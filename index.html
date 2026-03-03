@@ -26,6 +26,15 @@ button{font-family:inherit}select,input,textarea{font-family:inherit}
 .sync-dot.on{background:#34d399;box-shadow:0 0 6px #34d39966}
 .sync-dot.off{background:#ef4444;box-shadow:0 0 6px #ef444466}
 .sync-dot.loading{background:#fbbf24;animation:pulse 1s infinite}
+.ai-msg{padding:12px 16px;border-radius:10px;font-size:12px;line-height:1.7;white-space:pre-wrap;word-wrap:break-word}
+.ai-msg.user{background:#DC262618;border:1px solid #DC262625;color:#dddde8;margin-left:40px}
+.ai-msg.bot{background:#818cf808;border:1px solid #818cf815;color:#b0b0c0;margin-right:40px}
+.ai-msg strong{color:#fff}.ai-msg em{color:#818cf8}
+.ai-typing{display:inline-flex;gap:4px;padding:8px 14px}
+.ai-typing span{width:6px;height:6px;border-radius:50%;background:#818cf8;animation:pulse 1s infinite}
+.ai-typing span:nth-child(2){animation-delay:.2s}.ai-typing span:nth-child(3){animation-delay:.4s}
+.ai-action{padding:8px 14px;border-radius:8px;border:1px solid #1a1a2a;background:#09091a;color:#b0b0c0;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;text-align:left}
+.ai-action:hover{border-color:#818cf840;background:#818cf808;transform:translateY(-1px)}
 </style>
 </head>
 <body>
@@ -135,6 +144,58 @@ const[fS,setFS]=useState("all");
 const[toast,setToast]=useState(null);
 const[showVerif,setShowVerif]=useState(null);
 const[now,setNow]=useState(Date.now());
+const[aiMessages,setAiMessages]=useState([]);
+const[aiInput,setAiInput]=useState("");
+const[aiLoading,setAiLoading]=useState(false);
+const aiEndRef=useRef(null);
+
+const buildContext=()=>{
+const sg=leads.filter(l=>l.status==="signe");const stale=leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);
+const overdue=leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);
+const pipe=leads.filter(l=>!["signe","injoignable"].includes(l.status));
+const weighted=pipe.reduce((s,l)=>{const col=COLS.find(c=>c.id===l.status);return s+(l.valeur*(col?.proba||0))},0);
+return `Tu es l'assistant IA de WEBO, une agence digitale dirigée par Kylian. L'agence connecte des freelances (landing pages, montage vidéo, vidéaste) avec des clients. Commission 20% sur chaque projet.
+
+ÉQUIPE: Kylian (Gérant), Keddy (Prospecteur), Dylan (Prospecteur)
+
+ÉTAT DU PIPELINE ACTUEL:
+- Total leads: ${leads.length}
+- Signés: ${sg.length} (CA: ${sg.reduce((s,l)=>s+l.valeur,0)}€)
+- Pipeline pondéré: ${Math.round(weighted)}€
+- Leads dormants (+48h): ${stale.length}
+- Relances en retard: ${overdue.length}
+- Injoignables: ${leads.filter(l=>l.status==="injoignable").length}
+
+DÉTAIL DES LEADS:
+${leads.map(l=>`- ${l.nom} | ${l.service} | ${COLS.find(c=>c.id===l.status)?.label} | ${l.valeur}€ | ${mN(l.memberId)} | Source: ${l.source} | Tentatives: ${l.tentatives} | ${l.nextRelance?"Relance: "+l.nextRelance:""} | ${l.notes}`).join("\n")}
+
+LEADS DORMANTS (action urgente):
+${stale.map(l=>`⚠ ${l.nom} (${mN(l.memberId)}) — ${fAgo(hAgo(l.lastInteraction))} sans contact — ${l.valeur}€`).join("\n")||"Aucun"}
+
+RELANCES EN RETARD:
+${overdue.map(l=>`🔴 ${l.nom} (${mN(l.memberId)}) — J${dUntil(l.nextRelance)} — ${l.valeur}€`).join("\n")||"Aucun"}
+
+Réponds TOUJOURS en français. Sois direct, concret et actionnable. Utilise des émojis pour structurer. Quand tu rédiges des messages de prospection, adapte le ton au canal (DM Instagram = casual, Email = pro, Appel = script court).`;
+};
+
+const askAI=async(prompt)=>{
+setAiMessages(p=>[...p,{role:"user",content:prompt}]);
+setAiInput("");setAiLoading(true);
+try{
+const sysPrompt=buildContext();
+const history=aiMessages.slice(-8).map(m=>({role:m.role,content:m.content}));
+const messages=[...history,{role:"user",content:prompt}];
+const res=await fetch("https://api.anthropic.com/v1/messages",{
+method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sysPrompt,messages})
+});
+const data=await res.json();
+const text=data.content?.map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur de réponse.";
+setAiMessages(p=>[...p,{role:"assistant",content:text}]);
+}catch(e){setAiMessages(p=>[...p,{role:"assistant",content:"❌ Erreur de connexion à l'IA. Vérifie ta connexion internet."}]);}
+setAiLoading(false);
+};
+useEffect(()=>{if(aiEndRef.current)aiEndRef.current.scrollIntoView({behavior:"smooth"})},[aiMessages,aiLoading]);
 
 // ─── Supabase: Load all leads ───
 useEffect(()=>{
@@ -302,7 +363,7 @@ if(!isConfigured){
 
 if(!ready) return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}><div style={{color:"#DC2626",fontWeight:700}}>Connexion à Supabase...</div></div>;
 
-const TABS=[{id:"kanban",l:"Pipeline"},{id:"list",l:"Liste"},{id:"stale",l:"⚡ Stale"},{id:"relances",l:"⏰ Relances"},{id:"ghosts",l:"👻 Ghosts"},{id:"verif",l:"🛡 Vérif."},{id:"perf",l:"◆ Perf."},{id:"roi",l:"📊 ROI"}];
+const TABS=[{id:"kanban",l:"Pipeline"},{id:"list",l:"Liste"},{id:"stale",l:"⚡ Stale"},{id:"relances",l:"⏰ Relances"},{id:"ghosts",l:"👻 Ghosts"},{id:"verif",l:"🛡 Vérif."},{id:"perf",l:"◆ Perf."},{id:"roi",l:"📊 ROI"},{id:"ia",l:"🤖 Agent IA"}];
 
 return (
 <div style={{minHeight:"100vh"}}>
@@ -513,6 +574,75 @@ return <div key={s.source} className="fu" style={{animationDelay:i*60+"ms",backg
   <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:10,color:"#4a4a5a",fontFamily:"'DM Mono',monospace"}}>{pct}%</span><span style={{fontSize:15,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>+{eur(s.com)}</span></div>
 </div>})}
 </div></div>}
+
+{/* ═══ AGENT IA ═══ */}
+{view==="ia"&&<div className="fu" style={{padding:"0 20px 20px",display:"grid",gridTemplateColumns:"280px 1fr",gap:12,height:"calc(100vh - 140px)"}}>
+
+{/* Quick Actions Panel */}
+<div style={{background:"#09091a",border:"1px solid #111122",borderRadius:10,padding:14,display:"flex",flexDirection:"column",gap:6,overflowY:"auto"}}>
+<div style={{fontSize:11,fontWeight:700,color:"#818cf8",letterSpacing:1,fontFamily:"'DM Mono',monospace",marginBottom:4}}>⚡ ACTIONS RAPIDES</div>
+
+<button className="ai-action" onClick={()=>askAI("Fais une analyse complète du pipeline Webo. Identifie les points forts, les risques, et donne 3 actions prioritaires concrètes pour cette semaine. Sois direct et chiffré.")}><span style={{fontSize:16}}>📊</span><div><div style={{color:"#fff",fontWeight:700}}>Analyse pipeline</div><div style={{fontSize:10,color:"#4a4a5a"}}>Diagnostic complet + 3 priorités</div></div></button>
+
+<button className="ai-action" onClick={()=>askAI("Génère un plan d'action hebdomadaire pour Keddy et Dylan. Pour chaque prospecteur, liste les 3-5 actions les plus urgentes avec les leads concernés, en commençant par les relances en retard et les leads dormants.")}><span style={{fontSize:16}}>🎯</span><div><div style={{color:"#fff",fontWeight:700}}>Plan d'action semaine</div><div style={{fontSize:10,color:"#4a4a5a"}}>Tâches Keddy + Dylan</div></div></button>
+
+<button className="ai-action" onClick={()=>askAI("Pour chaque lead en retard de relance ou dormant, rédige un message de relance personnalisé adapté au canal (DM Instagram = court et casual, Email = professionnel, Appel = script). Inclus le nom du lead, son service, et un hook pertinent basé sur ses notes.")}><span style={{fontSize:16}}>✉️</span><div><div style={{color:"#fff",fontWeight:700}}>Messages de relance</div><div style={{fontSize:10,color:"#4a4a5a"}}>Messages personnalisés par lead</div></div></button>
+
+<button className="ai-action" onClick={()=>askAI("Génère 3 templates de prospection à froid pour chaque service (Web Design, Montage Vidéo, Vidéaste) adaptés aux canaux DM Instagram et Email froid. Chaque message doit avoir un hook accrocheur, une proposition de valeur, et un CTA clair.")}><span style={{fontSize:16}}>🧲</span><div><div style={{color:"#fff",fontWeight:700}}>Templates prospection</div><div style={{fontSize:10,color:"#4a4a5a"}}>Cold outreach par service</div></div></button>
+
+<button className="ai-action" onClick={()=>askAI("Analyse les leads injoignables et les raisons d'échec. Identifie les patterns (quel canal marche le moins, quel service a le plus d'échecs, quelle objection revient le plus). Propose des solutions concrètes pour améliorer le taux de conversion.")}><span style={{fontSize:16}}>📉</span><div><div style={{color:"#fff",fontWeight:700}}>Analyse des échecs</div><div style={{fontSize:10,color:"#4a4a5a"}}>Patterns + solutions</div></div></button>
+
+<button className="ai-action" onClick={()=>askAI("Donne-moi un rapport de performance de l'équipe façon 'manager'. Compare Keddy et Dylan sur: taux de conversion, vitesse de closing, volume de prospection, leads dormants. Identifie les forces de chacun et suggère des axes d'amélioration bienveillants mais directs.")}><span style={{fontSize:16}}>🏆</span><div><div style={{color:"#fff",fontWeight:700}}>Coaching équipe</div><div style={{fontSize:10,color:"#4a4a5a"}}>Perf. Keddy vs Dylan + axes</div></div></button>
+
+<button className="ai-action" onClick={()=>askAI("Prédis le CA des 30 prochains jours. Pour chaque lead en pipeline, estime la probabilité de closing et le délai probable. Donne un scénario optimiste, réaliste et pessimiste avec les montants.")}><span style={{fontSize:16}}>🔮</span><div><div style={{color:"#fff",fontWeight:700}}>Prévisions CA</div><div style={{fontSize:10,color:"#4a4a5a"}}>Scénarios 30 jours</div></div></button>
+
+<button className="ai-action" onClick={()=>askAI("Rédige le message de réunion hebdomadaire d'équipe pour Keddy et Dylan. Résume la semaine (wins, leads avancés, retards), félicite les succès, et donne les 3 objectifs de la semaine prochaine. Ton motivant mais professionnel.")}><span style={{fontSize:16}}>📋</span><div><div style={{color:"#fff",fontWeight:700}}>Brief équipe</div><div style={{fontSize:10,color:"#4a4a5a"}}>Résumé semaine + objectifs</div></div></button>
+
+<div style={{marginTop:"auto",paddingTop:10,borderTop:"1px solid #111122"}}>
+<button onClick={()=>setAiMessages([])} style={{width:"100%",padding:"6px",borderRadius:6,border:"1px solid #1a1a2a",background:"transparent",color:"#3a3a4a",fontSize:10,fontWeight:600,cursor:"pointer"}}>🗑 Vider la conversation</button>
+</div>
+</div>
+
+{/* Chat Panel */}
+<div style={{background:"#09091a",border:"1px solid #111122",borderRadius:10,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+
+{/* Chat header */}
+<div style={{padding:"12px 16px",borderBottom:"1px solid #111122",display:"flex",alignItems:"center",gap:8}}>
+<div style={{width:28,height:28,borderRadius:"50%",background:"#818cf820",border:"2px solid #818cf8",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>🤖</div>
+<div><div style={{fontSize:13,fontWeight:700,color:"#fff",fontFamily:"'Outfit',sans-serif"}}>Agent IA Webo</div><div style={{fontSize:10,color:"#4a4a5a"}}>Analyse · Rédaction · Coaching · Prévisions</div></div>
+<div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4}}><span style={{width:6,height:6,borderRadius:"50%",background:"#34d399"}}/><span style={{fontSize:10,color:"#34d399",fontWeight:600}}>En ligne</span></div>
+</div>
+
+{/* Messages */}
+<div style={{flex:1,overflowY:"auto",padding:16,display:"flex",flexDirection:"column",gap:10}}>
+{aiMessages.length===0&&<div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,color:"#2a2a3a"}}>
+<div style={{fontSize:44}}>🤖</div>
+<div style={{fontSize:14,fontWeight:700,color:"#3a3a4a",fontFamily:"'Outfit',sans-serif"}}>Agent IA Webo</div>
+<div style={{fontSize:11,color:"#2a2a3a",textAlign:"center",maxWidth:340,lineHeight:1.6}}>Clique sur une action rapide à gauche ou pose-moi une question sur ton pipeline. J'ai accès à toutes les données de ton CRM en temps réel.</div>
+</div>}
+
+{aiMessages.map((m,i)=><div key={i} className={"ai-msg fu "+(m.role==="user"?"user":"bot")} style={{animationDelay:"0ms"}}>
+{m.role==="assistant"&&<div style={{fontSize:9,fontWeight:700,color:"#818cf8",marginBottom:4,fontFamily:"'DM Mono',monospace"}}>🤖 AGENT IA</div>}
+{m.role==="user"&&<div style={{fontSize:9,fontWeight:700,color:"#DC2626",marginBottom:4,fontFamily:"'DM Mono',monospace"}}>KYLIAN</div>}
+{m.content}
+</div>)}
+
+{aiLoading&&<div className="ai-msg bot fu"><div style={{fontSize:9,fontWeight:700,color:"#818cf8",marginBottom:4,fontFamily:"'DM Mono',monospace"}}>🤖 AGENT IA</div><div className="ai-typing"><span/><span/><span/></div></div>}
+<div ref={aiEndRef}/>
+</div>
+
+{/* Input */}
+<div style={{padding:"12px 16px",borderTop:"1px solid #111122",display:"flex",gap:8}}>
+<input value={aiInput} onChange={e=>setAiInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiInput.trim()&&!aiLoading){askAI(aiInput.trim())}}}
+  placeholder="Pose une question sur ton pipeline, demande un message, une analyse..."
+  style={{flex:1,padding:"10px 14px",borderRadius:8,border:"1px solid #1a1a2a",background:"#06060e",color:"#dddde8",fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif"}}/>
+<button onClick={()=>{if(aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}} disabled={aiLoading||!aiInput.trim()}
+  style={{padding:"10px 18px",borderRadius:8,border:"none",background:aiLoading?"#1a1a2a":"#818cf8",color:aiLoading?"#3a3a4a":"#fff",fontSize:12,fontWeight:700,cursor:aiLoading?"not-allowed":"pointer",fontFamily:"'DM Sans',sans-serif"}}>
+  {aiLoading?"...":"Envoyer"}
+</button>
+</div>
+</div>
+</div>}
 
 {/* MODALS */}
 {showForm&&<div className="overlay" onClick={closeForm}><div className="overlay-bg"/><div className="modal fu" onClick={e=>e.stopPropagation()}>
