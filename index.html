@@ -2,39 +2,66 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WEBO Tracker v5 — Online</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>WEBO Tracker v5</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23DC2626'/><text x='16' y='24' font-size='20' text-anchor='middle' fill='white'>W</text></svg>"/>
+<link rel="apple-mobile-web-app-capable" content="yes"/>
+<link rel="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:#06060e;color:#b0b0c0;font-family:'DM Sans',-apple-system,sans-serif;min-height:100vh;overflow-x:hidden}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+html{-webkit-text-size-adjust:100%}
+body{background:#06060e;color:#b0b0c0;font-family:'DM Sans',-apple-system,sans-serif;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.fu{animation:fadeUp .35s ease-out both}
+.fu{animation:fadeUp .3s ease-out both}
 .blink{animation:blink 1s ease-in-out infinite}
 .kcol{transition:all .2s}.kcol.over{background:rgba(220,38,38,.05)!important}
 .kc{transition:all .15s;cursor:grab}.kc:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.4)}.kc:active{cursor:grabbing}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#1a1a2a;border-radius:3px}
-button{font-family:inherit}select,input,textarea{font-family:inherit}
-.overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#1a1a2a;border-radius:3px}
+button{font-family:inherit;-webkit-tap-highlight-color:transparent}
+select,input,textarea{font-family:inherit;font-size:16px}
+.overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center}
 .overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(5px)}
-.modal{position:relative;background:#0b0b16;border:1px solid #1a1a2a;border-radius:14px;padding:22px;width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
-.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.modal{position:relative;background:#0b0b16;border:1px solid #1a1a2a;border-radius:18px 18px 0 0;padding:20px;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
 .sync-dot.on{background:#34d399;box-shadow:0 0 6px #34d39966}
 .sync-dot.off{background:#ef4444;box-shadow:0 0 6px #ef444466}
 .sync-dot.loading{background:#fbbf24;animation:pulse 1s infinite}
-.ai-msg{padding:12px 16px;border-radius:10px;font-size:12px;line-height:1.7;white-space:pre-wrap;word-wrap:break-word}
-.ai-msg.user{background:#DC262618;border:1px solid #DC262625;color:#dddde8;margin-left:40px}
-.ai-msg.bot{background:#818cf808;border:1px solid #818cf815;color:#b0b0c0;margin-right:40px}
+.ai-msg{padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-wrap:break-word}
+.ai-msg.user{background:#DC262618;border:1px solid #DC262625;color:#dddde8;margin-left:20px}
+.ai-msg.bot{background:#818cf808;border:1px solid #818cf815;color:#b0b0c0;margin-right:20px}
 .ai-msg strong{color:#fff}.ai-msg em{color:#818cf8}
 .ai-typing{display:inline-flex;gap:4px;padding:8px 14px}
 .ai-typing span{width:6px;height:6px;border-radius:50%;background:#818cf8;animation:pulse 1s infinite}
 .ai-typing span:nth-child(2){animation-delay:.2s}.ai-typing span:nth-child(3){animation-delay:.4s}
-.ai-action{padding:8px 14px;border-radius:8px;border:1px solid #1a1a2a;background:#09091a;color:#b0b0c0;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;text-align:left}
-.ai-action:hover{border-color:#818cf840;background:#818cf808;transform:translateY(-1px)}
+.ai-action{padding:10px 14px;border-radius:10px;border:1px solid #1a1a2a;background:#09091a;color:#b0b0c0;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:8px;text-align:left;width:100%}
+.ai-action:hover{border-color:#818cf840;background:#818cf808}
+.tab-bar{display:flex;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px;background:#06060e;border-radius:8px;flex-shrink:0}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{padding:7px 12px;border-radius:6px;border:none;background:transparent;color:#555;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.tab-btn.active{background:#141428;color:#fff}
+.m-card{background:#09091a;border:1px solid #111122;border-radius:10px;padding:14px;cursor:pointer}
+.m-card:active{background:#0d0d1a}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 14px}
+.kanban-scroll{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 14px 14px;scroll-snap-type:x mandatory}
+.kanban-scroll::-webkit-scrollbar{display:none}
+.kanban-col{min-width:260px;max-width:300px;flex-shrink:0;scroll-snap-align:start}
+.cards-grid{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:640px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.cards-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:768px){
+  .stats-grid{grid-template-columns:repeat(7,1fr);padding:12px 20px;gap:8px}
+  .overlay{align-items:center}
+  .modal{border-radius:14px;max-height:88vh}
+  .kanban-scroll{padding:0 20px 20px}
+  .kanban-col{min-width:0;max-width:none;flex:1}
+}
+@media(max-width:639px){
+  .stats-grid .stat-7,.stats-grid .stat-6,.stats-grid .stat-5{display:none}
+  select,input,textarea{font-size:16px!important}
+}
 </style>
 </head>
 <body>
@@ -45,63 +72,21 @@ button{font-family:inherit}select,input,textarea{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script type="text/babel">
 const {useState,useEffect,useCallback,useMemo,useRef} = React;
-
-/* ═══════════════════════════════════════════════════════════
-   🔴 COLLE TES CLÉS SUPABASE ICI (voir GUIDE-SETUP.md)
-   ═══════════════════════════════════════════════════════════ */
 const SUPABASE_URL = "https://smgglunijtmftjchxdgy.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZ2dsdW5panRtZnRqY2h4ZGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzYyNDMsImV4cCI6MjA4ODE1MjI0M30.RM7JmWaY0z8vw4cpL1GqsZN2gCwNK-KMet2hNxMDd5A";
-/* ═══════════════════════════════════════════════════════════ */
-
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const isConfigured = SUPABASE_URL !== "COLLE_TON_URL_ICI";
 
-// ─── Convert DB row to app lead ───
-function dbToLead(r) {
-  return {
-    id:r.id, nom:r.nom, service:r.service, valeur:r.valeur, memberId:r.member_id,
-    lien:r.lien||"", status:r.status, dateCreated:r.date_created||"",
-    lastInteraction:r.last_interaction||"", nextRelance:r.next_relance||"",
-    notes:r.notes||"", source:r.source||"DM Instagram", echecReason:r.echec_reason||"—",
-    tentatives:r.tentatives||0, paymentProof:r.payment_proof||"",
-    verifStatus:r.verif_status||"none", verifNote:r.verif_note||"", verifDate:r.verif_date||""
-  };
-}
-function leadToDb(l) {
-  return {
-    id:l.id, nom:l.nom, service:l.service, valeur:l.valeur, member_id:l.memberId,
-    lien:l.lien||"", status:l.status, date_created:l.dateCreated||"",
-    last_interaction:l.lastInteraction||"", next_relance:l.nextRelance||"",
-    notes:l.notes||"", source:l.source||"DM Instagram", echec_reason:l.echecReason||"—",
-    tentatives:l.tentatives||0, payment_proof:l.paymentProof||"",
-    verif_status:l.verifStatus||"none", verif_note:l.verifNote||"", verif_date:l.verifDate||""
-  };
-}
+function dbToLead(r){return{id:r.id,nom:r.nom,service:r.service,valeur:r.valeur,memberId:r.member_id,lien:r.lien||"",status:r.status,dateCreated:r.date_created||"",lastInteraction:r.last_interaction||"",nextRelance:r.next_relance||"",notes:r.notes||"",source:r.source||"DM Instagram",echecReason:r.echec_reason||"—",tentatives:r.tentatives||0,paymentProof:r.payment_proof||"",verifStatus:r.verif_status||"none",verifNote:r.verif_note||"",verifDate:r.verif_date||""}}
+function leadToDb(l){return{id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.memberId,lien:l.lien||"",status:l.status,date_created:l.dateCreated||"",last_interaction:l.lastInteraction||"",next_relance:l.nextRelance||"",notes:l.notes||"",source:l.source||"DM Instagram",echec_reason:l.echecReason||"—",tentatives:l.tentatives||0,payment_proof:l.paymentProof||"",verif_status:l.verifStatus||"none",verif_note:l.verifNote||"",verif_date:l.verifDate||""}}
 
-const COLS=[
-{id:"nouveau",label:"Nouveau",icon:"✦",accent:"#818cf8",proba:.10},
-{id:"contacte",label:"Contacté",icon:"◈",accent:"#fbbf24",proba:.20},
-{id:"relance1",label:"Relance 1",icon:"◉",accent:"#fb923c",proba:.30},
-{id:"relance2",label:"Relance 2",icon:"◎",accent:"#f87171",proba:.40},
-{id:"call",label:"Call planifié",icon:"☎",accent:"#c084fc",proba:.80},
-{id:"injoignable",label:"Injoignable",icon:"⊘",accent:"#64748b",proba:0},
-{id:"signe",label:"Signé !",icon:"✓",accent:"#34d399",proba:1},
-];
+const COLS=[{id:"nouveau",label:"Nouveau",icon:"✦",accent:"#818cf8",proba:.10},{id:"contacte",label:"Contacté",icon:"◈",accent:"#fbbf24",proba:.20},{id:"relance1",label:"Relance 1",icon:"◉",accent:"#fb923c",proba:.30},{id:"relance2",label:"Relance 2",icon:"◎",accent:"#f87171",proba:.40},{id:"call",label:"Call",icon:"☎",accent:"#c084fc",proba:.80},{id:"injoignable",label:"Injoignable",icon:"⊘",accent:"#64748b",proba:0},{id:"signe",label:"Signé",icon:"✓",accent:"#34d399",proba:1}];
 const SERVICES=["Web Design","Montage Vidéo","Vidéaste"];
 const SOURCES=["DM Instagram","LinkedIn","Email froid","Appel à froid","Référence","Autre"];
 const ECHECS=["—","Prix trop élevé","Pas de besoin","Déjà équipé","Pas de budget","Concurrent choisi","Projet reporté"];
 const GHOST_MAP={"DM Instagram":"Email froid ou Appel","LinkedIn":"DM Instagram ou Appel","Email froid":"DM Instagram ou LinkedIn","Appel à froid":"DM Instagram ou Email","Référence":"Relancer via la référence","Autre":"DM Instagram + Email combo"};
-const TEAM=[
-{id:"kylian",name:"Kylian",role:"Gérant",color:"#DC2626"},
-{id:"keddy",name:"Keddy",role:"Prospecteur",color:"#818cf8"},
-{id:"dylan",name:"Dylan",role:"Prospecteur",color:"#34d399"},
-];
-const VERIFS=[
-{id:"none",label:"—",color:"#333"},
-{id:"pending",label:"⏳ En attente",color:"#fbbf24"},
-{id:"confirmed",label:"✓ Confirmé",color:"#34d399"},
-{id:"alert",label:"⚠ Anomalie",color:"#f87171"},
-];
+const TEAM=[{id:"kylian",name:"Kylian",role:"Gérant",color:"#DC2626"},{id:"keddy",name:"Keddy",role:"Prospecteur",color:"#818cf8"},{id:"dylan",name:"Dylan",role:"Prospecteur",color:"#34d399"}];
+const VERIFS=[{id:"none",label:"—",color:"#333"},{id:"pending",label:"⏳ En attente",color:"#fbbf24"},{id:"confirmed",label:"✓ Confirmé",color:"#34d399"},{id:"alert",label:"⚠ Anomalie",color:"#f87171"}];
 
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const eur=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:0,maximumFractionDigits:0}).format(n||0);
@@ -114,532 +99,252 @@ const mCol=id=>TEAM.find(t=>t.id===id)?.color||"#666";
 const td=()=>new Date().toISOString().slice(0,10);
 const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
 
-function Dot({id,sz=16}){const m=TEAM.find(t=>t.id===id);if(!m)return null;return <div title={m.name} style={{width:sz,height:sz,borderRadius:"50%",background:m.color+"20",border:"2px solid "+m.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:sz*.5,fontWeight:800,color:m.color,fontFamily:"'Outfit',sans-serif",flexShrink:0}}>{m.name[0]}</div>}
-function StaleTag({li,st}){if(["signe","injoignable"].includes(st))return null;const h=hAgo(li);if(!h||h<48)return null;const c=h>=120?"#ef4444":h>=72?"#fb923c":"#fbbf24";const l=h>=120?"CRITIQUE":h>=72?"EN DANGER":"DORMANT";return <span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"2px 6px",borderRadius:4,background:c+"14",fontSize:9,fontWeight:700,color:c,border:"1px solid "+c+"25"}}><span style={{width:5,height:5,borderRadius:"50%",background:c,animation:h>=120?"pulse 1.2s infinite":"none"}}/> {fAgo(h)} · {l}</span>}
-function RelanceTag({nr,st}){if(!nr||["signe","injoignable"].includes(st))return null;const d=dUntil(nr);if(d===null)return null;if(d<0)return <span className="blink" style={{fontSize:9,fontWeight:700,color:"#ef4444",background:"#ef444418",padding:"2px 6px",borderRadius:4}}>{"⏰ J"+d}</span>;if(d===0)return <span style={{fontSize:9,fontWeight:700,color:"#fbbf24",background:"#fbbf2418",padding:"2px 6px",borderRadius:4}}>⏰ AUJOURD'HUI</span>;return <span style={{fontSize:9,fontWeight:600,color:"#3a3a4a",background:"#0e0e1a",padding:"2px 6px",borderRadius:4}}>J+{d}</span>}
-function Tent({n}){if(!n)return null;const c=n>=4?"#ef4444":n>=2?"#fb923c":"#3a3a4a";return <span title={n+" tentatives"} style={{fontSize:9,fontWeight:700,color:c,fontFamily:"'DM Mono',monospace"}}>{n}×</span>}
-function VBadge({s}){const v=VERIFS.find(x=>x.id===s);if(!v||s==="none")return null;return <span style={{fontSize:9,fontWeight:700,color:v.color,background:v.color+"15",padding:"2px 6px",borderRadius:4}}>{v.label}</span>}
-function FF({l,children}){return <div style={{marginBottom:9}}><label style={{display:"block",fontSize:8.5,fontWeight:700,color:"#3a3a4a",marginBottom:3,letterSpacing:1.2,fontFamily:"'DM Mono',monospace",textTransform:"uppercase"}}>{l}</label>{children}</div>}
+function Dot({id,sz=18}){const m=TEAM.find(t=>t.id===id);if(!m)return null;return <div title={m.name} style={{width:sz,height:sz,borderRadius:"50%",background:m.color+"20",border:"2px solid "+m.color,display:"flex",alignItems:"center",justifyContent:"center",fontSize:sz*.5,fontWeight:800,color:m.color,fontFamily:"'Outfit'",flexShrink:0}}>{m.name[0]}</div>}
+function StaleTag({li,st}){if(["signe","injoignable"].includes(st))return null;const h=hAgo(li);if(!h||h<48)return null;const c=h>=120?"#ef4444":h>=72?"#fb923c":"#fbbf24";const l=h>=120?"CRITIQUE":h>=72?"EN DANGER":"DORMANT";return <span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"2px 7px",borderRadius:4,background:c+"14",fontSize:10,fontWeight:700,color:c,border:"1px solid "+c+"25"}}><span style={{width:5,height:5,borderRadius:"50%",background:c}}/> {fAgo(h)} · {l}</span>}
+function RelanceTag({nr,st}){if(!nr||["signe","injoignable"].includes(st))return null;const d=dUntil(nr);if(d===null)return null;if(d<0)return <span className="blink" style={{fontSize:10,fontWeight:700,color:"#ef4444",background:"#ef444418",padding:"2px 7px",borderRadius:4}}>⏰ J{d}</span>;if(d===0)return <span style={{fontSize:10,fontWeight:700,color:"#fbbf24",background:"#fbbf2418",padding:"2px 7px",borderRadius:4}}>Aujourd'hui</span>;return <span style={{fontSize:10,fontWeight:600,color:"#3a3a4a",background:"#0e0e1a",padding:"2px 7px",borderRadius:4}}>J+{d}</span>}
+function Tent({n}){if(!n)return null;const c=n>=4?"#ef4444":n>=2?"#fb923c":"#3a3a4a";return <span style={{fontSize:10,fontWeight:700,color:c,fontFamily:"'DM Mono'"}}>{n}×</span>}
+function VBadge({s}){const v=VERIFS.find(x=>x.id===s);if(!v||s==="none")return null;return <span style={{fontSize:10,fontWeight:700,color:v.color,background:v.color+"15",padding:"2px 7px",borderRadius:4}}>{v.label}</span>}
+function FF({l,children}){return <div style={{marginBottom:10}}><label style={{display:"block",fontSize:10,fontWeight:700,color:"#3a3a4a",marginBottom:4,letterSpacing:1,fontFamily:"'DM Mono'"}}>{l}</label>{children}</div>}
 
-function doExportCSV(leads){
-const h=["Nom","Service","Statut","Valeur HT","Commission 20%","Prospecteur","Source","Tentatives","Prochaine Relance","Raison Echec","Notes"];
-const rows=leads.map(l=>[l.nom,l.service,COLS.find(c=>c.id===l.status)?.label||"",l.valeur,Math.round(l.valeur*.2),mN(l.memberId),l.source||"",l.tentatives||0,l.nextRelance||"",l.echecReason||"",'"'+(l.notes||"").replace(/"/g,'""')+'"']);
-const csv=[h.join(";"),...rows.map(r=>r.join(";"))].join("\n");
-const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
-const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="webo-export-"+td()+".csv";a.click();URL.revokeObjectURL(url);
-}
+function doExportCSV(leads){const h=["Nom","Service","Statut","Valeur HT","Commission 20%","Prospecteur","Source","Tentatives","Prochaine Relance","Raison Echec","Notes"];const rows=leads.map(l=>[l.nom,l.service,COLS.find(c=>c.id===l.status)?.label||"",l.valeur,Math.round(l.valeur*.2),mN(l.memberId),l.source||"",l.tentatives||0,l.nextRelance||"",l.echecReason||"",'"'+(l.notes||"").replace(/"/g,'""')+'"']);const csv=[h.join(";"),...rows.map(r=>r.join(";"))].join("\n");const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="webo-export-"+td()+".csv";a.click();URL.revokeObjectURL(url)}
 
-/* ═══════════ MAIN APP ═══════════ */
+function LeadCard({lead,onClick,extra}){const col=COLS.find(c=>c.id===lead.status);const h=hAgo(lead.lastInteraction);const isS=!["signe","injoignable"].includes(lead.status)&&h>=48;const isOD=lead.nextRelance&&!["signe","injoignable"].includes(lead.status)&&dUntil(lead.nextRelance)<0;
+return <div className="m-card fu" onClick={()=>onClick&&onClick(lead.id)} style={{borderLeft:"3px solid "+(isOD?"#ef4444":isS?(h>=120?"#ef4444":h>=72?"#fb923c":"#fbbf24"):col?.accent+"40")}}>
+<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Dot id={lead.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:700,color:"#dddde8",fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lead.nom}</div><div style={{display:"flex",alignItems:"center",gap:6,marginTop:2,flexWrap:"wrap"}}><span style={{fontSize:11,color:col?.accent,fontWeight:600}}>{col?.icon} {col?.label}</span><span style={{fontSize:11,color:sC(lead.service),fontWeight:600}}>{lead.service}</span><Tent n={lead.tentatives}/></div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:16,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit'"}}>{eur(lead.valeur)}</div>{lead.status==="signe"&&<div style={{fontSize:11,fontWeight:700,color:"#34d399",fontFamily:"'DM Mono'"}}>+{eur(lead.valeur*.2)}</div>}</div></div>
+<div style={{display:"flex",flexWrap:"wrap",gap:4,alignItems:"center"}}>{lead.source&&lead.source!=="Autre"&&<span style={{fontSize:10,color:"#3a3a4a",background:"#0a0a12",padding:"2px 6px",borderRadius:4}}>{lead.source}</span>}<StaleTag li={lead.lastInteraction} st={lead.status}/><RelanceTag nr={lead.nextRelance} st={lead.status}/>{lead.status==="signe"&&!lead.paymentProof&&<span style={{fontSize:10,color:"#fb923c",fontWeight:700}}>⚠ Preuve</span>}{lead.status==="signe"&&<VBadge s={lead.verifStatus}/>}</div>
+{extra&&<div style={{marginTop:8}}>{extra}</div>}</div>}
+
 function App(){
-const[leads,setLeads]=useState([]);
-const[ready,setReady]=useState(false);
-const[syncStatus,setSyncStatus]=useState("loading"); // loading | on | off
-const[view,setView]=useState("kanban");
-const[showForm,setShowForm]=useState(false);
-const[editId,setEditId]=useState(null);
-const[dragId,setDragId]=useState(null);
-const[dragOver,setDragOver]=useState(null);
-const[fM,setFM]=useState("all");
-const[fS,setFS]=useState("all");
-const[toast,setToast]=useState(null);
-const[showVerif,setShowVerif]=useState(null);
-const[now,setNow]=useState(Date.now());
-const[aiMessages,setAiMessages]=useState([]);
-const[aiInput,setAiInput]=useState("");
-const[aiLoading,setAiLoading]=useState(false);
-const aiEndRef=useRef(null);
+const[leads,setLeads]=useState([]);const[ready,setReady]=useState(false);const[syncStatus,setSyncStatus]=useState("loading");const[view,setView]=useState("kanban");const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);const[dragId,setDragId]=useState(null);const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[fS,setFS]=useState("all");const[toast,setToast]=useState(null);const[showVerif,setShowVerif]=useState(null);const[showFilters,setShowFilters]=useState(false);const[now,setNow]=useState(Date.now());const[aiMessages,setAiMessages]=useState([]);const[aiInput,setAiInput]=useState("");const[aiLoading,setAiLoading]=useState(false);const[aiShowActions,setAiShowActions]=useState(true);const aiEndRef=useRef(null);
 
-const buildContext=()=>{
-const sg=leads.filter(l=>l.status==="signe");const stale=leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);
-const overdue=leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);
-const pipe=leads.filter(l=>!["signe","injoignable"].includes(l.status));
-const weighted=pipe.reduce((s,l)=>{const col=COLS.find(c=>c.id===l.status);return s+(l.valeur*(col?.proba||0))},0);
-return `Tu es l'assistant IA de WEBO, une agence digitale dirigée par Kylian. L'agence connecte des freelances (landing pages, montage vidéo, vidéaste) avec des clients. Commission 20% sur chaque projet.
+const buildContext=()=>{const sg=leads.filter(l=>l.status==="signe");const stale=leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);const overdue=leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);const pipe=leads.filter(l=>!["signe","injoignable"].includes(l.status));const weighted=pipe.reduce((s,l)=>{const col=COLS.find(c=>c.id===l.status);return s+(l.valeur*(col?.proba||0))},0);
+return "Tu es l assistant IA de WEBO, agence digitale de Kylian. Commission 20%.\nEQUIPE: Kylian (Gerant), Keddy (Prospecteur), Dylan (Prospecteur)\nPIPELINE: "+leads.length+" leads | "+sg.length+" signes ("+sg.reduce((s,l)=>s+l.valeur,0)+"EUR) | Pondere: "+Math.round(weighted)+"EUR | Dormants: "+stale.length+" | Overdue: "+overdue.length+"\nLEADS:\n"+leads.map(l=>"- "+l.nom+"|"+l.service+"|"+(COLS.find(c=>c.id===l.status)?.label)+"|"+l.valeur+"EUR|"+mN(l.memberId)+"|"+l.source+"|T:"+l.tentatives+"|"+(l.nextRelance?"R:"+l.nextRelance:"")+"|"+l.notes).join("\n")+"\nReponds en francais. Sois direct, concret, actionnable. Utilise des emojis."};
 
-ÉQUIPE: Kylian (Gérant), Keddy (Prospecteur), Dylan (Prospecteur)
-
-ÉTAT DU PIPELINE ACTUEL:
-- Total leads: ${leads.length}
-- Signés: ${sg.length} (CA: ${sg.reduce((s,l)=>s+l.valeur,0)}€)
-- Pipeline pondéré: ${Math.round(weighted)}€
-- Leads dormants (+48h): ${stale.length}
-- Relances en retard: ${overdue.length}
-- Injoignables: ${leads.filter(l=>l.status==="injoignable").length}
-
-DÉTAIL DES LEADS:
-${leads.map(l=>`- ${l.nom} | ${l.service} | ${COLS.find(c=>c.id===l.status)?.label} | ${l.valeur}€ | ${mN(l.memberId)} | Source: ${l.source} | Tentatives: ${l.tentatives} | ${l.nextRelance?"Relance: "+l.nextRelance:""} | ${l.notes}`).join("\n")}
-
-LEADS DORMANTS (action urgente):
-${stale.map(l=>`⚠ ${l.nom} (${mN(l.memberId)}) — ${fAgo(hAgo(l.lastInteraction))} sans contact — ${l.valeur}€`).join("\n")||"Aucun"}
-
-RELANCES EN RETARD:
-${overdue.map(l=>`🔴 ${l.nom} (${mN(l.memberId)}) — J${dUntil(l.nextRelance)} — ${l.valeur}€`).join("\n")||"Aucun"}
-
-Réponds TOUJOURS en français. Sois direct, concret et actionnable. Utilise des émojis pour structurer. Quand tu rédiges des messages de prospection, adapte le ton au canal (DM Instagram = casual, Email = pro, Appel = script court).`;
-};
-
-const askAI=async(prompt)=>{
-setAiMessages(p=>[...p,{role:"user",content:prompt}]);
-setAiInput("");setAiLoading(true);
-try{
-const sysPrompt=buildContext();
-const history=aiMessages.slice(-8).map(m=>({role:m.role,content:m.content}));
-const messages=[...history,{role:"user",content:prompt}];
-const res=await fetch("https://api.anthropic.com/v1/messages",{
-method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sysPrompt,messages})
-});
-const data=await res.json();
-const text=data.content?.map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur de réponse.";
-setAiMessages(p=>[...p,{role:"assistant",content:text}]);
-}catch(e){setAiMessages(p=>[...p,{role:"assistant",content:"❌ Erreur de connexion à l'IA. Vérifie ta connexion internet."}]);}
-setAiLoading(false);
-};
+const askAI=async(prompt)=>{setAiMessages(p=>[...p,{role:"user",content:prompt}]);setAiInput("");setAiLoading(true);setAiShowActions(false);
+try{const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:buildContext(),messages:[...aiMessages.slice(-8).map(m=>({role:m.role,content:m.content})),{role:"user",content:prompt}]})});const data=await res.json();const text=data.content?.map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur.";setAiMessages(p=>[...p,{role:"assistant",content:text}])}catch(e){setAiMessages(p=>[...p,{role:"assistant",content:"Erreur connexion IA."}])}setAiLoading(false)};
 useEffect(()=>{if(aiEndRef.current)aiEndRef.current.scrollIntoView({behavior:"smooth"})},[aiMessages,aiLoading]);
 
-// ─── Supabase: Load all leads ───
-useEffect(()=>{
-  if(!isConfigured){
-    setSyncStatus("off");
-    setReady(true);
-    return;
-  }
-  (async()=>{
-    setSyncStatus("loading");
-    const{data,error}=await supabase.from("leads").select("*");
-    if(error){console.error("Load error:",error);setSyncStatus("off");setReady(true);return}
-    setLeads((data||[]).map(dbToLead));
-    setSyncStatus("on");
-    setReady(true);
-  })();
-},[]);
-
-// ─── Supabase: Real-time subscription ───
-useEffect(()=>{
-  if(!isConfigured) return;
-  const channel = supabase.channel("leads-realtime")
-    .on("postgres_changes",{event:"INSERT",schema:"public",table:"leads"},payload=>{
-      const newLead = dbToLead(payload.new);
-      setLeads(p=>{
-        if(p.some(l=>l.id===newLead.id)) return p;
-        return [...p, newLead];
-      });
-    })
-    .on("postgres_changes",{event:"UPDATE",schema:"public",table:"leads"},payload=>{
-      const updated = dbToLead(payload.new);
-      setLeads(p=>p.map(l=>l.id===updated.id?updated:l));
-    })
-    .on("postgres_changes",{event:"DELETE",schema:"public",table:"leads"},payload=>{
-      setLeads(p=>p.filter(l=>l.id!==payload.old.id));
-    })
-    .subscribe((status)=>{
-      if(status==="SUBSCRIBED") setSyncStatus("on");
-      else if(status==="CLOSED"||status==="CHANNEL_ERROR") setSyncStatus("off");
-    });
-  return ()=>{ supabase.removeChannel(channel); };
-},[]);
-
+useEffect(()=>{if(!isConfigured){setSyncStatus("off");setReady(true);return}(async()=>{setSyncStatus("loading");const{data,error}=await supabase.from("leads").select("*");if(error){setSyncStatus("off");setReady(true);return}setLeads((data||[]).map(dbToLead));setSyncStatus("on");setReady(true)})()},[]);
+useEffect(()=>{if(!isConfigured)return;const ch=supabase.channel("leads-rt").on("postgres_changes",{event:"INSERT",schema:"public",table:"leads"},p=>{const n=dbToLead(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n])}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"leads"},p=>{const u=dbToLead(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}).on("postgres_changes",{event:"DELETE",schema:"public",table:"leads"},p=>{setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSyncStatus("on");else if(s==="CLOSED"||s==="CHANNEL_ERROR")setSyncStatus("off")});return()=>supabase.removeChannel(ch)},[]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
-
 const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2800)};
 
-// ─── CRUD operations ───
-const upsertLead = useCallback(async(lead)=>{
-  const clean = {...lead}; delete clean._isNew;
-  // Optimistic update
-  setLeads(p=>p.some(x=>x.id===clean.id)?p.map(x=>x.id===clean.id?clean:x):[...p,clean]);
-  setShowForm(false);setEditId(null);
-  flash(lead._isNew?"Lead ajouté ✓":"Mis à jour ✓");
-  // Persist to Supabase
-  if(isConfigured){
-    const{error}=await supabase.from("leads").upsert(leadToDb(clean));
-    if(error){console.error("Upsert error:",error);flash("⚠ Erreur sync")}
-  }
-},[]);
+const upsertLead=useCallback(async(lead)=>{const clean={...lead};delete clean._isNew;setLeads(p=>p.some(x=>x.id===clean.id)?p.map(x=>x.id===clean.id?clean:x):[...p,clean]);setShowForm(false);setEditId(null);flash(lead._isNew?"Lead ajouté ✓":"Mis à jour ✓");if(isConfigured){const{error}=await supabase.from("leads").upsert(leadToDb(clean));if(error)flash("⚠ Erreur sync")}},[]);
+const deleteLead=useCallback(async(id)=>{setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");if(isConfigured)await supabase.from("leads").delete().eq("id",id)},[]);
+const touchLead=useCallback(async(id)=>{setLeads(p=>p.map(l=>l.id===id?{...l,lastInteraction:new Date().toISOString(),tentatives:(l.tentatives||0)+1}:l));if(isConfigured){const lead=leads.find(l=>l.id===id);if(lead)await supabase.from("leads").update({last_interaction:new Date().toISOString(),tentatives:(lead.tentatives||0)+1}).eq("id",id)}},[leads]);
+const updateField=useCallback(async(id,fields)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...fields}:l));if(isConfigured){const db={};if("status" in fields)db.status=fields.status;if("lastInteraction" in fields)db.last_interaction=fields.lastInteraction;if("tentatives" in fields)db.tentatives=fields.tentatives;if("nextRelance" in fields)db.next_relance=fields.nextRelance;if("verifStatus" in fields)db.verif_status=fields.verifStatus;if("verifNote" in fields)db.verif_note=fields.verifNote;if("verifDate" in fields)db.verif_date=fields.verifDate;await supabase.from("leads").update(db).eq("id",id)}},[]);
+const updVerif=useCallback(async(id,vs,vn)=>{setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,verifDate:td()}:l));setShowVerif(null);flash("Vérification ✓");if(isConfigured)await supabase.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td()}).eq("id",id)},[]);
 
-const deleteLead = useCallback(async(id)=>{
-  setLeads(p=>p.filter(l=>l.id!==id));
-  setShowForm(false);setEditId(null);flash("Supprimé");
-  if(isConfigured){
-    const{error}=await supabase.from("leads").delete().eq("id",id);
-    if(error) console.error("Delete error:",error);
-  }
-},[]);
+const onDS=(e,id)=>{setDragId(id);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};const onDE=()=>{setDragId(null);setDragOver(null)};
+const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const lead=leads.find(l=>l.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(lead?.tentatives||0)+1};setLeads(p=>p.map(l=>l.id===id?{...l,...nd}:l));const c=COLS.find(x=>x.id===col);if(lead&&c)flash(lead.nom+" → "+c.label);if(isConfigured)await supabase.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives}).eq("id",id)}setDragOver(null);setDragId(null)};
 
-const touchLead = useCallback(async(id)=>{
-  const updated = {lastInteraction:new Date().toISOString()};
-  setLeads(p=>p.map(l=>l.id===id?{...l,...updated,tentatives:(l.tentatives||0)+1}:l));
-  if(isConfigured){
-    const lead = leads.find(l=>l.id===id);
-    if(lead){
-      const{error}=await supabase.from("leads").update({last_interaction:updated.lastInteraction,tentatives:(lead.tentatives||0)+1}).eq("id",id);
-      if(error) console.error(error);
-    }
-  }
-},[leads]);
-
-const updateField = useCallback(async(id,fields)=>{
-  setLeads(p=>p.map(l=>l.id===id?{...l,...fields}:l));
-  if(isConfigured){
-    const dbFields={};
-    if("status" in fields) dbFields.status=fields.status;
-    if("lastInteraction" in fields) dbFields.last_interaction=fields.lastInteraction;
-    if("tentatives" in fields) dbFields.tentatives=fields.tentatives;
-    if("nextRelance" in fields) dbFields.next_relance=fields.nextRelance;
-    if("verifStatus" in fields) dbFields.verif_status=fields.verifStatus;
-    if("verifNote" in fields) dbFields.verif_note=fields.verifNote;
-    if("verifDate" in fields) dbFields.verif_date=fields.verifDate;
-    const{error}=await supabase.from("leads").update(dbFields).eq("id",id);
-    if(error) console.error(error);
-  }
-},[]);
-
-const updVerif = useCallback(async(id,vs,vn)=>{
-  const fields={verifStatus:vs,verifNote:vn,verifDate:td()};
-  setLeads(p=>p.map(l=>l.id===id?{...l,...fields}:l));
-  setShowVerif(null);flash("Vérification enregistrée ✓");
-  if(isConfigured){
-    const{error}=await supabase.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td()}).eq("id",id);
-    if(error) console.error(error);
-  }
-},[]);
-
-// ─── Drag & Drop ───
-const onDS=(e,id)=>{setDragId(id);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id);requestAnimationFrame(()=>{const el=document.getElementById("c-"+id);if(el)el.style.opacity="0.3"})};
-const onDE=()=>{if(dragId){const el=document.getElementById("c-"+dragId);if(el)el.style.opacity="1"}setDragId(null);setDragOver(null)};
-const onDr=async(e,col)=>{
-  e.preventDefault();const id=e.dataTransfer.getData("text/plain");
-  if(id){
-    const lead=leads.find(l=>l.id===id);
-    const newData={status:col,lastInteraction:new Date().toISOString(),tentatives:(lead?.tentatives||0)+1};
-    setLeads(p=>p.map(l=>l.id===id?{...l,...newData}:l));
-    const c=COLS.find(x=>x.id===col);
-    if(lead&&c)flash(lead.nom+" → "+c.label);
-    if(isConfigured){
-      const{error}=await supabase.from("leads").update({status:col,last_interaction:newData.lastInteraction,tentatives:newData.tentatives}).eq("id",id);
-      if(error) console.error(error);
-    }
-  }
-  setDragOver(null);setDragId(null);
-};
-
-const openEdit=id=>{setEditId(id);setShowForm(true)};
-const closeForm=()=>{setShowForm(false);setEditId(null)};
-
+const openEdit=id=>{setEditId(id);setShowForm(true)};const closeForm=()=>{setShowForm(false);setEditId(null)};
 const filtered=useMemo(()=>{let f=leads;if(fM!=="all")f=f.filter(l=>l.memberId===fM);if(fS!=="all")f=f.filter(l=>l.service===fS);return f},[leads,fM,fS]);
 
-const stats=useMemo(()=>{
-const sg=leads.filter(l=>l.status==="signe");const pipe=leads.filter(l=>!["injoignable","signe"].includes(l.status));
-const stale=leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);
-const overdue=leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);
-const caSigne=sg.reduce((s,l)=>s+l.valeur,0);
-const weighted=pipe.reduce((s,l)=>{const col=COLS.find(c=>c.id===l.status);return s+(l.valeur*(col?.proba||0))},0);
-const proofMiss=sg.filter(l=>!l.paymentProof).length;
-const bySrc=SOURCES.map(src=>{const sl=leads.filter(l=>l.source===src);const ss=sl.filter(l=>l.status==="signe");const ca=ss.reduce((s,l)=>s+l.valeur,0);return{source:src,total:sl.length,signes:ss.length,rate:sl.length?Math.round(ss.length/sl.length*100):0,ca,com:ca*.2}}).filter(s=>s.total>0).sort((a,b)=>b.com-a.com);
-const byEchec=ECHECS.filter(e=>e!=="—").map(r=>({reason:r,count:leads.filter(l=>l.echecReason===r).length})).filter(e=>e.count>0).sort((a,b)=>b.count-a.count);
-const byM=TEAM.filter(t=>t.role==="Prospecteur").map(m=>{const ml=leads.filter(l=>l.memberId===m.id);const ms=ml.filter(l=>l.status==="signe");const ca=ms.reduce((s,l)=>s+l.valeur,0);const st=ml.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).length;const od=ml.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0).length;return{...m,total:ml.length,signes:ms.length,rate:ml.length?Math.round(ms.length/ml.length*100):0,ca,com:ca*.2,stale:st,overdue:od}}).sort((a,b)=>b.com-a.com);
-return{total:leads.length,signes:sg.length,stale:stale.length,overdue:overdue.length,caSigne,weighted,commission:caSigne*.2,proofMiss,bySrc,byEchec,byM}
-},[leads,now]);
+const stats=useMemo(()=>{const sg=leads.filter(l=>l.status==="signe");const pipe=leads.filter(l=>!["injoignable","signe"].includes(l.status));const stale=leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);const overdue=leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);const caSigne=sg.reduce((s,l)=>s+l.valeur,0);const weighted=pipe.reduce((s,l)=>{const col=COLS.find(c=>c.id===l.status);return s+(l.valeur*(col?.proba||0))},0);const proofMiss=sg.filter(l=>!l.paymentProof).length;const bySrc=SOURCES.map(src=>{const sl=leads.filter(l=>l.source===src);const ss=sl.filter(l=>l.status==="signe");const ca=ss.reduce((s,l)=>s+l.valeur,0);return{source:src,total:sl.length,signes:ss.length,rate:sl.length?Math.round(ss.length/sl.length*100):0,ca,com:ca*.2}}).filter(s=>s.total>0).sort((a,b)=>b.com-a.com);const byEchec=ECHECS.filter(e=>e!=="—").map(r=>({reason:r,count:leads.filter(l=>l.echecReason===r).length})).filter(e=>e.count>0).sort((a,b)=>b.count-a.count);const byM=TEAM.filter(t=>t.role==="Prospecteur").map(m=>{const ml=leads.filter(l=>l.memberId===m.id);const ms=ml.filter(l=>l.status==="signe");const ca=ms.reduce((s,l)=>s+l.valeur,0);const st=ml.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).length;const od=ml.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0).length;return{...m,total:ml.length,signes:ms.length,rate:ml.length?Math.round(ms.length/ml.length*100):0,ca,com:ca*.2,stale:st,overdue:od}}).sort((a,b)=>b.com-a.com);return{total:leads.length,signes:sg.length,stale:stale.length,overdue:overdue.length,caSigne,weighted,commission:caSigne*.2,proofMiss,bySrc,byEchec,byM}},[leads,now]);
 
-const IS={width:"100%",padding:"8px 11px",borderRadius:7,border:"1px solid #1a1a2a",background:"#08080f",color:"#c8c8d8",fontSize:13,outline:"none",boxSizing:"border-box",fontFamily:"'DM Sans',sans-serif"};
+const IS={width:"100%",padding:"10px 12px",borderRadius:8,border:"1px solid #1a1a2a",background:"#08080f",color:"#c8c8d8",fontSize:16,outline:"none",boxSizing:"border-box",fontFamily:"'DM Sans'"};
+if(!isConfigured)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:20}}><div style={{background:"#09091a",border:"1px solid #111122",borderRadius:16,padding:30,maxWidth:400,textAlign:"center",width:"100%"}}><h2 style={{color:"#fff",fontFamily:"'Outfit'",fontSize:18,fontWeight:800}}>Configuration requise</h2><p style={{color:"#6a6a8a",fontSize:13}}>Voir GUIDE-SETUP.md</p></div></div>;
+if(!ready)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}><div style={{color:"#DC2626",fontWeight:700}}>Connexion...</div></div>;
 
-// ─── Config screen ───
-if(!isConfigured){
-  return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh",background:"#06060e",padding:40}}>
-    <div style={{background:"#09091a",border:"1px solid #111122",borderRadius:16,padding:40,maxWidth:500,textAlign:"center"}}>
-      <svg width="120" height="35" viewBox="0 0 110 32" fill="none" style={{marginBottom:20}}><rect x="0" y="4" width="24" height="24" rx="6" fill="#DC2626"/><path d="M7 12L12 20L17 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/><text x="30" y="23" fontFamily="Outfit,sans-serif" fontWeight="800" fontSize="22" fill="white" letterSpacing="-0.5">WEB</text><text x="76" y="23" fontFamily="Outfit,sans-serif" fontWeight="800" fontSize="22" fill="#DC2626" letterSpacing="-0.5">O</text></svg>
-      <h2 style={{color:"#fff",fontFamily:"'Outfit',sans-serif",fontSize:20,fontWeight:800,marginBottom:12}}>Configuration requise</h2>
-      <p style={{color:"#6a6a8a",fontSize:13,lineHeight:1.7,marginBottom:20}}>
-        Ouvre ce fichier HTML dans un éditeur de texte et remplace les 2 lignes en haut du JavaScript :<br/><br/>
-        <code style={{background:"#06060e",padding:"6px 12px",borderRadius:6,color:"#DC2626",fontSize:12,display:"block",textAlign:"left",marginTop:8}}>
-          const SUPABASE_URL = "ton-url-supabase";<br/>
-          const SUPABASE_KEY = "ta-clé-anon";
-        </code>
-      </p>
-      <p style={{color:"#4a4a5a",fontSize:11}}>Voir le fichier GUIDE-SETUP.md pour les instructions complètes.</p>
-    </div>
-  </div>;
-}
-
-if(!ready) return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100vh"}}><div style={{color:"#DC2626",fontWeight:700}}>Connexion à Supabase...</div></div>;
-
-const TABS=[{id:"kanban",l:"Pipeline"},{id:"list",l:"Liste"},{id:"stale",l:"⚡ Stale"},{id:"relances",l:"⏰ Relances"},{id:"ghosts",l:"👻 Ghosts"},{id:"verif",l:"🛡 Vérif."},{id:"perf",l:"◆ Perf."},{id:"roi",l:"📊 ROI"},{id:"ia",l:"🤖 Agent IA"}];
+const TABS=[{id:"kanban",l:"Pipeline"},{id:"list",l:"Liste"},{id:"stale",l:"⚡ Stale"},{id:"relances",l:"⏰ Relances"},{id:"ghosts",l:"👻 Ghosts"},{id:"verif",l:"🛡 Vérif."},{id:"perf",l:"◆ Perf."},{id:"roi",l:"📊 ROI"},{id:"ia",l:"🤖 IA"}];
+const px=window.innerWidth<768?"14px":"20px";
 
 return (
-<div style={{minHeight:"100vh"}}>
+<div style={{minHeight:"100vh",minHeight:"100dvh",display:"flex",flexDirection:"column"}}>
 
 {/* HEADER */}
-<header style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 20px",height:54,background:"#09091a",borderBottom:"1px solid #111122",flexWrap:"wrap",gap:8}}>
-<div style={{display:"flex",alignItems:"center",gap:14}}>
-  <svg width="100" height="28" viewBox="0 0 110 32" fill="none"><rect x="0" y="4" width="24" height="24" rx="6" fill="#DC2626"/><path d="M7 12L12 20L17 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/><text x="30" y="23" fontFamily="Outfit,sans-serif" fontWeight="800" fontSize="22" fill="white" letterSpacing="-0.5">WEB</text><text x="76" y="23" fontFamily="Outfit,sans-serif" fontWeight="800" fontSize="22" fill="#DC2626" letterSpacing="-0.5">O</text></svg>
-  <div style={{display:"flex",alignItems:"center",gap:6}}>
-    <span style={{fontSize:9,fontWeight:700,color:"#DC2626",background:"#DC262612",padding:"2px 7px",borderRadius:4,letterSpacing:1.5,fontFamily:"'DM Mono',monospace"}}>ONLINE</span>
-    <span className={"sync-dot "+(syncStatus)} title={syncStatus==="on"?"Sync temps réel actif":syncStatus==="loading"?"Connexion...":"Déconnecté"}/>
+<header style={{background:"#09091a",borderBottom:"1px solid #111122",padding:"8px 14px",position:"sticky",top:0,zIndex:100}}>
+<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+  <div style={{display:"flex",alignItems:"center",gap:8}}>
+    <svg width="80" height="24" viewBox="0 0 110 32" fill="none"><rect x="0" y="4" width="24" height="24" rx="6" fill="#DC2626"/><path d="M7 12L12 20L17 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/><text x="30" y="23" fontFamily="Outfit,sans-serif" fontWeight="800" fontSize="22" fill="white">WEB</text><text x="76" y="23" fontFamily="Outfit,sans-serif" fontWeight="800" fontSize="22" fill="#DC2626">O</text></svg>
+    <span className={"sync-dot "+syncStatus}/>
   </div>
-  <div style={{display:"flex",gap:2,background:"#06060e",borderRadius:7,padding:2,flexWrap:"wrap"}}>
-    {TABS.map(t=><button key={t.id} onClick={()=>setView(t.id)} style={{padding:"4px 9px",borderRadius:5,border:"none",background:view===t.id?"#141428":"transparent",color:view===t.id?"#fff":"#444",fontSize:10.5,fontWeight:600,cursor:"pointer",display:"flex",alignItems:"center",gap:3}}>
-      {t.l}
-      {t.id==="stale"&&stats.stale>0&&<span style={{fontSize:8,fontWeight:800,color:"#fbbf24",background:"#fbbf2418",padding:"1px 4px",borderRadius:3}}>{stats.stale}</span>}
-      {t.id==="relances"&&stats.overdue>0&&<span style={{fontSize:8,fontWeight:800,color:"#ef4444",background:"#ef444418",padding:"1px 4px",borderRadius:3}}>{stats.overdue}</span>}
-    </button>)}
+  <div style={{display:"flex",alignItems:"center",gap:6}}>
+    <button onClick={()=>setShowFilters(p=>!p)} style={{padding:"6px 10px",borderRadius:6,border:"1px solid "+(showFilters?"#DC262640":"#1a1a2a"),background:showFilters?"#DC262610":"transparent",color:showFilters?"#DC2626":"#555",fontSize:11,fontWeight:600,cursor:"pointer"}}>☰</button>
+    <button onClick={()=>doExportCSV(filtered)} style={{padding:"6px 10px",borderRadius:6,border:"1px solid #1a1a2a",background:"transparent",color:"#555",fontSize:11,fontWeight:700,cursor:"pointer"}}>↓</button>
+    <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"6px 14px",borderRadius:8,border:"none",background:"#DC2626",color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Lead</button>
   </div>
 </div>
-<div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-  <div style={{display:"flex",gap:2,background:"#06060e",borderRadius:7,padding:2}}>
-    <button onClick={()=>setFM("all")} style={{padding:"4px 9px",borderRadius:5,border:"none",background:fM==="all"?"#141428":"transparent",color:fM==="all"?"#fff":"#444",fontSize:11,fontWeight:600,cursor:"pointer"}}>Tous</button>
-    {TEAM.map(m=><button key={m.id} onClick={()=>setFM(m.id)} style={{padding:"4px 9px",borderRadius:5,border:"none",background:fM===m.id?m.color+"20":"transparent",color:fM===m.id?m.color:"#444",fontSize:11,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:3}}><span style={{width:7,height:7,borderRadius:"50%",background:m.color,opacity:fM===m.id?1:.3}}/>{m.name}</button>)}
+{showFilters&&<div className="fu" style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+  <div style={{display:"flex",gap:2,background:"#06060e",borderRadius:7,padding:2,flexWrap:"wrap"}}>
+    <button onClick={()=>setFM("all")} style={{padding:"5px 10px",borderRadius:5,border:"none",background:fM==="all"?"#141428":"transparent",color:fM==="all"?"#fff":"#555",fontSize:12,fontWeight:600,cursor:"pointer"}}>Tous</button>
+    {TEAM.map(m=><button key={m.id} onClick={()=>setFM(m.id)} style={{padding:"5px 10px",borderRadius:5,border:"none",background:fM===m.id?m.color+"20":"transparent",color:fM===m.id?m.color:"#555",fontSize:12,fontWeight:700,cursor:"pointer"}}>{m.name}</button>)}
   </div>
-  <select value={fS} onChange={e=>setFS(e.target.value)} style={{...IS,width:"auto",fontSize:11,padding:"4px 8px"}}><option value="all">Services</option>{SERVICES.map(s=><option key={s} value={s}>{s}</option>)}</select>
-  <button onClick={()=>doExportCSV(filtered)} style={{padding:"5px 11px",borderRadius:6,border:"1px solid #1a1a2a",background:"transparent",color:"#666",fontSize:10,fontWeight:700,cursor:"pointer"}}>↓ CSV</button>
-  <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"6px 14px",borderRadius:7,border:"none",background:"#DC2626",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer"}}>+ Lead</button>
+  <select value={fS} onChange={e=>setFS(e.target.value)} style={{...IS,width:"auto",fontSize:12,padding:"5px 10px"}}><option value="all">Services</option>{SERVICES.map(s=><option key={s}>{s}</option>)}</select>
+</div>}
+<div className="tab-bar">
+  {TABS.map(t=><button key={t.id} className={"tab-btn "+(view===t.id?"active":"")} onClick={()=>setView(t.id)}>
+    {t.l}
+    {t.id==="stale"&&stats.stale>0&&<span style={{fontSize:9,fontWeight:800,color:"#fbbf24",background:"#fbbf2418",padding:"1px 5px",borderRadius:3}}>{stats.stale}</span>}
+    {t.id==="relances"&&stats.overdue>0&&<span style={{fontSize:9,fontWeight:800,color:"#ef4444",background:"#ef444418",padding:"1px 5px",borderRadius:3}}>{stats.overdue}</span>}
+  </button>)}
 </div>
 </header>
 
 {/* STATS */}
-<div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:8,padding:"12px 20px"}}>
-{[{l:"LEADS",v:stats.total,c:"#818cf8"},{l:"SIGNÉS",v:stats.signes,c:"#34d399"},{l:"⚡ STALE",v:stats.stale,c:stats.stale>0?"#fbbf24":"#2a2a3a"},{l:"⏰ OVERDUE",v:stats.overdue,c:stats.overdue>0?"#ef4444":"#2a2a3a"},{l:"PONDÉRÉ",v:eur(stats.weighted),c:"#c084fc"},{l:"COMMISSIONS",v:eur(stats.commission),c:"#DC2626"},{l:"PREUVES ⚠",v:stats.proofMiss,c:stats.proofMiss>0?"#fb923c":"#2a2a3a"}].map((s,i)=>
-<div key={i} className="fu" style={{animationDelay:i*35+"ms",background:"#09091a",border:"1px solid #111122",borderRadius:9,padding:"9px 13px"}}>
-  <div style={{fontSize:8.5,fontWeight:600,color:"#3a3a4a",letterSpacing:1.5,fontFamily:"'DM Mono',monospace",marginBottom:2}}>{s.l}</div>
-  <div style={{fontSize:18,fontWeight:800,color:s.c,fontFamily:"'Outfit',sans-serif",letterSpacing:-.5}}>{s.v}</div>
+<div className="stats-grid">
+{[{l:"LEADS",v:stats.total,c:"#818cf8",n:1},{l:"SIGNÉS",v:stats.signes,c:"#34d399",n:2},{l:"STALE",v:stats.stale,c:stats.stale>0?"#fbbf24":"#2a2a3a",n:3},{l:"OVERDUE",v:stats.overdue,c:stats.overdue>0?"#ef4444":"#2a2a3a",n:4},{l:"PONDÉRÉ",v:eur(stats.weighted),c:"#c084fc",n:5},{l:"COMMISSIONS",v:eur(stats.commission),c:"#DC2626",n:6},{l:"PREUVES",v:stats.proofMiss,c:stats.proofMiss>0?"#fb923c":"#2a2a3a",n:7}].map((s,i)=>
+<div key={i} className={"fu stat-"+s.n} style={{animationDelay:i*30+"ms",background:"#09091a",border:"1px solid #111122",borderRadius:8,padding:"8px 10px"}}>
+  <div style={{fontSize:8,fontWeight:600,color:"#3a3a4a",letterSpacing:1,fontFamily:"'DM Mono'",marginBottom:2}}>{s.l}</div>
+  <div style={{fontSize:16,fontWeight:800,color:s.c,fontFamily:"'Outfit'",letterSpacing:-.5}}>{s.v}</div>
 </div>)}
 </div>
 
-{/* ═══ KANBAN ═══ */}
-{view==="kanban"&&<div style={{padding:"0 20px 20px"}}><div style={{display:"grid",gridTemplateColumns:"repeat("+COLS.length+",minmax(0,1fr))",gap:8}}>
-{COLS.map((col,ci)=>{
-const cards=filtered.filter(l=>l.status===col.id);const colVal=cards.reduce((s,l)=>s+l.valeur,0);const colW=cards.reduce((s,l)=>s+l.valeur*col.proba,0);
-const stN=cards.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).length;
-const odN=cards.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0).length;
-return <div key={col.id} className={"kcol fu "+(dragOver===col.id?"over":"")}
-  style={{animationDelay:ci*35+"ms",background:"#09091a",border:"1px solid #111122",borderRadius:10,padding:7,minHeight:360,display:"flex",flexDirection:"column"}}
+{/* KANBAN */}
+{view==="kanban"&&<div className="kanban-scroll">
+{COLS.map((col,ci)=>{const cards=filtered.filter(l=>l.status===col.id);const colVal=cards.reduce((s,l)=>s+l.valeur,0);
+return <div key={col.id} className={"kcol kanban-col fu "+(dragOver===col.id?"over":"")} style={{animationDelay:ci*30+"ms",background:"#09091a",border:"1px solid #111122",borderRadius:10,padding:8,display:"flex",flexDirection:"column"}}
   onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4,padding:"0 4px"}}>
-    <div style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:6,height:6,borderRadius:"50%",background:col.accent}}/><span style={{fontSize:9.5,fontWeight:700,color:col.accent,fontFamily:"'DM Mono',monospace",textTransform:"uppercase"}}>{col.label}</span></div>
-    <div style={{display:"flex",alignItems:"center",gap:3}}>
-      {stN>0&&<span style={{fontSize:8,fontWeight:700,color:"#fbbf24",background:"#fbbf2412",padding:"1px 4px",borderRadius:3}}>⚡{stN}</span>}
-      {odN>0&&<span className="blink" style={{fontSize:8,fontWeight:700,color:"#ef4444",background:"#ef444412",padding:"1px 4px",borderRadius:3}}>⏰{odN}</span>}
-      <span style={{fontSize:9,fontWeight:700,color:"#2a2a3a",background:"#0c0c16",padding:"2px 5px",borderRadius:3}}>{cards.length}</span>
-    </div>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6,padding:"0 4px"}}>
+    <div style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:7,height:7,borderRadius:"50%",background:col.accent}}/><span style={{fontSize:11,fontWeight:700,color:col.accent,fontFamily:"'DM Mono'"}}>{col.label}</span></div>
+    <span style={{fontSize:10,fontWeight:700,color:"#2a2a3a",background:"#0c0c16",padding:"2px 6px",borderRadius:4}}>{cards.length}</span>
   </div>
-  <div style={{display:"flex",justifyContent:"space-between",padding:"0 4px 4px",borderBottom:"1px solid "+col.accent+"10",marginBottom:4}}>
-    <span style={{fontSize:9,color:"#2a2a3a",fontFamily:"'DM Mono',monospace"}}>{eur(colVal)}</span>
-    <span style={{fontSize:9,fontWeight:700,color:col.id==="signe"?"#34d399":"#1a1a2a",fontFamily:"'DM Mono',monospace"}}>{col.id==="signe"?"+"+eur(colVal*.2):colVal>0?"~"+eur(colW):""}</span>
-  </div>
-  <div style={{flex:1,minHeight:30}}>
-    {cards.map(lead=>{
-      const h=hAgo(lead.lastInteraction);const isS=!["signe","injoignable"].includes(lead.status)&&h>=48;const isOD=lead.nextRelance&&!["signe","injoignable"].includes(lead.status)&&dUntil(lead.nextRelance)<0;
-      const bL=isOD?"3px solid #ef4444":isS?"3px solid "+(h>=120?"#ef4444":h>=72?"#fb923c":"#fbbf24"):"3px solid transparent";
-      return <div key={lead.id} id={"c-"+lead.id} className="kc" draggable onDragStart={e=>onDS(e,lead.id)} onDragEnd={onDE} onClick={()=>openEdit(lead.id)}
-        style={{background:isOD?"#ef44440a":"#0c0c18",border:"1px solid "+(isOD?"#ef444420":isS?"#fbbf2420":"#141425"),borderLeft:bL,borderRadius:8,padding:9,marginBottom:4}}>
-        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}><Dot id={lead.memberId} sz={16}/><span style={{fontWeight:700,color:"#dddde8",fontSize:11,flex:1}}>{lead.nom}</span><Tent n={lead.tentatives}/></div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:3}}>
-          <span style={{fontSize:9,color:sC(lead.service),background:sC(lead.service)+"12",padding:"1px 5px",borderRadius:3,fontWeight:600}}>{lead.service}</span>
-          {lead.source&&lead.source!=="Autre"&&<span style={{fontSize:8,color:"#3a3a4a",background:"#0a0a12",padding:"1px 5px",borderRadius:3}}>{lead.source}</span>}
-        </div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:3}}><StaleTag li={lead.lastInteraction} st={lead.status}/><RelanceTag nr={lead.nextRelance} st={lead.status}/></div>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <span style={{fontSize:12,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(lead.valeur)}</span>
-          <div style={{display:"flex",alignItems:"center",gap:3}}>
-            {lead.status==="signe"&&<span style={{fontSize:9,fontWeight:700,color:"#34d399",fontFamily:"'DM Mono',monospace"}}>+{eur(lead.valeur*.2)}</span>}
-            {lead.status==="signe"&&!lead.paymentProof&&<span style={{fontSize:8,color:"#fb923c",fontWeight:700}}>⚠</span>}
-            {lead.status==="signe"&&<VBadge s={lead.verifStatus}/>}
-          </div>
-        </div>
-      </div>})}
-    {cards.length===0&&<div style={{padding:"25px 8px",textAlign:"center",color:"#141425",fontSize:10}}>Glissez ici</div>}
+  <div style={{fontSize:10,color:"#2a2a3a",fontFamily:"'DM Mono'",padding:"0 4px 6px",borderBottom:"1px solid "+col.accent+"10",marginBottom:6}}>{eur(colVal)}</div>
+  <div style={{flex:1,minHeight:60}}>
+    {cards.map(lead=>{const h=hAgo(lead.lastInteraction);const isS=!["signe","injoignable"].includes(lead.status)&&h>=48;const isOD=lead.nextRelance&&!["signe","injoignable"].includes(lead.status)&&dUntil(lead.nextRelance)<0;
+    return <div key={lead.id} className="kc" draggable onDragStart={e=>onDS(e,lead.id)} onDragEnd={onDE} onClick={()=>openEdit(lead.id)}
+      style={{background:isOD?"#ef44440a":"#0c0c18",border:"1px solid "+(isOD?"#ef444420":"#141425"),borderLeft:"3px solid "+(isOD?"#ef4444":isS?(h>=120?"#ef4444":"#fbbf24"):"transparent"),borderRadius:8,padding:10,marginBottom:5}}>
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><Dot id={lead.memberId} sz={16}/><span style={{fontWeight:700,color:"#dddde8",fontSize:12,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{lead.nom}</span><Tent n={lead.tentatives}/></div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:3}}><span style={{fontSize:10,color:sC(lead.service),fontWeight:600}}>{lead.service}</span></div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:3}}><StaleTag li={lead.lastInteraction} st={lead.status}/><RelanceTag nr={lead.nextRelance} st={lead.status}/></div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:14,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit'"}}>{eur(lead.valeur)}</span>{lead.status==="signe"&&<span style={{fontSize:10,fontWeight:700,color:"#34d399",fontFamily:"'DM Mono'"}}>+{eur(lead.valeur*.2)}</span>}</div>
+    </div>})}
+    {cards.length===0&&<div style={{padding:20,textAlign:"center",color:"#141425",fontSize:11}}>Glissez ici</div>}
   </div>
 </div>})}
-</div></div>}
-
-{/* ═══ LIST ═══ */}
-{view==="list"&&<div className="fu" style={{padding:"0 20px 20px"}}><div style={{background:"#09091a",border:"1px solid #111122",borderRadius:10,overflowX:"auto"}}>
-<table style={{width:"100%",borderCollapse:"collapse",minWidth:1100}}>
-<thead><tr style={{borderBottom:"1px solid #111122"}}>{["","Entreprise","Service","Statut","Source","Stale","Relance","Tent.","Valeur","Com.","Pondéré","Prosp.","Preuve"].map(h=><th key={h} style={{padding:"9px 8px",textAlign:"left",fontSize:8.5,fontWeight:700,color:"#3a3a4a",letterSpacing:1,fontFamily:"'DM Mono',monospace",textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
-<tbody>{filtered.map((l,i)=>{const col=COLS.find(c=>c.id===l.status);const isS=!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48;const isOD=l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0;
-return <tr key={l.id} onClick={()=>openEdit(l.id)} style={{borderBottom:"1px solid #0c0c18",cursor:"pointer",background:isOD?"#ef44440a":isS?"#fbbf2405":i%2?"#08080f":"transparent"}}>
-  <td style={{padding:8}}><Dot id={l.memberId}/></td><td style={{padding:8,fontWeight:700,color:"#dddde8",fontSize:12}}>{l.nom}</td>
-  <td style={{padding:8}}><span style={{fontSize:10,color:sC(l.service),fontWeight:600}}>{l.service}</span></td>
-  <td style={{padding:8}}><span style={{fontSize:10,color:col?.accent,background:col?.accent+"15",padding:"2px 6px",borderRadius:4,fontWeight:700}}>{col?.icon} {col?.label}</span></td>
-  <td style={{padding:8,fontSize:10,color:"#4a4a5a"}}>{l.source||"—"}</td>
-  <td style={{padding:8}}>{isS?<StaleTag li={l.lastInteraction} st={l.status}/>:<span style={{color:"#1a1a2a",fontSize:9}}>OK</span>}</td>
-  <td style={{padding:8}}><RelanceTag nr={l.nextRelance} st={l.status}/></td><td style={{padding:8}}><Tent n={l.tentatives}/></td>
-  <td style={{padding:8,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif",fontSize:13}}>{eur(l.valeur)}</td>
-  <td style={{padding:8,fontWeight:700,color:l.status==="signe"?"#34d399":"#1a1a2a",fontFamily:"'DM Mono',monospace",fontSize:12}}>{l.status==="signe"?eur(l.valeur*.2):"—"}</td>
-  <td style={{padding:8,fontSize:11,color:"#c084fc",fontFamily:"'DM Mono',monospace"}}>{eur(l.valeur*(col?.proba||0))}</td>
-  <td style={{padding:8,fontSize:11,color:mCol(l.memberId),fontWeight:600}}>{mN(l.memberId)}</td>
-  <td style={{padding:8}}>{l.paymentProof?<span style={{fontSize:9,color:"#34d399",fontWeight:700}}>✓</span>:l.status==="signe"?<span style={{fontSize:9,color:"#fb923c",fontWeight:700}}>⚠</span>:<span style={{color:"#1a1a2a",fontSize:9}}>—</span>}</td>
-</tr>})}</tbody></table></div></div>}
-
-{/* ═══ STALE ═══ */}
-{view==="stale"&&<div className="fu" style={{padding:"0 20px 20px"}}>
-<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}><span style={{fontSize:15,fontWeight:800,color:"#fbbf24",fontFamily:"'Outfit',sans-serif"}}>⚡ Dormants (+48h)</span><span style={{fontSize:11,fontWeight:700,color:"#3a3a4a",background:"#0e0e1a",padding:"3px 10px",borderRadius:5}}>{stats.stale}</span></div>
-<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:8}}>
-{leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)).map((l,i)=>{const h=hAgo(l.lastInteraction);const sc=h>=120?"#ef4444":h>=72?"#fb923c":"#fbbf24";const col=COLS.find(c=>c.id===l.status);
-return <div key={l.id} className="fu" style={{animationDelay:i*45+"ms",background:"#09091a",border:"1px solid #111122",borderLeft:"3px solid "+sc,borderRadius:10,padding:14,cursor:"pointer"}} onClick={()=>openEdit(l.id)}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1}}><div style={{fontWeight:700,color:"#dddde8",fontSize:13}}>{l.nom}</div><div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}><span style={{fontSize:10,color:col?.accent,fontWeight:600}}>{col?.label}</span><span style={{fontSize:10,color:mCol(l.memberId),fontWeight:600}}>{mN(l.memberId)}</span><Tent n={l.tentatives}/></div></div><StaleTag li={l.lastInteraction} st={l.status}/></div>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:14,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(l.valeur)}</span><button onClick={e=>{e.stopPropagation();touchLead(l.id);flash(l.nom+" — +1 tentative")}} style={{padding:"4px 11px",borderRadius:5,border:"1px solid "+sc+"30",background:"transparent",color:sc,fontSize:10,fontWeight:700,cursor:"pointer"}}>↻ Contacté</button></div>
-</div>})}
-</div>{stats.stale===0&&<div style={{padding:50,textAlign:"center",color:"#1e1e2e"}}><div style={{fontSize:34,marginBottom:8}}>✓</div><div style={{fontSize:13,fontWeight:600}}>Pipeline actif</div></div>}
 </div>}
 
-{/* ═══ RELANCES ═══ */}
-{view==="relances"&&<div className="fu" style={{padding:"0 20px 20px"}}>
-<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}><span style={{fontSize:15,fontWeight:800,color:"#ef4444",fontFamily:"'Outfit',sans-serif"}}>⏰ Relances en retard</span><span style={{fontSize:11,fontWeight:700,color:"#3a3a4a",background:"#0e0e1a",padding:"3px 10px",borderRadius:5}}>{stats.overdue}</span></div>
-<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:8}}>
-{leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<=0).sort((a,b)=>new Date(a.nextRelance)-new Date(b.nextRelance)).map((l,i)=>{const d=dUntil(l.nextRelance);const col=COLS.find(c=>c.id===l.status);
-return <div key={l.id} className="fu" style={{animationDelay:i*45+"ms",background:d<0?"#ef44440a":"#09091a",border:"1px solid "+(d<0?"#ef444425":"#111122"),borderRadius:10,padding:14,cursor:"pointer"}} onClick={()=>openEdit(l.id)}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1}}><div style={{fontWeight:700,color:"#dddde8",fontSize:13}}>{l.nom}</div><div style={{display:"flex",gap:6,marginTop:2}}><span style={{fontSize:10,color:col?.accent,fontWeight:600}}>{col?.label}</span><span style={{fontSize:10,color:mCol(l.memberId),fontWeight:600}}>{mN(l.memberId)}</span></div></div>
-    {d<0?<span className="blink" style={{fontSize:10,fontWeight:700,color:"#ef4444",background:"#ef444418",padding:"3px 8px",borderRadius:5}}>⏰ J{d}</span>:<span style={{fontSize:10,fontWeight:700,color:"#fbbf24",background:"#fbbf2418",padding:"3px 8px",borderRadius:5}}>Aujourd'hui</span>}
-  </div>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:14,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(l.valeur)}</span>
-    <button onClick={async e=>{e.stopPropagation();touchLead(l.id);const nr=addD(td(),2);updateField(l.id,{nextRelance:nr});flash(l.nom+" — next J+2")}} style={{padding:"4px 11px",borderRadius:5,border:"1px solid #34d39930",background:"transparent",color:"#34d399",fontSize:10,fontWeight:700,cursor:"pointer"}}>✓ Relancé</button>
-  </div>
-</div>})}
-</div>{stats.overdue===0&&<div style={{padding:50,textAlign:"center",color:"#1e1e2e"}}><div style={{fontSize:34,marginBottom:8}}>✓</div><div style={{fontSize:13,fontWeight:600}}>Relances à jour</div></div>}
+{/* LIST */}
+{view==="list"&&<div className="fu" style={{padding:"0 "+px+" "+px}}><div className="cards-grid">{filtered.map(l=><LeadCard key={l.id} lead={l} onClick={openEdit}/>)}</div>{filtered.length===0&&<div style={{padding:40,textAlign:"center",color:"#1e1e2e"}}>Aucun lead</div>}</div>}
+
+{/* STALE */}
+{view==="stale"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
+<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><span style={{fontSize:16,fontWeight:800,color:"#fbbf24",fontFamily:"'Outfit'"}}>⚡ Dormants</span><span style={{fontSize:12,fontWeight:700,color:"#3a3a4a",background:"#0e0e1a",padding:"3px 10px",borderRadius:6}}>{stats.stale}</span></div>
+<div className="cards-grid">{leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)).map(l=><LeadCard key={l.id} lead={l} onClick={openEdit} extra={<button onClick={e=>{e.stopPropagation();touchLead(l.id);flash(l.nom+" +1")}} style={{width:"100%",padding:"8px",borderRadius:6,border:"1px solid #fbbf2430",background:"transparent",color:"#fbbf24",fontSize:12,fontWeight:700,cursor:"pointer"}}>↻ Contacté</button>}/>)}</div>
+{stats.stale===0&&<div style={{padding:50,textAlign:"center",color:"#1e1e2e"}}><div style={{fontSize:34,marginBottom:8}}>✓</div><div style={{fontSize:14,fontWeight:600}}>Pipeline actif</div></div>}
 </div>}
 
-{/* ═══ GHOSTS ═══ */}
-{view==="ghosts"&&<div className="fu" style={{padding:"0 20px 20px"}}>
-<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}><span style={{fontSize:15,fontWeight:800,color:"#64748b",fontFamily:"'Outfit',sans-serif"}}>👻 Ghost Mode</span></div>
-<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(340px,1fr))",gap:8}}>
-{leads.filter(l=>l.status==="injoignable").map((l,i)=>{const sug=GHOST_MAP[l.source]||GHOST_MAP["Autre"];const dS=hAgo(l.lastInteraction);
-return <div key={l.id} className="fu" style={{animationDelay:i*45+"ms",background:"#09091a",border:"1px solid #111122",borderRadius:10,padding:16}}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1}}><div style={{fontWeight:700,color:"#dddde8",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"#3a3a4a",marginTop:2}}>{l.service} · {mN(l.memberId)} · <Tent n={l.tentatives}/></div></div></div>
-  {l.notes&&<div style={{fontSize:11,color:"#3a3a4a",background:"#06060e",padding:8,borderRadius:6,marginBottom:8}}>{l.notes}</div>}
-  {l.echecReason&&l.echecReason!=="—"&&<div style={{fontSize:10,color:"#f87171",marginBottom:8}}>Raison : {l.echecReason}</div>}
-  <div style={{background:"#818cf808",border:"1px solid #818cf815",borderRadius:7,padding:"8px 10px",marginBottom:10}}>
-    <div style={{fontSize:9,fontWeight:700,color:"#818cf8",letterSpacing:1,fontFamily:"'DM Mono',monospace",marginBottom:3}}>👻 SUGGESTION</div>
-    <div style={{fontSize:11,color:"#8888aa"}}>Canal : <strong style={{color:"#fff"}}>{l.source}</strong> — {dS?fAgo(dS):""} sans réponse</div>
-    <div style={{fontSize:11,color:"#34d399",fontWeight:600,marginTop:3}}>→ {sug}</div>
-  </div>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}><span style={{fontSize:15,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(l.valeur)}</span>
-    <div style={{display:"flex",gap:6}}>
-      <button onClick={async()=>{const f={status:"nouveau",lastInteraction:new Date().toISOString(),tentatives:(l.tentatives||0)+1};setLeads(p=>p.map(x=>x.id===l.id?{...x,...f}:x));flash(l.nom+" → Nouveau");if(isConfigured)await supabase.from("leads").update({status:"nouveau",last_interaction:f.lastInteraction,tentatives:f.tentatives}).eq("id",l.id)}} style={{padding:"5px 11px",borderRadius:5,border:"1px solid #818cf833",background:"transparent",color:"#818cf8",fontSize:10,fontWeight:700,cursor:"pointer"}}>↻ Retenter</button>
-      <button onClick={()=>deleteLead(l.id)} style={{padding:"5px 9px",borderRadius:5,border:"1px solid #ef444433",background:"transparent",color:"#ef4444",fontSize:10,fontWeight:700,cursor:"pointer"}}>✕</button>
-    </div>
-  </div>
-</div>})}
-</div>{leads.filter(l=>l.status==="injoignable").length===0&&<div style={{padding:50,textAlign:"center",color:"#1e1e2e"}}><div style={{fontSize:34,marginBottom:8}}>✓</div><div style={{fontSize:13,fontWeight:600}}>Aucun ghost</div></div>}
+{/* RELANCES */}
+{view==="relances"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
+<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><span style={{fontSize:16,fontWeight:800,color:"#ef4444",fontFamily:"'Outfit'"}}>⏰ Relances</span><span style={{fontSize:12,fontWeight:700,color:"#3a3a4a",background:"#0e0e1a",padding:"3px 10px",borderRadius:6}}>{stats.overdue}</span></div>
+<div className="cards-grid">{leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<=0).sort((a,b)=>new Date(a.nextRelance)-new Date(b.nextRelance)).map(l=><LeadCard key={l.id} lead={l} onClick={openEdit} extra={<button onClick={async e=>{e.stopPropagation();touchLead(l.id);updateField(l.id,{nextRelance:addD(td(),2)});flash(l.nom+" → J+2")}} style={{width:"100%",padding:"8px",borderRadius:6,border:"1px solid #34d39930",background:"transparent",color:"#34d399",fontSize:12,fontWeight:700,cursor:"pointer"}}>✓ Relancé</button>}/>)}</div>
+{stats.overdue===0&&<div style={{padding:50,textAlign:"center",color:"#1e1e2e"}}><div style={{fontSize:34,marginBottom:8}}>✓</div><div style={{fontSize:14,fontWeight:600}}>Relances à jour</div></div>}
 </div>}
 
-{/* ═══ VERIF ═══ */}
-{view==="verif"&&<div className="fu" style={{padding:"0 20px 20px"}}>
-<div style={{marginBottom:8}}><span style={{fontSize:15,fontWeight:800,color:"#fbbf24",fontFamily:"'Outfit',sans-serif"}}>🛡 Anti-Bypass</span></div>
-<div style={{background:"#09091a22",borderRadius:8,padding:12,marginBottom:14,fontSize:12,color:"#4a4a5a",lineHeight:1.7,border:"1px dashed #1a1a2a"}}><strong style={{color:"#fbbf24"}}>Template :</strong> <em style={{color:"#818cf8"}}>« Bonjour, Kylian de Webo. Suivi qualité, tout se passe bien ? »</em></div>
-<div style={{background:"#09091a",border:"1px solid #111122",borderRadius:10,overflowX:"auto"}}>
-<table style={{width:"100%",borderCollapse:"collapse"}}><thead><tr style={{borderBottom:"1px solid #111122"}}>{["","Client","Service","Valeur","Com.","Prosp.","Preuve","Vérif.",""].map((h,i)=><th key={i} style={{padding:9,textAlign:"left",fontSize:9,fontWeight:700,color:"#3a3a4a",fontFamily:"'DM Mono',monospace",textTransform:"uppercase"}}>{h}</th>)}</tr></thead>
-<tbody>{leads.filter(l=>l.status==="signe").map(l=>
-<tr key={l.id} style={{borderBottom:"1px solid #0c0c18",background:!l.paymentProof?"#fb923c05":"transparent"}}>
-  <td style={{padding:9}}><Dot id={l.memberId}/></td><td style={{padding:9,fontWeight:700,color:"#dddde8",fontSize:12}}>{l.nom}</td>
-  <td style={{padding:9}}><span style={{fontSize:10,color:sC(l.service),fontWeight:600}}>{l.service}</span></td>
-  <td style={{padding:9,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(l.valeur)}</td>
-  <td style={{padding:9,fontWeight:700,color:"#34d399",fontFamily:"'DM Mono',monospace"}}>{eur(l.valeur*.2)}</td>
-  <td style={{padding:9,fontSize:11,color:mCol(l.memberId),fontWeight:600}}>{mN(l.memberId)}</td>
-  <td style={{padding:9}}>{l.paymentProof?<span style={{fontSize:10,color:"#34d399",fontWeight:700}}>✓</span>:<span style={{fontSize:10,color:"#fb923c",fontWeight:700}}>⚠</span>}</td>
-  <td style={{padding:9}}><VBadge s={l.verifStatus}/></td>
-  <td style={{padding:9}}><button onClick={()=>setShowVerif(l.id)} style={{padding:"4px 9px",borderRadius:5,border:"1px solid #fbbf2430",background:"transparent",color:"#fbbf24",fontSize:10,fontWeight:700,cursor:"pointer"}}>{l.verifStatus==="none"?"Lancer":"Modifier"}</button></td>
-</tr>)}</tbody></table></div></div>}
+{/* GHOSTS */}
+{view==="ghosts"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
+<div style={{marginBottom:12}}><span style={{fontSize:16,fontWeight:800,color:"#64748b",fontFamily:"'Outfit'"}}>👻 Ghosts</span></div>
+<div className="cards-grid">{leads.filter(l=>l.status==="injoignable").map(l=>{const sug=GHOST_MAP[l.source]||GHOST_MAP["Autre"];
+return <div key={l.id} className="m-card fu">
+  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:700,color:"#dddde8",fontSize:14}}>{l.nom}</div><div style={{fontSize:12,color:"#3a3a4a"}}>{l.service} · {mN(l.memberId)}</div></div><span style={{fontSize:16,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit'"}}>{eur(l.valeur)}</span></div>
+  {l.echecReason&&l.echecReason!=="—"&&<div style={{fontSize:11,color:"#f87171",marginBottom:6}}>Raison : {l.echecReason}</div>}
+  <div style={{background:"#818cf808",border:"1px solid #818cf815",borderRadius:8,padding:10,marginBottom:10}}>
+    <div style={{fontSize:10,fontWeight:700,color:"#818cf8",fontFamily:"'DM Mono'",marginBottom:4}}>SUGGESTION</div>
+    <div style={{fontSize:12,color:"#34d399",fontWeight:600}}>→ {sug}</div>
+  </div>
+  <div style={{display:"flex",gap:8}}>
+    <button onClick={async()=>{const f={status:"nouveau",lastInteraction:new Date().toISOString(),tentatives:(l.tentatives||0)+1};setLeads(p=>p.map(x=>x.id===l.id?{...x,...f}:x));flash(l.nom+" → Nouveau");if(isConfigured)await supabase.from("leads").update({status:"nouveau",last_interaction:f.lastInteraction,tentatives:f.tentatives}).eq("id",l.id)}} style={{flex:1,padding:"8px",borderRadius:6,border:"1px solid #818cf833",background:"transparent",color:"#818cf8",fontSize:12,fontWeight:700,cursor:"pointer"}}>↻ Retenter</button>
+    <button onClick={()=>deleteLead(l.id)} style={{padding:"8px 12px",borderRadius:6,border:"1px solid #ef444433",background:"transparent",color:"#ef4444",fontSize:12,fontWeight:700,cursor:"pointer"}}>✕</button>
+  </div>
+</div>})}</div>
+{leads.filter(l=>l.status==="injoignable").length===0&&<div style={{padding:50,textAlign:"center",color:"#1e1e2e"}}><div style={{fontSize:34,marginBottom:8}}>✓</div><div style={{fontSize:14,fontWeight:600}}>Aucun ghost</div></div>}
+</div>}
 
-{/* ═══ PERF ═══ */}
-{view==="perf"&&<div className="fu" style={{padding:"0 20px 20px"}}>
-<h2 style={{fontSize:15,fontWeight:800,color:"#fff",fontFamily:"'Outfit',sans-serif",margin:"0 0 12px"}}>◆ Keddy vs Dylan</h2>
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20}}>
-{stats.byM.map((m,i)=><div key={m.id} className="fu" style={{animationDelay:i*80+"ms",background:"#09091a",border:"1px solid "+m.color+"20",borderRadius:12,padding:18,position:"relative",overflow:"hidden"}}>
+{/* VERIF */}
+{view==="verif"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
+<div style={{marginBottom:12}}><span style={{fontSize:16,fontWeight:800,color:"#fbbf24",fontFamily:"'Outfit'"}}>🛡 Anti-Bypass</span></div>
+<div className="cards-grid">{leads.filter(l=>l.status==="signe").map(l=>
+<div key={l.id} className="m-card">
+  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:700,color:"#dddde8",fontSize:14}}>{l.nom}</div><div style={{fontSize:12,color:mCol(l.memberId),fontWeight:600}}>{mN(l.memberId)} · {l.service}</div></div></div>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,flexWrap:"wrap",gap:4}}>
+    <div><span style={{fontSize:16,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit'"}}>{eur(l.valeur)}</span><span style={{fontSize:12,fontWeight:700,color:"#34d399",marginLeft:8}}>+{eur(l.valeur*.2)}</span></div>
+    <div style={{display:"flex",gap:6}}>{l.paymentProof?<span style={{fontSize:11,color:"#34d399",fontWeight:700}}>✓ Preuve</span>:<span style={{fontSize:11,color:"#fb923c",fontWeight:700}}>⚠ Preuve</span>}<VBadge s={l.verifStatus}/></div>
+  </div>
+  <button onClick={()=>setShowVerif(l.id)} style={{width:"100%",padding:"8px",borderRadius:6,border:"1px solid #fbbf2430",background:"transparent",color:"#fbbf24",fontSize:12,fontWeight:700,cursor:"pointer"}}>{l.verifStatus==="none"?"Vérifier":"Modifier"}</button>
+</div>)}</div></div>}
+
+{/* PERF */}
+{view==="perf"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
+<h2 style={{fontSize:16,fontWeight:800,color:"#fff",fontFamily:"'Outfit'",marginBottom:12}}>◆ Keddy vs Dylan</h2>
+<div style={{display:"grid",gridTemplateColumns:"1fr",gap:12,marginBottom:16}}>
+{stats.byM.map((m,i)=><div key={m.id} className="fu" style={{animationDelay:i*80+"ms",background:"#09091a",border:"1px solid "+m.color+"20",borderRadius:12,padding:16,position:"relative",overflow:"hidden"}}>
   <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:m.color,opacity:.6}}/>
-  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}><Dot id={m.id} sz={30}/><div><div style={{fontSize:17,fontWeight:800,color:"#fff",fontFamily:"'Outfit',sans-serif"}}>{m.name}</div><div style={{fontSize:11,color:"#4a4a5a"}}>{m.role}</div></div>{i===0&&stats.byM.length>1&&stats.byM[0].com>stats.byM[1].com&&<span style={{marginLeft:"auto",fontSize:20}}>🏆</span>}</div>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10}}>
-    {[{l:"LEADS",v:m.total,c:"#818cf8"},{l:"SIGNÉS",v:m.signes,c:"#34d399"},{l:"TAUX",v:m.rate+"%",c:m.rate>=30?"#34d399":m.rate>=15?"#fbbf24":"#f87171"},{l:"⚡",v:m.stale,c:m.stale>0?"#fbbf24":"#2a2a3a"},{l:"⏰",v:m.overdue,c:m.overdue>0?"#ef4444":"#2a2a3a"}].map(s=><div key={s.l}><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono',monospace"}}>{s.l}</div><div style={{fontSize:20,fontWeight:900,color:s.c,fontFamily:"'Outfit',sans-serif"}}>{s.v}</div></div>)}
+  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}><Dot id={m.id} sz={28}/><div><div style={{fontSize:18,fontWeight:800,color:"#fff",fontFamily:"'Outfit'"}}>{m.name}</div><div style={{fontSize:12,color:"#4a4a5a"}}>{m.role}</div></div>{i===0&&stats.byM.length>1&&stats.byM[0].com>stats.byM[1].com&&<span style={{marginLeft:"auto",fontSize:22}}>🏆</span>}</div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6}}>
+    {[{l:"LEADS",v:m.total,c:"#818cf8"},{l:"SIGNÉS",v:m.signes,c:"#34d399"},{l:"TAUX",v:m.rate+"%",c:m.rate>=30?"#34d399":"#f87171"},{l:"⚡",v:m.stale,c:m.stale>0?"#fbbf24":"#2a2a3a"},{l:"⏰",v:m.overdue,c:m.overdue>0?"#ef4444":"#2a2a3a"}].map(s=><div key={s.l}><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono'"}}>{s.l}</div><div style={{fontSize:16,fontWeight:900,color:s.c,fontFamily:"'Outfit'"}}>{s.v}</div></div>)}
   </div>
   <div style={{marginTop:12,paddingTop:12,borderTop:"1px solid #111122",display:"flex",justifyContent:"space-between"}}>
-    <div><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono',monospace"}}>CA SIGNÉ</div><div style={{fontSize:19,fontWeight:800,color:"#818cf8",fontFamily:"'Outfit',sans-serif"}}>{eur(m.ca)}</div></div>
-    <div style={{textAlign:"right"}}><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono',monospace"}}>COMMISSIONS</div><div style={{fontSize:19,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(m.com)}</div></div>
+    <div><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono'"}}>CA SIGNÉ</div><div style={{fontSize:18,fontWeight:800,color:"#818cf8",fontFamily:"'Outfit'"}}>{eur(m.ca)}</div></div>
+    <div style={{textAlign:"right"}}><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono'"}}>COMMISSIONS</div><div style={{fontSize:18,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit'"}}>{eur(m.com)}</div></div>
   </div>
 </div>)}
 </div>
-{stats.byEchec.length>0&&<div style={{marginBottom:20}}><h3 style={{fontSize:13,fontWeight:700,color:"#888",margin:"0 0 10px"}}>Raisons d'échec</h3><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:8}}>{stats.byEchec.map(e=><div key={e.reason} style={{background:"#09091a",border:"1px solid #111122",borderRadius:8,padding:"10px 14px",display:"flex",justifyContent:"space-between"}}><span style={{fontSize:12,color:"#8888aa"}}>{e.reason}</span><span style={{fontSize:18,fontWeight:800,color:"#f87171",fontFamily:"'Outfit',sans-serif"}}>{e.count}</span></div>)}</div></div>}
-<div style={{background:"linear-gradient(135deg,#1a0808,#09091a)",border:"1px solid #DC262625",borderRadius:10,padding:18,display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><div style={{fontSize:9,color:"#DC2626",fontWeight:700,fontFamily:"'DM Mono',monospace",letterSpacing:1.5}}>TOTAL COMMISSIONS</div><div style={{fontSize:30,fontWeight:900,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(stats.commission)}</div></div><div style={{textAlign:"right"}}><div style={{fontSize:9,color:"#3a3a4a",fontFamily:"'DM Mono',monospace"}}>PIPELINE PONDÉRÉ</div><div style={{fontSize:20,fontWeight:800,color:"#c084fc",fontFamily:"'Outfit',sans-serif"}}>{eur(stats.weighted)}</div></div></div>
+{stats.byEchec.length>0&&<div style={{marginBottom:16}}><h3 style={{fontSize:14,fontWeight:700,color:"#888",marginBottom:10}}>Raisons d'échec</h3><div className="cards-grid">{stats.byEchec.map(e=><div key={e.reason} style={{background:"#09091a",border:"1px solid #111122",borderRadius:8,padding:"12px 14px",display:"flex",justifyContent:"space-between"}}><span style={{fontSize:13,color:"#8888aa"}}>{e.reason}</span><span style={{fontSize:18,fontWeight:800,color:"#f87171",fontFamily:"'Outfit'"}}>{e.count}</span></div>)}</div></div>}
+<div style={{background:"linear-gradient(135deg,#1a0808,#09091a)",border:"1px solid #DC262625",borderRadius:10,padding:16,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+  <div><div style={{fontSize:10,color:"#DC2626",fontWeight:700,fontFamily:"'DM Mono'"}}>TOTAL COMMISSIONS</div><div style={{fontSize:24,fontWeight:900,color:"#DC2626",fontFamily:"'Outfit'"}}>{eur(stats.commission)}</div></div>
+  <div style={{textAlign:"right"}}><div style={{fontSize:10,color:"#3a3a4a",fontFamily:"'DM Mono'"}}>PIPELINE PONDÉRÉ</div><div style={{fontSize:18,fontWeight:800,color:"#c084fc",fontFamily:"'Outfit'"}}>{eur(stats.weighted)}</div></div>
+</div>
 </div>}
 
-{/* ═══ ROI ═══ */}
-{view==="roi"&&<div className="fu" style={{padding:"0 20px 20px"}}>
-<h2 style={{fontSize:15,fontWeight:800,color:"#fff",fontFamily:"'Outfit',sans-serif",margin:"0 0 12px"}}>📊 ROI par Source</h2>
-<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
-{stats.bySrc.map((s,i)=>{const maxC=Math.max(...stats.bySrc.map(x=>x.com),1);const pct=Math.round(s.com/maxC*100);
-return <div key={s.source} className="fu" style={{animationDelay:i*60+"ms",background:"#09091a",border:"1px solid #111122",borderRadius:10,padding:18}}>
-  <div style={{fontSize:14,fontWeight:700,color:"#fff",fontFamily:"'Outfit',sans-serif",marginBottom:12}}>{s.source}</div>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:10}}>
-    {[{l:"LEADS",v:s.total,c:"#818cf8"},{l:"SIGNÉS",v:s.signes,c:"#34d399"},{l:"TAUX",v:s.rate+"%",c:s.rate>=30?"#34d399":s.rate>=15?"#fbbf24":"#f87171"},{l:"CA",v:eur(s.ca),c:"#DC2626"}].map(x=><div key={x.l}><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono',monospace"}}>{x.l}</div><div style={{fontSize:17,fontWeight:900,color:x.c,fontFamily:"'Outfit',sans-serif"}}>{x.v}</div></div>)}
+{/* ROI */}
+{view==="roi"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
+<h2 style={{fontSize:16,fontWeight:800,color:"#fff",fontFamily:"'Outfit'",marginBottom:12}}>📊 ROI par Source</h2>
+<div className="cards-grid">{stats.bySrc.map((s,i)=>{const maxC=Math.max(...stats.bySrc.map(x=>x.com),1);const pct=Math.round(s.com/maxC*100);
+return <div key={s.source} className="fu" style={{animationDelay:i*50+"ms",background:"#09091a",border:"1px solid #111122",borderRadius:10,padding:14}}>
+  <div style={{fontSize:14,fontWeight:700,color:"#fff",fontFamily:"'Outfit'",marginBottom:10}}>{s.source}</div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>
+    {[{l:"LEADS",v:s.total,c:"#818cf8"},{l:"SIGNÉS",v:s.signes,c:"#34d399"},{l:"TAUX",v:s.rate+"%",c:s.rate>=30?"#34d399":"#f87171"},{l:"CA",v:eur(s.ca),c:"#DC2626"}].map(x=><div key={x.l}><div style={{fontSize:8,color:"#3a3a4a",fontFamily:"'DM Mono'"}}>{x.l}</div><div style={{fontSize:14,fontWeight:900,color:x.c,fontFamily:"'Outfit'"}}>{x.v}</div></div>)}
   </div>
   <div style={{marginBottom:6}}><div style={{height:5,borderRadius:3,background:"#111122",overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",borderRadius:3,background:s.com>0?"#DC2626":"#1a1a2a"}}/></div></div>
-  <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:10,color:"#4a4a5a",fontFamily:"'DM Mono',monospace"}}>{pct}%</span><span style={{fontSize:15,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>+{eur(s.com)}</span></div>
-</div>})}
-</div></div>}
+  <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:10,color:"#4a4a5a",fontFamily:"'DM Mono'"}}>{pct}%</span><span style={{fontSize:15,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit'"}}>+{eur(s.com)}</span></div>
+</div>})}</div></div>}
 
-{/* ═══ AGENT IA ═══ */}
-{view==="ia"&&<div className="fu" style={{padding:"0 20px 20px",display:"grid",gridTemplateColumns:"280px 1fr",gap:12,height:"calc(100vh - 140px)"}}>
-
-{/* Quick Actions Panel */}
-<div style={{background:"#09091a",border:"1px solid #111122",borderRadius:10,padding:14,display:"flex",flexDirection:"column",gap:6,overflowY:"auto"}}>
-<div style={{fontSize:11,fontWeight:700,color:"#818cf8",letterSpacing:1,fontFamily:"'DM Mono',monospace",marginBottom:4}}>⚡ ACTIONS RAPIDES</div>
-
-<button className="ai-action" onClick={()=>askAI("Fais une analyse complète du pipeline Webo. Identifie les points forts, les risques, et donne 3 actions prioritaires concrètes pour cette semaine. Sois direct et chiffré.")}><span style={{fontSize:16}}>📊</span><div><div style={{color:"#fff",fontWeight:700}}>Analyse pipeline</div><div style={{fontSize:10,color:"#4a4a5a"}}>Diagnostic complet + 3 priorités</div></div></button>
-
-<button className="ai-action" onClick={()=>askAI("Génère un plan d'action hebdomadaire pour Keddy et Dylan. Pour chaque prospecteur, liste les 3-5 actions les plus urgentes avec les leads concernés, en commençant par les relances en retard et les leads dormants.")}><span style={{fontSize:16}}>🎯</span><div><div style={{color:"#fff",fontWeight:700}}>Plan d'action semaine</div><div style={{fontSize:10,color:"#4a4a5a"}}>Tâches Keddy + Dylan</div></div></button>
-
-<button className="ai-action" onClick={()=>askAI("Pour chaque lead en retard de relance ou dormant, rédige un message de relance personnalisé adapté au canal (DM Instagram = court et casual, Email = professionnel, Appel = script). Inclus le nom du lead, son service, et un hook pertinent basé sur ses notes.")}><span style={{fontSize:16}}>✉️</span><div><div style={{color:"#fff",fontWeight:700}}>Messages de relance</div><div style={{fontSize:10,color:"#4a4a5a"}}>Messages personnalisés par lead</div></div></button>
-
-<button className="ai-action" onClick={()=>askAI("Génère 3 templates de prospection à froid pour chaque service (Web Design, Montage Vidéo, Vidéaste) adaptés aux canaux DM Instagram et Email froid. Chaque message doit avoir un hook accrocheur, une proposition de valeur, et un CTA clair.")}><span style={{fontSize:16}}>🧲</span><div><div style={{color:"#fff",fontWeight:700}}>Templates prospection</div><div style={{fontSize:10,color:"#4a4a5a"}}>Cold outreach par service</div></div></button>
-
-<button className="ai-action" onClick={()=>askAI("Analyse les leads injoignables et les raisons d'échec. Identifie les patterns (quel canal marche le moins, quel service a le plus d'échecs, quelle objection revient le plus). Propose des solutions concrètes pour améliorer le taux de conversion.")}><span style={{fontSize:16}}>📉</span><div><div style={{color:"#fff",fontWeight:700}}>Analyse des échecs</div><div style={{fontSize:10,color:"#4a4a5a"}}>Patterns + solutions</div></div></button>
-
-<button className="ai-action" onClick={()=>askAI("Donne-moi un rapport de performance de l'équipe façon 'manager'. Compare Keddy et Dylan sur: taux de conversion, vitesse de closing, volume de prospection, leads dormants. Identifie les forces de chacun et suggère des axes d'amélioration bienveillants mais directs.")}><span style={{fontSize:16}}>🏆</span><div><div style={{color:"#fff",fontWeight:700}}>Coaching équipe</div><div style={{fontSize:10,color:"#4a4a5a"}}>Perf. Keddy vs Dylan + axes</div></div></button>
-
-<button className="ai-action" onClick={()=>askAI("Prédis le CA des 30 prochains jours. Pour chaque lead en pipeline, estime la probabilité de closing et le délai probable. Donne un scénario optimiste, réaliste et pessimiste avec les montants.")}><span style={{fontSize:16}}>🔮</span><div><div style={{color:"#fff",fontWeight:700}}>Prévisions CA</div><div style={{fontSize:10,color:"#4a4a5a"}}>Scénarios 30 jours</div></div></button>
-
-<button className="ai-action" onClick={()=>askAI("Rédige le message de réunion hebdomadaire d'équipe pour Keddy et Dylan. Résume la semaine (wins, leads avancés, retards), félicite les succès, et donne les 3 objectifs de la semaine prochaine. Ton motivant mais professionnel.")}><span style={{fontSize:16}}>📋</span><div><div style={{color:"#fff",fontWeight:700}}>Brief équipe</div><div style={{fontSize:10,color:"#4a4a5a"}}>Résumé semaine + objectifs</div></div></button>
-
-<div style={{marginTop:"auto",paddingTop:10,borderTop:"1px solid #111122"}}>
-<button onClick={()=>setAiMessages([])} style={{width:"100%",padding:"6px",borderRadius:6,border:"1px solid #1a1a2a",background:"transparent",color:"#3a3a4a",fontSize:10,fontWeight:600,cursor:"pointer"}}>🗑 Vider la conversation</button>
+{/* AGENT IA */}
+{view==="ia"&&<div className="fu" style={{padding:"0 "+px,display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
+{aiShowActions&&<div style={{marginBottom:8}}>
+<div style={{fontSize:11,fontWeight:700,color:"#818cf8",fontFamily:"'DM Mono'",marginBottom:6}}>⚡ ACTIONS RAPIDES</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>
+{[
+{e:"📊",t:"Analyse pipeline",p:"Fais une analyse complète du pipeline. Points forts, risques, 3 actions prioritaires."},
+{e:"🎯",t:"Plan semaine",p:"Plan d action hebdo pour Keddy et Dylan. Actions urgentes par prospecteur."},
+{e:"✉️",t:"Messages relance",p:"Redige un message de relance personnalise pour chaque lead en retard. Adapte au canal."},
+{e:"🧲",t:"Templates prospection",p:"3 templates cold outreach par service pour DM Instagram et Email froid."},
+{e:"📉",t:"Analyse échecs",p:"Analyse les leads injoignables et patterns d echec. Propose des solutions."},
+{e:"🏆",t:"Coaching",p:"Compare Keddy et Dylan: conversion, vitesse, volume. Forces et axes d amelioration."},
+{e:"🔮",t:"Prévisions CA",p:"Predis le CA 30 jours. Scenario optimiste, realiste, pessimiste."},
+{e:"📋",t:"Brief équipe",p:"Redige le message de reunion hebdo. Resume, wins, objectifs semaine."},
+].map(a=><button key={a.t} className="ai-action" onClick={()=>askAI(a.p)}><span style={{fontSize:16}}>{a.e}</span><div style={{fontSize:12,color:"#fff",fontWeight:700}}>{a.t}</div></button>)}
 </div>
-</div>
-
-{/* Chat Panel */}
-<div style={{background:"#09091a",border:"1px solid #111122",borderRadius:10,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-
-{/* Chat header */}
-<div style={{padding:"12px 16px",borderBottom:"1px solid #111122",display:"flex",alignItems:"center",gap:8}}>
-<div style={{width:28,height:28,borderRadius:"50%",background:"#818cf820",border:"2px solid #818cf8",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>🤖</div>
-<div><div style={{fontSize:13,fontWeight:700,color:"#fff",fontFamily:"'Outfit',sans-serif"}}>Agent IA Webo</div><div style={{fontSize:10,color:"#4a4a5a"}}>Analyse · Rédaction · Coaching · Prévisions</div></div>
-<div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4}}><span style={{width:6,height:6,borderRadius:"50%",background:"#34d399"}}/><span style={{fontSize:10,color:"#34d399",fontWeight:600}}>En ligne</span></div>
-</div>
-
-{/* Messages */}
-<div style={{flex:1,overflowY:"auto",padding:16,display:"flex",flexDirection:"column",gap:10}}>
-{aiMessages.length===0&&<div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,color:"#2a2a3a"}}>
-<div style={{fontSize:44}}>🤖</div>
-<div style={{fontSize:14,fontWeight:700,color:"#3a3a4a",fontFamily:"'Outfit',sans-serif"}}>Agent IA Webo</div>
-<div style={{fontSize:11,color:"#2a2a3a",textAlign:"center",maxWidth:340,lineHeight:1.6}}>Clique sur une action rapide à gauche ou pose-moi une question sur ton pipeline. J'ai accès à toutes les données de ton CRM en temps réel.</div>
 </div>}
 
-{aiMessages.map((m,i)=><div key={i} className={"ai-msg fu "+(m.role==="user"?"user":"bot")} style={{animationDelay:"0ms"}}>
-{m.role==="assistant"&&<div style={{fontSize:9,fontWeight:700,color:"#818cf8",marginBottom:4,fontFamily:"'DM Mono',monospace"}}>🤖 AGENT IA</div>}
-{m.role==="user"&&<div style={{fontSize:9,fontWeight:700,color:"#DC2626",marginBottom:4,fontFamily:"'DM Mono',monospace"}}>KYLIAN</div>}
-{m.content}
-</div>)}
-
-{aiLoading&&<div className="ai-msg bot fu"><div style={{fontSize:9,fontWeight:700,color:"#818cf8",marginBottom:4,fontFamily:"'DM Mono',monospace"}}>🤖 AGENT IA</div><div className="ai-typing"><span/><span/><span/></div></div>}
-<div ref={aiEndRef}/>
+<div style={{flex:1,minHeight:0,background:"#09091a",border:"1px solid #111122",borderRadius:10,display:"flex",flexDirection:"column",overflow:"hidden",marginBottom:14}}>
+<div style={{padding:"10px 14px",borderBottom:"1px solid #111122",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+  <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>🤖</span><span style={{fontSize:13,fontWeight:700,color:"#fff",fontFamily:"'Outfit'"}}>Agent IA</span><span style={{width:6,height:6,borderRadius:"50%",background:"#34d399"}}/></div>
+  <div style={{display:"flex",gap:6}}>
+    <button onClick={()=>setAiShowActions(p=>!p)} style={{padding:"4px 8px",borderRadius:5,border:"1px solid #1a1a2a",background:aiShowActions?"#141428":"transparent",color:aiShowActions?"#818cf8":"#444",fontSize:10,fontWeight:600,cursor:"pointer"}}>⚡</button>
+    <button onClick={()=>{setAiMessages([]);setAiShowActions(true)}} style={{padding:"4px 8px",borderRadius:5,border:"1px solid #1a1a2a",background:"transparent",color:"#3a3a4a",fontSize:10,fontWeight:600,cursor:"pointer"}}>🗑</button>
+  </div>
 </div>
-
-{/* Input */}
-<div style={{padding:"12px 16px",borderTop:"1px solid #111122",display:"flex",gap:8}}>
-<input value={aiInput} onChange={e=>setAiInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiInput.trim()&&!aiLoading){askAI(aiInput.trim())}}}
-  placeholder="Pose une question sur ton pipeline, demande un message, une analyse..."
-  style={{flex:1,padding:"10px 14px",borderRadius:8,border:"1px solid #1a1a2a",background:"#06060e",color:"#dddde8",fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif"}}/>
-<button onClick={()=>{if(aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}} disabled={aiLoading||!aiInput.trim()}
-  style={{padding:"10px 18px",borderRadius:8,border:"none",background:aiLoading?"#1a1a2a":"#818cf8",color:aiLoading?"#3a3a4a":"#fff",fontSize:12,fontWeight:700,cursor:aiLoading?"not-allowed":"pointer",fontFamily:"'DM Sans',sans-serif"}}>
-  {aiLoading?"...":"Envoyer"}
-</button>
+<div style={{flex:1,overflowY:"auto",padding:12,display:"flex",flexDirection:"column",gap:8}}>
+  {aiMessages.length===0&&<div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#2a2a3a",padding:20}}>
+    <div style={{fontSize:40,marginBottom:8}}>🤖</div>
+    <div style={{fontSize:12,color:"#2a2a3a",textAlign:"center",lineHeight:1.6}}>Clique une action ou pose ta question.</div>
+  </div>}
+  {aiMessages.map((m,i)=><div key={i} className={"ai-msg fu "+(m.role==="user"?"user":"bot")}>
+    {m.role==="assistant"&&<div style={{fontSize:9,fontWeight:700,color:"#818cf8",marginBottom:4,fontFamily:"'DM Mono'"}}>🤖 AGENT IA</div>}
+    {m.content}
+  </div>)}
+  {aiLoading&&<div className="ai-msg bot fu"><div className="ai-typing"><span/><span/><span/></div></div>}
+  <div ref={aiEndRef}/>
+</div>
+<div style={{padding:"10px 12px",borderTop:"1px solid #111122",display:"flex",gap:6}}>
+  <input value={aiInput} onChange={e=>setAiInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}}
+    placeholder="Pose ta question..." style={{flex:1,padding:"10px 12px",borderRadius:8,border:"1px solid #1a1a2a",background:"#06060e",color:"#dddde8",fontSize:16,outline:"none",fontFamily:"'DM Sans'"}}/>
+  <button onClick={()=>{if(aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}} disabled={aiLoading||!aiInput.trim()}
+    style={{padding:"10px 16px",borderRadius:8,border:"none",background:aiLoading?"#1a1a2a":"#818cf8",color:aiLoading?"#3a3a4a":"#fff",fontSize:14,fontWeight:700,cursor:aiLoading?"not-allowed":"pointer"}}>
+    {aiLoading?"...":"→"}
+  </button>
 </div>
 </div>
 </div>}
@@ -648,50 +353,54 @@ return <div key={s.source} className="fu" style={{animationDelay:i*60+"ms",backg
 {showForm&&<div className="overlay" onClick={closeForm}><div className="overlay-bg"/><div className="modal fu" onClick={e=>e.stopPropagation()}>
 <LeadForm lead={editId?leads.find(l=>l.id===editId):null} onSave={upsertLead} onDel={editId?()=>deleteLead(editId):null} onX={closeForm} IS={IS}/>
 </div></div>}
-{showVerif&&<div className="overlay" onClick={()=>setShowVerif(null)}><div className="overlay-bg"/><div className="modal fu" style={{width:500}} onClick={e=>e.stopPropagation()}>
+{showVerif&&<div className="overlay" onClick={()=>setShowVerif(null)}><div className="overlay-bg"/><div className="modal fu" style={{maxWidth:500}} onClick={e=>e.stopPropagation()}>
 <VerifForm lead={leads.find(l=>l.id===showVerif)} onSave={updVerif} onX={()=>setShowVerif(null)} IS={IS}/>
 </div></div>}
-{toast&&<div className="fu" style={{position:"fixed",bottom:20,right:20,zIndex:2000,background:"#111122",border:"1px solid #DC262635",borderRadius:8,padding:"9px 16px",color:"#dddde8",fontSize:12,fontWeight:600,boxShadow:"0 10px 30px rgba(0,0,0,.5)"}}>{toast}</div>}
+{toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"#111122",border:"1px solid #DC262635",borderRadius:8,padding:"10px 18px",color:"#dddde8",fontSize:13,fontWeight:600,boxShadow:"0 10px 30px rgba(0,0,0,.5)",whiteSpace:"nowrap"}}>{toast}</div>}
 </div>);
 }
 
-/* ═══ LEAD FORM ═══ */
 function LeadForm({lead,onSave,onDel,onX,IS}){
 const[f,setF]=useState(lead?{...lead}:{nom:"",service:SERVICES[0],valeur:"",memberId:"keddy",lien:"",status:"nouveau",dateCreated:td(),lastInteraction:new Date().toISOString(),nextRelance:addD(td(),2),notes:"",source:SOURCES[0],echecReason:"—",tentatives:0,paymentProof:"",verifStatus:"none",verifNote:""});
 const s=(k,v)=>setF(p=>({...p,[k]:v}));const col=COLS.find(c=>c.id===f.status);
 return <div>
-<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}><h3 style={{margin:0,fontSize:16,fontWeight:800,color:"#fff",fontFamily:"'Outfit',sans-serif"}}>{lead?"✎ "+lead.nom:"✦ Nouveau Lead"}</h3><button onClick={onX} style={{background:"none",border:"none",color:"#333",fontSize:18,cursor:"pointer"}}>✕</button></div>
+<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+  <h3 style={{margin:0,fontSize:17,fontWeight:800,color:"#fff",fontFamily:"'Outfit'"}}>{lead?"✎ "+lead.nom:"✦ Nouveau Lead"}</h3>
+  <button onClick={onX} style={{background:"none",border:"none",color:"#555",fontSize:22,cursor:"pointer",padding:4}}>✕</button>
+</div>
+<FF l="Nom entreprise"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Studio Lumière"/></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-  <FF l="Nom"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Studio Lumière"/></FF>
   <FF l="Service"><select style={{...IS,cursor:"pointer"}} value={f.service} onChange={e=>s("service",e.target.value)}>{SERVICES.map(sv=><option key={sv}>{sv}</option>)}</select></FF>
   <FF l="Valeur HT (€)"><input style={IS} type="number" value={f.valeur} onChange={e=>s("valeur",e.target.value)} placeholder="2500"/></FF>
-  <FF l="Prospecteur"><select style={{...IS,cursor:"pointer"}} value={f.memberId} onChange={e=>s("memberId",e.target.value)}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select></FF>
-  <FF l="Source"><select style={{...IS,cursor:"pointer"}} value={f.source} onChange={e=>s("source",e.target.value)}>{SOURCES.map(src=><option key={src}>{src}</option>)}</select></FF>
-  <FF l="Statut"><select style={{...IS,cursor:"pointer"}} value={f.status} onChange={e=>s("status",e.target.value)}>{COLS.map(c=><option key={c.id} value={c.id}>{c.icon} {c.label} ({Math.round(c.proba*100)}%)</option>)}</select></FF>
-  <FF l="Lien"><input style={IS} value={f.lien} onChange={e=>s("lien",e.target.value)} placeholder="https://..."/></FF>
-  <FF l="Prochaine relance"><input style={{...IS,borderColor:f.nextRelance&&dUntil(f.nextRelance)<0?"#ef444440":"#1a1a2a"}} type="date" value={f.nextRelance} onChange={e=>s("nextRelance",e.target.value)}/></FF>
 </div>
-<FF l="Notes"><textarea style={{...IS,height:50,resize:"vertical"}} value={f.notes} onChange={e=>s("notes",e.target.value)} placeholder="Contexte..."/></FF>
-{(f.status==="signe"||lead?.status==="signe")&&<FF l="🔒 Preuve paiement"><input style={{...IS,borderColor:f.paymentProof?"#34d39930":"#fb923c30"}} value={f.paymentProof} onChange={e=>s("paymentProof",e.target.value)} placeholder="Lien Stripe, virement, Drive..."/>{!f.paymentProof&&<div style={{fontSize:10,color:"#fb923c",marginTop:3}}>⚠ Obligatoire</div>}</FF>}
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+  <FF l="Prospecteur"><select style={{...IS,cursor:"pointer"}} value={f.memberId} onChange={e=>s("memberId",e.target.value)}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></FF>
+  <FF l="Source"><select style={{...IS,cursor:"pointer"}} value={f.source} onChange={e=>s("source",e.target.value)}>{SOURCES.map(src=><option key={src}>{src}</option>)}</select></FF>
+</div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+  <FF l="Statut"><select style={{...IS,cursor:"pointer"}} value={f.status} onChange={e=>s("status",e.target.value)}>{COLS.map(c=><option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}</select></FF>
+  <FF l="Prochaine relance"><input style={IS} type="date" value={f.nextRelance} onChange={e=>s("nextRelance",e.target.value)}/></FF>
+</div>
+<FF l="Notes"><textarea style={{...IS,height:60,resize:"vertical"}} value={f.notes} onChange={e=>s("notes",e.target.value)} placeholder="Contexte..."/></FF>
+{(f.status==="signe"||lead?.status==="signe")&&<FF l="Preuve paiement"><input style={IS} value={f.paymentProof} onChange={e=>s("paymentProof",e.target.value)} placeholder="Lien Stripe, virement..."/>{!f.paymentProof&&<div style={{fontSize:11,color:"#fb923c",marginTop:3}}>⚠ Obligatoire</div>}</FF>}
 {(f.status==="injoignable"||lead?.status==="injoignable")&&<FF l="Raison échec"><select style={{...IS,cursor:"pointer"}} value={f.echecReason} onChange={e=>s("echecReason",e.target.value)}>{ECHECS.map(r=><option key={r}>{r}</option>)}</select></FF>}
-{f.valeur&&Number(f.valeur)>0&&<div style={{background:"#DC262610",border:"1px solid #DC262620",borderRadius:7,padding:"8px 12px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:11,color:"#DC2626",fontWeight:600}}>Commission 20%</span><div style={{textAlign:"right"}}><div style={{fontSize:14,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit',sans-serif"}}>{eur(Number(f.valeur)*.2)}</div>{f.status!=="signe"&&col&&<div style={{fontSize:9,color:"#c084fc"}}>Pondéré: {eur(Number(f.valeur)*col.proba)}</div>}</div></div>}
-<div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:12}}>
-  {onDel&&<button onClick={onDel} style={{padding:"7px 13px",borderRadius:7,border:"1px solid #ef444425",background:"transparent",color:"#ef4444",fontSize:11,fontWeight:700,cursor:"pointer",marginRight:"auto"}}>Supprimer</button>}
-  <button onClick={onX} style={{padding:"7px 15px",borderRadius:7,border:"1px solid #1a1a2a",background:"transparent",color:"#555",fontSize:11,fontWeight:600,cursor:"pointer"}}>Annuler</button>
-  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),valeur:Number(f.valeur)||0,lastInteraction:new Date().toISOString(),_isNew:!f.id})}} style={{padding:"7px 18px",borderRadius:7,border:"none",background:"#DC2626",color:"#fff",fontSize:11,fontWeight:700,cursor:"pointer"}}>{lead?"Enregistrer":"Ajouter"}</button>
+{f.valeur&&Number(f.valeur)>0&&<div style={{background:"#DC262610",border:"1px solid #DC262620",borderRadius:8,padding:"10px 14px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:12,color:"#DC2626",fontWeight:600}}>Commission 20%</span><div style={{textAlign:"right"}}><div style={{fontSize:16,fontWeight:800,color:"#DC2626",fontFamily:"'Outfit'"}}>{eur(Number(f.valeur)*.2)}</div>{f.status!=="signe"&&col&&<div style={{fontSize:10,color:"#c084fc"}}>Pondéré: {eur(Number(f.valeur)*col.proba)}</div>}</div></div>}
+<div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:14,flexWrap:"wrap"}}>
+  {onDel&&<button onClick={onDel} style={{padding:"10px 14px",borderRadius:8,border:"1px solid #ef444425",background:"transparent",color:"#ef4444",fontSize:12,fontWeight:700,cursor:"pointer",marginRight:"auto"}}>Supprimer</button>}
+  <button onClick={onX} style={{padding:"10px 16px",borderRadius:8,border:"1px solid #1a1a2a",background:"transparent",color:"#555",fontSize:12,fontWeight:600,cursor:"pointer"}}>Annuler</button>
+  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),valeur:Number(f.valeur)||0,lastInteraction:new Date().toISOString(),_isNew:!f.id})}} style={{padding:"10px 20px",borderRadius:8,border:"none",background:"#DC2626",color:"#fff",fontSize:13,fontWeight:700,cursor:"pointer"}}>{lead?"Enregistrer":"Ajouter"}</button>
 </div></div>}
 
 function VerifForm({lead,onSave,onX,IS}){
 const[st,setSt]=useState(lead?.verifStatus||"pending");const[note,setNote]=useState(lead?.verifNote||"");
 if(!lead)return null;
 return <div>
-<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}><h3 style={{margin:0,fontSize:15,fontWeight:800,color:"#fff",fontFamily:"'Outfit',sans-serif"}}>🛡 {lead.nom}</h3><button onClick={onX} style={{background:"none",border:"none",color:"#333",fontSize:18,cursor:"pointer"}}>✕</button></div>
-<div style={{background:"#06060e",borderRadius:8,padding:10,marginBottom:12,fontSize:12,color:"#4a4a5a",lineHeight:1.7}}><em style={{color:"#818cf8"}}>« Bonjour, Kylian de Webo. Suivi qualité sur {lead.service}. Tout OK ? »</em></div>
-<FF l="Statut"><div style={{display:"flex",gap:6}}>{VERIFS.filter(v=>v.id!=="none").map(v=><button key={v.id} onClick={()=>setSt(v.id)} style={{flex:1,padding:"7px 0",borderRadius:6,border:"1px solid "+(st===v.id?v.color:"#1a1a2a"),background:st===v.id?v.color+"15":"transparent",color:st===v.id?v.color:"#3a3a4a",fontSize:11,fontWeight:700,cursor:"pointer"}}>{v.label}</button>)}</div></FF>
-<FF l="Note"><textarea style={{...IS,height:55,resize:"vertical"}} value={note} onChange={e=>setNote(e.target.value)} placeholder="Client confirme..."/></FF>
-<div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:12}}>
-  <button onClick={onX} style={{padding:"7px 15px",borderRadius:7,border:"1px solid #1a1a2a",background:"transparent",color:"#555",fontSize:11,fontWeight:600,cursor:"pointer"}}>Annuler</button>
-  <button onClick={()=>onSave(lead.id,st,note)} style={{padding:"7px 18px",borderRadius:7,border:"none",background:"#fbbf24",color:"#06060e",fontSize:11,fontWeight:800,cursor:"pointer"}}>Enregistrer</button>
+<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}><h3 style={{margin:0,fontSize:16,fontWeight:800,color:"#fff",fontFamily:"'Outfit'"}}>🛡 {lead.nom}</h3><button onClick={onX} style={{background:"none",border:"none",color:"#555",fontSize:22,cursor:"pointer"}}>✕</button></div>
+<FF l="Statut"><div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{VERIFS.filter(v=>v.id!=="none").map(v=><button key={v.id} onClick={()=>setSt(v.id)} style={{flex:1,minWidth:80,padding:"10px",borderRadius:7,border:"1px solid "+(st===v.id?v.color:"#1a1a2a"),background:st===v.id?v.color+"15":"transparent",color:st===v.id?v.color:"#3a3a4a",fontSize:12,fontWeight:700,cursor:"pointer"}}>{v.label}</button>)}</div></FF>
+<FF l="Note"><textarea style={{...IS,height:60,resize:"vertical"}} value={note} onChange={e=>setNote(e.target.value)} placeholder="Client confirme..."/></FF>
+<div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:14}}>
+  <button onClick={onX} style={{padding:"10px 16px",borderRadius:8,border:"1px solid #1a1a2a",background:"transparent",color:"#555",fontSize:12,fontWeight:600,cursor:"pointer"}}>Annuler</button>
+  <button onClick={()=>onSave(lead.id,st,note)} style={{padding:"10px 20px",borderRadius:8,border:"none",background:"#fbbf24",color:"#06060e",fontSize:13,fontWeight:800,cursor:"pointer"}}>Enregistrer</button>
 </div></div>}
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
