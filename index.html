@@ -4,13 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>WEBO Tracker v6</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23DC2626'/><text x='16' y='24' font-size='20' text-anchor='middle' fill='white'>W</text></svg>"/>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%}
-body{background:#050509;color:#9898b0;font-family:'Inter',-apple-system,sans-serif;font-weight:400;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+body{background:#050509;color:#9898b0;font-family:'Inter',-apple-system,sans-serif;font-weight:400;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
@@ -20,10 +18,10 @@ body{background:#050509;color:#9898b0;font-family:'Inter',-apple-system,sans-ser
 .fu{animation:fadeUp .25s ease-out both}
 .blink{animation:blink 1s ease-in-out infinite}
 .glow30{animation:glow30 2s ease-in-out infinite}
-button{font-family:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer;letter-spacing:inherit}
-select,input,textarea{font-family:inherit;font-size:16px;letter-spacing:inherit}
+button{font-family:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer}
+select,input,textarea{font-family:inherit;font-size:16px}
 ::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:#16162e;border-radius:2px}
-.overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .15s ease-out}
+.overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .15s}
 .overlay-bg{position:absolute;inset:0;background:rgba(2,2,6,.85);backdrop-filter:blur(8px)}
 .modal{position:relative;background:#0a0a14;border:1px solid #12122a;border-radius:22px 22px 0 0;padding:24px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:0 -20px 60px rgba(0,0,0,.4);animation:slideUp .25s ease-out}
 .modal::-webkit-scrollbar{width:2px}
@@ -31,49 +29,32 @@ select,input,textarea{font-family:inherit;font-size:16px;letter-spacing:inherit}
 .sync-dot.on{background:#34d399;box-shadow:0 0 8px #34d39955}
 .sync-dot.off{background:#ef4444}
 .sync-dot.loading{background:#fbbf24;animation:pulse 1s infinite}
-/* Tabs */
 .tab-bar{display:flex;gap:1px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px;background:#080810;border-radius:10px;flex-shrink:0}
 .tab-bar::-webkit-scrollbar{display:none}
-.tab-btn{padding:7px 13px;border-radius:8px;border:none;background:transparent;color:#3a3a52;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;transition:all .2s ease}
-.tab-btn.active{background:#12122a;color:#e8e8f0;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-.main-tab{flex:1;padding:10px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden}
-.main-tab::after{content:'';position:absolute;bottom:0;left:50%;width:0;height:2px;border-radius:1px;transition:all .25s ease;transform:translateX(-50%)}
-.main-tab.active::after{width:40%}
-/* Cards */
-.m-card{background:#0a0a14;border:1px solid #10102a;border-radius:14px;padding:14px;transition:all .2s ease;box-shadow:0 1px 3px rgba(0,0,0,.15)}
-.m-card:active{transform:scale(.99);background:#0c0c18}
+.tab-btn{padding:7px 13px;border-radius:8px;border:none;background:transparent;color:#3a3a52;font-size:11.5px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;transition:all .2s}
+.tab-btn.active{background:#12122a;color:#e8e8f0}
+.m-card{background:#0a0a14;border:1px solid #10102a;border-radius:14px;padding:14px;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .kcol{transition:all .2s}.kcol.over{background:rgba(220,38,38,.03)!important}
-.kc{transition:all .2s ease;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.12)}.kc:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.25)}.kc:active{cursor:grabbing}
-/* AI */
+.kc{transition:all .2s;cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,.12)}.kc:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.25)}.kc:active{cursor:grabbing}
 .ai-msg{padding:12px 14px;border-radius:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-wrap:break-word}
 .ai-msg.user{background:#DC262610;border:1px solid #DC262618;color:#d0d0e0;margin-left:16px}
 .ai-msg.bot{background:#818cf806;border:1px solid #818cf810;color:#9898b0;margin-right:16px}
-.ai-msg strong{color:#e8e8f0}.ai-msg em{color:#818cf8}
 .ai-typing{display:inline-flex;gap:4px;padding:8px 14px}.ai-typing span{width:5px;height:5px;border-radius:50%;background:#818cf8;animation:pulse 1s infinite}.ai-typing span:nth-child(2){animation-delay:.2s}.ai-typing span:nth-child(3){animation-delay:.4s}
-.ai-action{padding:10px 14px;border-radius:12px;border:1px solid #10102a;background:#08080f;color:#9898b0;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:8px;text-align:left;width:100%;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.ai-action:hover{border-color:#818cf825;background:#818cf806;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
-/* Progress */
+.ai-action{padding:10px 14px;border-radius:12px;border:1px solid #10102a;background:#08080f;color:#9898b0;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;text-align:left;width:100%}
+.ai-action:hover{border-color:#818cf825;background:#818cf806;transform:translateY(-1px)}
 .prob-bar{height:3px;border-radius:2px;background:#0c0c1a;overflow:hidden;margin-top:5px}
-.prob-fill{height:100%;border-radius:2px;transition:width .4s ease}
-/* Grids */
+.prob-fill{height:100%;border-radius:2px;transition:width .4s}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 14px}
 .kanban-scroll{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 14px 14px;scroll-snap-type:x mandatory}.kanban-scroll::-webkit-scrollbar{display:none}
 .kanban-col{min-width:250px;max-width:300px;flex-shrink:0;scroll-snap-align:start}
 .cards-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .presta-grid{display:grid;grid-template-columns:1fr;gap:10px}
-/* Presta select */
-.presta-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid #10102a;background:#08080f;cursor:pointer;transition:all .15s}
-.presta-opt:hover{border-color:#818cf825;background:#818cf806}
-.presta-opt.sel{border-color:#818cf840;background:#818cf810}
-/* Share button */
 .share-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid #34d39918;background:transparent;color:#34d399;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
-.share-btn:hover{background:#34d39908;border-color:#34d39930}
-/* Responsive */
 @media(min-width:640px){.cards-grid,.presta-grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1024px){.cards-grid,.presta-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:768px){
 .stats-grid{grid-template-columns:repeat(7,1fr);padding:12px 20px;gap:8px}
-.overlay{align-items:center}.modal{border-radius:18px;max-height:88vh;animation:fadeUp .2s ease-out}
+.overlay{align-items:center}.modal{border-radius:18px;max-height:88vh}
 .kanban-scroll{padding:0 20px 20px}.kanban-col{min-width:0;max-width:none;flex:1}
 }
 @media(max-width:639px){.stats-grid .stat-5,.stats-grid .stat-6,.stats-grid .stat-7{display:none}}
@@ -86,9 +67,9 @@ select,input,textarea{font-family:inherit;font-size:16px;letter-spacing:inherit}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script type="text/babel">
-const {useState,useEffect,useCallback,useMemo,useRef} = React;
-const SUPABASE_URL = "https://smgglunijtmftjchxdgy.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZ2dsdW5panRtZnRqY2h4ZGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzYyNDMsImV4cCI6MjA4ODE1MjI0M30.RM7JmWaY0z8vw4cpL1GqsZN2gCwNK-KMet2hNxMDd5A";
+const {useState,useEffect,useCallback,useMemo,useRef}=React;
+const SUPABASE_URL="https://smgglunijtmftjchxdgy.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZ2dsdW5panRtZnRqY2h4ZGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzYyNDMsImV4cCI6MjA4ODE1MjI0M30.RM7JmWaY0z8vw4cpL1GqsZN2gCwNK-KMet2hNxMDd5A";
 const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const isConfigured=SUPABASE_URL!=="COLLE_TON_URL_ICI";
 
@@ -116,37 +97,31 @@ const mCol=id=>TEAM.find(t=>t.id===id)?.color||"#666";
 const td=()=>new Date().toISOString().slice(0,10);
 const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
 
-/* ── Share Brief Generator ── */
 function genBrief(lead,prestaName,memberName){
-const col=COLS.find(c=>c.id===lead.status);
-const lines=[
-"📋 *BRIEF — "+lead.nom+"*","",
-"🎯 Service : "+lead.service,
-"💰 Budget : "+eur(lead.valeur)+" HT",
-"📊 Statut : "+(col?.icon||"")+" "+( col?.label||""),
-"👤 Prospecteur : "+memberName,
-"📡 Source : "+(lead.source||"—"),
-];
-if(prestaName)lines.push("🤝 Prestataire : "+prestaName);
-if(lead.nextRelance)lines.push("📅 Relance : "+lead.nextRelance);
-if(lead.notes)lines.push("","📝 Notes :",""+lead.notes);
-lines.push("","—","Envoyé depuis WEBO Tracker");
-return lines.join("\n");
+  const col=COLS.find(c=>c.id===lead.status);
+  const L=["📋 *BRIEF — "+lead.nom+"*","","🎯 Service : "+lead.service,"💰 Budget : "+eur(lead.valeur)+" HT","📊 Statut : "+(col?col.label:""),"👤 Prospecteur : "+memberName,"📡 Source : "+(lead.source||"—")];
+  if(prestaName)L.push("🤝 Prestataire : "+prestaName);
+  if(lead.nextRelance)L.push("📅 Relance : "+lead.nextRelance);
+  if(lead.notes){L.push("");L.push("📝 Notes :");L.push(lead.notes)}
+  L.push("");L.push("—");L.push("Envoyé depuis WEBO Tracker");
+  return L.join("\n");
 }
 
 function Dot({id,sz=18}){const m=TEAM.find(t=>t.id===id);if(!m)return null;return <div title={m.name} style={{width:sz,height:sz,borderRadius:"50%",background:m.color+"15",border:"1.5px solid "+m.color+"80",display:"flex",alignItems:"center",justifyContent:"center",fontSize:sz*.45,fontWeight:700,color:m.color,flexShrink:0}}>{m.name[0]}</div>}
-function ProbBar({status}){const col=COLS.find(c=>c.id===status);if(!col)return null;const pct=Math.round(col.proba*100);const color=pct>=70?"#34d399":pct>=40?"#fbbf24":pct>=20?"#fb923c":"#818cf8";return <div><div style={{display:"flex",justifyContent:"flex-end"}}><span style={{fontSize:9,fontWeight:600,color:color+"aa",fontFamily:"'JetBrains Mono'"}}>{pct}%</span></div><div className="prob-bar"><div className="prob-fill" style={{width:pct+"%",background:color+"cc"}}/></div></div>}
+function ProbBar({status}){const col=COLS.find(c=>c.id===status);if(!col)return null;const pct=Math.round(col.proba*100);const color=pct>=70?"#34d399":pct>=40?"#fbbf24":pct>=20?"#fb923c":"#818cf8";return <div><div style={{display:"flex",justifyContent:"flex-end"}}><span style={{fontSize:9,fontWeight:600,color:color+"aa",fontFamily:"monospace"}}>{pct}%</span></div><div className="prob-bar"><div className="prob-fill" style={{width:pct+"%",background:color+"cc"}}/></div></div>}
 function StaleTag({li,st}){if(["signe","injoignable"].includes(st))return null;const h=hAgo(li);if(!h||h<48)return null;const c=h>=120?"#ef4444":h>=72?"#fb923c":"#fbbf24";return <span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"2px 7px",borderRadius:5,background:c+"10",fontSize:10,fontWeight:600,color:c}}><span style={{width:4,height:4,borderRadius:"50%",background:c}}/>{fAgo(h)}</span>}
 function RelanceTag({nr,st}){if(!nr||["signe","injoignable"].includes(st))return null;const d=dUntil(nr);if(d===null)return null;if(d<0)return <span className="blink" style={{fontSize:10,fontWeight:600,color:"#ef4444",background:"#ef444410",padding:"2px 7px",borderRadius:5}}>⏰ J{d}</span>;if(d===0)return <span style={{fontSize:10,fontWeight:600,color:"#fbbf24",background:"#fbbf2410",padding:"2px 7px",borderRadius:5}}>Aujourd'hui</span>;return <span style={{fontSize:10,fontWeight:500,color:"#2a2a40",background:"#0a0a14",padding:"2px 7px",borderRadius:5}}>J+{d}</span>}
-function Tent({n}){if(!n)return null;const c=n>=4?"#ef4444":n>=2?"#fb923c":"#2a2a40";return <span style={{fontSize:10,fontWeight:600,color:c,fontFamily:"'JetBrains Mono'"}}>{n}×</span>}
+function Tent({n}){if(!n)return null;const c=n>=4?"#ef4444":n>=2?"#fb923c":"#2a2a40";return <span style={{fontSize:10,fontWeight:600,color:c,fontFamily:"monospace"}}>{n}×</span>}
 function VBadge({s}){const v=VERIFS.find(x=>x.id===s);if(!v||s==="none")return null;return <span style={{fontSize:10,fontWeight:600,color:v.color,background:v.color+"10",padding:"2px 7px",borderRadius:5}}>{v.label}</span>}
 function SignedAlert({dateCreated,status}){if(status!=="signe"||!dateCreated)return null;const days=dAgo(dateCreated);if(!days||days<30)return null;return <span className="glow30" style={{display:"inline-flex",alignItems:"center",gap:3,padding:"2px 8px",borderRadius:5,background:"#ef444410",fontSize:10,fontWeight:600,color:"#ef4444"}}>🔄 {Math.floor(days)}j</span>}
-function FF({l,children}){return <div style={{marginBottom:12}}><label style={{display:"block",fontSize:10,fontWeight:600,color:"#3a3a52",marginBottom:5,letterSpacing:.5,fontFamily:"'JetBrains Mono'"}}>{l}</label>{children}</div>}
+function FF({l,children}){return <div style={{marginBottom:12}}><label style={{display:"block",fontSize:10,fontWeight:600,color:"#3a3a52",marginBottom:5,letterSpacing:.5,fontFamily:"monospace"}}>{l}</label>{children}</div>}
 function doExportCSV(leads){const h=["Nom","Service","Statut","Valeur","Commission","Prospecteur","Source","Tentatives","Relance","Echec","Notes"];const rows=leads.map(l=>[l.nom,l.service,COLS.find(c=>c.id===l.status)?.label||"",l.valeur,Math.round(l.valeur*.2),mN(l.memberId),l.source||"",l.tentatives||0,l.nextRelance||"",l.echecReason||"",'"'+(l.notes||"").replace(/"/g,'""')+'"']);const csv=[h.join(";"),...rows.map(r=>r.join(";"))].join("\n");const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="webo-"+td()+".csv";a.click();URL.revokeObjectURL(url)}
+const WLogo=()=><svg width="68" height="20" viewBox="0 0 110 32" fill="none"><rect x="0" y="4" width="24" height="24" rx="6" fill="#DC2626"/><path d="M7 12L12 20L17 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/><text x="30" y="23" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="22" fill="white">WEB</text><text x="76" y="23" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="22" fill="#DC2626">O</text></svg>;
 
 function App(){
 const[session,setSession]=useState(()=>{try{return localStorage.getItem("webo_session")||""}catch(e){return""}});
-const isAdmin=TEAM.find(t=>t.id===session)?.isAdmin||false;const sessionUser=TEAM.find(t=>t.id===session);
+const isAdmin=TEAM.find(t=>t.id===session)?.isAdmin||false;
+const sessionUser=TEAM.find(t=>t.id===session);
 const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[syncStatus,setSyncStatus]=useState("loading");
 const[mainTab,setMainTab]=useState("leads");const[view,setView]=useState("kanban");const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
 const[dragId,setDragId]=useState(null);const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[fS,setFS]=useState("all");
@@ -155,61 +130,85 @@ const[showPrestaForm,setShowPrestaForm]=useState(false);const[editPresta,setEdit
 const[now,setNow]=useState(Date.now());const[aiMessages,setAiMessages]=useState([]);const[aiInput,setAiInput]=useState("");
 const[aiLoading,setAiLoading]=useState(false);const[aiShowActions,setAiShowActions]=useState(true);
 const aiEndRef=useRef(null);
-
 const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2400)};
 const pN=id=>{const p=prestas.find(x=>x.id===id);return p?p.nom:""};
-const pSpec=id=>{const p=prestas.find(x=>x.id===id);return p?p.specialite:""};
 
-const shareBrief=(lead)=>{const presta=lead.prestaId?pN(lead.prestaId):"";const brief=genBrief(lead,presta,mN(lead.memberId));
-if(navigator.share){navigator.share({title:"Brief — "+lead.nom,text:brief}).catch(()=>{})}
-else if(navigator.clipboard){navigator.clipboard.writeText(brief).then(()=>flash("Brief copié ✓")).catch(()=>{})}else{flash("Brief non supporté")}};
+const shareBrief=(lead)=>{const presta=lead.prestaId?pN(lead.prestaId):"";const brief=genBrief(lead,presta,mN(lead.memberId));if(navigator.share){navigator.share({title:"Brief — "+lead.nom,text:brief}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(brief).then(()=>flash("Brief copié ✓")).catch(()=>{})}else{flash("Brief non supporté")}};
 
-const buildContext=()=>{const sg=leads.filter(l=>l.status==="signe");const stale=leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);const overdue=leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);const pipe=leads.filter(l=>!["signe","injoignable"].includes(l.status));const w=pipe.reduce((s,l)=>{const c=COLS.find(x=>x.id===l.status);return s+(l.valeur*(c?.proba||0))},0);
-return "Tu es l assistant IA de WEBO, agence digitale. Commission 20% HT. Equipe: Kylian (Gerant), Keddy + Dylan (Prospecteurs). "+leads.length+" leads | "+sg.length+" signes ("+sg.reduce((s,l)=>s+l.valeur,0)+"EUR) | Pondere: "+Math.round(w)+"EUR | Dormants: "+stale.length+" | Overdue: "+overdue.length+". Prestataires: "+prestas.map(p=>p.nom+"("+p.specialite+")").join(",")+". LEADS:\n"+leads.map(l=>"- "+l.nom+"|"+l.service+"|"+(COLS.find(c=>c.id===l.status)?.label)+"|"+l.valeur+"EUR|"+mN(l.memberId)+"|"+l.source+"|T:"+l.tentatives+"|"+(l.prestaId?pN(l.prestaId):"no presta")+"|"+l.notes).join("\n")+"\nReponds en francais. Direct, concret, actionnable."};
+const buildContext=()=>{const sg=leads.filter(l=>l.status==="signe");const stale=leads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);const overdue=leads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);const pipe=leads.filter(l=>!["signe","injoignable"].includes(l.status));const w=pipe.reduce((s,l)=>{const c=COLS.find(x=>x.id===l.status);return s+(l.valeur*(c?.proba||0))},0);return "Tu es l assistant IA de WEBO, agence digitale. Commission 20% HT. Equipe: Kylian (Gerant), Keddy+Dylan (Prospecteurs). "+leads.length+" leads | "+sg.length+" signes ("+sg.reduce((s,l)=>s+l.valeur,0)+"EUR) | Pondere:"+Math.round(w)+"EUR | Dormants:"+stale.length+" | Overdue:"+overdue.length+". Prestas:"+prestas.map(p=>p.nom+"("+p.specialite+")").join(",")+". LEADS:\n"+leads.map(l=>"- "+l.nom+"|"+l.service+"|"+(COLS.find(c=>c.id===l.status)?.label)+"|"+l.valeur+"EUR|"+mN(l.memberId)+"|"+l.source+"|T:"+l.tentatives+"|"+(l.prestaId?pN(l.prestaId):"—")+"|"+l.notes).join("\n")+"\nReponds en francais, concret et actionnable."};
 
-const askAI=async(prompt)=>{setAiMessages(p=>[...p,{role:"user",content:prompt}]);setAiInput("");setAiLoading(true);setAiShowActions(false);
-try{const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:buildContext(),messages:[...aiMessages.slice(-8).map(m=>({role:m.role,content:m.content})),{role:"user",content:prompt}]})});const data=await res.json();const text=data.content?.map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur.";setAiMessages(p=>[...p,{role:"assistant",content:text}])}catch(e){setAiMessages(p=>[...p,{role:"assistant",content:"Erreur connexion IA."}])}setAiLoading(false)};
+const askAI=async(prompt)=>{setAiMessages(p=>[...p,{role:"user",content:prompt}]);setAiInput("");setAiLoading(true);setAiShowActions(false);try{const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:buildContext(),messages:[...aiMessages.slice(-8).map(m=>({role:m.role,content:m.content})),{role:"user",content:prompt}]})});const data=await res.json();const text=(data.content||[]).map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur.";setAiMessages(p=>[...p,{role:"assistant",content:text}])}catch(e){setAiMessages(p=>[...p,{role:"assistant",content:"Erreur connexion IA."}])}setAiLoading(false)};
 useEffect(()=>{if(aiEndRef.current)aiEndRef.current.scrollIntoView({behavior:"smooth"})},[aiMessages,aiLoading]);
+const aiSummary=(lead)=>{setMainTab("leads");setView("ia");setAiShowActions(false);askAI("Resume IA du lead "+lead.nom+": "+lead.service+", "+lead.valeur+"EUR, "+(COLS.find(c=>c.id===lead.status)?.label)+", Prospecteur: "+mN(lead.memberId)+", Source: "+lead.source+", Tentatives: "+lead.tentatives+", Presta: "+(lead.prestaId?pN(lead.prestaId):"aucun")+", Notes: "+(lead.notes||"aucune")+". Resume concis + 2 actions recommandees.")};
 
-const aiSummary=(lead)=>{setMainTab("leads");setView("ia");setAiShowActions(false);askAI("Resume IA du lead "+lead.nom+": "+lead.service+", "+lead.valeur+"EUR, "+(COLS.find(c=>c.id===lead.status)?.label)+", Prospecteur: "+mN(lead.memberId)+", Source: "+lead.source+", Tentatives: "+lead.tentatives+", Presta: "+(lead.prestaId?pN(lead.prestaId):"aucun")+", Notes: "+(lead.notes||"aucune")+". Fais un resume concis + 2 actions recommandees.")};
+/* SUPABASE INIT - with try/catch for missing prestataires table */
+useEffect(()=>{if(!isConfigured){setSyncStatus("off");setReady(true);return}
+(async()=>{setSyncStatus("loading");
+try{
+  const lr=await supabase.from("leads").select("*");
+  setLeads((lr.data||[]).map(dbToLead));
+  try{const pr=await supabase.from("prestataires").select("*");setPrestas(pr.data||[])}catch(e){console.log("prestataires table not found")}
+  setSyncStatus(lr.error?"off":"on");
+}catch(e){setSyncStatus("off");console.error(e)}
+setReady(true)})()},[]);
 
-useEffect(()=>{if(!isConfigured){setSyncStatus("off");setReady(true);return}(async()=>{setSyncStatus("loading");const[lr,pr]=await Promise.all([supabase.from("leads").select("*"),supabase.from("prestataires").select("*")]);setLeads((lr.data||[]).map(dbToLead));setPrestas(pr.data||[]);setSyncStatus(lr.error?"off":"on");setReady(true)})()},[]);
-useEffect(()=>{if(!isConfigured)return;const ch=supabase.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=dbToLead(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n])}if(p.eventType==="UPDATE"){const u=dbToLead(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT"){const n=p.new;setPrestas(pr=>pr.some(x=>x.id===n.id)?pr:[...pr,n])}if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSyncStatus("on");else if(s==="CLOSED"||s==="CHANNEL_ERROR")setSyncStatus("off")});return()=>supabase.removeChannel(ch)},[]);
+useEffect(()=>{if(!isConfigured)return;
+const ch=supabase.channel("rt")
+  .on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{
+    if(p.eventType==="INSERT"){const n=dbToLead(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n])}
+    if(p.eventType==="UPDATE"){const u=dbToLead(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}
+    if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))
+  })
+  .on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{
+    if(p.eventType==="INSERT"){const n=p.new;setPrestas(pr=>pr.some(x=>x.id===n.id)?pr:[...pr,n])}
+    if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));
+    if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))
+  })
+  .subscribe(s=>{if(s==="SUBSCRIBED")setSyncStatus("on")});
+return()=>supabase.removeChannel(ch)},[]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
 
 const upsertLead=useCallback(async(lead)=>{const c={...lead};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(lead._isNew?"Lead ajouté ✓":"Mis à jour ✓");if(isConfigured){const{error}=await supabase.from("leads").upsert(leadToDb(c));if(error)flash("⚠ Erreur sync")}},[]);
 const deleteLead=useCallback(async(id)=>{setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");if(isConfigured)await supabase.from("leads").delete().eq("id",id)},[]);
-const touchLead=useCallback(async(id)=>{setLeads(p=>p.map(l=>l.id===id?{...l,lastInteraction:new Date().toISOString(),tentatives:(l.tentatives||0)+1}:l));if(isConfigured){const lead=leads.find(l=>l.id===id);if(lead)await supabase.from("leads").update({last_interaction:new Date().toISOString(),tentatives:(lead.tentatives||0)+1}).eq("id",id)}},[leads]);
-const updateField=useCallback(async(id,fields)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...fields}:l));if(isConfigured){const db={};Object.keys(fields).forEach(k=>{const map={status:"status",lastInteraction:"last_interaction",tentatives:"tentatives",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",verifDate:"verif_date"};if(map[k])db[map[k]]=fields[k]});await supabase.from("leads").update(db).eq("id",id)}},[]);
+const touchLead=useCallback(async(id)=>{const lead=leads.find(l=>l.id===id);if(!lead)return;const t=(lead.tentatives||0)+1;setLeads(p=>p.map(l=>l.id===id?{...l,lastInteraction:new Date().toISOString(),tentatives:t}:l));if(isConfigured)await supabase.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t}).eq("id",id)},[leads]);
+const updateField=useCallback(async(id,fields)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...fields}:l));if(isConfigured){const db={};const map={status:"status",lastInteraction:"last_interaction",tentatives:"tentatives",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",verifDate:"verif_date"};Object.keys(fields).forEach(k=>{if(map[k])db[map[k]]=fields[k]});await supabase.from("leads").update(db).eq("id",id)}},[]);
 const updVerif=useCallback(async(id,vs,vn)=>{setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,verifDate:td()}:l));setShowVerif(null);flash("Vérification ✓");if(isConfigured)await supabase.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td()}).eq("id",id)},[]);
-const upsertPresta=useCallback(async(p)=>{const c={...p};delete c._isNew;setPrestas(pr=>pr.some(x=>x.id===c.id)?pr.map(x=>x.id===c.id?c:x):[...pr,c]);setShowPrestaForm(false);setEditPresta(null);flash(p._isNew?"Prestataire ajouté ✓":"Mis à jour ✓");if(isConfigured){const{error}=await supabase.from("prestataires").upsert(c);if(error)flash("⚠ Erreur")}},[]);
+const upsertPresta=useCallback(async(p)=>{const c={...p};delete c._isNew;setPrestas(pr=>pr.some(x=>x.id===c.id)?pr.map(x=>x.id===c.id?c:x):[...pr,c]);setShowPrestaForm(false);setEditPresta(null);flash(p._isNew?"Prestataire ajouté ✓":"Mis à jour ✓");if(isConfigured){await supabase.from("prestataires").upsert(c).then(r=>{if(r.error)flash("⚠ Table prestataires manquante - exécute le SQL")})}},[]);
 const deletePresta=useCallback(async(id)=>{setPrestas(pr=>pr.filter(x=>x.id!==id));setShowPrestaForm(false);setEditPresta(null);flash("Supprimé");if(isConfigured)await supabase.from("prestataires").delete().eq("id",id)},[]);
 
-const onDS=(e,id)=>{setDragId(id);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};const onDE=()=>{setDragId(null);setDragOver(null)};
+const onDS=(e,id)=>{setDragId(id);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
+const onDE=()=>{setDragId(null);setDragOver(null)};
 const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const lead=leads.find(l=>l.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(lead?.tentatives||0)+1};setLeads(p=>p.map(l=>l.id===id?{...l,...nd}:l));const c=COLS.find(x=>x.id===col);if(lead&&c)flash(lead.nom+" → "+c.label);if(isConfigured)await supabase.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives}).eq("id",id)}setDragOver(null);setDragId(null)};
-const openEdit=id=>{setEditId(id);setShowForm(true)};const closeForm=()=>{setShowForm(false);setEditId(null)};
+const openEdit=id=>{setEditId(id);setShowForm(true)};
+const closeForm=()=>{setShowForm(false);setEditId(null)};
 
 const myLeads=useMemo(()=>isAdmin?leads:leads.filter(l=>l.memberId===session),[leads,session,isAdmin]);
 const filtered=useMemo(()=>{let f=myLeads;if(fM!=="all")f=f.filter(l=>l.memberId===fM);if(fS!=="all")f=f.filter(l=>l.service===fS);return f},[myLeads,fM,fS]);
 
-const stats=useMemo(()=>{const src=isAdmin?leads:myLeads;const sg=src.filter(l=>l.status==="signe");const pipe=src.filter(l=>!["injoignable","signe"].includes(l.status));const stale=src.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);const overdue=src.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);const caSigne=sg.reduce((s,l)=>s+l.valeur,0);const weighted=pipe.reduce((s,l)=>{const col=COLS.find(c=>c.id===l.status);return s+(l.valeur*(col?.proba||0))},0);const proofMiss=sg.filter(l=>!l.paymentProof).length;const bySrc=SOURCES.map(s=>{const sl=src.filter(l=>l.source===s);const ss=sl.filter(l=>l.status==="signe");const ca=ss.reduce((a,l)=>a+l.valeur,0);return{source:s,total:sl.length,signes:ss.length,rate:sl.length?Math.round(ss.length/sl.length*100):0,ca,com:ca*.2}}).filter(s=>s.total>0).sort((a,b)=>b.com-a.com);const byEchec=ECHECS.filter(e=>e!=="—").map(r=>({reason:r,count:src.filter(l=>l.echecReason===r).length})).filter(e=>e.count>0).sort((a,b)=>b.count-a.count);const byM=TEAM.filter(t=>t.role==="Prospecteur").map(m=>{const ml=src.filter(l=>l.memberId===m.id);const ms=ml.filter(l=>l.status==="signe");const ca=ms.reduce((s,l)=>s+l.valeur,0);const st=ml.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).length;const od=ml.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0).length;return{...m,total:ml.length,signes:ms.length,rate:ml.length?Math.round(ms.length/ml.length*100):0,ca,com:ca*.2,stale:st,overdue:od}}).sort((a,b)=>b.com-a.com);return{total:src.length,signes:sg.length,stale:stale.length,overdue:overdue.length,caSigne,weighted,commission:caSigne*.2,proofMiss,bySrc,byEchec,byM}},[leads,myLeads,isAdmin,now]);
+const stats=useMemo(()=>{const src=isAdmin?leads:myLeads;const sg=src.filter(l=>l.status==="signe");const pipe=src.filter(l=>!["injoignable","signe"].includes(l.status));const stale=src.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48);const overdue=src.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0);const caSigne=sg.reduce((s,l)=>s+l.valeur,0);const weighted=pipe.reduce((s,l)=>{const col=COLS.find(c=>c.id===l.status);return s+(l.valeur*(col?.proba||0))},0);const proofMiss=sg.filter(l=>!l.paymentProof).length;
+const bySrc=SOURCES.map(s=>{const sl=src.filter(l=>l.source===s);const ss=sl.filter(l=>l.status==="signe");const ca=ss.reduce((a,l)=>a+l.valeur,0);return{source:s,total:sl.length,signes:ss.length,rate:sl.length?Math.round(ss.length/sl.length*100):0,ca,com:ca*.2}}).filter(s=>s.total>0).sort((a,b)=>b.com-a.com);
+const byEchec=ECHECS.filter(e=>e!=="—").map(r=>({reason:r,count:src.filter(l=>l.echecReason===r).length})).filter(e=>e.count>0).sort((a,b)=>b.count-a.count);
+const byM=TEAM.filter(t=>t.role==="Prospecteur").map(m=>{const ml=src.filter(l=>l.memberId===m.id);const ms=ml.filter(l=>l.status==="signe");const ca=ms.reduce((s,l)=>s+l.valeur,0);return{...m,total:ml.length,signes:ms.length,rate:ml.length?Math.round(ms.length/ml.length*100):0,ca,com:ca*.2,stale:ml.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).length,overdue:ml.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<0).length}}).sort((a,b)=>b.com-a.com);
+return{total:src.length,signes:sg.length,stale:stale.length,overdue:overdue.length,caSigne,weighted,commission:caSigne*.2,proofMiss,bySrc,byEchec,byM}},[leads,myLeads,isAdmin,now]);
 
-const IS={width:"100%",padding:"10px 12px",borderRadius:10,border:"1px solid #12122a",background:"#07070f",color:"#c0c0d0",fontSize:16,outline:"none",boxSizing:"border-box",fontFamily:"'Inter'",fontWeight:400,transition:"border-color .15s"};
+const IS={width:"100%",padding:"10px 12px",borderRadius:10,border:"1px solid #12122a",background:"#07070f",color:"#c0c0d0",fontSize:16,outline:"none",boxSizing:"border-box",fontFamily:"'Inter'"};
 
-/* SESSION */
-if(!session)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",padding:20}}>
-<div className="fu" style={{background:"#0a0a14",border:"1px solid #12122a",borderRadius:22px,padding:36,maxWidth:380,width:"100%",textAlign:"center",boxShadow:"0 4px 30px rgba(0,0,0,.3)"}}>
-  <svg width="90" height="28" viewBox="0 0 110 32" fill="none" style={{marginBottom:24}}><rect x="0" y="4" width="24" height="24" rx="6" fill="#DC2626"/><path d="M7 12L12 20L17 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/><text x="30" y="23" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="22" fill="white">WEB</text><text x="76" y="23" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="22" fill="#DC2626">O</text></svg>
+/* ═══ SESSION SCREEN ═══ */
+if(!session)return(
+<div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",padding:20}}>
+<div className="fu" style={{background:"#0a0a14",border:"1px solid #12122a",borderRadius:22,padding:36,maxWidth:380,width:"100%",textAlign:"center",boxShadow:"0 4px 30px rgba(0,0,0,.3)"}}>
+  <WLogo/><div style={{height:20}}/>
   <h2 style={{color:"#e8e8f0",fontSize:18,fontWeight:700,marginBottom:4}}>Bienvenue</h2>
-  <p style={{color:"#4a4a60",fontSize:13,fontWeight:400,marginBottom:28}}>Choisis ton profil pour commencer</p>
+  <p style={{color:"#4a4a60",fontSize:13,marginBottom:28}}>Choisis ton profil</p>
   <div style={{display:"flex",flexDirection:"column",gap:8}}>
-    {TEAM.map(m=><button key={m.id} onClick={()=>{setSession(m.id);try{localStorage.setItem("webo_session",m.id)}catch(e){}}} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",borderRadius:14,border:"1px solid "+m.color+"18",background:"#08080f",transition:"all .2s ease",boxShadow:"0 1px 4px rgba(0,0,0,.1)"}}>
+    {TEAM.map(m=><button key={m.id} onClick={()=>{setSession(m.id);try{localStorage.setItem("webo_session",m.id)}catch(e){}}} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 16px",borderRadius:14,border:"1px solid "+m.color+"18",background:"#08080f",transition:"all .2s"}}>
       <Dot id={m.id} sz={38}/><div style={{textAlign:"left",flex:1}}><div style={{fontWeight:600,color:"#e8e8f0",fontSize:15}}>{m.name}</div><div style={{fontSize:12,color:m.color,fontWeight:500}}>{m.role}{m.isAdmin?" · Admin":""}</div></div><span style={{color:"#2a2a40",fontSize:16}}>→</span>
     </button>)}
   </div>
-</div></div>;
-if(!isConfigured)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",padding:20}}><div style={{background:"#0a0a14",borderRadius:18,padding:30,textAlign:"center"}}><h2 style={{color:"#e8e8f0",fontSize:18,fontWeight:700}}>Configuration requise</h2></div></div>;
-if(!ready)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh"}}><div style={{color:"#DC2626",fontWeight:600,fontSize:14}}>Connexion Supabase…</div></div>;
+</div></div>);
+
+if(!isConfigured)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh"}}><div style={{background:"#0a0a14",borderRadius:18,padding:30,textAlign:"center"}}><h2 style={{color:"#e8e8f0",fontSize:18,fontWeight:700}}>Configuration requise</h2></div></div>;
+if(!ready)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh"}}><div style={{color:"#DC2626",fontWeight:600}}>Connexion Supabase…</div></div>;
 
 const TABS=mainTab==="leads"?[{id:"kanban",l:"Pipeline"},{id:"list",l:"Liste"},{id:"stale",l:"⚡ Stale"},{id:"relances",l:"⏰ Relances"},{id:"ghosts",l:"👻 Ghosts"},...(isAdmin?[{id:"verif",l:"🛡 Vérif."},{id:"perf",l:"◆ Perf."},{id:"roi",l:"📊 ROI"}]:[]),{id:"ia",l:"🤖 IA"}]:[];
 const px=window.innerWidth<768?"14px":"20px";
@@ -218,26 +217,24 @@ return (
 <div style={{minHeight:"100dvh",display:"flex",flexDirection:"column"}}>
 
 {/* HEADER */}
-<header style={{background:"#08080f",borderBottom:"1px solid #0e0e20",padding:"8px 14px",position:"sticky",top:0,zIndex:100,backdropFilter:"blur(12px)"}}>
+<header style={{background:"#08080f",borderBottom:"1px solid #0e0e20",padding:"8px 14px",position:"sticky",top:0,zIndex:100}}>
 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
   <div style={{display:"flex",alignItems:"center",gap:8}}>
-    <svg width="68" height="20" viewBox="0 0 110 32" fill="none"><rect x="0" y="4" width="24" height="24" rx="6" fill="#DC2626"/><path d="M7 12L12 20L17 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/><text x="30" y="23" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="22" fill="white">WEB</text><text x="76" y="23" fontFamily="Inter,sans-serif" fontWeight="800" fontSize="22" fill="#DC2626">O</text></svg>
-    <span className={"sync-dot "+syncStatus}/>
-    <button onClick={()=>{setSession("");try{localStorage.removeItem("webo_session")}catch(e){}}} style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:8,border:"1px solid "+sessionUser?.color+"18",background:"transparent",fontSize:11,fontWeight:500,color:sessionUser?.color+"cc"}}>
-      <Dot id={session} sz={15}/>{sessionUser?.name}{isAdmin?" 👑":""}
+    <WLogo/><span className={"sync-dot "+syncStatus}/>
+    <button onClick={()=>{setSession("");try{localStorage.removeItem("webo_session")}catch(e){}}} style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:8,border:"1px solid "+(sessionUser?.color||"#333")+"18",background:"transparent",fontSize:11,fontWeight:500,color:(sessionUser?.color||"#333")+"cc"}}>
+      <Dot id={session} sz={15}/>{sessionUser?.name||""}{isAdmin?" 👑":""}
     </button>
   </div>
   <div style={{display:"flex",alignItems:"center",gap:5}}>
     {mainTab==="leads"&&<><button onClick={()=>setShowFilters(p=>!p)} style={{padding:"6px 9px",borderRadius:8,border:"1px solid "+(showFilters?"#DC262625":"#0e0e20"),background:showFilters?"#DC262606":"transparent",color:showFilters?"#DC2626":"#3a3a52",fontSize:11,fontWeight:500}}>☰</button>
     <button onClick={()=>doExportCSV(filtered)} style={{padding:"6px 9px",borderRadius:8,border:"1px solid #0e0e20",background:"transparent",color:"#3a3a52",fontSize:11,fontWeight:600}}>↓</button>
-    <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"#DC2626",color:"#fff",fontSize:12,fontWeight:600,boxShadow:"0 2px 8px #DC262630"}}>+ Lead</button></>}
-    {mainTab==="prestas"&&isAdmin&&<button onClick={()=>{setEditPresta(null);setShowPrestaForm(true)}} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"#818cf8",color:"#fff",fontSize:12,fontWeight:600,boxShadow:"0 2px 8px #818cf830"}}>+ Prestataire</button>}
+    <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"#DC2626",color:"#fff",fontSize:12,fontWeight:600}}>+ Lead</button></>}
+    {mainTab==="prestas"&&isAdmin&&<button onClick={()=>{setEditPresta(null);setShowPrestaForm(true)}} style={{padding:"6px 14px",borderRadius:10,border:"none",background:"#818cf8",color:"#fff",fontSize:12,fontWeight:600}}>+ Prestataire</button>}
   </div>
 </div>
-{/* Main tabs with smooth indicator */}
 <div style={{display:"flex",gap:3,marginBottom:8,background:"#060609",borderRadius:12,padding:3}}>
-  <button className={"main-tab "+(mainTab==="leads"?"active":"")} onClick={()=>{setMainTab("leads");setView("kanban")}} style={{background:mainTab==="leads"?"#DC262612":"transparent",color:mainTab==="leads"?"#DC2626":"#3a3a52"}}>📋 Leads</button>
-  <button className={"main-tab "+(mainTab==="prestas"?"active":"")} onClick={()=>setMainTab("prestas")} style={{background:mainTab==="prestas"?"#818cf812":"transparent",color:mainTab==="prestas"?"#818cf8":"#3a3a52"}}>🤝 Prestataires</button>
+  <button onClick={()=>{setMainTab("leads");if(!["kanban","list","stale","relances","ghosts","verif","perf","roi","ia"].includes(view))setView("kanban")}} style={{flex:1,padding:10,borderRadius:10,border:"none",fontSize:13,fontWeight:600,background:mainTab==="leads"?"#DC262612":"transparent",color:mainTab==="leads"?"#DC2626":"#3a3a52",transition:"all .25s"}}>📋 Leads</button>
+  <button onClick={()=>setMainTab("prestas")} style={{flex:1,padding:10,borderRadius:10,border:"none",fontSize:13,fontWeight:600,background:mainTab==="prestas"?"#818cf812":"transparent",color:mainTab==="prestas"?"#818cf8":"#3a3a52",transition:"all .25s"}}>🤝 Prestataires</button>
 </div>
 {mainTab==="leads"&&showFilters&&<div className="fu" style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
   {isAdmin&&<div style={{display:"flex",gap:2,background:"#060609",borderRadius:8,padding:2,flexWrap:"wrap"}}>
@@ -246,28 +243,28 @@ return (
   </div>}
   <select value={fS} onChange={e=>setFS(e.target.value)} style={{...IS,width:"auto",fontSize:12,padding:"5px 10px"}}><option value="all">Services</option>{SERVICES.map(s=><option key={s}>{s}</option>)}</select>
 </div>}
-{mainTab==="leads"&&<div className="tab-bar">{TABS.map(t=><button key={t.id} className={"tab-btn "+(view===t.id?"active":"")} onClick={()=>setView(t.id)}>{t.l}{t.id==="stale"&&stats.stale>0&&<span style={{fontSize:9,fontWeight:700,color:"#fbbf24",background:"#fbbf2412",padding:"1px 5px",borderRadius:4}}>{stats.stale}</span>}{t.id==="relances"&&stats.overdue>0&&<span style={{fontSize:9,fontWeight:700,color:"#ef4444",background:"#ef444412",padding:"1px 5px",borderRadius:4}}>{stats.overdue}</span>}</button>)}</div>}
+{mainTab==="leads"&&<div className="tab-bar">{TABS.map(t=><button key={t.id} className={"tab-btn "+(view===t.id?"active":"")} onClick={()=>setView(t.id)}>{t.l}{t.id==="stale"&&stats.stale>0&&<span style={{fontSize:9,fontWeight:700,color:"#fbbf24",background:"#fbbf2412",padding:"1px 5px",borderRadius:4,marginLeft:3}}>{stats.stale}</span>}{t.id==="relances"&&stats.overdue>0&&<span style={{fontSize:9,fontWeight:700,color:"#ef4444",background:"#ef444412",padding:"1px 5px",borderRadius:4,marginLeft:3}}>{stats.overdue}</span>}</button>)}</div>}
 </header>
 
 {/* STATS */}
 {mainTab==="leads"&&<div className="stats-grid">
 {[{l:"LEADS",v:stats.total,c:"#818cf8",n:1},{l:"SIGNÉS",v:stats.signes,c:"#34d399",n:2},{l:"STALE",v:stats.stale,c:stats.stale>0?"#fbbf24":"#1a1a30",n:3},{l:"OVERDUE",v:stats.overdue,c:stats.overdue>0?"#ef4444":"#1a1a30",n:4},{l:"PONDÉRÉ",v:eur(stats.weighted),c:"#c084fc",n:5},{l:"COMMISSIONS",v:eur(stats.commission),c:"#DC2626",n:6},{l:"PREUVES",v:stats.proofMiss,c:stats.proofMiss>0?"#fb923c":"#1a1a30",n:7}].map((s,i)=>
-<div key={i} className={"fu stat-"+s.n} style={{animationDelay:i*20+"ms",background:"#0a0a14",border:"1px solid #10102a",borderRadius:12,padding:"8px 10px",boxShadow:"0 1px 3px rgba(0,0,0,.1)"}}>
-  <div style={{fontSize:8,fontWeight:600,color:"#2a2a40",letterSpacing:.6,fontFamily:"'JetBrains Mono'",marginBottom:2}}>{s.l}</div>
-  <div style={{fontSize:15,fontWeight:700,color:s.c,letterSpacing:-.3}}>{s.v}</div>
+<div key={i} className={"fu stat-"+s.n} style={{animationDelay:i*20+"ms",background:"#0a0a14",border:"1px solid #10102a",borderRadius:12,padding:"8px 10px"}}>
+  <div style={{fontSize:8,fontWeight:600,color:"#2a2a40",letterSpacing:.6,fontFamily:"monospace",marginBottom:2}}>{s.l}</div>
+  <div style={{fontSize:15,fontWeight:700,color:s.c}}>{s.v}</div>
 </div>)}
 </div>}
 
 {/* KANBAN */}
 {mainTab==="leads"&&view==="kanban"&&<div className="kanban-scroll">
 {COLS.map((col,ci)=>{const cards=filtered.filter(l=>l.status===col.id);const colVal=cards.reduce((s,l)=>s+l.valeur,0);
-return <div key={col.id} className={"kcol kanban-col fu "+(dragOver===col.id?"over":"")} style={{animationDelay:ci*20+"ms",background:"#0a0a14",border:"1px solid #10102a",borderRadius:14,padding:8,display:"flex",flexDirection:"column",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}
+return <div key={col.id} className={"kcol kanban-col fu "+(dragOver===col.id?"over":"")} style={{animationDelay:ci*20+"ms",background:"#0a0a14",border:"1px solid #10102a",borderRadius:14,padding:8,display:"flex",flexDirection:"column"}}
   onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6,padding:"0 4px"}}>
-    <div style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:6,height:6,borderRadius:"50%",background:col.accent}}/><span style={{fontSize:11,fontWeight:600,color:col.accent+"cc",fontFamily:"'JetBrains Mono'"}}>{col.label}</span><span style={{fontSize:9,color:"#2a2a40",fontFamily:"'JetBrains Mono'"}}>{Math.round(col.proba*100)}%</span></div>
+    <div style={{display:"flex",alignItems:"center",gap:5}}><span style={{width:6,height:6,borderRadius:"50%",background:col.accent}}/><span style={{fontSize:11,fontWeight:600,color:col.accent+"cc",fontFamily:"monospace"}}>{col.label}</span><span style={{fontSize:9,color:"#2a2a40",fontFamily:"monospace"}}>{Math.round(col.proba*100)}%</span></div>
     <span style={{fontSize:10,fontWeight:600,color:"#1a1a30",background:"#080810",padding:"2px 6px",borderRadius:5}}>{cards.length}</span>
   </div>
-  <div style={{fontSize:10,color:"#1a1a30",fontFamily:"'JetBrains Mono'",padding:"0 4px 6px",borderBottom:"1px solid "+col.accent+"08",marginBottom:6}}>{eur(colVal)}</div>
+  <div style={{fontSize:10,color:"#1a1a30",fontFamily:"monospace",padding:"0 4px 6px",borderBottom:"1px solid "+col.accent+"08",marginBottom:6}}>{eur(colVal)}</div>
   <div style={{flex:1,minHeight:50}}>
     {cards.map(lead=>{const h=hAgo(lead.lastInteraction);const isS=!["signe","injoignable"].includes(lead.status)&&h>=48;const isOD=lead.nextRelance&&!["signe","injoignable"].includes(lead.status)&&dUntil(lead.nextRelance)<0;const presta=lead.prestaId?pN(lead.prestaId):"";
     return <div key={lead.id} className={"kc "+(lead.status==="signe"&&dAgo(lead.dateCreated)>=30?"glow30":"")} draggable onDragStart={e=>onDS(e,lead.id)} onDragEnd={onDE} onClick={()=>openEdit(lead.id)}
@@ -281,14 +278,14 @@ return <div key={col.id} className={"kcol kanban-col fu "+(dragOver===col.id?"ov
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:2}}>
         <span style={{fontSize:14,fontWeight:700,color:"#DC2626"}}>{eur(lead.valeur)}</span>
         <div style={{display:"flex",gap:3,alignItems:"center"}}>
-          {lead.status==="signe"&&<span style={{fontSize:10,fontWeight:600,color:"#34d399",fontFamily:"'JetBrains Mono'"}}>+{eur(lead.valeur*.2)}</span>}
+          {lead.status==="signe"&&<span style={{fontSize:10,fontWeight:600,color:"#34d399",fontFamily:"monospace"}}>+{eur(lead.valeur*.2)}</span>}
           <button onClick={e=>{e.stopPropagation();shareBrief(lead)}} className="share-btn" title="Partager brief">📤</button>
           <button onClick={e=>{e.stopPropagation();aiSummary(lead)}} style={{padding:"2px 6px",borderRadius:5,border:"1px solid #818cf815",background:"transparent",color:"#818cf8",fontSize:9,fontWeight:600}}>🤖</button>
         </div>
       </div>
       <ProbBar status={lead.status}/>
     </div>})}
-    {cards.length===0&&<div style={{padding:16,textAlign:"center",color:"#0e0e20",fontSize:11,fontWeight:500}}>Glissez ici</div>}
+    {cards.length===0&&<div style={{padding:16,textAlign:"center",color:"#0e0e20",fontSize:11}}>Glissez ici</div>}
   </div>
 </div>})}
 </div>}
@@ -297,159 +294,148 @@ return <div key={col.id} className={"kcol kanban-col fu "+(dragOver===col.id?"ov
 {mainTab==="leads"&&view==="list"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
 <div className="cards-grid">{filtered.map((l,i)=>{const presta=l.prestaId?pN(l.prestaId):"";const col=COLS.find(c=>c.id===l.status);
 return <div key={l.id} className="m-card fu" onClick={()=>openEdit(l.id)} style={{animationDelay:i*15+"ms",borderLeft:"3px solid "+(col?.accent||"#333")+"30",cursor:"pointer"}}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.nom}</div><div style={{display:"flex",alignItems:"center",gap:6,marginTop:2,flexWrap:"wrap"}}><span style={{fontSize:11,color:col?.accent+"bb",fontWeight:500}}>{col?.icon} {col?.label}</span><span style={{fontSize:11,color:sC(l.service)+"bb",fontWeight:500}}>{l.service}</span><Tent n={l.tentatives}/>{presta&&<span style={{fontSize:10,color:"#818cf8",fontWeight:500}}>🤝 {presta}</span>}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:16,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</div>{l.status==="signe"&&<div style={{fontSize:11,fontWeight:600,color:"#34d399",fontFamily:"'JetBrains Mono'"}}>+{eur(l.valeur*.2)}</div>}</div></div>
+  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.nom}</div><div style={{display:"flex",alignItems:"center",gap:6,marginTop:2,flexWrap:"wrap"}}><span style={{fontSize:11,color:(col?.accent||"#666")+"bb",fontWeight:500}}>{col?.icon} {col?.label}</span><span style={{fontSize:11,color:sC(l.service)+"bb",fontWeight:500}}>{l.service}</span><Tent n={l.tentatives}/>{presta&&<span style={{fontSize:10,color:"#818cf8",fontWeight:500}}>🤝 {presta}</span>}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontSize:16,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</div>{l.status==="signe"&&<div style={{fontSize:11,fontWeight:600,color:"#34d399",fontFamily:"monospace"}}>+{eur(l.valeur*.2)}</div>}</div></div>
   <div style={{display:"flex",flexWrap:"wrap",gap:4,alignItems:"center",marginBottom:4}}><StaleTag li={l.lastInteraction} st={l.status}/><RelanceTag nr={l.nextRelance} st={l.status}/><SignedAlert dateCreated={l.dateCreated} status={l.status}/></div>
   <ProbBar status={l.status}/>
-  <div style={{display:"flex",gap:6,marginTop:8}}>
-    <button onClick={e=>{e.stopPropagation();shareBrief(l)}} className="share-btn">📤 Brief</button>
-    <button onClick={e=>{e.stopPropagation();aiSummary(l)}} style={{padding:"4px 10px",borderRadius:6,border:"1px solid #818cf815",background:"transparent",color:"#818cf8",fontSize:10,fontWeight:600}}>🤖 Résumé</button>
-  </div>
+  <div style={{display:"flex",gap:6,marginTop:8}}><button onClick={e=>{e.stopPropagation();shareBrief(l)}} className="share-btn">📤 Brief</button><button onClick={e=>{e.stopPropagation();aiSummary(l)}} style={{padding:"4px 10px",borderRadius:6,border:"1px solid #818cf815",background:"transparent",color:"#818cf8",fontSize:10,fontWeight:600}}>🤖 Résumé</button></div>
 </div>})}</div>
 {filtered.length===0&&<div style={{padding:50,textAlign:"center",color:"#1a1a30"}}><div style={{fontSize:14,fontWeight:500}}>Aucun lead</div></div>}
 </div>}
 
 {/* STALE */}
 {mainTab==="leads"&&view==="stale"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
-<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}><span style={{fontSize:15,fontWeight:700,color:"#fbbf24"}}>⚡ Dormants</span><span style={{fontSize:12,fontWeight:600,color:"#2a2a40",background:"#0a0a14",padding:"3px 10px",borderRadius:8,border:"1px solid #10102a"}}>{stats.stale}</span></div>
-<div className="cards-grid">{myLeads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)).map((l,i)=>
-<div key={l.id} className="m-card fu" style={{animationDelay:i*15+"ms",borderLeft:"3px solid #fbbf2440"}}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"#4a4a60",fontWeight:400}}>{l.service} · {mN(l.memberId)}</div></div><span style={{fontSize:15,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</span></div>
+<div style={{marginBottom:14}}><span style={{fontSize:15,fontWeight:700,color:"#fbbf24"}}>⚡ Dormants</span> <span style={{fontSize:12,color:"#2a2a40"}}>{stats.stale}</span></div>
+<div className="cards-grid">{myLeads.filter(l=>!["signe","injoignable"].includes(l.status)&&hAgo(l.lastInteraction)>=48).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)).map(l=>
+<div key={l.id} className="m-card fu" style={{borderLeft:"3px solid #fbbf2440"}}>
+  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Dot id={l.memberId}/><div style={{flex:1}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"#4a4a60"}}>{l.service} · {mN(l.memberId)}</div></div><span style={{fontSize:15,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</span></div>
   <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:8}}><StaleTag li={l.lastInteraction} st={l.status}/></div>
-  <div style={{display:"flex",gap:6}}><button onClick={()=>{touchLead(l.id);flash(l.nom+" +1")}} style={{flex:1,padding:"8px",borderRadius:10,border:"1px solid #fbbf2420",background:"transparent",color:"#fbbf24",fontSize:12,fontWeight:600}}>↻ Contacté</button><button onClick={()=>shareBrief(l)} className="share-btn" style={{padding:"8px 12px",borderRadius:10,fontSize:12}}>📤</button></div>
+  <div style={{display:"flex",gap:6}}><button onClick={()=>{touchLead(l.id);flash(l.nom+" +1")}} style={{flex:1,padding:8,borderRadius:10,border:"1px solid #fbbf2420",background:"transparent",color:"#fbbf24",fontSize:12,fontWeight:600}}>↻ Contacté</button><button onClick={()=>shareBrief(l)} className="share-btn" style={{padding:"8px 12px",borderRadius:10,fontSize:12}}>📤</button></div>
 </div>)}</div>
-{stats.stale===0&&<div style={{padding:50,textAlign:"center",color:"#1a1a30"}}><div style={{fontSize:28,marginBottom:6}}>✓</div><div style={{fontSize:13,fontWeight:500}}>Pipeline actif</div></div>}
+{stats.stale===0&&<div style={{padding:50,textAlign:"center",color:"#1a1a30"}}>✓ Pipeline actif</div>}
 </div>}
 
 {/* RELANCES */}
 {mainTab==="leads"&&view==="relances"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
-<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}><span style={{fontSize:15,fontWeight:700,color:"#ef4444"}}>⏰ Relances</span><span style={{fontSize:12,fontWeight:600,color:"#2a2a40",background:"#0a0a14",padding:"3px 10px",borderRadius:8,border:"1px solid #10102a"}}>{stats.overdue}</span></div>
-<div className="cards-grid">{myLeads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<=0).sort((a,b)=>new Date(a.nextRelance)-new Date(b.nextRelance)).map((l,i)=>
-<div key={l.id} className="m-card fu" style={{animationDelay:i*15+"ms",borderLeft:"3px solid #ef444440"}}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"#4a4a60"}}>{l.service} · {mN(l.memberId)}</div></div><span style={{fontSize:15,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</span></div>
-  <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:8}}><RelanceTag nr={l.nextRelance} st={l.status}/></div>
-  <div style={{display:"flex",gap:6}}><button onClick={()=>{touchLead(l.id);updateField(l.id,{nextRelance:addD(td(),2)});flash(l.nom+" → J+2")}} style={{flex:1,padding:"8px",borderRadius:10,border:"1px solid #34d39920",background:"transparent",color:"#34d399",fontSize:12,fontWeight:600}}>✓ Relancé</button><button onClick={()=>shareBrief(l)} className="share-btn" style={{padding:"8px 12px",borderRadius:10,fontSize:12}}>📤</button></div>
+<div style={{marginBottom:14}}><span style={{fontSize:15,fontWeight:700,color:"#ef4444"}}>⏰ Relances</span> <span style={{fontSize:12,color:"#2a2a40"}}>{stats.overdue}</span></div>
+<div className="cards-grid">{myLeads.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dUntil(l.nextRelance)<=0).sort((a,b)=>new Date(a.nextRelance)-new Date(b.nextRelance)).map(l=>
+<div key={l.id} className="m-card fu" style={{borderLeft:"3px solid #ef444440"}}>
+  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}><Dot id={l.memberId}/><div style={{flex:1}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"#4a4a60"}}>{l.service}</div></div><span style={{fontSize:15,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</span></div>
+  <div style={{marginBottom:8}}><RelanceTag nr={l.nextRelance} st={l.status}/></div>
+  <div style={{display:"flex",gap:6}}><button onClick={()=>{touchLead(l.id);updateField(l.id,{nextRelance:addD(td(),2)});flash(l.nom+" → J+2")}} style={{flex:1,padding:8,borderRadius:10,border:"1px solid #34d39920",background:"transparent",color:"#34d399",fontSize:12,fontWeight:600}}>✓ Relancé</button><button onClick={()=>shareBrief(l)} className="share-btn" style={{padding:"8px 12px",borderRadius:10,fontSize:12}}>📤</button></div>
 </div>)}</div>
-{stats.overdue===0&&<div style={{padding:50,textAlign:"center",color:"#1a1a30"}}><div style={{fontSize:28,marginBottom:6}}>✓</div><div style={{fontSize:13,fontWeight:500}}>Relances à jour</div></div>}
+{stats.overdue===0&&<div style={{padding:50,textAlign:"center",color:"#1a1a30"}}>✓ Relances à jour</div>}
 </div>}
 
 {/* GHOSTS */}
 {mainTab==="leads"&&view==="ghosts"&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
 <div style={{marginBottom:14}}><span style={{fontSize:15,fontWeight:700,color:"#64748b"}}>👻 Ghosts</span></div>
-<div className="cards-grid">{myLeads.filter(l=>l.status==="injoignable").map((l,i)=>{const sug=GHOST_MAP[l.source]||GHOST_MAP["Autre"];
-return <div key={l.id} className="m-card fu" style={{animationDelay:i*15+"ms"}}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"#4a4a60"}}>{l.service} · {mN(l.memberId)}</div></div><span style={{fontSize:15,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</span></div>
-  {l.echecReason&&l.echecReason!=="—"&&<div style={{fontSize:11,color:"#f87171",fontWeight:500,marginBottom:6}}>Raison: {l.echecReason}</div>}
+<div className="cards-grid">{myLeads.filter(l=>l.status==="injoignable").map(l=>{const sug=GHOST_MAP[l.source]||GHOST_MAP["Autre"];
+return <div key={l.id} className="m-card fu">
+  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"#4a4a60"}}>{l.service}</div></div><span style={{fontSize:15,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</span></div>
+  {l.echecReason&&l.echecReason!=="—"&&<div style={{fontSize:11,color:"#f87171",marginBottom:6}}>Raison: {l.echecReason}</div>}
   <div style={{background:"#818cf806",border:"1px solid #818cf80c",borderRadius:10,padding:10,marginBottom:10}}>
-    <div style={{fontSize:10,fontWeight:600,color:"#818cf8aa",fontFamily:"'JetBrains Mono'",marginBottom:3}}>SUGGESTION</div>
+    <div style={{fontSize:10,fontWeight:600,color:"#818cf8aa",fontFamily:"monospace",marginBottom:3}}>SUGGESTION</div>
     <div style={{fontSize:12,color:"#34d399",fontWeight:500}}>→ {sug}</div>
   </div>
   <div style={{display:"flex",gap:6}}>
-    <button onClick={async()=>{const f={status:"nouveau",lastInteraction:new Date().toISOString(),tentatives:(l.tentatives||0)+1};setLeads(p=>p.map(x=>x.id===l.id?{...x,...f}:x));flash(l.nom+" → Nouveau");if(isConfigured)await supabase.from("leads").update({status:"nouveau",last_interaction:f.lastInteraction,tentatives:f.tentatives}).eq("id",l.id)}} style={{flex:1,padding:"8px",borderRadius:10,border:"1px solid #818cf820",background:"transparent",color:"#818cf8",fontSize:12,fontWeight:600}}>↻ Retenter</button>
+    <button onClick={async()=>{const f={status:"nouveau",lastInteraction:new Date().toISOString(),tentatives:(l.tentatives||0)+1};setLeads(p=>p.map(x=>x.id===l.id?{...x,...f}:x));flash(l.nom+" → Nouveau");if(isConfigured)await supabase.from("leads").update({status:"nouveau",last_interaction:f.lastInteraction,tentatives:f.tentatives}).eq("id",l.id)}} style={{flex:1,padding:8,borderRadius:10,border:"1px solid #818cf820",background:"transparent",color:"#818cf8",fontSize:12,fontWeight:600}}>↻ Retenter</button>
     <button onClick={()=>deleteLead(l.id)} style={{padding:"8px 12px",borderRadius:10,border:"1px solid #ef444420",background:"transparent",color:"#ef4444",fontSize:12,fontWeight:600}}>✕</button>
   </div>
 </div>})}</div>
-{myLeads.filter(l=>l.status==="injoignable").length===0&&<div style={{padding:50,textAlign:"center",color:"#1a1a30"}}><div style={{fontSize:28,marginBottom:6}}>✓</div><div style={{fontSize:13,fontWeight:500}}>Aucun ghost</div></div>}
+{myLeads.filter(l=>l.status==="injoignable").length===0&&<div style={{padding:50,textAlign:"center",color:"#1a1a30"}}>✓ Aucun ghost</div>}
 </div>}
 
-{/* VERIF */}
+{/* VERIF (admin) */}
 {mainTab==="leads"&&view==="verif"&&isAdmin&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
 <div style={{marginBottom:14}}><span style={{fontSize:15,fontWeight:700,color:"#fbbf24"}}>🛡 Anti-Bypass</span></div>
-<div className="cards-grid">{leads.filter(l=>l.status==="signe").map((l,i)=>
-<div key={l.id} className={"m-card fu "+(dAgo(l.dateCreated)>=30?"glow30":"")} style={{animationDelay:i*15+"ms"}}>
-  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:mCol(l.memberId)+"bb",fontWeight:500}}>{mN(l.memberId)} · {l.service}</div></div></div>
+<div className="cards-grid">{leads.filter(l=>l.status==="signe").map(l=>
+<div key={l.id} className={"m-card fu "+(dAgo(l.dateCreated)>=30?"glow30":"")}>
+  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><Dot id={l.memberId}/><div style={{flex:1}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:mCol(l.memberId)+"bb"}}>{mN(l.memberId)} · {l.service}</div></div></div>
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6,flexWrap:"wrap",gap:4}}>
     <div><span style={{fontSize:15,fontWeight:700,color:"#DC2626"}}>{eur(l.valeur)}</span><span style={{fontSize:11,fontWeight:600,color:"#34d399",marginLeft:6}}>+{eur(l.valeur*.2)}</span></div>
     <div style={{display:"flex",gap:4}}>{l.paymentProof?<span style={{fontSize:10,color:"#34d399",fontWeight:600}}>✓ Preuve</span>:<span style={{fontSize:10,color:"#fb923c",fontWeight:600}}>⚠ Preuve</span>}<VBadge s={l.verifStatus}/></div>
   </div>
   <SignedAlert dateCreated={l.dateCreated} status={l.status}/>
   {l.prestaId&&<div style={{fontSize:11,color:"#818cf8aa",marginTop:4}}>🤝 {pN(l.prestaId)}</div>}
-  <button onClick={()=>setShowVerif(l.id)} style={{width:"100%",padding:"8px",borderRadius:10,border:"1px solid #fbbf2420",background:"transparent",color:"#fbbf24",fontSize:12,fontWeight:600,marginTop:8}}>{l.verifStatus==="none"?"Vérifier":"Modifier"}</button>
+  <button onClick={()=>setShowVerif(l.id)} style={{width:"100%",padding:8,borderRadius:10,border:"1px solid #fbbf2420",background:"transparent",color:"#fbbf24",fontSize:12,fontWeight:600,marginTop:8}}>{l.verifStatus==="none"?"Vérifier":"Modifier"}</button>
 </div>)}</div></div>}
 
-{/* PERF */}
+{/* PERF (admin) */}
 {mainTab==="leads"&&view==="perf"&&isAdmin&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
-<h2 style={{fontSize:15,fontWeight:700,color:"#e8e8f0",marginBottom:14}}>◆ Performance Équipe</h2>
-<div style={{display:"grid",gridTemplateColumns:"1fr",gap:12,marginBottom:16}}>
-{stats.byM.map((m,i)=><div key={m.id} className="fu" style={{animationDelay:i*60+"ms",background:"#0a0a14",border:"1px solid "+m.color+"15",borderRadius:16,padding:16,position:"relative",overflow:"hidden",boxShadow:"0 2px 8px rgba(0,0,0,.1)"}}>
+<h2 style={{fontSize:15,fontWeight:700,color:"#e8e8f0",marginBottom:14}}>◆ Performance</h2>
+{stats.byM.map((m,i)=><div key={m.id} className="fu" style={{animationDelay:i*60+"ms",background:"#0a0a14",border:"1px solid "+m.color+"15",borderRadius:16,padding:16,marginBottom:12,position:"relative",overflow:"hidden"}}>
   <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,"+m.color+"60,transparent)"}}/>
-  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}><Dot id={m.id} sz={30}/><div><div style={{fontSize:17,fontWeight:700,color:"#e8e8f0"}}>{m.name}</div><div style={{fontSize:12,color:"#4a4a60",fontWeight:400}}>{m.role}</div></div>{i===0&&stats.byM.length>1&&stats.byM[0].com>stats.byM[1].com&&<span style={{marginLeft:"auto",fontSize:20}}>🏆</span>}</div>
+  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}><Dot id={m.id} sz={30}/><div><div style={{fontSize:17,fontWeight:700,color:"#e8e8f0"}}>{m.name}</div><div style={{fontSize:12,color:"#4a4a60"}}>{m.role}</div></div>{i===0&&stats.byM.length>1&&<span style={{marginLeft:"auto",fontSize:20}}>🏆</span>}</div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:6}}>
-    {[{l:"LEADS",v:m.total,c:"#818cf8"},{l:"SIGNÉS",v:m.signes,c:"#34d399"},{l:"TAUX",v:m.rate+"%",c:m.rate>=30?"#34d399":"#f87171"},{l:"⚡",v:m.stale,c:m.stale>0?"#fbbf24":"#1a1a30"},{l:"⏰",v:m.overdue,c:m.overdue>0?"#ef4444":"#1a1a30"}].map(s=><div key={s.l}><div style={{fontSize:8,color:"#2a2a40",fontFamily:"'JetBrains Mono'"}}>{s.l}</div><div style={{fontSize:16,fontWeight:800,color:s.c}}>{s.v}</div></div>)}
+    {[{l:"LEADS",v:m.total,c:"#818cf8"},{l:"SIGNÉS",v:m.signes,c:"#34d399"},{l:"TAUX",v:m.rate+"%",c:m.rate>=30?"#34d399":"#f87171"},{l:"⚡",v:m.stale,c:m.stale>0?"#fbbf24":"#1a1a30"},{l:"⏰",v:m.overdue,c:m.overdue>0?"#ef4444":"#1a1a30"}].map(s=><div key={s.l}><div style={{fontSize:8,color:"#2a2a40",fontFamily:"monospace"}}>{s.l}</div><div style={{fontSize:16,fontWeight:800,color:s.c}}>{s.v}</div></div>)}
   </div>
   <div style={{marginTop:14,paddingTop:14,borderTop:"1px solid #10102a",display:"flex",justifyContent:"space-between"}}>
-    <div><div style={{fontSize:8,color:"#2a2a40",fontFamily:"'JetBrains Mono'"}}>CA SIGNÉ</div><div style={{fontSize:17,fontWeight:700,color:"#818cf8"}}>{eur(m.ca)}</div></div>
-    <div style={{textAlign:"right"}}><div style={{fontSize:8,color:"#2a2a40",fontFamily:"'JetBrains Mono'"}}>COMMISSIONS</div><div style={{fontSize:17,fontWeight:700,color:"#DC2626"}}>{eur(m.com)}</div></div>
+    <div><div style={{fontSize:8,color:"#2a2a40",fontFamily:"monospace"}}>CA SIGNÉ</div><div style={{fontSize:17,fontWeight:700,color:"#818cf8"}}>{eur(m.ca)}</div></div>
+    <div style={{textAlign:"right"}}><div style={{fontSize:8,color:"#2a2a40",fontFamily:"monospace"}}>COMMISSIONS</div><div style={{fontSize:17,fontWeight:700,color:"#DC2626"}}>{eur(m.com)}</div></div>
   </div>
 </div>)}
-</div>
-{stats.byEchec.length>0&&<div style={{marginBottom:16}}><h3 style={{fontSize:13,fontWeight:600,color:"#5a5a70",marginBottom:10}}>Raisons d'échec</h3><div className="cards-grid">{stats.byEchec.map(e=><div key={e.reason} style={{background:"#0a0a14",border:"1px solid #10102a",borderRadius:12,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:13,color:"#6a6a80"}}>{e.reason}</span><span style={{fontSize:17,fontWeight:700,color:"#f87171"}}>{e.count}</span></div>)}</div></div>}
-<div style={{background:"linear-gradient(135deg,#140808,#0a0a14)",border:"1px solid #DC262618",borderRadius:14,padding:16,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8,boxShadow:"0 2px 12px #DC262610"}}>
-  <div><div style={{fontSize:9,color:"#DC2626",fontWeight:600,fontFamily:"'JetBrains Mono'"}}>TOTAL COMMISSIONS</div><div style={{fontSize:22,fontWeight:800,color:"#DC2626"}}>{eur(stats.commission)}</div></div>
-  <div style={{textAlign:"right"}}><div style={{fontSize:9,color:"#4a4a60",fontFamily:"'JetBrains Mono'"}}>PIPELINE PONDÉRÉ</div><div style={{fontSize:17,fontWeight:700,color:"#c084fc"}}>{eur(stats.weighted)}</div></div>
+<div style={{background:"linear-gradient(135deg,#140808,#0a0a14)",border:"1px solid #DC262618",borderRadius:14,padding:16,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+  <div><div style={{fontSize:9,color:"#DC2626",fontWeight:600,fontFamily:"monospace"}}>TOTAL COMMISSIONS</div><div style={{fontSize:22,fontWeight:800,color:"#DC2626"}}>{eur(stats.commission)}</div></div>
+  <div style={{textAlign:"right"}}><div style={{fontSize:9,color:"#4a4a60",fontFamily:"monospace"}}>PIPELINE PONDÉRÉ</div><div style={{fontSize:17,fontWeight:700,color:"#c084fc"}}>{eur(stats.weighted)}</div></div>
 </div></div>}
 
-{/* ROI */}
+{/* ROI (admin) */}
 {mainTab==="leads"&&view==="roi"&&isAdmin&&<div className="fu" style={{padding:"0 "+px+" "+px}}>
 <h2 style={{fontSize:15,fontWeight:700,color:"#e8e8f0",marginBottom:14}}>📊 ROI par Source</h2>
 <div className="cards-grid">{stats.bySrc.map((s,i)=>{const maxC=Math.max(...stats.bySrc.map(x=>x.com),1);const pct=Math.round(s.com/maxC*100);
-return <div key={s.source} className="fu" style={{animationDelay:i*30+"ms",background:"#0a0a14",border:"1px solid #10102a",borderRadius:14,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
+return <div key={s.source} className="fu" style={{animationDelay:i*30+"ms",background:"#0a0a14",border:"1px solid #10102a",borderRadius:14,padding:14}}>
   <div style={{fontSize:14,fontWeight:600,color:"#e8e8f0",marginBottom:10}}>{s.source}</div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:10}}>
-    {[{l:"LEADS",v:s.total,c:"#818cf8"},{l:"SIGNÉS",v:s.signes,c:"#34d399"},{l:"TAUX",v:s.rate+"%",c:s.rate>=30?"#34d399":"#f87171"},{l:"CA",v:eur(s.ca),c:"#DC2626"}].map(x=><div key={x.l}><div style={{fontSize:8,color:"#2a2a40",fontFamily:"'JetBrains Mono'"}}>{x.l}</div><div style={{fontSize:13,fontWeight:700,color:x.c}}>{x.v}</div></div>)}
+    {[{l:"LEADS",v:s.total,c:"#818cf8"},{l:"SIGNÉS",v:s.signes,c:"#34d399"},{l:"TAUX",v:s.rate+"%",c:s.rate>=30?"#34d399":"#f87171"},{l:"CA",v:eur(s.ca),c:"#DC2626"}].map(x=><div key={x.l}><div style={{fontSize:8,color:"#2a2a40",fontFamily:"monospace"}}>{x.l}</div><div style={{fontSize:13,fontWeight:700,color:x.c}}>{x.v}</div></div>)}
   </div>
-  <div style={{marginBottom:6}}><div style={{height:3,borderRadius:2,background:"#0c0c1a",overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",borderRadius:2,background:"#DC2626cc",transition:"width .4s"}}/></div></div>
-  <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:10,color:"#3a3a52",fontFamily:"'JetBrains Mono'"}}>{pct}%</span><span style={{fontSize:14,fontWeight:700,color:"#DC2626"}}>+{eur(s.com)}</span></div>
+  <div style={{height:3,borderRadius:2,background:"#0c0c1a",overflow:"hidden",marginBottom:6}}><div style={{width:pct+"%",height:"100%",borderRadius:2,background:"#DC2626cc",transition:"width .4s"}}/></div>
+  <div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:10,color:"#3a3a52",fontFamily:"monospace"}}>{pct}%</span><span style={{fontSize:14,fontWeight:700,color:"#DC2626"}}>+{eur(s.com)}</span></div>
 </div>})}</div></div>}
 
 {/* AGENT IA */}
 {mainTab==="leads"&&view==="ia"&&<div className="fu" style={{padding:"0 "+px,display:"flex",flexDirection:"column",flex:1,minHeight:0}}>
 {aiShowActions&&<div style={{marginBottom:8}}>
-<div style={{fontSize:10,fontWeight:600,color:"#818cf8aa",fontFamily:"'JetBrains Mono'",marginBottom:6}}>⚡ ACTIONS RAPIDES</div>
+<div style={{fontSize:10,fontWeight:600,color:"#818cf8aa",fontFamily:"monospace",marginBottom:6}}>⚡ ACTIONS RAPIDES</div>
 <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:6}}>
-{[{e:"📊",t:"Analyse pipeline",p:"Analyse complete du pipeline. Points forts, risques, 3 actions prioritaires."},{e:"🎯",t:"Plan semaine",p:"Plan action hebdo par prospecteur."},{e:"✉️",t:"Messages relance",p:"Message de relance personnalise pour chaque lead en retard."},{e:"🧲",t:"Templates prospection",p:"3 templates cold outreach par service pour DM et Email."},{e:"📉",t:"Analyse echecs",p:"Patterns echec des leads injoignables. Solutions."},{e:"🏆",t:"Coaching equipe",p:"Compare prospecteurs: conversion, vitesse. Axes amelioration."},{e:"🔮",t:"Previsions CA",p:"CA 30 jours: optimiste, realiste, pessimiste."},{e:"📋",t:"Brief equipe",p:"Message reunion hebdo: resume, wins, objectifs."}
+{[{e:"📊",t:"Analyse pipeline",p:"Analyse complete du pipeline. Points forts, risques, 3 actions prioritaires."},{e:"🎯",t:"Plan semaine",p:"Plan action hebdo par prospecteur."},{e:"✉️",t:"Messages relance",p:"Message de relance pour chaque lead en retard."},{e:"🧲",t:"Templates prospection",p:"3 templates cold outreach par service."},{e:"📉",t:"Analyse echecs",p:"Patterns echec des leads injoignables."},{e:"🏆",t:"Coaching equipe",p:"Compare prospecteurs: conversion, vitesse."},{e:"🔮",t:"Previsions CA",p:"CA 30 jours: optimiste, realiste, pessimiste."},{e:"📋",t:"Brief equipe",p:"Message reunion hebdo: resume, wins, objectifs."}
 ].map(a=><button key={a.t} className="ai-action" onClick={()=>askAI(a.p)}><span style={{fontSize:15}}>{a.e}</span><div style={{fontSize:12,color:"#e8e8f0",fontWeight:600}}>{a.t}</div></button>)}
 </div></div>}
-<div style={{flex:1,minHeight:0,background:"#0a0a14",border:"1px solid #10102a",borderRadius:14,display:"flex",flexDirection:"column",overflow:"hidden",marginBottom:14,boxShadow:"0 2px 8px rgba(0,0,0,.1)"}}>
+<div style={{flex:1,minHeight:0,background:"#0a0a14",border:"1px solid #10102a",borderRadius:14,display:"flex",flexDirection:"column",overflow:"hidden",marginBottom:14}}>
 <div style={{padding:"10px 14px",borderBottom:"1px solid #10102a",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
   <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:15}}>🤖</span><span style={{fontSize:13,fontWeight:600,color:"#e8e8f0"}}>Agent IA</span><span style={{width:5,height:5,borderRadius:"50%",background:"#34d399"}}/></div>
   <div style={{display:"flex",gap:5}}>
     <button onClick={()=>setAiShowActions(p=>!p)} style={{padding:"4px 8px",borderRadius:6,border:"1px solid #10102a",background:aiShowActions?"#12122a":"transparent",color:aiShowActions?"#818cf8":"#3a3a52",fontSize:10,fontWeight:500}}>⚡</button>
-    <button onClick={()=>{setAiMessages([]);setAiShowActions(true)}} style={{padding:"4px 8px",borderRadius:6,border:"1px solid #10102a",background:"transparent",color:"#2a2a40",fontSize:10,fontWeight:500}}>🗑</button>
+    <button onClick={()=>{setAiMessages([]);setAiShowActions(true)}} style={{padding:"4px 8px",borderRadius:6,border:"1px solid #10102a",background:"transparent",color:"#2a2a40",fontSize:10}}>🗑</button>
   </div>
 </div>
 <div style={{flex:1,overflowY:"auto",padding:12,display:"flex",flexDirection:"column",gap:8}}>
-  {aiMessages.length===0&&<div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}><div style={{fontSize:36,marginBottom:8,opacity:.5}}>🤖</div><div style={{fontSize:12,color:"#2a2a40",textAlign:"center"}}>Action rapide ou question libre</div></div>}
-  {aiMessages.map((m,i)=><div key={i} className={"ai-msg fu "+(m.role==="user"?"user":"bot")}>{m.role==="assistant"&&<div style={{fontSize:9,fontWeight:600,color:"#818cf8aa",marginBottom:4,fontFamily:"'JetBrains Mono'"}}>AGENT IA</div>}{m.content}</div>)}
+  {aiMessages.length===0&&<div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}><div style={{fontSize:36,opacity:.5}}>🤖</div><div style={{fontSize:12,color:"#2a2a40",marginTop:8}}>Action rapide ou question libre</div></div>}
+  {aiMessages.map((m,i)=><div key={i} className={"ai-msg fu "+(m.role==="user"?"user":"bot")}>{m.role==="assistant"&&<div style={{fontSize:9,fontWeight:600,color:"#818cf8aa",marginBottom:4,fontFamily:"monospace"}}>AGENT IA</div>}{m.content}</div>)}
   {aiLoading&&<div className="ai-msg bot fu"><div className="ai-typing"><span/><span/><span/></div></div>}
   <div ref={aiEndRef}/>
 </div>
 <div style={{padding:"10px 12px",borderTop:"1px solid #10102a",display:"flex",gap:6}}>
-  <input value={aiInput} onChange={e=>setAiInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}} placeholder="Pose ta question…" style={{flex:1,padding:"10px 12px",borderRadius:10,border:"1px solid #10102a",background:"#060609",color:"#d0d0e0",fontSize:16,outline:"none",fontFamily:"'Inter'",fontWeight:400}}/>
-  <button onClick={()=>{if(aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}} disabled={aiLoading||!aiInput.trim()} style={{padding:"10px 16px",borderRadius:10,border:"none",background:aiLoading?"#10102a":"#818cf8",color:aiLoading?"#2a2a40":"#fff",fontSize:14,fontWeight:600,boxShadow:aiLoading?"none":"0 2px 8px #818cf830"}}>{aiLoading?"…":"→"}</button>
+  <input value={aiInput} onChange={e=>setAiInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}} placeholder="Pose ta question…" style={{flex:1,padding:"10px 12px",borderRadius:10,border:"1px solid #10102a",background:"#060609",color:"#d0d0e0",fontSize:16,outline:"none",fontFamily:"'Inter'"}}/>
+  <button onClick={()=>{if(aiInput.trim()&&!aiLoading)askAI(aiInput.trim())}} disabled={aiLoading||!aiInput.trim()} style={{padding:"10px 16px",borderRadius:10,border:"none",background:aiLoading?"#10102a":"#818cf8",color:aiLoading?"#2a2a40":"#fff",fontSize:14,fontWeight:600}}>{aiLoading?"…":"→"}</button>
 </div>
 </div></div>}
 
 {/* PRESTATAIRES */}
 {mainTab==="prestas"&&<div className="fu" style={{padding:"14px "+px}}>
-<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-  <h2 style={{fontSize:15,fontWeight:700,color:"#e8e8f0"}}>🤝 Prestataires <span style={{fontWeight:400,color:"#3a3a52"}}>({prestas.length})</span></h2>
-</div>
-{prestas.length===0&&<div style={{padding:60,textAlign:"center"}}><div style={{fontSize:44,marginBottom:12,opacity:.4}}>🤝</div><div style={{fontSize:14,fontWeight:500,color:"#2a2a40"}}>Aucun prestataire</div><div style={{fontSize:12,color:"#1a1a30",marginTop:4}}>Ajoute tes monteurs, agences et freelances</div></div>}
+<h2 style={{fontSize:15,fontWeight:700,color:"#e8e8f0",marginBottom:16}}>🤝 Prestataires ({prestas.length})</h2>
+{prestas.length===0&&<div style={{padding:60,textAlign:"center"}}><div style={{fontSize:44,opacity:.4}}>🤝</div><div style={{fontSize:14,color:"#2a2a40",marginTop:8}}>Aucun prestataire</div></div>}
 <div className="presta-grid">
 {prestas.map((p,i)=>{const assigned=leads.filter(l=>l.prestaId===p.id);const signedCA=assigned.filter(l=>l.status==="signe").reduce((s,l)=>s+l.valeur,0);
 return <div key={p.id} className="m-card fu" style={{animationDelay:i*30+"ms",borderLeft:"3px solid #818cf825",cursor:isAdmin?"pointer":"default"}} onClick={()=>{if(isAdmin){setEditPresta(p);setShowPrestaForm(true)}}}>
   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
     <div style={{width:38,height:38,borderRadius:12,background:"#818cf810",border:"1px solid #818cf818",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,color:"#818cf8",flexShrink:0}}>{p.nom?p.nom[0].toUpperCase():"?"}</div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontWeight:600,color:"#d0d0e0",fontSize:15}}>{p.nom}</div>
-      <div style={{fontSize:12,color:"#818cf8aa",fontWeight:500}}>{p.specialite}</div>
-    </div>
+    <div style={{flex:1}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:15}}>{p.nom}</div><div style={{fontSize:12,color:"#818cf8aa",fontWeight:500}}>{p.specialite}</div></div>
   </div>
-  {p.contact&&<div style={{fontSize:12,color:"#4a4a60",marginBottom:4,fontWeight:400}}>📞 {p.contact}</div>}
-  {p.email&&<div style={{fontSize:12,color:"#4a4a60",marginBottom:4,fontWeight:400}}>✉️ {p.email}</div>}
-  {p.notes&&<div style={{fontSize:11,color:"#3a3a52",marginBottom:8,padding:"8px 10px",background:"#07070f",borderRadius:8,lineHeight:1.6,fontWeight:400}}>{p.notes}</div>}
+  {p.contact&&<div style={{fontSize:12,color:"#4a4a60",marginBottom:4}}>📞 {p.contact}</div>}
+  {p.email&&<div style={{fontSize:12,color:"#4a4a60",marginBottom:4}}>✉️ {p.email}</div>}
+  {p.notes&&<div style={{fontSize:11,color:"#3a3a52",marginBottom:8,padding:"8px 10px",background:"#07070f",borderRadius:8,lineHeight:1.6}}>{p.notes}</div>}
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:10,borderTop:"1px solid #10102a"}}>
-    <span style={{fontSize:11,color:"#3a3a52",fontWeight:400}}>{assigned.length} lead{assigned.length!==1?"s":""}</span>
+    <span style={{fontSize:11,color:"#3a3a52"}}>{assigned.length} lead{assigned.length!==1?"s":""}</span>
     {signedCA>0&&<span style={{fontSize:13,fontWeight:700,color:"#34d399"}}>{eur(signedCA)}</span>}
   </div>
 </div>})}
@@ -472,11 +458,11 @@ return <div key={p.id} className="m-card fu" style={{animationDelay:i*30+"ms",bo
 /* ═══ LEAD FORM ═══ */
 function LeadForm({lead,onSave,onDel,onX,IS,prestas,session,isAdmin,onAiSummary,onShare}){
 const[f,setF]=useState(lead?{...lead}:{nom:"",service:SERVICES[0],valeur:"",memberId:session||"keddy",lien:"",status:"nouveau",dateCreated:td(),lastInteraction:new Date().toISOString(),nextRelance:addD(td(),2),notes:"",source:SOURCES[0],echecReason:"—",tentatives:0,paymentProof:"",verifStatus:"none",verifNote:"",prestaId:""});
-const[prestaSearch,setPrestaSearch]=useState("");
+const[prestaQ,setPrestaQ]=useState("");
 const s=(k,v)=>setF(p=>({...p,[k]:v}));
 const col=COLS.find(c=>c.id===f.status);
-const filteredPrestas=prestas.filter(p=>{if(!prestaSearch)return true;const q=prestaSearch.toLowerCase();return p.nom.toLowerCase().includes(q)||p.specialite.toLowerCase().includes(q)});
-const selectedPresta=prestas.find(p=>p.id===f.prestaId);
+const fPrestas=prestas.filter(p=>{if(!prestaQ)return true;const q=prestaQ.toLowerCase();return p.nom.toLowerCase().includes(q)||p.specialite.toLowerCase().includes(q)});
+const selPresta=prestas.find(p=>p.id===f.prestaId);
 
 return <div>
 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
@@ -487,7 +473,6 @@ return <div>
     <button onClick={onX} style={{background:"none",border:"none",color:"#3a3a52",fontSize:20,padding:4}}>✕</button>
   </div>
 </div>
-
 <FF l="NOM ENTREPRISE"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Studio Lumière"/></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
   <FF l="SERVICE"><select style={IS} value={f.service} onChange={e=>s("service",e.target.value)}>{SERVICES.map(sv=><option key={sv}>{sv}</option>)}</select></FF>
@@ -503,36 +488,36 @@ return <div>
 </div>
 
 {/* PRESTA SELECTOR */}
-<FF l="🤝 PRESTATAIRE ASSIGNÉ">
-{selectedPresta?<div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,border:"1px solid #818cf825",background:"#818cf808"}}>
-  <div style={{width:32,height:32,borderRadius:10,background:"#818cf812",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:"#818cf8"}}>{selectedPresta.nom[0].toUpperCase()}</div>
-  <div style={{flex:1}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:13}}>{selectedPresta.nom}</div><div style={{fontSize:11,color:"#818cf8aa"}}>{selectedPresta.specialite}{selectedPresta.contact?" · "+selectedPresta.contact:""}</div></div>
+<FF l="🤝 PRESTATAIRE">
+{selPresta?<div style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:10,border:"1px solid #818cf825",background:"#818cf808"}}>
+  <div style={{width:32,height:32,borderRadius:10,background:"#818cf812",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:"#818cf8"}}>{selPresta.nom[0].toUpperCase()}</div>
+  <div style={{flex:1}}><div style={{fontWeight:600,color:"#d0d0e0",fontSize:13}}>{selPresta.nom}</div><div style={{fontSize:11,color:"#818cf8aa"}}>{selPresta.specialite}{selPresta.contact?" · "+selPresta.contact:""}</div></div>
   <button onClick={()=>s("prestaId","")} style={{padding:"4px 8px",borderRadius:6,border:"1px solid #ef444418",background:"transparent",color:"#ef4444",fontSize:10,fontWeight:600}}>✕</button>
 </div>:<div>
-  <input value={prestaSearch} onChange={e=>setPrestaSearch(e.target.value)} placeholder={prestas.length>0?"Chercher un prestataire…":"Aucun prestataire (crée-en d'abord)"} style={{...IS,marginBottom:6,fontSize:14}}/>
+  <input value={prestaQ} onChange={e=>setPrestaQ(e.target.value)} placeholder={prestas.length>0?"Chercher un prestataire…":"Aucun prestataire créé"} style={{...IS,marginBottom:6,fontSize:14}}/>
   {prestas.length>0&&<div style={{maxHeight:140,overflowY:"auto",display:"flex",flexDirection:"column",gap:4,borderRadius:10,border:"1px solid #10102a",background:"#07070f",padding:4}}>
-    {filteredPrestas.length===0&&<div style={{padding:12,textAlign:"center",color:"#2a2a40",fontSize:12}}>Aucun résultat</div>}
-    {filteredPrestas.map(p=><button key={p.id} onClick={()=>{s("prestaId",p.id);setPrestaSearch("")}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",cursor:"pointer",transition:"all .15s",textAlign:"left",width:"100%"}}>
+    {fPrestas.length===0&&<div style={{padding:12,textAlign:"center",color:"#2a2a40",fontSize:12}}>Aucun résultat</div>}
+    {fPrestas.map(p=><button key={p.id} onClick={()=>{s("prestaId",p.id);setPrestaQ("")}} type="button" style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,border:"none",background:"transparent",cursor:"pointer",textAlign:"left",width:"100%"}}>
       <div style={{width:28,height:28,borderRadius:8,background:"#818cf810",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:"#818cf8",flexShrink:0}}>{p.nom[0].toUpperCase()}</div>
-      <div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#c0c0d0",fontSize:13,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.nom}</div><div style={{fontSize:10,color:"#4a4a60"}}>{p.specialite}{p.contact?" · "+p.contact:""}</div></div>
+      <div style={{flex:1,minWidth:0}}><div style={{fontWeight:600,color:"#c0c0d0",fontSize:13}}>{p.nom}</div><div style={{fontSize:10,color:"#4a4a60"}}>{p.specialite}</div></div>
     </button>)}
   </div>}
 </div>}
 </FF>
 
 <FF l="NOTES"><textarea style={{...IS,height:56,resize:"vertical",fontSize:14}} value={f.notes} onChange={e=>s("notes",e.target.value)} placeholder="Contexte, échanges…"/></FF>
-{(f.status==="signe"||lead?.status==="signe")&&<FF l="PREUVE PAIEMENT"><input style={IS} value={f.paymentProof} onChange={e=>s("paymentProof",e.target.value)} placeholder="Lien Stripe, virement…"/>{!f.paymentProof&&<div style={{fontSize:11,color:"#fb923c",fontWeight:500,marginTop:4}}>⚠ Obligatoire pour valider</div>}</FF>}
+{(f.status==="signe"||lead?.status==="signe")&&<FF l="PREUVE PAIEMENT"><input style={IS} value={f.paymentProof} onChange={e=>s("paymentProof",e.target.value)} placeholder="Lien Stripe, virement…"/>{!f.paymentProof&&<div style={{fontSize:11,color:"#fb923c",marginTop:4}}>⚠ Obligatoire</div>}</FF>}
 {(f.status==="injoignable"||lead?.status==="injoignable")&&<FF l="RAISON ÉCHEC"><select style={IS} value={f.echecReason} onChange={e=>s("echecReason",e.target.value)}>{ECHECS.map(r=><option key={r}>{r}</option>)}</select></FF>}
 
 {f.valeur&&Number(f.valeur)>0&&<div style={{background:"#DC262608",border:"1px solid #DC262615",borderRadius:12,padding:"12px 14px",marginBottom:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-  <div><div style={{fontSize:12,color:"#DC2626",fontWeight:500}}>Commission 20%</div>{col&&<div style={{fontSize:10,color:"#c084fcaa",marginTop:2}}>Prob. closing: {Math.round(col.proba*100)}%</div>}</div>
+  <div><div style={{fontSize:12,color:"#DC2626",fontWeight:500}}>Commission 20%</div>{col&&<div style={{fontSize:10,color:"#c084fcaa",marginTop:2}}>Prob: {Math.round(col.proba*100)}%</div>}</div>
   <div style={{textAlign:"right"}}><div style={{fontSize:16,fontWeight:700,color:"#DC2626"}}>{eur(Number(f.valeur)*.2)}</div>{f.status!=="signe"&&col&&<div style={{fontSize:10,color:"#c084fcaa"}}>Pondéré: {eur(Number(f.valeur)*col.proba)}</div>}</div>
 </div>}
 
 <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:16,flexWrap:"wrap"}}>
   {onDel&&<button onClick={onDel} style={{padding:"10px 14px",borderRadius:10,border:"1px solid #ef444418",background:"transparent",color:"#ef4444",fontSize:12,fontWeight:600,marginRight:"auto"}}>Supprimer</button>}
   <button onClick={onX} style={{padding:"10px 16px",borderRadius:10,border:"1px solid #10102a",background:"transparent",color:"#4a4a60",fontSize:12,fontWeight:500}}>Annuler</button>
-  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),valeur:Number(f.valeur)||0,lastInteraction:new Date().toISOString(),_isNew:!f.id})}} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"#DC2626",color:"#fff",fontSize:13,fontWeight:600,boxShadow:"0 2px 10px #DC262630"}}>{lead?"Enregistrer":"Ajouter"}</button>
+  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),valeur:Number(f.valeur)||0,lastInteraction:new Date().toISOString(),_isNew:!f.id})}} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"#DC2626",color:"#fff",fontSize:13,fontWeight:600}}>  {lead?"Enregistrer":"Ajouter"}</button>
 </div></div>}
 
 /* ═══ VERIF FORM ═══ */
@@ -541,10 +526,10 @@ const[st,setSt]=useState(lead?.verifStatus||"pending");const[note,setNote]=useSt
 if(!lead)return null;
 return <div>
 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}><h3 style={{margin:0,fontSize:16,fontWeight:700,color:"#e8e8f0"}}>🛡 {lead.nom}</h3><button onClick={onX} style={{background:"none",border:"none",color:"#3a3a52",fontSize:20}}>✕</button></div>
-<FF l="STATUT VÉRIFICATION"><div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{VERIFS.filter(v=>v.id!=="none").map(v=><button key={v.id} onClick={()=>setSt(v.id)} style={{flex:1,minWidth:80,padding:"10px",borderRadius:10,border:"1px solid "+(st===v.id?v.color+"40":"#10102a"),background:st===v.id?v.color+"10":"transparent",color:st===v.id?v.color:"#2a2a40",fontSize:12,fontWeight:600,transition:"all .15s"}}>{v.label}</button>)}</div></FF>
-<FF l="NOTE"><textarea style={{...IS,height:56,resize:"vertical",fontSize:14}} value={note} onChange={e=>setNote(e.target.value)} placeholder="Client confirme le paiement…"/></FF>
+<FF l="STATUT"><div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{VERIFS.filter(v=>v.id!=="none").map(v=><button key={v.id} onClick={()=>setSt(v.id)} style={{flex:1,minWidth:80,padding:10,borderRadius:10,border:"1px solid "+(st===v.id?v.color+"40":"#10102a"),background:st===v.id?v.color+"10":"transparent",color:st===v.id?v.color:"#2a2a40",fontSize:12,fontWeight:600}}>{v.label}</button>)}</div></FF>
+<FF l="NOTE"><textarea style={{...IS,height:56,resize:"vertical",fontSize:14}} value={note} onChange={e=>setNote(e.target.value)} placeholder="Client confirme…"/></FF>
 <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:16}}>
-  <button onClick={onX} style={{padding:"10px 16px",borderRadius:10,border:"1px solid #10102a",background:"transparent",color:"#4a4a60",fontSize:12,fontWeight:500}}>Annuler</button>
+  <button onClick={onX} style={{padding:"10px 16px",borderRadius:10,border:"1px solid #10102a",background:"transparent",color:"#4a4a60",fontSize:12}}>Annuler</button>
   <button onClick={()=>onSave(lead.id,st,note)} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"#fbbf24",color:"#050509",fontSize:13,fontWeight:700}}>Enregistrer</button>
 </div></div>}
 
@@ -557,17 +542,17 @@ return <div>
   <h3 style={{margin:0,fontSize:17,fontWeight:700,color:"#e8e8f0"}}>{presta?"✎ "+presta.nom:"🤝 Nouveau Prestataire"}</h3>
   <button onClick={onX} style={{background:"none",border:"none",color:"#3a3a52",fontSize:20,padding:4}}>✕</button>
 </div>
-<FF l="NOM"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Jean Dupont / Studio XYZ"/></FF>
+<FF l="NOM"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Jean Dupont"/></FF>
 <FF l="SPÉCIALITÉ"><select style={IS} value={f.specialite} onChange={e=>s("specialite",e.target.value)}>{SPECIALITES.map(sp=><option key={sp}>{sp}</option>)}</select></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
   <FF l="TÉLÉPHONE"><input style={IS} value={f.contact} onChange={e=>s("contact",e.target.value)} placeholder="06 12 34 56 78" type="tel"/></FF>
   <FF l="EMAIL"><input style={IS} value={f.email} onChange={e=>s("email",e.target.value)} placeholder="jean@studio.com" type="email"/></FF>
 </div>
-<FF l="NOTES"><textarea style={{...IS,height:56,resize:"vertical",fontSize:14}} value={f.notes} onChange={e=>s("notes",e.target.value)} placeholder="Tarifs, dispo, portfolio…"/></FF>
+<FF l="NOTES"><textarea style={{...IS,height:56,resize:"vertical",fontSize:14}} value={f.notes} onChange={e=>s("notes",e.target.value)} placeholder="Tarifs, dispo…"/></FF>
 <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:16,flexWrap:"wrap"}}>
   {onDel&&<button onClick={onDel} style={{padding:"10px 14px",borderRadius:10,border:"1px solid #ef444418",background:"transparent",color:"#ef4444",fontSize:12,fontWeight:600,marginRight:"auto"}}>Supprimer</button>}
-  <button onClick={onX} style={{padding:"10px 16px",borderRadius:10,border:"1px solid #10102a",background:"transparent",color:"#4a4a60",fontSize:12,fontWeight:500}}>Annuler</button>
-  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),_isNew:!f.id})}} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"#818cf8",color:"#fff",fontSize:13,fontWeight:600,boxShadow:"0 2px 10px #818cf830"}}>{presta?"Enregistrer":"Ajouter"}</button>
+  <button onClick={onX} style={{padding:"10px 16px",borderRadius:10,border:"1px solid #10102a",background:"transparent",color:"#4a4a60",fontSize:12}}>Annuler</button>
+  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),_isNew:!f.id})}} style={{padding:"10px 22px",borderRadius:10,border:"none",background:"#818cf8",color:"#fff",fontSize:13,fontWeight:600}}>{presta?"Enregistrer":"Ajouter"}</button>
 </div></div>}
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
