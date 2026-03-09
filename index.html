@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management — Hub v13</title>
+<title>WEBO Asset Management — Hub v12</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -126,51 +126,6 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .match-card{background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:8px;padding:8px;margin-top:4px;cursor:pointer;transition:all .15s}.match-card:hover{background:rgba(139,92,246,.12)}
 @media(max-width:768px){.topnav{padding:0 12px;height:48px;gap:6px}.hub{padding:20px 12px}.hub-grid{grid-template-columns:1fr}.logo-tag,.lb-mini{display:none}.kanban-col{min-width:210px;flex:none}.rpanel{width:85vw}}
 @media(min-width:1200px){.kanban-col{min-width:0}}
-/* ═══ V13 — NOTIFICATIONS ═══ */
-.notif-bell{position:relative;cursor:pointer;padding:7px 10px;border-radius:var(--radius);transition:all .2s}
-.notif-bell:hover{background:var(--bg3)}
-.notif-dot{position:absolute;top:4px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--bg2);animation:pulse 2s infinite}
-.notif-panel{position:absolute;top:100%;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.45);z-index:500;animation:fadeUp .2s}
-.notif-item{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;transition:background .15s;cursor:pointer;font-size:12px}
-.notif-item:hover{background:var(--bg3)}
-.notif-item.unread{border-left:3px solid var(--gold)}
-.notif-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px}
-.notif-empty{padding:30px;text-align:center;color:var(--text3);font-size:12px}
-/* ═══ V13 — BULK ACTIONS ═══ */
-.bulk-bar{position:sticky;bottom:0;left:0;right:0;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(197,160,89,.2);padding:10px 18px;display:flex;align-items:center;gap:10px;z-index:50;animation:fadeUp .2s}
-.bulk-bar .cnt{font-family:var(--mono);font-weight:700;color:var(--gold);font-size:14px}
-.bulk-btn{padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;transition:all .15s;border:1px solid var(--border);color:var(--text2)}
-.bulk-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(197,160,89,.06)}
-.bulk-btn.danger{border-color:rgba(231,76,76,.3);color:var(--red)}
-.bulk-btn.danger:hover{background:rgba(231,76,76,.06)}
-.chk{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
-/* ═══ V13 — CALENDAR ═══ */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-head{font-size:9px;font-weight:700;color:var(--text3);text-align:center;padding:8px 0;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
-.cal-day{min-height:80px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;transition:all .2s;cursor:pointer;overflow:hidden}
-.cal-day:hover{border-color:var(--border2);background:var(--bg3)}
-.cal-day.today{border-color:rgba(197,160,89,.4);background:rgba(197,160,89,.04)}
-.cal-day.other{opacity:.35}
-.cal-num{font-size:11px;font-weight:700;font-family:var(--mono);margin-bottom:2px}
-.cal-ev{font-size:8px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;cursor:pointer}
-.cal-ev:hover{opacity:.8}
-/* ═══ V13 — CHARTS ═══ */
-.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.chart-card-h{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.chart-card-h span{font-size:11px;font-weight:600;font-family:var(--mono);color:var(--text2)}
-.funnel-step{display:flex;align-items:center;gap:10px;padding:8px 14px;transition:background .15s}
-.funnel-step:hover{background:var(--bg3)}
-.funnel-bar{height:24px;border-radius:4px;transition:width .8s ease-out;min-width:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:700;color:rgba(255,255,255,.9);font-family:var(--mono)}
-.sparkline{display:inline-block;vertical-align:middle}
-/* ═══ V13 — ACTIVITY FEED ═══ */
-.feed{max-height:300px;overflow-y:auto}
-.feed-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .15s;animation:fadeUp .3s ease-out both}
-.feed-item:hover{background:var(--bg3)}
-.feed-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
-.feed-time{font-size:9px;color:var(--text3);font-family:var(--mono)}
-.feed-msg{font-size:12px;color:var(--text2);line-height:1.5}
-.feed-msg strong{color:var(--text);font-weight:600}
-@media(max-width:768px){.notif-panel{width:90vw;right:-40px}.cal-day{min-height:50px}.cal-ev{font-size:7px}.bulk-bar{flex-wrap:wrap;gap:6px}.finance-charts{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -255,42 +210,17 @@ const[showPF,setShowPF]=useState(false);const[editP,setEditP]=useState(null);
 const[now,setNow]=useState(Date.now());const[aiMsgs,setAiMsgs]=useState([]);const[aiIn,setAiIn]=useState("");const[aiLoad,setAiLoad]=useState(false);
 const[cmd,setCmd]=useState(false);const[cmdQ,setCmdQ]=useState("");
 const[privacy,setPrivacy]=useState(false);const[selLead,setSelLead]=useState(null);
-const[notifs,setNotifs]=useState([]);const[showNotif,setShowNotif]=useState(false);
-const[selIds,setSelIds]=useState(new Set());const[calMonth,setCalMonth]=useState(new Date());
-const[actFeed,setActFeed]=useState([]);
 const aiRef=useRef(null);const pm=privacy;
 const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2200)};
 const pN=id=>prestas.find(x=>x.id===id)?.nom||"";
 
-/* V13 — Notification system */
-const addNotif=(icon,color,msg,leadId)=>{const n={id:uid(),icon,color,msg,time:new Date().toISOString(),read:false,leadId};setNotifs(p=>[n,...p].slice(0,50))};
-const unreadCount=useMemo(()=>notifs.filter(n=>!n.read).length,[notifs]);
-const markAllRead=()=>setNotifs(p=>p.map(n=>({...n,read:true})));
-
-/* V13 — Activity feed */
-const addActivity=(who,action,target,color)=>{const a={id:uid(),who,action,target,color:color||mC(who),time:new Date().toISOString()};setActFeed(p=>[a,...p].slice(0,100))};
-
-/* V13 — CSV Export */
-const exportCSV=(data,filename,headers)=>{const h=headers.join(",");const rows=data.map(r=>headers.map(k=>'"'+(String(r[k]||"").replace(/"/g,'""'))+'"').join(","));const csv="\uFEFF"+h+"\n"+rows.join("\n");const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=filename+"-"+td()+".csv";a.click();URL.revokeObjectURL(u);flash("Export "+filename+" ✓")};
-const exportLeads=()=>{const data=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Apporteur:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,DernierContact:l.lastInteraction?.slice(0,10)||"",ProchaineRelance:l.nextRelance,Prestataire:pN(l.prestaId),Notes:l.notes}));exportCSV(data,"webo-leads",["Entreprise","Statut","Service","Valeur","Apporteur","Source","Tel","Email","DateCreation","DernierContact","ProchaineRelance","Prestataire","Notes"])};
-const exportFinance=()=>{const sg=leads.filter(l=>l.status==="signe");const data=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Commission20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Apporteur:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,DateSignature:l.dateCreated,Prestataire:pN(l.prestaId)}});exportCSV(data,"webo-finance",["Entreprise","Service","Valeur","Commission20","PartChasseur","MargeNette","Apporteur","Role","DateSignature","Prestataire"])};
-
-/* V13 — Bulk actions */
-const toggleSel=id=>setSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
-const selAll=()=>{const ids=filt.map(l=>l.id);setSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
-const bulkStatus=async status=>{const ids=[...selIds];for(const id of ids){const l=leads.find(x=>x.id===id);if(l){const nl=addLog(l.activityLog,"Bulk→"+COLS.find(c=>c.id===status)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,status,lastInteraction:new Date().toISOString(),activityLog:nl}:x));await sb.from("leads").update({status,last_interaction:new Date().toISOString(),activity_log:nl}).eq("id",id)}}setSelIds(new Set());flash(ids.length+" leads → "+COLS.find(c=>c.id===status)?.label);addActivity(sess,"bulk",ids.length+" leads → "+COLS.find(c=>c.id===status)?.label)};
-const bulkAssignPresta=async prestaId=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,prestaId}:x));await sb.from("leads").update({presta_id:prestaId}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads → "+pN(prestaId))};
-
-/* V13 — Calendar helpers */
-const calDays=useMemo(()=>{const y=calMonth.getFullYear(),m=calMonth.getMonth();const first=new Date(y,m,1);const last=new Date(y,m+1,0);const startDay=(first.getDay()+6)%7;const totalCells=Math.ceil((startDay+last.getDate())/7)*7;const days=[];for(let i=0;i<totalCells;i++){const d=new Date(y,m,i-startDay+1);const ds=d.toISOString().slice(0,10);const events=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>events.push({type:"relance",label:"📅 "+l.nom,color:"var(--red)",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>events.push({type:"signe",label:"✓ "+l.nom,color:"var(--green)",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>events.push({type:"paiement",label:"💳 "+l.nom,color:"var(--gold)",lead:l}));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==m,events})}return days},[calMonth,myL,leads]);
-
 const doLogin=()=>{const q=logId.trim().toLowerCase();const a=ACCTS.find(x=>x.login===q||x.email===q);if(!a){setLogErr("Identifiant inconnu");return}if(logPw!==a.pass){setLogErr("Mot de passe incorrect");return}setSess(a.id);try{localStorage.setItem("webo_session",a.id)}catch(e){}};
 
-useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT")return;if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setCmd(p=>!p);setCmdQ("")}if(e.key==="n"||e.key==="N"){e.preventDefault();setPage("pipeline");setShowForm(true)}if(e.key==="Escape"){setCmd(false);setSelLead(null);setShowNotif(false)}if(e.key==="Backspace"&&page!=="hub"){e.preventDefault();setPage("hub")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[page]);
+useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT")return;if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setCmd(p=>!p);setCmdQ("")}if(e.key==="n"||e.key==="N"){e.preventDefault();setPage("pipeline");setShowForm(true)}if(e.key==="Escape"){setCmd(false);setSelLead(null)}if(e.key==="Backspace"&&page!=="hub"){e.preventDefault();setPage("hub")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[page]);
 
 /* CRUD */
-const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");if(l._isNew){addNotif("fa-plus","var(--green)","Nouveau lead: "+c.nom+" ("+c.service+")",c.id);addActivity(sess,"a ajouté",c.nom,"var(--green)")}else{addActivity(sess,"a modifié",c.nom,"var(--blue)")}await sb.from("leads").upsert(L2db(c))},[sess]);
-const del=useCallback(async id=>{const l=leads.find(x=>x.id===id);setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");addActivity(sess,"a supprimé",l?.nom||"lead","var(--red)");await sb.from("leads").delete().eq("id",id)},[leads,sess]);
+const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");await sb.from("leads").upsert(L2db(c))},[]);
+const del=useCallback(async id=>{setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");await sb.from("leads").delete().eq("id",id)},[]);
 const touch=useCallback(async(id,msg)=>{const l=leads.find(x=>x.id===id);if(!l)return;const t=(l.tentatives||0)+1;const nl=addLog(l.activityLog,msg||"Contact #"+t);setLeads(p=>p.map(x=>x.id===id?{...x,lastInteraction:new Date().toISOString(),tentatives:t,activityLog:nl}:x));await sb.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t,activity_log:nl}).eq("id",id)},[leads]);
 const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={status:"status",lastInteraction:"last_interaction",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",activityLog:"activity_log"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});await sb.from("leads").update(db).eq("id",id)},[]);
 const updV=useCallback(async(id,vs,vn)=>{const nl=addLog(leads.find(l=>l.id===id)?.activityLog||"","Vérif:"+vs);setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,activityLog:nl}:l));setShowVerif(null);flash("Vérif ✓");await sb.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td(),activity_log:nl}).eq("id",id)},[leads]);
@@ -298,22 +228,15 @@ const upsP=useCallback(async p=>{const c={...p};delete c._isNew;setPrestas(pr=>p
 const delP=useCallback(async id=>{setPrestas(pr=>pr.filter(x=>x.id!==id));setShowPF(false);setEditP(null);flash("Supprimé");await sb.from("prestataires").delete().eq("id",id)},[]);
 
 const onDS=(e,id)=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
-const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));const colLabel=COLS.find(c=>c.id===col)?.label;flash(l?.nom+" → "+colLabel);addActivity(sess,"a déplacé",l?.nom+" → "+colLabel);if(col==="signe")addNotif("fa-trophy","var(--green)",l?.nom+" signé! "+E(l?.valeur),id);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}setDragOver(null)};
+const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));flash(l?.nom+" → "+COLS.find(c=>c.id===col)?.label);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}setDragOver(null)};
 
 const askAI=async pr=>{setAiMsgs(p=>[...p,{role:"user",content:pr}]);setAiIn("");setAiLoad(true);try{const sg=leads.filter(l=>l.status==="signe");const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:"Assistant WEBO Asset Management. Com 20%, Fondateur garde 100%, Chasseur split 50%. "+leads.length+" leads, "+sg.length+" signés. Français, expert, concret.",messages:[...aiMsgs.slice(-6).map(m=>({role:m.role,content:m.content})),{role:"user",content:pr}]})});const d=await r.json();const t=(d.content||[]).map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur";setAiMsgs(p=>[...p,{role:"assistant",content:t}])}catch(e){setAiMsgs(p=>[...p,{role:"assistant",content:"Erreur IA."}])}setAiLoad(false)};
 useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"})},[aiMsgs,aiLoad]);
 
 /* Supabase */
 useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads").select("*");setLeads((lr.data||[]).map(db2L));try{const pr=await sb.from("prestataires").select("*");setPrestas(pr.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
-useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
+useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n])}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
-
-/* V13 — Auto-generate notifications from urgent items */
-useEffect(()=>{if(!ready||notifs.length>0)return;const init=[];
-urgL.slice(0,5).forEach(l=>init.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" — inactif depuis "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));
-leads.filter(l=>l.status==="signe"&&!l.paymentProof).slice(0,3).forEach(l=>init.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement manquante: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));
-leads.filter(l=>l.status==="signe"&&dA(l.dateCreated)>=30&&l.verifStatus!=="confirmed").slice(0,3).forEach(l=>init.push({id:uid(),icon:"fa-shield",color:"var(--red)",msg:"Vérif commission 30j+: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));
-if(init.length>0)setNotifs(init)},[ready,urgL,leads]);
 
 /* Computed */
 const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===sess),[leads,sess,isA]);
@@ -383,18 +306,6 @@ const Nav=()=>(
   <div style={{display:"flex",gap:4,alignItems:"center"}}>
     {page!=="hub"&&<button className="nb" onClick={()=>setPage("hub")}><i className="fa-solid fa-arrow-left"/> Hub</button>}
     <button className="nb" onClick={()=>setCmd(true)}><i className="fa-solid fa-magnifying-glass"/></button>
-    {/* V13 — NOTIFICATIONS */}
-    <div style={{position:"relative"}}><button className="notif-bell" onClick={()=>{setShowNotif(p=>!p)}}><i className="fa-solid fa-bell" style={{fontSize:13,color:showNotif?"var(--gold)":"var(--text2)"}}/>{unreadCount>0&&<div className="notif-dot"/>}</button>
-    {showNotif&&<div className="notif-panel" onClick={e=>e.stopPropagation()}>
-      <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:13}}>Notifications</span>{unreadCount>0&&<button onClick={markAllRead} style={{fontSize:10,color:"var(--gold)",fontWeight:600}}>Tout lu</button>}</div>
-      {notifs.length===0?<div className="notif-empty"><i className="fa-regular fa-bell-slash" style={{display:"block",fontSize:18,marginBottom:6}}/> Aucune notification</div>:notifs.slice(0,20).map(n=><div key={n.id} className={"notif-item"+(n.read?"":" unread")} onClick={()=>{if(n.leadId){const l=leads.find(x=>x.id===n.leadId);if(l){setSelLead(l);setPage("pipeline")}}setNotifs(p=>p.map(x=>x.id===n.id?{...x,read:true}:x));setShowNotif(false)}}>
-        <div className="notif-icon" style={{background:n.color+"15",color:n.color}}><i className={"fa-solid "+n.icon}/></div>
-        <div style={{flex:1}}><div style={{fontSize:12,lineHeight:1.4}}>{n.msg}</div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{fA(hA(n.time))}</div></div>
-      </div>)}
-    </div>}
-    </div>
-    {/* V13 — CSV EXPORT */}
-    <div style={{position:"relative"}}><button className="nb" onClick={()=>{exportLeads()}} title="Export CSV"><i className="fa-solid fa-file-csv"/></button></div>
     <button className="nb" onClick={()=>setPrivacy(p=>!p)} style={{color:privacy?"var(--red)":"var(--text2)"}}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")}/></button>
     <button className="nb" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓")}}><i className="fa-solid fa-cloud-arrow-down"/></button>
     <div style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}><Av id={sess} sz={22}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(sess)}</span><span style={{fontSize:9,color:"var(--text3)"}}>{sU?.role}</span><span className={"sync-dot "+sync}/></div>
@@ -412,38 +323,13 @@ const HubPage=()=>(
     {[{l:"Portefeuille",v:st.total,c:"var(--gold)"},{l:"Signés",v:st.signes,c:"var(--green)"},{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Marge Nette",v:E(st.margeNette),c:"var(--gold)"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"},{l:"Agenda",v:st.agenda+" tâches",c:st.agenda>0?"var(--red)":"var(--green)"}].map((s,i)=>
     <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:20}}><P$ v={s.v} p={pm}/></div></div>)}
   </div>
-  {/* V13 — FUNNEL + ACTIVITY FEED */}
-  <div style={{display:"grid",gridTemplateColumns:isA?"1fr 1fr":"1fr",gap:14,marginBottom:28}}>
-    {/* Funnel de conversion */}
-    <div className="chart-card">
-      <div className="chart-card-h"><span><i className="fa-solid fa-filter" style={{color:"var(--gold)",marginRight:6}}/>Funnel Pipeline</span><span style={{color:"var(--text3)"}}>{st.total} leads</span></div>
-      <div style={{padding:"6px 0"}}>{COLS.filter(c=>c.id!=="injoignable").map((col,i)=>{const cnt=myL.filter(l=>l.status===col.id).length;const maxCnt=Math.max(...COLS.map(c=>myL.filter(l=>l.status===c.id).length),1);const pct=Math.round(cnt/maxCnt*100);const val=myL.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);
-      return <div key={col.id} className="funnel-step" style={{animationDelay:i*50+"ms"}}>
-        <div style={{width:90,fontSize:10,fontWeight:600,color:col.accent,flexShrink:0}}><i className={"fa-solid "+col.icon} style={{marginRight:4,fontSize:9}}/>{col.label}</div>
-        <div style={{flex:1}}><div className="funnel-bar" style={{width:Math.max(pct,6)+"%",background:"linear-gradient(90deg,"+col.accent+"CC,"+col.accent+"55)"}}>{cnt>0?cnt:""}</div></div>
-        <div style={{width:70,textAlign:"right",fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}><P$ v={E(val)} p={pm}/></div>
-      </div>})}</div>
-    </div>
-    {/* Activity Feed */}
-    {isA&&<div className="chart-card">
-      <div className="chart-card-h"><span><i className="fa-solid fa-bolt" style={{color:"var(--gold)",marginRight:6}}/>Activité Récente</span><span style={{color:"var(--text3)"}}>{actFeed.length} actions</span></div>
-      <div className="feed">
-        {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-clock" style={{display:"block",fontSize:18,marginBottom:6}}/>Les actions de l'équipe apparaîtront ici</div>:
-        actFeed.slice(0,15).map((a,i)=><div key={a.id} className="feed-item" style={{animationDelay:i*30+"ms"}}>
-          <div className="feed-dot" style={{background:a.color||"var(--gold)"}}/>
-          <div style={{flex:1}}><div className="feed-msg"><strong style={{color:mC(a.who)}}>{mN(a.who)}</strong> {a.action} <strong>{a.target}</strong></div><div className="feed-time">{fA(hA(a.time))}</div></div>
-        </div>)}
-      </div>
-    </div>}
-  </div>
   <div className="hub-grid">
     {[{icon:"fa-chart-line",title:"Pipeline Commercial",desc:"Kanban, leads, prospection, cycle de vente.",pg:"pipeline",cnt:st.total+" deals"},
     {icon:"fa-users-gear",title:"Réseau de Talents",desc:"Prestataires d'élite, compétences, charge.",pg:"talents",cnt:prestas.length+" prestas"},
     {icon:"fa-calendar-check",title:"Agenda & Échéances",desc:"Daily Focus : relances, audits, deadlines paiement.",pg:"agenda",cnt:st.agenda+" tâches"},
     {icon:"fa-chart-pie",title:"Contrôle Financier",desc:"CA, marge nette, ROI, commissions Fondateur vs Chasseurs.",pg:"finance",cnt:E(st.margeNette)},
     {icon:"fa-robot",title:"Agent IA Stratégique",desc:"Analyse, coaching, prévisions automatisées.",pg:"ia",cnt:"IA"},
-    {icon:"fa-calendar-days",title:"Calendrier",desc:"Vue mensuelle des relances, signatures et échéances.",pg:"cal",cnt:st.agenda+" évts"},
-    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>{setPage(c.pg==="cal"?"pipeline":c.pg);if(c.pg==="cal")setPView("calendar")}}>
+    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>setPage(c.pg)}>
       <div className="hub-card-icon"><i className={"fa-solid "+c.icon}/></div>
       <h3>{c.title}</h3><p>{c.desc}</p><div className="cnt">{c.cnt}</div>
     </div>)}
@@ -452,7 +338,7 @@ const HubPage=()=>(
 
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
-const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"},{id:"calendar",l:"Calendrier",i:"fa-calendar-days"}];
+const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"}];
 return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",flexDirection:"column"}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
     <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Pipeline Commercial</h2>
@@ -461,17 +347,15 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
       <span style={{width:1,height:18,background:"var(--border)"}}/>
       {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:11,width:"auto"}}><option value="all">Tous</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)} ({m.role})</option>)}</select>}
       <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:11,width:"auto"}}><option value="default">Tri</option><option value="valeur">Valeur↓</option><option value="date">Date↓</option></select>
-      {pView==="table"&&<button onClick={exportLeads} className="nb" style={{fontSize:10,border:"1px solid var(--border)"}} title="Export CSV"><i className="fa-solid fa-file-csv" style={{marginRight:3}}/>CSV</button>}
       <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Lead</button>
     </div>
   </div>
 
   {/* TABLE */}
   {pView==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",overflow:"auto",flex:1}}>
-  <table className="tbl"><thead><tr><th style={{width:30}}><input type="checkbox" className="chk" onChange={selAll} checked={selIds.size>0&&selIds.size===filt.length}/></th><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th><th>Marge Nette</th><th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
-  <tbody>{srt(filt).map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);const h=hA(l.lastInteraction);const isSel=selIds.has(l.id);
-  return <tr key={l.id} style={{borderLeft:urg?"3px solid var(--red)":"3px solid transparent",background:isSel?"rgba(197,160,89,.04)":"transparent"}} onClick={()=>setSelLead(l)}>
-    <td onClick={e=>e.stopPropagation()}><input type="checkbox" className="chk" checked={isSel} onChange={()=>toggleSel(l.id)}/></td>
+  <table className="tbl"><thead><tr><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th><th>Marge Nette</th><th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
+  <tbody>{srt(filt).map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);const h=hA(l.lastInteraction);
+  return <tr key={l.id} style={{borderLeft:urg?"3px solid var(--red)":"3px solid transparent"}} onClick={()=>setSelLead(l)}>
     <td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={l.memberId} sz={26}/><div><div style={{fontWeight:600,fontSize:12}}>{l.nom}{l.valeur>=HOT&&<span style={{color:"var(--red)",marginLeft:3,fontSize:10}}>🔥</span>}</div><div style={{fontSize:10,color:"var(--text3)"}}>{l.email||l.phone||""}</div></div></div></td>
     <td><SBadge status={l.status}/></td>
     <td style={{fontSize:11,color:"var(--text2)"}}>{l.service}</td>
@@ -518,33 +402,6 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
     </div>
   </div>})}
   {urgL.length===0&&<div style={{padding:40,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{fontSize:20,display:"block",marginBottom:6}}/> Aucun urgent</div>}
-  </div>}
-
-  {/* V13 — CALENDAR VIEW */}
-  {pView==="calendar"&&<div style={{flex:1,overflow:"auto"}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-      <button onClick={()=>setCalMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()-1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-left"/></button>
-      <h3 style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:600}}>{calMonth.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</h3>
-      <button onClick={()=>setCalMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()+1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-right"/></button>
-    </div>
-    <div className="cal-grid">
-      {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(d=><div key={d} className="cal-head">{d}</div>)}
-      {calDays.map((d,i)=><div key={i} className={"cal-day"+(d.isToday?" today":"")+(d.isOther?" other":"")}>
-        <div className="cal-num" style={{color:d.isToday?"var(--gold)":"var(--text)"}}>{d.day}</div>
-        {d.events.slice(0,3).map((ev,j)=><div key={j} className="cal-ev" style={{background:ev.color+"18",color:ev.color}} onClick={()=>{if(ev.lead)setSelLead(ev.lead)}}>{ev.label}</div>)}
-        {d.events.length>3&&<div style={{fontSize:8,color:"var(--text3)",textAlign:"center"}}>+{d.events.length-3}</div>}
-      </div>)}
-    </div>
-  </div>}
-
-  {/* V13 — BULK ACTION BAR */}
-  {selIds.size>0&&<div className="bulk-bar">
-    <span className="cnt">{selIds.size} sélectionné{selIds.size>1?"s":""}</span>
-    <div style={{height:16,width:1,background:"var(--border)"}}/>
-    {COLS.filter(c=>!["injoignable"].includes(c.id)).map(c=><button key={c.id} className="bulk-btn" onClick={()=>bulkStatus(c.id)} style={{color:c.accent,borderColor:c.accent+"40"}}><i className={"fa-solid "+c.icon} style={{marginRight:3,fontSize:9}}/>{c.label}</button>)}
-    {prestas.length>0&&<select onChange={e=>{if(e.target.value)bulkAssignPresta(e.target.value);e.target.value=""}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="">Assigner presta…</option>{prestas.map(p=><option key={p.id} value={p.id}>{p.nom}</option>)}</select>}
-    <div style={{flex:1}}/>
-    <button className="bulk-btn danger" onClick={()=>setSelIds(new Set())}><i className="fa-solid fa-xmark"/> Annuler</button>
   </div>}
 </div>};
 
@@ -631,39 +488,6 @@ const Finance=()=>(
   </div>
   {/* Objectif */}
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Objectif Mensuel — {E(OBJ)}</span><span style={{fontFamily:"var(--mono)",fontWeight:700,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span></div><div className="card-b"><div style={{height:6}}><Prog pct={st.obj} color={st.obj>=100?"var(--green)":"var(--gold)"}/></div></div></div>
-  {/* V13 — VISUAL CHARTS */}
-  <div className="finance-charts" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
-    {/* Commission Split Chart */}
-    <div className="chart-card">
-      <div className="chart-card-h"><span><i className="fa-solid fa-chart-pie" style={{color:"var(--gold)",marginRight:6}}/>Répartition Commission</span><button onClick={exportFinance} style={{fontSize:9,color:"var(--gold)",fontWeight:600,padding:"3px 8px",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)"}}><i className="fa-solid fa-file-csv" style={{marginRight:3}}/>Export</button></div>
-      <div style={{padding:16}}>
-        {(()=>{const total=st.ca*.2;const net=st.margeNette;const prosp=st.comProsp;const netPct=total>0?Math.round(net/total*100):100;const prospPct=total>0?Math.round(prosp/total*100):0;
-        return <div>
-          <div style={{display:"flex",height:20,borderRadius:10,overflow:"hidden",marginBottom:12}}>
-            <div style={{width:netPct+"%",background:"var(--gold)",transition:"width .8s"}}/>
-            <div style={{width:prospPct+"%",background:"var(--blue)",transition:"width .8s"}}/>
-          </div>
-          <div style={{display:"flex",justifyContent:"space-around",fontSize:11}}>
-            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--gold)",display:"inline-block",marginRight:4}}/>Marge WEBO<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:16,color:"var(--gold)",marginTop:2}}><P$ v={E(net)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{netPct}%</div></div>
-            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--blue)",display:"inline-block",marginRight:4}}/>Part Chasseurs<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:16,color:"var(--blue)",marginTop:2}}><P$ v={E(prosp)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{prospPct}%</div></div>
-            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--green)",display:"inline-block",marginRight:4}}/>CA Total<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:16,color:"var(--green)",marginTop:2}}><P$ v={E(st.ca)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>100%</div></div>
-          </div>
-        </div>})()}
-      </div>
-    </div>
-    {/* Pipeline Value by Status */}
-    <div className="chart-card">
-      <div className="chart-card-h"><span><i className="fa-solid fa-signal" style={{color:"var(--gold)",marginRight:6}}/>Valeur par Étape</span></div>
-      <div style={{padding:"10px 14px"}}>
-        {COLS.map((col,i)=>{const val=leads.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);const cnt=leads.filter(l=>l.status===col.id).length;const maxVal=Math.max(...COLS.map(c=>leads.filter(l=>l.status===c.id).reduce((s,l)=>s+l.valeur,0)),1);const pct=Math.round(val/maxVal*100);
-        return <div key={col.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-          <div style={{width:70,fontSize:9,fontWeight:600,color:col.accent,fontFamily:"var(--mono)",flexShrink:0}}>{col.label}</div>
-          <div style={{flex:1,height:14,background:"var(--bg4)",borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",width:pct+"%",background:col.accent,borderRadius:4,transition:"width .6s"}}/></div>
-          <div style={{width:80,textAlign:"right",fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{cnt}× <P$ v={E(val)} p={pm}/></div>
-        </div>})}
-      </div>
-    </div>
-  </div>
   {/* Équipe — Fondateur vs Chasseurs */}
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Performance — Fondateur vs Chasseurs</span></div><div className="card-b">
   <table className="tbl"><thead><tr><th>Apporteur</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th><th>Marge WEBO</th><th>Part Chasseur</th></tr></thead>
@@ -746,7 +570,7 @@ return <div className="rpanel">
 </div>};
 
 return (
-<div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>{if(showNotif)setShowNotif(false)}}>
+<div style={{display:"flex",flexDirection:"column",height:"100dvh"}}>
   <Nav/>
   <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
     {page==="hub"&&<HubPage/>}
