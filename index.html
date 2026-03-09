@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management</title>
+<title>WEBO Asset Management — Hub v13</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -11,11 +11,11 @@
 :root{
 --bg:#0B0E14;--bg2:#111520;--bg3:#171C28;--bg4:#1E2436;--bg5:#252C3D;
 --border:#2A2D35;--border2:#353A48;
---gold:#C5A059;--gold2:#D4AF6A;--bordeaux:#4A0E0E;--bordeaux2:#6B1A1A;
+--gold:#C5A059;--gold2:#D4AF6A;--bordeaux:#4A0E0E;--bordeaux2:#6B1A1A;--bordeaux-bg:#2A0808;
 --green:#089981;--red:#E74C4C;--blue:#2962FF;--purple:#8B5CF6;
 --text:#F5F5F7;--text2:#9CA3AF;--text3:#5A6270;--text4:#3A4050;
 --serif:'Playfair Display',Georgia,serif;--sans:'Inter',-apple-system,sans-serif;--mono:'JetBrains Mono',monospace;
---radius:8px;--glass:rgba(17,21,32,.75);
+--radius:8px;--glass:rgba(17,21,32,.78);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:400;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:13px}
@@ -24,108 +24,153 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideR{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes glow{0%,100%{box-shadow:0 0 8px var(--gold,#C5A059)20}50%{box-shadow:0 0 20px var(--gold)40}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-.fu{animation:fadeUp .35s ease-out both}
-.fi{animation:fadeIn .3s ease-out both}
-.sr{animation:slideR .3s ease-out both}
+@keyframes glow{0%,100%{box-shadow:0 0 6px rgba(197,160,89,.15)}50%{box-shadow:0 0 20px rgba(197,160,89,.3)}}
+@keyframes urgPulse{0%,100%{border-color:var(--bordeaux)}50%{border-color:var(--red)}}
+.fu{animation:fadeUp .35s ease-out both}.fi{animation:fadeIn .3s ease-out both}
 button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border:none;background:transparent}
 select,input,textarea{font-family:var(--sans);font-size:14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;transition:border-color .2s}
 select:focus,input:focus,textarea:focus{border-color:var(--gold)}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
-::-webkit-scrollbar-track{background:transparent}
-/* NAV */
-.topnav{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;height:56px;gap:16px}
-.topnav-logo{display:flex;align-items:baseline;gap:2px;text-decoration:none}
-.topnav-logo .w{font-family:var(--serif);font-weight:700;font-size:24px;color:var(--gold);font-style:italic}
-.topnav-logo .rest{font-family:var(--serif);font-weight:600;font-size:20px;color:var(--text)}
-.topnav-tag{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono);margin-left:8px}
-.nav-btn{padding:8px 16px;border-radius:var(--radius);font-size:12px;font-weight:600;color:var(--text2);transition:all .2s;display:flex;align-items:center;gap:6px}
-.nav-btn:hover{color:var(--text);background:var(--bg3)}
-.nav-btn.active{color:var(--gold);background:var(--gold)10}
-.nav-btn i{font-size:13px}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+/* TOPNAV */
+.topnav{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;height:54px;gap:12px}
+.logo{display:flex;align-items:baseline;gap:1px;text-decoration:none;cursor:pointer}
+.logo .w{font-family:var(--serif);font-weight:700;font-size:22px;color:var(--gold);font-style:italic}
+.logo .r{font-family:var(--serif);font-weight:600;font-size:18px;color:var(--text)}
+.logo-tag{font-size:8px;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase;font-family:var(--mono);margin-left:6px}
+.nb{padding:7px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;color:var(--text2);transition:all .2s;display:flex;align-items:center;gap:5px}
+.nb:hover{color:var(--text);background:var(--bg3)}
+.nb.active{color:var(--gold);background:rgba(197,160,89,.08)}
+.nb i{font-size:12px}
+/* LEADERBOARD MINI */
+.lb-mini{display:flex;gap:8px;align-items:center;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg2)}
+.lb-item{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600}
+.lb-rank{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;font-family:var(--mono)}
 /* HUB */
-.hub{padding:48px 24px;max-width:1200px;margin:0 auto}
-.hub-title{font-family:var(--serif);font-size:36px;font-weight:600;color:var(--text);margin-bottom:4px}
-.hub-sub{font-size:14px;color:var(--text2);margin-bottom:40px;font-weight:300}
-.hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-.hub-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px 24px;cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden}
-.hub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold);opacity:0;transition:opacity .3s}
-.hub-card:hover{border-color:var(--gold)40;transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.hub{padding:40px 24px;max-width:1200px;margin:0 auto}
+.hub-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
+.hub-title{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1.2}
+.hub-sub{font-size:13px;color:var(--text2);font-weight:300;margin-top:4px}
+.hub-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:28px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:all .25s}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.stat-label{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);margin-bottom:3px}
+.stat-val{font-size:24px;font-weight:700;font-family:var(--mono);line-height:1.1}
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.hub-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px 22px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.hub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0;transition:opacity .3s}
+.hub-card:hover{border-color:rgba(197,160,89,.3);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .hub-card:hover::before{opacity:1}
-.hub-card-icon{width:48px;height:48px;border-radius:12px;background:var(--gold)10;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:20px;color:var(--gold)}
-.hub-card h3{font-family:var(--serif);font-size:18px;font-weight:600;margin-bottom:6px}
-.hub-card p{font-size:12px;color:var(--text2);line-height:1.6}
-.hub-card .count{position:absolute;top:20px;right:20px;font-family:var(--mono);font-size:24px;font-weight:700;color:var(--gold)20}
+.hub-card-icon{width:44px;height:44px;border-radius:10px;background:rgba(197,160,89,.08);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:18px;color:var(--gold)}
+.hub-card h3{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:5px}
+.hub-card p{font-size:11px;color:var(--text2);line-height:1.6}
+.hub-card .cnt{position:absolute;top:18px;right:18px;font-family:var(--mono);font-size:22px;font-weight:800;color:rgba(197,160,89,.12)}
 /* TABLE */
 .tbl{width:100%;border-collapse:separate;border-spacing:0}
-.tbl th{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:5}
-.tbl td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
-.tbl tr{transition:background .15s}.tbl tbody tr:hover{background:var(--bg3)}
-.tbl tbody tr{cursor:pointer}
-/* BADGES */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;font-family:var(--mono)}
-.badge-green{color:var(--green);background:var(--green)12;border:1px solid var(--green)25}
-.badge-red{color:var(--red);background:var(--red)12;border:1px solid var(--red)25}
-.badge-gold{color:var(--gold);background:var(--gold)12;border:1px solid var(--gold)25}
-.badge-purple{color:var(--purple);background:var(--purple)12;border:1px solid var(--purple)25}
-.badge-blue{color:var(--blue);background:var(--blue)12;border:1px solid var(--blue)25}
+.tbl th{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:5}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+.tbl tbody tr{transition:background .15s;cursor:pointer}.tbl tbody tr:hover{background:var(--bg3)}
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-family:var(--mono)}
+.badge-green{color:var(--green);background:rgba(8,153,129,.1);border:1px solid rgba(8,153,129,.2)}
+.badge-red{color:var(--red);background:rgba(231,76,76,.1);border:1px solid rgba(231,76,76,.2)}
+.badge-gold{color:var(--gold);background:rgba(197,160,89,.1);border:1px solid rgba(197,160,89,.2)}
+.badge-purple{color:var(--purple);background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)}
+.badge-blue{color:var(--blue);background:rgba(41,98,255,.1);border:1px solid rgba(41,98,255,.2)}
 .badge-ghost{color:var(--text3);background:var(--bg4);border:1px solid var(--border)}
-/* CARDS */
+.badge-bordeaux{color:#E88;background:rgba(74,14,14,.4);border:1px solid rgba(107,26,26,.6)}
+/* CARD */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);transition:all .25s}
-.card:hover{border-color:var(--border2);box-shadow:0 8px 24px rgba(0,0,0,.15)}
-.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-body{padding:16px 20px}
+.card:hover{border-color:var(--border2);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.card-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-b{padding:14px 18px}
 /* PROGRESS */
-.prog{height:4px;border-radius:2px;background:var(--bg4);overflow:hidden}
-.prog-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.prog{height:4px;border-radius:2px;background:var(--bg4);overflow:hidden}.prog-fill{height:100%;border-radius:2px;transition:width .6s}
 /* TIMELINE */
-.tl-item{display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--border)}
-.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0}
-.tl-content{flex:1}
+.tl{position:relative;padding-left:24px}
+.tl::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;background:var(--border)}
+.tl-item{position:relative;padding:10px 0;border-bottom:1px solid rgba(42,45,53,.5)}
+.tl-dot{position:absolute;left:-20px;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg);z-index:2}
+.tl-time{font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:3px}
+.tl-title{font-weight:600;font-size:13px;margin-bottom:2px}
+.tl-sub{font-size:11px;color:var(--text2)}
 /* AVATAR */
-.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
 /* MODAL */
 .overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeIn .12s}
 .overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)}
-.modal{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:95%;max-width:540px;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:fadeUp .25s ease-out}
+.modal{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:95%;max-width:540px;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:fadeUp .25s}
 .modal::-webkit-scrollbar{width:3px}
-/* RESPONSIVE */
-.kanban-scroll{display:flex;gap:10px;overflow-x:auto;padding:0 0 16px;-webkit-overflow-scrolling:touch}
-.kanban-scroll::-webkit-scrollbar{display:none}
-.kanban-col{min-width:240px;flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:8px;display:flex;flex-direction:column}
-.kc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin-bottom:6px;cursor:grab;transition:all .2s}
-.kc:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,.2);border-color:var(--border2)}
-.kc:active{cursor:grabbing}
-/* STAT CARDS */
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
-.stat-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);margin-bottom:4px}
-.stat-val{font-size:28px;font-weight:700;font-family:var(--mono);line-height:1.1}
+/* KANBAN */
+.kanban-scroll{display:flex;gap:8px;overflow-x:auto;padding:8px;flex:1;-webkit-overflow-scrolling:touch}.kanban-scroll::-webkit-scrollbar{display:none}
+.kanban-col{min-width:230px;flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:6px;display:flex;flex-direction:column}
+.kc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:9px;margin-bottom:4px;cursor:grab;transition:all .2s}
+.kc:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.18);border-color:var(--border2)}.kc:active{cursor:grabbing}
+.kcol.over{background:rgba(41,98,255,.04)!important}
+/* CMD */
+.cmd-ov{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding-top:15vh;animation:fadeIn .1s}
+.cmd-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:90%;max-width:520px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+.cmd-in{width:100%;padding:16px 20px;font-size:16px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);outline:none}
+.cmd-r{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s;font-size:13px}
+.cmd-r:hover{background:var(--bg3)}
+/* RIGHT PANEL */
+.rpanel{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:90vw;background:var(--bg2);border-left:1px solid var(--border);z-index:200;overflow-y:auto;box-shadow:-10px 0 30px rgba(0,0,0,.25);animation:slideR .2s ease-out}
+.rpanel::-webkit-scrollbar{width:3px}
 /* UTILS */
-.sep{height:1px;background:linear-gradient(90deg,transparent,var(--gold)30,transparent);margin:12px 0}
+.sep{height:1px;background:linear-gradient(90deg,transparent,rgba(197,160,89,.2),transparent);margin:10px 0}
 .blur{filter:blur(6px);user-select:none;pointer-events:none}
 .sync-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .sync-dot.on{background:var(--green)}.sync-dot.off{background:var(--red)}.sync-dot.loading{background:var(--gold);animation:pulse 1s infinite}
-.ff label{display:block;font-size:10px;font-weight:600;color:var(--text3);margin-bottom:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:var(--mono)}
-.ff{margin-bottom:12px}
-.wa-btn{padding:4px 8px;border-radius:var(--radius);border:1px solid #25D36625;color:#25D366;font-size:11px;transition:all .15s}
-.wa-btn:hover{background:#25D36608}
-.share-btn{padding:4px 8px;border-radius:var(--radius);border:1px solid var(--green)25;color:var(--green);font-size:11px;transition:all .15s}
-.share-btn:hover{background:var(--green)08}
-.cmd-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding-top:15vh;animation:fadeIn .1s}
-.cmd-box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;width:90%;max-width:520px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5)}
-.cmd-input{width:100%;padding:16px 20px;font-size:16px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);outline:none}
-.cmd-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s;font-size:13px}
-.cmd-item:hover{background:var(--bg3)}
-@media(max-width:768px){
-.topnav{padding:0 12px;height:48px;gap:8px}
-.hub{padding:24px 12px}
-.hub-grid{grid-template-columns:1fr}
-.topnav-tag{display:none}
-.kanban-col{min-width:220px;flex:none}
-}
+.ff label{display:block;font-size:9px;font-weight:600;color:var(--text3);margin-bottom:4px;letter-spacing:1.2px;text-transform:uppercase;font-family:var(--mono)}
+.ff{margin-bottom:10px}
+.wa{padding:4px 8px;border-radius:var(--radius);border:1px solid rgba(37,211,102,.2);color:#25D366;font-size:11px;transition:all .15s}.wa:hover{background:rgba(37,211,102,.06)}
+.match-card{background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:8px;padding:8px;margin-top:4px;cursor:pointer;transition:all .15s}.match-card:hover{background:rgba(139,92,246,.12)}
+@media(max-width:768px){.topnav{padding:0 12px;height:48px;gap:6px}.hub{padding:20px 12px}.hub-grid{grid-template-columns:1fr}.logo-tag,.lb-mini{display:none}.kanban-col{min-width:210px;flex:none}.rpanel{width:85vw}}
 @media(min-width:1200px){.kanban-col{min-width:0}}
+/* ═══ V13 — NOTIFICATIONS ═══ */
+.notif-bell{position:relative;cursor:pointer;padding:7px 10px;border-radius:var(--radius);transition:all .2s}
+.notif-bell:hover{background:var(--bg3)}
+.notif-dot{position:absolute;top:4px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--bg2);animation:pulse 2s infinite}
+.notif-panel{position:absolute;top:100%;right:0;width:340px;max-height:400px;overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.45);z-index:500;animation:fadeUp .2s}
+.notif-item{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;transition:background .15s;cursor:pointer;font-size:12px}
+.notif-item:hover{background:var(--bg3)}
+.notif-item.unread{border-left:3px solid var(--gold)}
+.notif-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px}
+.notif-empty{padding:30px;text-align:center;color:var(--text3);font-size:12px}
+/* ═══ V13 — BULK ACTIONS ═══ */
+.bulk-bar{position:sticky;bottom:0;left:0;right:0;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(197,160,89,.2);padding:10px 18px;display:flex;align-items:center;gap:10px;z-index:50;animation:fadeUp .2s}
+.bulk-bar .cnt{font-family:var(--mono);font-weight:700;color:var(--gold);font-size:14px}
+.bulk-btn{padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;transition:all .15s;border:1px solid var(--border);color:var(--text2)}
+.bulk-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(197,160,89,.06)}
+.bulk-btn.danger{border-color:rgba(231,76,76,.3);color:var(--red)}
+.bulk-btn.danger:hover{background:rgba(231,76,76,.06)}
+.chk{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+/* ═══ V13 — CALENDAR ═══ */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-head{font-size:9px;font-weight:700;color:var(--text3);text-align:center;padding:8px 0;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
+.cal-day{min-height:80px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;transition:all .2s;cursor:pointer;overflow:hidden}
+.cal-day:hover{border-color:var(--border2);background:var(--bg3)}
+.cal-day.today{border-color:rgba(197,160,89,.4);background:rgba(197,160,89,.04)}
+.cal-day.other{opacity:.35}
+.cal-num{font-size:11px;font-weight:700;font-family:var(--mono);margin-bottom:2px}
+.cal-ev{font-size:8px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;cursor:pointer}
+.cal-ev:hover{opacity:.8}
+/* ═══ V13 — CHARTS ═══ */
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.chart-card-h{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.chart-card-h span{font-size:11px;font-weight:600;font-family:var(--mono);color:var(--text2)}
+.funnel-step{display:flex;align-items:center;gap:10px;padding:8px 14px;transition:background .15s}
+.funnel-step:hover{background:var(--bg3)}
+.funnel-bar{height:24px;border-radius:4px;transition:width .8s ease-out;min-width:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:700;color:rgba(255,255,255,.9);font-family:var(--mono)}
+.sparkline{display:inline-block;vertical-align:middle}
+/* ═══ V13 — ACTIVITY FEED ═══ */
+.feed{max-height:300px;overflow-y:auto}
+.feed-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .15s;animation:fadeUp .3s ease-out both}
+.feed-item:hover{background:var(--bg3)}
+.feed-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.feed-time{font-size:9px;color:var(--text3);font-family:var(--mono)}
+.feed-msg{font-size:12px;color:var(--text2);line-height:1.5}
+.feed-msg strong{color:var(--text);font-weight:600}
+@media(max-width:768px){.notif-panel{width:90vw;right:-40px}.cal-day{min-height:50px}.cal-ev{font-size:7px}.bulk-bar{flex-wrap:wrap;gap:6px}.finance-charts{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -140,26 +185,30 @@ const SB_URL="https://smgglunijtmftjchxdgy.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZ2dsdW5panRtZnRqY2h4ZGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzYyNDMsImV4cCI6MjA4ODE1MjI0M30.RM7JmWaY0z8vw4cpL1GqsZN2gCwNK-KMet2hNxMDd5A";
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
 
+/* ═══ AUTH ═══ */
 const ACCTS=[
-{id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
-{id:"keddy",name:"Keddy",role:"Prospecteur",color:"#2962FF",isAdmin:false,login:"keddy",email:"keddy@webo.fr",pass:"Keddy2024!"},
-{id:"dylan",name:"Dylan",role:"Prospecteur",color:"#089981",isAdmin:false,login:"dylan",email:"dylan@webo.fr",pass:"Dylan2024!"}];
-const TEAM=ACCTS.map(({id,name,role,color,isAdmin})=>({id,name,role,color,isAdmin}));
+{id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
+{id:"keddy",name:"Keddy",role:"Chasseur",color:"#2962FF",isAdmin:false,isFondateur:false,login:"keddy",email:"keddy@webo.fr",pass:"Keddy2024!"},
+{id:"dylan",name:"Dylan",role:"Chasseur",color:"#089981",isAdmin:false,isFondateur:false,login:"dylan",email:"dylan@webo.fr",pass:"Dylan2024!"}];
+const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur}));
 
+/* ═══ DATA MAPPING ═══ */
 const db2L=r=>({id:r.id,nom:r.nom,service:r.service,valeur:r.valeur,memberId:r.member_id,status:r.status,dateCreated:r.date_created||"",lastInteraction:r.last_interaction||"",nextRelance:r.next_relance||"",notes:r.notes||"",source:r.source||"DM Instagram",echecReason:r.echec_reason||"—",tentatives:r.tentatives||0,paymentProof:r.payment_proof||"",verifStatus:r.verif_status||"none",verifNote:r.verif_note||"",prestaId:r.presta_id||"",email:r.email||"",phone:r.phone||"",adresse:r.adresse||"",temperature:r.temperature||"tiede",activityLog:r.activity_log||"",paymentLink:r.payment_link||"",externalLink:r.external_link||""});
 const L2db=l=>({id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.memberId,status:l.status,date_created:l.dateCreated,last_interaction:l.lastInteraction,next_relance:l.nextRelance,notes:l.notes,source:l.source,echec_reason:l.echecReason,tentatives:l.tentatives,payment_proof:l.paymentProof,verif_status:l.verifStatus,verif_note:l.verifNote,presta_id:l.prestaId,email:l.email,phone:l.phone,adresse:l.adresse,temperature:l.temperature,activity_log:l.activityLog,payment_link:l.paymentLink,external_link:l.externalLink});
 
-const COLS=[{id:"nouveau",label:"Qualifié",icon:"fa-diamond",accent:"#8B5CF6",proba:.10,urgDays:5},{id:"contacte",label:"Audit",icon:"fa-magnifying-glass",accent:"#2962FF",proba:.25,urgDays:3},{id:"relance1",label:"Négociation",icon:"fa-handshake",accent:"#C5A059",proba:.40,urgDays:4},{id:"relance2",label:"Closing",icon:"fa-gavel",accent:"#E74C4C",proba:.60,urgDays:7},{id:"call",label:"Due Diligence",icon:"fa-shield-halved",accent:"#7C5CBF",proba:.80,urgDays:5},{id:"injoignable",label:"Perdu",icon:"fa-ban",accent:"#5A6270",proba:0,urgDays:999},{id:"signe",label:"Signé",icon:"fa-check-circle",accent:"#089981",proba:1,urgDays:999}];
+/* ═══ CONSTANTS ═══ */
+const COLS=[{id:"nouveau",label:"Qualifié",icon:"fa-diamond",accent:"#8B5CF6",proba:.10,urgDays:5},{id:"contacte",label:"Audit",icon:"fa-magnifying-glass",accent:"#2962FF",proba:.25,urgDays:3},{id:"relance1",label:"Négociation",icon:"fa-handshake",accent:"#C5A059",proba:.40,urgDays:4},{id:"relance2",label:"Closing",icon:"fa-gavel",accent:"#E74C4C",proba:.60,urgDays:7},{id:"call",label:"Due Diligence",icon:"fa-shield-halved",accent:"#7C5CBF",proba:.80,urgDays:5},{id:"injoignable",label:"Perdu",icon:"fa-ban",accent:"#5A6270",proba:0,urgDays:999},{id:"signe",label:"Signé",icon:"fa-circle-check",accent:"#089981",proba:1,urgDays:999}];
 const SERVICES=["Web Design","Montage Vidéo","Vidéaste"];
 const SOURCES=["DM Instagram","LinkedIn","Email froid","Appel à froid","Prospection terrain","Référence","Autre"];
 const ECHECS=["—","Prix trop élevé","Pas de besoin","Déjà équipé","Pas de budget","Concurrent choisi","Projet reporté"];
-const GHOST_MAP={"DM Instagram":"Email ou Appel","LinkedIn":"DM ou Appel","Email froid":"DM ou LinkedIn","Appel à froid":"DM ou Email","Prospection terrain":"Email ou Appel","Référence":"Relancer via ref","Autre":"DM + Email"};
+const GHOST_MAP={"DM Instagram":"Email/Appel","LinkedIn":"DM/Appel","Email froid":"DM/LinkedIn","Appel à froid":"DM/Email","Prospection terrain":"Email/Appel","Référence":"Via ref","Autre":"DM+Email"};
 const VERIFS=[{id:"none",label:"—"},{id:"pending",label:"En attente",color:"#C5A059"},{id:"confirmed",label:"Confirmé",color:"#089981"},{id:"alert",label:"Alerte",color:"#E74C4C"}];
 const SPECIALITES=["Landing Page","Montage Vidéo","Vidéaste","Motion Design","Web Design","SEO","Social Media","Autre"];
-const TEMPS=[{id:"froid",e:"❄️",label:"Froid"},{id:"tiede",e:"☁️",label:"Tiède"},{id:"chaud",e:"🔥",label:"Chaud"}];
+const TEMPS=[{id:"froid",e:"❄️",l:"Froid"},{id:"tiede",e:"☁️",l:"Tiède"},{id:"chaud",e:"🔥",l:"Chaud"}];
 const OBJ=15000;const HOT=3000;
-const TPL={nouveau:"Bonjour [N], je suis [P], Fondateur & Expert en Croissance chez Webo Asset Management. Nous accompagnons [E] dans sa stratégie digitale via [S]. Disponible pour un audit gratuit ? — Webo",contacte:"Bonjour [N], suite à notre échange sur [E], avez-vous pu étudier notre proposition [S] ? — [P], Webo",relance1:"Bonjour [N], je me permets de revenir vers vous pour [E]. Un call stratégique de 15min ? — [P]",relance2:"Bonjour [N], dernière relance pour [E]. Dites-moi si le timing est meilleur plus tard. — [P]",call:"Bonjour [N], suite à notre call stratégique pour [E] : [S] validé. Prochaines étapes en cours. — [P]",signe:"Bonjour [N], bienvenue dans le portefeuille Webo. Le projet [S] pour [E] est activé. — [P]"};
+const TPL={nouveau:"Bonjour [N], [P] de WEBO Asset Management. Nous accompagnons [E] dans sa stratégie [S]. Disponible pour un audit gratuit de 15min ? — WEBO",contacte:"Bonjour [N], suite à notre échange pour [E], avez-vous étudié notre proposition [S] ? — [P]",relance1:"Bonjour [N], je reviens pour le projet [S] de [E]. Un call stratégique ? — [P]",relance2:"Bonjour [N], dernière relance pour [E]. — [P]",call:"Bonjour [N], suite à notre call pour [E] : [S] validé. — [P]",signe:"Bienvenue dans le portefeuille WEBO. Projet [S] pour [E] activé. — [P]"};
 
+/* ═══ HELPERS ═══ */
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const E=n=>new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",minimumFractionDigits:0,maximumFractionDigits:0}).format(n||0);
 const hA=i=>i?(Date.now()-new Date(i).getTime())/3.6e6:null;
@@ -174,452 +223,616 @@ const cDays=(c,s)=>s==="signe"&&c?Math.floor((Date.now()-new Date(c).getTime())/
 const isUrg=l=>{const c=COLS.find(x=>x.id===l.status);return c&&c.urgDays<999&&dA(l.lastInteraction)>=c.urgDays};
 const genTpl=(l,mn)=>(TPL[l.status]||TPL.nouveau).replace(/\[N\]/g,l.nom.split(" ")[0]).replace(/\[E\]/g,l.nom).replace(/\[S\]/g,l.service).replace(/\[P\]/g,mn);
 const openWA=(l,mn)=>{const m=genTpl(l,mn);const p=(l.phone||"").replace(/\s/g,"").replace(/^0/,"+33");window.open("https://wa.me/"+p+"?text="+encodeURIComponent(m),"_blank")};
-const cp=(t,f)=>{if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>f("Copié ✓"));else if(navigator.share)navigator.share({text:t})};
+const cp=(t,f)=>{if(navigator.clipboard)navigator.clipboard.writeText(t).then(()=>f("Copié ✓"))};
 const addLog=(c,m)=>new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+"—"+m+(c?"\n"+c:"");
 const matchP=(l,ps)=>ps.map(p=>{let s=0;const sp=(p.specialite||"").toLowerCase(),sv=l.service.toLowerCase();if(sp.includes(sv)||sv.includes(sp))s+=50;if(sv.includes("vid")&&(sp.includes("vid")||sp.includes("motion")))s+=30;if(sv.includes("web")&&(sp.includes("web")||sp.includes("land")))s+=30;return{...p,score:s}}).filter(p=>p.score>0).sort((a,b)=>b.score-a.score).slice(0,2);
 const healthScore=l=>{let s=0;const c=COLS.find(x=>x.id===l.status);s+=c?c.proba*40:0;if(l.temperature==="chaud")s+=30;else if(l.temperature==="tiede")s+=15;const h=hA(l.lastInteraction);if(h&&h<24)s+=20;else if(h&&h<72)s+=10;return Math.min(Math.round(s),100)};
-const healthLabel=s=>s>=80?"Strong Buy":s>=60?"Buy":s>=40?"Hold":s>=20?"Sell":"Strong Sell";
+const hLab=s=>s>=80?"Strong Buy":s>=60?"Buy":s>=40?"Hold":"Sell";
 const hCol=s=>s>=60?"#089981":s>=40?"#C5A059":"#E74C4C";
+/* Commission: Fondateur keeps 100%, Chasseur splits 50/50 */
+const calcMargin=(valeur,memberId)=>{const m=TEAM.find(t=>t.id===memberId);const comWebo=valeur*.2;if(m?.isFondateur)return{comWebo,comProsp:0,margeNette:comWebo};const comProsp=comWebo*.5;return{comWebo,comProsp,margeNette:comWebo-comProsp}};
 
-function Av({id,sz=36}){const m=TEAM.find(t=>t.id===id);if(!m)return null;return <div className="avatar" style={{width:sz,height:sz,background:m.color+"18",border:"2px solid "+m.color+"40",color:m.color,fontSize:sz*.38}}>{m.name[0]}</div>}
-function IS_(){return{width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",boxSizing:"border-box",fontFamily:"var(--sans)"}}
-function FF({l,children}){return <div className="ff"><label>{l}</label>{children}</div>}
+/* ═══ COMPONENTS ═══ */
+function Av({id,sz=36}){const m=TEAM.find(t=>t.id===id);if(!m)return null;return <div className="av" style={{width:sz,height:sz,background:m.color+"18",border:"2px solid "+m.color+"40",color:m.color,fontSize:sz*.38}}>{m.name[0]}</div>}
 function Badge({type,children}){return <span className={"badge badge-"+type}>{children}</span>}
-function Prog({pct,color}){return <div className="prog"><div className="prog-fill" style={{width:pct+"%",background:color||"var(--gold)"}}/></div>}
+function Prog({pct,color}){return <div className="prog"><div className="prog-fill" style={{width:Math.min(pct,100)+"%",background:color||"var(--gold)"}}/></div>}
 function P$({v,p}){return <span className={p?"blur":""}>{v}</span>}
-function StatusBadge({status}){const c=COLS.find(x=>x.id===status);if(!c)return null;const type=status==="signe"?"green":status==="injoignable"?"ghost":["relance2","call"].includes(status)?"gold":"blue";return <Badge type={type}><i className={"fa-solid "+c.icon} style={{fontSize:9}}/> {c.label}</Badge>}
+function SBadge({status}){const c=COLS.find(x=>x.id===status);if(!c)return null;const t=status==="signe"?"green":status==="injoignable"?"ghost":["relance2","call"].includes(status)?"gold":"blue";return <Badge type={t}><i className={"fa-solid "+c.icon} style={{fontSize:8}}/> {c.label}</Badge>}
+function FF({l,children}){return <div className="ff"><label>{l}</label>{children}</div>}
+const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",boxSizing:"border-box",fontFamily:"var(--sans)"};
 
+/* ═══ APP ═══ */
 function App(){
 const[sess,setSess]=useState(()=>{try{return localStorage.getItem("webo_session")||""}catch(e){return""}});
 const[logId,setLogId]=useState("");const[logPw,setLogPw]=useState("");const[logErr,setLogErr]=useState("");
 const isA=TEAM.find(t=>t.id===sess)?.isAdmin||false;const sU=TEAM.find(t=>t.id===sess);
 const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");
-const[page,setPage]=useState("hub");const[view,setView]=useState("table");const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
-const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[fS,setFS]=useState("all");const[sortBy,setSortBy]=useState("default");
+const[page,setPage]=useState("hub");const[pView,setPView]=useState("table");
+const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
+const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[sortBy,setSortBy]=useState("default");
 const[toast,setToast]=useState(null);const[showVerif,setShowVerif]=useState(null);
 const[showPF,setShowPF]=useState(false);const[editP,setEditP]=useState(null);
 const[now,setNow]=useState(Date.now());const[aiMsgs,setAiMsgs]=useState([]);const[aiIn,setAiIn]=useState("");const[aiLoad,setAiLoad]=useState(false);
 const[cmd,setCmd]=useState(false);const[cmdQ,setCmdQ]=useState("");
 const[privacy,setPrivacy]=useState(false);const[selLead,setSelLead]=useState(null);
-const aiRef=useRef(null);const IS=IS_();
+const[notifs,setNotifs]=useState([]);const[showNotif,setShowNotif]=useState(false);
+const[selIds,setSelIds]=useState(new Set());const[calMonth,setCalMonth]=useState(new Date());
+const[actFeed,setActFeed]=useState([]);
+const aiRef=useRef(null);const pm=privacy;
 const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2200)};
-const pN=id=>prestas.find(x=>x.id===id)?.nom||"";const pm=privacy;
+const pN=id=>prestas.find(x=>x.id===id)?.nom||"";
+
+/* V13 — Notification system */
+const addNotif=(icon,color,msg,leadId)=>{const n={id:uid(),icon,color,msg,time:new Date().toISOString(),read:false,leadId};setNotifs(p=>[n,...p].slice(0,50))};
+const unreadCount=useMemo(()=>notifs.filter(n=>!n.read).length,[notifs]);
+const markAllRead=()=>setNotifs(p=>p.map(n=>({...n,read:true})));
+
+/* V13 — Activity feed */
+const addActivity=(who,action,target,color)=>{const a={id:uid(),who,action,target,color:color||mC(who),time:new Date().toISOString()};setActFeed(p=>[a,...p].slice(0,100))};
+
+/* V13 — CSV Export */
+const exportCSV=(data,filename,headers)=>{const h=headers.join(",");const rows=data.map(r=>headers.map(k=>'"'+(String(r[k]||"").replace(/"/g,'""'))+'"').join(","));const csv="\uFEFF"+h+"\n"+rows.join("\n");const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=filename+"-"+td()+".csv";a.click();URL.revokeObjectURL(u);flash("Export "+filename+" ✓")};
+const exportLeads=()=>{const data=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Apporteur:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,DernierContact:l.lastInteraction?.slice(0,10)||"",ProchaineRelance:l.nextRelance,Prestataire:pN(l.prestaId),Notes:l.notes}));exportCSV(data,"webo-leads",["Entreprise","Statut","Service","Valeur","Apporteur","Source","Tel","Email","DateCreation","DernierContact","ProchaineRelance","Prestataire","Notes"])};
+const exportFinance=()=>{const sg=leads.filter(l=>l.status==="signe");const data=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Commission20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Apporteur:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,DateSignature:l.dateCreated,Prestataire:pN(l.prestaId)}});exportCSV(data,"webo-finance",["Entreprise","Service","Valeur","Commission20","PartChasseur","MargeNette","Apporteur","Role","DateSignature","Prestataire"])};
+
+/* V13 — Bulk actions */
+const toggleSel=id=>setSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
+const selAll=()=>{const ids=filt.map(l=>l.id);setSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
+const bulkStatus=async status=>{const ids=[...selIds];for(const id of ids){const l=leads.find(x=>x.id===id);if(l){const nl=addLog(l.activityLog,"Bulk→"+COLS.find(c=>c.id===status)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,status,lastInteraction:new Date().toISOString(),activityLog:nl}:x));await sb.from("leads").update({status,last_interaction:new Date().toISOString(),activity_log:nl}).eq("id",id)}}setSelIds(new Set());flash(ids.length+" leads → "+COLS.find(c=>c.id===status)?.label);addActivity(sess,"bulk",ids.length+" leads → "+COLS.find(c=>c.id===status)?.label)};
+const bulkAssignPresta=async prestaId=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,prestaId}:x));await sb.from("leads").update({presta_id:prestaId}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads → "+pN(prestaId))};
+
+/* V13 — Calendar helpers */
+const calDays=useMemo(()=>{const y=calMonth.getFullYear(),m=calMonth.getMonth();const first=new Date(y,m,1);const last=new Date(y,m+1,0);const startDay=(first.getDay()+6)%7;const totalCells=Math.ceil((startDay+last.getDate())/7)*7;const days=[];for(let i=0;i<totalCells;i++){const d=new Date(y,m,i-startDay+1);const ds=d.toISOString().slice(0,10);const events=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>events.push({type:"relance",label:"📅 "+l.nom,color:"var(--red)",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>events.push({type:"signe",label:"✓ "+l.nom,color:"var(--green)",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>events.push({type:"paiement",label:"💳 "+l.nom,color:"var(--gold)",lead:l}));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==m,events})}return days},[calMonth,myL,leads]);
 
 const doLogin=()=>{const q=logId.trim().toLowerCase();const a=ACCTS.find(x=>x.login===q||x.email===q);if(!a){setLogErr("Identifiant inconnu");return}if(logPw!==a.pass){setLogErr("Mot de passe incorrect");return}setSess(a.id);try{localStorage.setItem("webo_session",a.id)}catch(e){}};
 
-useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT")return;if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setCmd(p=>!p);setCmdQ("")}if(e.key==="n"||e.key==="N"){e.preventDefault();setPage("pipeline");setEditId(null);setShowForm(true)}if(e.key==="Escape"){setCmd(false);setSelLead(null)}if(e.key==="Backspace"&&page!=="hub"){e.preventDefault();setPage("hub")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[page]);
+useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT")return;if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setCmd(p=>!p);setCmdQ("")}if(e.key==="n"||e.key==="N"){e.preventDefault();setPage("pipeline");setShowForm(true)}if(e.key==="Escape"){setCmd(false);setSelLead(null);setShowNotif(false)}if(e.key==="Backspace"&&page!=="hub"){e.preventDefault();setPage("hub")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[page]);
 
 /* CRUD */
-const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");await sb.from("leads").upsert(L2db(c))},[]);
-const del=useCallback(async id=>{setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");await sb.from("leads").delete().eq("id",id)},[]);
+const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");if(l._isNew){addNotif("fa-plus","var(--green)","Nouveau lead: "+c.nom+" ("+c.service+")",c.id);addActivity(sess,"a ajouté",c.nom,"var(--green)")}else{addActivity(sess,"a modifié",c.nom,"var(--blue)")}await sb.from("leads").upsert(L2db(c))},[sess]);
+const del=useCallback(async id=>{const l=leads.find(x=>x.id===id);setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");addActivity(sess,"a supprimé",l?.nom||"lead","var(--red)");await sb.from("leads").delete().eq("id",id)},[leads,sess]);
 const touch=useCallback(async(id,msg)=>{const l=leads.find(x=>x.id===id);if(!l)return;const t=(l.tentatives||0)+1;const nl=addLog(l.activityLog,msg||"Contact #"+t);setLeads(p=>p.map(x=>x.id===id?{...x,lastInteraction:new Date().toISOString(),tentatives:t,activityLog:nl}:x));await sb.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t,activity_log:nl}).eq("id",id)},[leads]);
-const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={status:"status",lastInteraction:"last_interaction",tentatives:"tentatives",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",activityLog:"activity_log"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});await sb.from("leads").update(db).eq("id",id)},[]);
-const updV=useCallback(async(id,vs,vn)=>{const nl=addLog(leads.find(l=>l.id===id)?.activityLog||"","Vérif: "+vs);setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,activityLog:nl}:l));setShowVerif(null);flash("Vérif ✓");await sb.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td(),activity_log:nl}).eq("id",id)},[leads]);
+const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={status:"status",lastInteraction:"last_interaction",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",activityLog:"activity_log"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});await sb.from("leads").update(db).eq("id",id)},[]);
+const updV=useCallback(async(id,vs,vn)=>{const nl=addLog(leads.find(l=>l.id===id)?.activityLog||"","Vérif:"+vs);setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,activityLog:nl}:l));setShowVerif(null);flash("Vérif ✓");await sb.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td(),activity_log:nl}).eq("id",id)},[leads]);
 const upsP=useCallback(async p=>{const c={...p};delete c._isNew;setPrestas(pr=>pr.some(x=>x.id===c.id)?pr.map(x=>x.id===c.id?c:x):[...pr,c]);setShowPF(false);setEditP(null);flash("Presta ✓");await sb.from("prestataires").upsert(c)},[]);
 const delP=useCallback(async id=>{setPrestas(pr=>pr.filter(x=>x.id!==id));setShowPF(false);setEditP(null);flash("Supprimé");await sb.from("prestataires").delete().eq("id",id)},[]);
 
-/* Drag */
 const onDS=(e,id)=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
-const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→ "+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));flash(l?.nom+" → "+COLS.find(c=>c.id===col)?.label);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}setDragOver(null)};
+const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));const colLabel=COLS.find(c=>c.id===col)?.label;flash(l?.nom+" → "+colLabel);addActivity(sess,"a déplacé",l?.nom+" → "+colLabel);if(col==="signe")addNotif("fa-trophy","var(--green)",l?.nom+" signé! "+E(l?.valeur),id);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}setDragOver(null)};
 
-/* AI */
-const askAI=async pr=>{setAiMsgs(p=>[...p,{role:"user",content:pr}]);setAiIn("");setAiLoad(true);try{const sg=leads.filter(l=>l.status==="signe");const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:"Assistant Webo Asset Management. Com 20%HT, prosp 50%=10%. "+leads.length+" leads, "+sg.length+" signés("+sg.reduce((s,l)=>s+l.valeur,0)+"€). Français, concret, expert.",messages:[...aiMsgs.slice(-6).map(m=>({role:m.role,content:m.content})),{role:"user",content:pr}]})});const d=await r.json();const t=(d.content||[]).map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur";setAiMsgs(p=>[...p,{role:"assistant",content:t}])}catch(e){setAiMsgs(p=>[...p,{role:"assistant",content:"Erreur IA."}])}setAiLoad(false)};
+const askAI=async pr=>{setAiMsgs(p=>[...p,{role:"user",content:pr}]);setAiIn("");setAiLoad(true);try{const sg=leads.filter(l=>l.status==="signe");const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:"Assistant WEBO Asset Management. Com 20%, Fondateur garde 100%, Chasseur split 50%. "+leads.length+" leads, "+sg.length+" signés. Français, expert, concret.",messages:[...aiMsgs.slice(-6).map(m=>({role:m.role,content:m.content})),{role:"user",content:pr}]})});const d=await r.json();const t=(d.content||[]).map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur";setAiMsgs(p=>[...p,{role:"assistant",content:t}])}catch(e){setAiMsgs(p=>[...p,{role:"assistant",content:"Erreur IA."}])}setAiLoad(false)};
 useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"})},[aiMsgs,aiLoad]);
 
 /* Supabase */
 useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads").select("*");setLeads((lr.data||[]).map(db2L));try{const pr=await sb.from("prestataires").select("*");setPrestas(pr.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
-useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n])}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[]);
+useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
 
+/* V13 — Auto-generate notifications from urgent items */
+useEffect(()=>{if(!ready||notifs.length>0)return;const init=[];
+urgL.slice(0,5).forEach(l=>init.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" — inactif depuis "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));
+leads.filter(l=>l.status==="signe"&&!l.paymentProof).slice(0,3).forEach(l=>init.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement manquante: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));
+leads.filter(l=>l.status==="signe"&&dA(l.dateCreated)>=30&&l.verifStatus!=="confirmed").slice(0,3).forEach(l=>init.push({id:uid(),icon:"fa-shield",color:"var(--red)",msg:"Vérif commission 30j+: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));
+if(init.length>0)setNotifs(init)},[ready,urgL,leads]);
+
+/* Computed */
 const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===sess),[leads,sess,isA]);
-const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);if(fS!=="all")f=f.filter(l=>l.service===fS);return f},[myL,fM,fS]);
+const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
 const srt=c=>{if(sortBy==="valeur")return[...c].sort((a,b)=>b.valeur-a.valeur);if(sortBy==="date")return[...c].sort((a,b)=>new Date(b.dateCreated)-new Date(a.dateCreated));return c};
+const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
 
-const st=useMemo(()=>{const src=isA?leads:myL;const sg=src.filter(l=>l.status==="signe");const pipe=src.filter(l=>!["injoignable","signe"].includes(l.status));const ca=sg.reduce((s,l)=>s+l.valeur,0);const w=pipe.reduce((s,l)=>{const c=COLS.find(x=>x.id===l.status);return s+(l.valeur*(c?.proba||0))},0);const stale=src.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=48).length;const od=src.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dU(l.nextRelance)<0).length;const urg=myL.filter(isUrg).length;
+/* Agenda: relances du jour + overdue + 3 days dormant */
+const agendaItems=useMemo(()=>{const items=[];
+myL.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dU(l.nextRelance)<=0).forEach(l=>items.push({type:"relance",urgency:dU(l.nextRelance)<0?"bordeaux":"gold",lead:l,time:l.nextRelance,label:"Relance "+l.nom}));
+myL.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=72).forEach(l=>{if(!items.find(x=>x.lead.id===l.id))items.push({type:"dormant",urgency:"bordeaux",lead:l,time:l.lastInteraction,label:l.nom+" — "+Math.floor(dA(l.lastInteraction))+"j sans contact"})});
+leads.filter(l=>l.status==="signe"&&!l.paymentProof).forEach(l=>items.push({type:"paiement",urgency:"gold",lead:l,time:l.dateCreated,label:"Preuve paiement — "+l.nom}));
+leads.filter(l=>l.status==="signe"&&dA(l.dateCreated)>=30&&l.verifStatus!=="confirmed").forEach(l=>{if(!items.find(x=>x.type==="paiement"&&x.lead.id===l.id))items.push({type:"verif",urgency:"bordeaux",lead:l,time:l.dateCreated,label:"Vérif commission — "+l.nom+" ("+Math.floor(dA(l.dateCreated))+"j)"})});
+return items.sort((a,b)=>a.urgency==="bordeaux"&&b.urgency!=="bordeaux"?-1:1)},[myL,leads,now]);
+
+/* Leaderboard */
+const leaderboard=useMemo(()=>TEAM.map(m=>{const sg=leads.filter(l=>l.status==="signe"&&l.memberId===m.id);return{...m,signes:sg.length,ca:sg.reduce((s,l)=>s+l.valeur,0)}}).sort((a,b)=>b.signes-a.signes),[leads]);
+
+/* Stats */
+const st=useMemo(()=>{const src=isA?leads:myL;const sg=src.filter(l=>l.status==="signe");const pipe=src.filter(l=>!["injoignable","signe"].includes(l.status));const ca=sg.reduce((s,l)=>s+l.valeur,0);const w=pipe.reduce((s,l)=>{const c=COLS.find(x=>x.id===l.status);return s+(l.valeur*(c?.proba||0))},0);
+const totalMargeNette=sg.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).margeNette,0);
+const totalComProsp=sg.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).comProsp,0);
+const stale=src.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=48).length;
+const od=src.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)&&dU(l.nextRelance)<0).length;
 const avgC=sg.length?Math.round(sg.reduce((s,l)=>s+(cDays(l.dateCreated,l.status)||0),0)/sg.length):0;
-const byM=TEAM.filter(t=>t.role==="Prospecteur").map(m=>{const ml=src.filter(l=>l.memberId===m.id);const ms=ml.filter(l=>l.status==="signe");const mc=ms.reduce((s,l)=>s+l.valeur,0);return{...m,total:ml.length,signes:ms.length,conv:ml.length?Math.round(ms.length/ml.length*100):0,ca:mc,comW:mc*.2,comP:mc*.10}}).sort((a,b)=>b.comW-a.comW);
+const byM=TEAM.map(m=>{const ml=src.filter(l=>l.memberId===m.id);const ms=ml.filter(l=>l.status==="signe");const mc=ms.reduce((s,l)=>s+l.valeur,0);const margins=ms.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).margeNette,0);const prosp=ms.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).comProsp,0);return{...m,total:ml.length,signes:ms.length,conv:ml.length?Math.round(ms.length/ml.length*100):0,ca:mc,marge:margins,prosp}}).sort((a,b)=>b.signes-a.signes);
 const bySrc=SOURCES.map(s=>{const sl=src.filter(l=>l.source===s);const ss=sl.filter(l=>l.status==="signe");return{source:s,total:sl.length,signes:ss.length,rate:sl.length?Math.round(ss.length/sl.length*100):0,ca:ss.reduce((a,l)=>a+l.valeur,0)}}).filter(s=>s.total>0).sort((a,b)=>b.ca-a.ca);
-return{total:src.length,signes:sg.length,stale,od,urg,ca,w,tw:w+ca,profit:ca*.2,comP:ca*.10,avgC,byM,bySrc,obj:Math.min(Math.round(ca/OBJ*100),100)}},[leads,myL,isA,now]);
+return{total:src.length,signes:sg.length,stale,od,urg:urgL.length,ca,w,tw:w+ca,margeNette:totalMargeNette,comProsp:totalComProsp,avgC,byM,bySrc,obj:Math.min(Math.round(ca/OBJ*100),100),agenda:agendaItems.length}},[leads,myL,isA,now,urgL,agendaItems]);
 
-/* Command palette */
+/* CMD palette */
 const cmdRes=useMemo(()=>{if(!cmdQ)return[];const q=cmdQ.toLowerCase();return[
-...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-users",l:"Nouveau Prestataire",a:()=>{setPage("talents");setShowPF(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-chart-line",l:"Analyse Financière",a:()=>setPage("finance")},{i:"fa-fire",l:"Focus Urgents",a:()=>{setPage("pipeline");setView("focus")}}].filter(c=>c.l.toLowerCase().includes(q)),
-...leads.filter(l=>l.nom.toLowerCase().includes(q)).slice(0,5).map(l=>({i:"fa-user",l:l.nom+" — "+l.service,a:()=>{setSelLead(l);setPage("pipeline")}})),
-...prestas.filter(p=>p.nom.toLowerCase().includes(q)).slice(0,3).map(p=>({i:"fa-handshake",l:p.nom+" — "+p.specialite,a:()=>{setEditP(p);setShowPF(true);setPage("talents")}}))
-]},[cmdQ,leads,prestas]);
+...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-users",l:"Nouveau Prestataire",a:()=>{setPage("talents");setShowPF(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")}].filter(c=>c.l.toLowerCase().includes(q)),
+...leads.filter(l=>l.nom.toLowerCase().includes(q)).slice(0,5).map(l=>({i:"fa-user",l:l.nom+" — "+l.service,a:()=>{setSelLead(l);setPage("pipeline")}}))
+]},[cmdQ,leads]);
 
-/* LOGIN */
+/* ═══ LOGIN ═══ */
 if(!sess)return(
 <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",background:"var(--bg)"}}>
 <div className="fu" style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:12,padding:48,maxWidth:400,width:"95%",textAlign:"center"}}>
-  <div style={{marginBottom:8}}><span style={{fontFamily:"var(--serif)",fontWeight:700,fontSize:48,color:"var(--gold)",fontStyle:"italic"}}>W</span><span style={{fontFamily:"var(--serif)",fontWeight:600,fontSize:42,color:"var(--text)"}}>ebo</span></div>
-  <div style={{fontSize:10,color:"var(--text3)",letterSpacing:4,textTransform:"uppercase",fontFamily:"var(--mono)",marginBottom:32}}>Asset Management</div>
+  <div style={{marginBottom:4}}><span style={{fontFamily:"var(--serif)",fontWeight:700,fontSize:48,color:"var(--gold)",fontStyle:"italic"}}>W</span><span style={{fontFamily:"var(--serif)",fontWeight:600,fontSize:42,color:"var(--text)"}}>ebo</span></div>
+  <div style={{fontSize:9,color:"var(--text3)",letterSpacing:4,textTransform:"uppercase",fontFamily:"var(--mono)",marginBottom:24}}>Asset Management</div>
   <div className="sep"/>
-  <p style={{fontSize:14,color:"var(--text2)",margin:"16px 0 24px",fontFamily:"var(--serif)",fontStyle:"italic"}}>Votre croissance, notre expertise.</p>
+  <p style={{fontSize:13,color:"var(--text2)",margin:"12px 0 20px",fontFamily:"var(--serif)",fontStyle:"italic"}}>Votre croissance, notre expertise.</p>
   <div style={{textAlign:"left"}}><FF l="Identifiant"><input style={IS} value={logId} onChange={e=>{setLogId(e.target.value);setLogErr("")}} placeholder="kylian ou email" onKeyDown={e=>{if(e.key==="Enter")doLogin()}}/></FF>
   <FF l="Mot de passe"><input style={IS} type="password" value={logPw} onChange={e=>{setLogPw(e.target.value);setLogErr("")}} placeholder="••••••" onKeyDown={e=>{if(e.key==="Enter")doLogin()}}/></FF></div>
-  {logErr&&<div style={{color:"var(--red)",fontSize:12,marginBottom:8,fontWeight:600}}>{logErr}</div>}
+  {logErr&&<div style={{color:"var(--red)",fontSize:12,marginBottom:8}}>{logErr}</div>}
   <button onClick={doLogin} style={{width:"100%",padding:14,borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:14,fontWeight:700,letterSpacing:.5}}>Accéder au Terminal</button>
-  <div style={{marginTop:16,fontSize:9,color:"var(--text4)",fontFamily:"var(--mono)"}}>⌘K Commandes · N Nouveau · Backspace Retour</div>
+  <div style={{marginTop:14,fontSize:9,color:"var(--text4)",fontFamily:"var(--mono)"}}>⌘K Commandes · N Lead · ⌫ Hub</div>
 </div></div>);
-
 if(!ready)return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh"}}><div style={{color:"var(--gold)"}}>Initialisation…</div></div>;
 
-/* NAVIGATION */
+/* ═══ NAV ═══ */
 const Nav=()=>(
 <nav className="topnav">
-  <a href="#" className="topnav-logo" onClick={e=>{e.preventDefault();setPage("hub")}}><span className="w">W</span><span className="rest">ebo</span></a>
-  <span className="topnav-tag">Asset Management</span>
+  <span className="logo" onClick={()=>setPage("hub")}><span className="w">W</span><span className="r">ebo</span></span>
+  <span className="logo-tag">Asset Management</span>
   <div style={{flex:1}}/>
-  {page!=="hub"&&<button className="nav-btn" onClick={()=>setPage("hub")}><i className="fa-solid fa-arrow-left"/> Hub</button>}
-  <button className={"nav-btn "+(page==="pipeline"?"active":"")} onClick={()=>setPage("pipeline")}><i className="fa-solid fa-chart-bar"/> Pipeline</button>
-  <button className={"nav-btn "+(page==="talents"?"active":"")} onClick={()=>setPage("talents")}><i className="fa-solid fa-users"/> Talents</button>
-  <button className={"nav-btn "+(page==="finance"?"active":"")} onClick={()=>setPage("finance")}><i className="fa-solid fa-coins"/> Finance</button>
-  <button className="nav-btn" onClick={()=>setCmd(true)}><i className="fa-solid fa-magnifying-glass"/></button>
-  <button className="nav-btn" onClick={()=>setPrivacy(p=>!p)} style={{color:privacy?"var(--red)":"var(--text2)"}}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")}/></button>
-  <button className="nav-btn" onClick={()=>{const d=JSON.stringify({v:"AM",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-backup-"+td()+".json";a.click();flash("Backup ✓")}}><i className="fa-solid fa-cloud-arrow-down"/></button>
-  <div style={{display:"flex",alignItems:"center",gap:6,padding:"4px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}>
-    <Av id={sess} sz={24}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(sess)}</span><span className={"sync-dot "+sync}/>
+  {/* LEADERBOARD LIVE */}
+  <div className="lb-mini">
+    <span style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginRight:4}}>TOP</span>
+    {leaderboard.slice(0,3).map((m,i)=><div key={m.id} className="lb-item">
+      <div className="lb-rank" style={{background:i===0?"var(--gold)":i===1?"var(--text3)":"#8B4513",color:i===0?"var(--bg)":"var(--text)"}}>{i+1}</div>
+      <span style={{color:m.color}}>{mN(m.id)}</span>
+      <span style={{fontFamily:"var(--mono)",color:"var(--green)"}}>{m.signes}</span>
+    </div>)}
   </div>
-  <button className="nav-btn" onClick={()=>{setSess("");try{localStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--text3)"}}><i className="fa-solid fa-power-off"/></button>
+  <div style={{display:"flex",gap:4,alignItems:"center"}}>
+    {page!=="hub"&&<button className="nb" onClick={()=>setPage("hub")}><i className="fa-solid fa-arrow-left"/> Hub</button>}
+    <button className="nb" onClick={()=>setCmd(true)}><i className="fa-solid fa-magnifying-glass"/></button>
+    {/* V13 — NOTIFICATIONS */}
+    <div style={{position:"relative"}}><button className="notif-bell" onClick={()=>{setShowNotif(p=>!p)}}><i className="fa-solid fa-bell" style={{fontSize:13,color:showNotif?"var(--gold)":"var(--text2)"}}/>{unreadCount>0&&<div className="notif-dot"/>}</button>
+    {showNotif&&<div className="notif-panel" onClick={e=>e.stopPropagation()}>
+      <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:13}}>Notifications</span>{unreadCount>0&&<button onClick={markAllRead} style={{fontSize:10,color:"var(--gold)",fontWeight:600}}>Tout lu</button>}</div>
+      {notifs.length===0?<div className="notif-empty"><i className="fa-regular fa-bell-slash" style={{display:"block",fontSize:18,marginBottom:6}}/> Aucune notification</div>:notifs.slice(0,20).map(n=><div key={n.id} className={"notif-item"+(n.read?"":" unread")} onClick={()=>{if(n.leadId){const l=leads.find(x=>x.id===n.leadId);if(l){setSelLead(l);setPage("pipeline")}}setNotifs(p=>p.map(x=>x.id===n.id?{...x,read:true}:x));setShowNotif(false)}}>
+        <div className="notif-icon" style={{background:n.color+"15",color:n.color}}><i className={"fa-solid "+n.icon}/></div>
+        <div style={{flex:1}}><div style={{fontSize:12,lineHeight:1.4}}>{n.msg}</div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{fA(hA(n.time))}</div></div>
+      </div>)}
+    </div>}
+    </div>
+    {/* V13 — CSV EXPORT */}
+    <div style={{position:"relative"}}><button className="nb" onClick={()=>{exportLeads()}} title="Export CSV"><i className="fa-solid fa-file-csv"/></button></div>
+    <button className="nb" onClick={()=>setPrivacy(p=>!p)} style={{color:privacy?"var(--red)":"var(--text2)"}}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")}/></button>
+    <button className="nb" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓")}}><i className="fa-solid fa-cloud-arrow-down"/></button>
+    <div style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}><Av id={sess} sz={22}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(sess)}</span><span style={{fontSize:9,color:"var(--text3)"}}>{sU?.role}</span><span className={"sync-dot "+sync}/></div>
+    <button className="nb" onClick={()=>{setSess("");try{localStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--text3)"}}><i className="fa-solid fa-power-off"/></button>
+  </div>
 </nav>);
 
-/* HUB PAGE */
+/* ═══ HUB ═══ */
 const HubPage=()=>(
 <div className="hub">
-  <div className="fu"><h1 className="hub-title">Bienvenue, {mN(sess)}</h1><p className="hub-sub">Fondateur & Expert en Croissance — WEBO Asset Management</p></div>
-  {/* Quick Stats */}
-  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:32}}>
-    {[{l:"Portefeuille",v:st.total+" deals",c:"var(--gold)"},{l:"Signés",v:st.signes,c:"var(--green)"},{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Profit Net",v:E(st.profit),c:"var(--gold)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
-    <div key={i} className="stat-card fu" style={{animationDelay:i*50+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c}}><P$ v={s.v} p={pm}/></div></div>)}
+  <div className="hub-header fu">
+    <div><h1 className="hub-title">Bienvenue, {sU?.name||""}</h1><p className="hub-sub">{sU?.role} — WEBO Asset Management · Fondateur & Expert en Croissance</p></div>
   </div>
-  {/* Master Cards */}
+  <div className="hub-stats">
+    {[{l:"Portefeuille",v:st.total,c:"var(--gold)"},{l:"Signés",v:st.signes,c:"var(--green)"},{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Marge Nette",v:E(st.margeNette),c:"var(--gold)"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"},{l:"Agenda",v:st.agenda+" tâches",c:st.agenda>0?"var(--red)":"var(--green)"}].map((s,i)=>
+    <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:20}}><P$ v={s.v} p={pm}/></div></div>)}
+  </div>
+  {/* V13 — FUNNEL + ACTIVITY FEED */}
+  <div style={{display:"grid",gridTemplateColumns:isA?"1fr 1fr":"1fr",gap:14,marginBottom:28}}>
+    {/* Funnel de conversion */}
+    <div className="chart-card">
+      <div className="chart-card-h"><span><i className="fa-solid fa-filter" style={{color:"var(--gold)",marginRight:6}}/>Funnel Pipeline</span><span style={{color:"var(--text3)"}}>{st.total} leads</span></div>
+      <div style={{padding:"6px 0"}}>{COLS.filter(c=>c.id!=="injoignable").map((col,i)=>{const cnt=myL.filter(l=>l.status===col.id).length;const maxCnt=Math.max(...COLS.map(c=>myL.filter(l=>l.status===c.id).length),1);const pct=Math.round(cnt/maxCnt*100);const val=myL.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);
+      return <div key={col.id} className="funnel-step" style={{animationDelay:i*50+"ms"}}>
+        <div style={{width:90,fontSize:10,fontWeight:600,color:col.accent,flexShrink:0}}><i className={"fa-solid "+col.icon} style={{marginRight:4,fontSize:9}}/>{col.label}</div>
+        <div style={{flex:1}}><div className="funnel-bar" style={{width:Math.max(pct,6)+"%",background:"linear-gradient(90deg,"+col.accent+"CC,"+col.accent+"55)"}}>{cnt>0?cnt:""}</div></div>
+        <div style={{width:70,textAlign:"right",fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}><P$ v={E(val)} p={pm}/></div>
+      </div>})}</div>
+    </div>
+    {/* Activity Feed */}
+    {isA&&<div className="chart-card">
+      <div className="chart-card-h"><span><i className="fa-solid fa-bolt" style={{color:"var(--gold)",marginRight:6}}/>Activité Récente</span><span style={{color:"var(--text3)"}}>{actFeed.length} actions</span></div>
+      <div className="feed">
+        {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-clock" style={{display:"block",fontSize:18,marginBottom:6}}/>Les actions de l'équipe apparaîtront ici</div>:
+        actFeed.slice(0,15).map((a,i)=><div key={a.id} className="feed-item" style={{animationDelay:i*30+"ms"}}>
+          <div className="feed-dot" style={{background:a.color||"var(--gold)"}}/>
+          <div style={{flex:1}}><div className="feed-msg"><strong style={{color:mC(a.who)}}>{mN(a.who)}</strong> {a.action} <strong>{a.target}</strong></div><div className="feed-time">{fA(hA(a.time))}</div></div>
+        </div>)}
+      </div>
+    </div>}
+  </div>
   <div className="hub-grid">
-    {[{icon:"fa-chart-line",title:"Pipeline Commercial",desc:"Kanban, leads, prospection et suivi de conversion.",page:"pipeline",count:st.total},
-    {icon:"fa-users-gear",title:"Gestion des Talents",desc:"Prestataires, compétences, charge et performance.",page:"talents",count:prestas.length},
-    {icon:"fa-calendar-check",title:"Calendrier des Livrables",desc:"Timeline des relances, deadlines et jalons projet.",page:"planning",count:st.od+" en retard"},
-    {icon:"fa-chart-pie",title:"Analyse Financière",desc:"CA, commissions, ROI par source, cash-flow prévisionnel.",page:"finance",count:E(st.ca)},
-    {icon:"fa-robot",title:"Agent IA Stratégique",desc:"Analyse automatisée, coaching et prévisions.",page:"ia",count:"GPT"}
-    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+6)*50+"ms"}} onClick={()=>setPage(c.page)}>
+    {[{icon:"fa-chart-line",title:"Pipeline Commercial",desc:"Kanban, leads, prospection, cycle de vente.",pg:"pipeline",cnt:st.total+" deals"},
+    {icon:"fa-users-gear",title:"Réseau de Talents",desc:"Prestataires d'élite, compétences, charge.",pg:"talents",cnt:prestas.length+" prestas"},
+    {icon:"fa-calendar-check",title:"Agenda & Échéances",desc:"Daily Focus : relances, audits, deadlines paiement.",pg:"agenda",cnt:st.agenda+" tâches"},
+    {icon:"fa-chart-pie",title:"Contrôle Financier",desc:"CA, marge nette, ROI, commissions Fondateur vs Chasseurs.",pg:"finance",cnt:E(st.margeNette)},
+    {icon:"fa-robot",title:"Agent IA Stratégique",desc:"Analyse, coaching, prévisions automatisées.",pg:"ia",cnt:"IA"},
+    {icon:"fa-calendar-days",title:"Calendrier",desc:"Vue mensuelle des relances, signatures et échéances.",pg:"cal",cnt:st.agenda+" évts"},
+    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>{setPage(c.pg==="cal"?"pipeline":c.pg);if(c.pg==="cal")setPView("calendar")}}>
       <div className="hub-card-icon"><i className={"fa-solid "+c.icon}/></div>
-      <h3>{c.title}</h3><p>{c.desc}</p>
-      <div className="count">{c.count}</div>
+      <h3>{c.title}</h3><p>{c.desc}</p><div className="cnt">{c.cnt}</div>
     </div>)}
   </div>
 </div>);
 
-/* PIPELINE PAGE */
-const PipelinePage=()=>{
-const urgL=myL.filter(isUrg);
-const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"}];
-return <div style={{padding:"16px 20px",flex:1,overflow:"auto"}}>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:8}}>
-    <h2 style={{fontFamily:"var(--serif)",fontSize:22,fontWeight:600}}>Pipeline Commercial</h2>
-    <div style={{display:"flex",gap:6,alignItems:"center"}}>
-      {views.map(v=><button key={v.id} onClick={()=>setView(v.id)} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid "+(view===v.id?"var(--gold)":"var(--border)"),color:view===v.id?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:view===v.id?"var(--gold)08":"transparent"}}><i className={"fa-solid "+v.i} style={{marginRight:4}}/>{v.l}</button>)}
-      <div style={{width:1,height:20,background:"var(--border)"}}/>
-      {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"5px 8px",fontSize:11,width:"auto"}}><option value="all">Tous</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)}</option>)}</select>}
-      <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...IS,padding:"5px 8px",fontSize:11,width:"auto"}}><option value="default">Tri</option><option value="valeur">Valeur↓</option><option value="date">Date↓</option></select>
-      <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:4}}/>Lead</button>
+/* ═══ PIPELINE ═══ */
+const Pipeline=()=>{
+const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"},{id:"calendar",l:"Calendrier",i:"fa-calendar-days"}];
+return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",flexDirection:"column"}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
+    <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Pipeline Commercial</h2>
+    <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
+      {views.map(v=><button key={v.id} onClick={()=>setPView(v.id)} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(pView===v.id?"var(--gold)":"var(--border)"),color:pView===v.id?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:pView===v.id?"rgba(197,160,89,.06)":"transparent"}}><i className={"fa-solid "+v.i} style={{marginRight:3}}/>{v.l}</button>)}
+      <span style={{width:1,height:18,background:"var(--border)"}}/>
+      {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:11,width:"auto"}}><option value="all">Tous</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)} ({m.role})</option>)}</select>}
+      <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:11,width:"auto"}}><option value="default">Tri</option><option value="valeur">Valeur↓</option><option value="date">Date↓</option></select>
+      {pView==="table"&&<button onClick={exportLeads} className="nb" style={{fontSize:10,border:"1px solid var(--border)"}} title="Export CSV"><i className="fa-solid fa-file-csv" style={{marginRight:3}}/>CSV</button>}
+      <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Lead</button>
     </div>
   </div>
 
-  {/* TABLE VIEW */}
-  {view==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",overflow:"auto"}}>
-  <table className="tbl"><thead><tr><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th><th>Prospecteur</th><th>Temp.</th><th>Activité</th><th>Actions</th></tr></thead>
-  <tbody>{srt(filt).map(l=>{const h=hA(l.lastInteraction);const urg=isUrg(l);
-  return <tr key={l.id} style={{borderLeft:urg?"3px solid var(--red)":"3px solid transparent"}} onClick={()=>setSelLead(l)}>
-    <td><div style={{display:"flex",alignItems:"center",gap:8}}><Av id={l.memberId} sz={28}/><div><div style={{fontWeight:600,fontSize:13}}>{l.nom}{l.valeur>=HOT&&<span className="fire" style={{fontSize:10,marginLeft:4}}>🔥</span>}</div><div style={{fontSize:10,color:"var(--text3)"}}>{l.email||l.phone||""}</div></div></div></td>
-    <td><StatusBadge status={l.status}/></td>
-    <td style={{fontSize:12,color:"var(--text2)"}}>{l.service}</td>
+  {/* TABLE */}
+  {pView==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",overflow:"auto",flex:1}}>
+  <table className="tbl"><thead><tr><th style={{width:30}}><input type="checkbox" className="chk" onChange={selAll} checked={selIds.size>0&&selIds.size===filt.length}/></th><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th><th>Marge Nette</th><th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
+  <tbody>{srt(filt).map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);const h=hA(l.lastInteraction);const isSel=selIds.has(l.id);
+  return <tr key={l.id} style={{borderLeft:urg?"3px solid var(--red)":"3px solid transparent",background:isSel?"rgba(197,160,89,.04)":"transparent"}} onClick={()=>setSelLead(l)}>
+    <td onClick={e=>e.stopPropagation()}><input type="checkbox" className="chk" checked={isSel} onChange={()=>toggleSel(l.id)}/></td>
+    <td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={l.memberId} sz={26}/><div><div style={{fontWeight:600,fontSize:12}}>{l.nom}{l.valeur>=HOT&&<span style={{color:"var(--red)",marginLeft:3,fontSize:10}}>🔥</span>}</div><div style={{fontSize:10,color:"var(--text3)"}}>{l.email||l.phone||""}</div></div></div></td>
+    <td><SBadge status={l.status}/></td>
+    <td style={{fontSize:11,color:"var(--text2)"}}>{l.service}</td>
     <td style={{fontFamily:"var(--mono)",fontWeight:600}}><P$ v={E(l.valeur)} p={pm}/></td>
-    <td><span style={{color:mC(l.memberId),fontWeight:600,fontSize:12}}>{mN(l.memberId)}</span></td>
+    <td style={{fontFamily:"var(--mono)",fontWeight:600,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></td>
+    <td><span style={{color:mC(l.memberId),fontWeight:600,fontSize:11}}>{mN(l.memberId)}</span><span style={{fontSize:9,color:"var(--text3)",marginLeft:4}}>{TEAM.find(t=>t.id===l.memberId)?.role}</span></td>
     <td>{TEMPS.find(t=>t.id===l.temperature)?.e}</td>
-    <td style={{fontSize:11,color:"var(--text3)"}}>{h?fA(h):"—"}{urg&&<span style={{color:"var(--red)",fontWeight:700,marginLeft:4}}>●</span>}</td>
-    <td onClick={e=>e.stopPropagation()}>
-      <div style={{display:"flex",gap:4}}><button onClick={()=>openWA(l,mN(l.memberId))} className="wa-btn"><i className="fa-brands fa-whatsapp"/></button><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"4px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}><i className="fa-solid fa-pen"/></button></div>
-    </td>
+    <td style={{fontSize:10,color:"var(--text3)"}}>{h?fA(h):"—"}{urg&&<span style={{color:"var(--red)",fontWeight:700,marginLeft:3}}>●</span>}</td>
+    <td onClick={e=>e.stopPropagation()}><div style={{display:"flex",gap:3}}><button onClick={()=>openWA(l,mN(l.memberId))} className="wa"><i className="fa-brands fa-whatsapp"/></button><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"3px 7px",borderRadius:4,border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-pen"/></button></div></td>
   </tr>})}</tbody></table></div>}
 
   {/* KANBAN */}
-  {view==="kanban"&&<div className="kanban-scroll">
+  {pView==="kanban"&&<div className="kanban-scroll" style={{flex:1}}>
   {COLS.map(col=>{const cards=srt(filt.filter(l=>l.status===col.id));const cv=cards.reduce((s,l)=>s+l.valeur,0);
   return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
-    <div style={{padding:"8px 6px",borderBottom:"1px solid var(--border)",marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <div style={{display:"flex",alignItems:"center",gap:4}}><i className={"fa-solid "+col.icon} style={{fontSize:10,color:col.accent}}/><span style={{fontSize:11,fontWeight:600,color:col.accent,fontFamily:"var(--mono)"}}>{col.label}</span></div>
-      <span style={{fontSize:11,fontWeight:700,color:col.accent,fontFamily:"var(--mono)"}}><P$ v={E(cv)} p={pm}/></span>
+    <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
+      <div style={{display:"flex",alignItems:"center",gap:3}}><i className={"fa-solid "+col.icon} style={{fontSize:9,color:col.accent}}/><span style={{fontSize:10,fontWeight:600,color:col.accent,fontFamily:"var(--mono)"}}>{col.label}</span></div>
+      <span style={{fontSize:10,fontWeight:700,color:col.accent,fontFamily:"var(--mono)"}}><P$ v={E(cv)} p={pm}/></span>
     </div>
-    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",padding:"0 4px 4px"}}>{cards.length} · {Math.round(col.proba*100)}%</div>
-    <div style={{flex:1,overflowY:"auto"}}>{cards.map(l=>{const urg=isUrg(l);const presta=l.prestaId?pN(l.prestaId):"";
+    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",padding:"0 4px 3px"}}>{cards.length} · {Math.round(col.proba*100)}%</div>
+    <div style={{flex:1,overflowY:"auto"}}>{cards.map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);
     return <div key={l.id} className="kc" draggable onDragStart={e=>onDS(e,l.id)} onDragEnd={()=>setDragOver(null)} onClick={()=>setSelLead(l)} style={{borderLeft:"3px solid "+(urg?"var(--red)":"transparent")}}>
-      <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:3}}><Av id={l.memberId} sz={16}/><span style={{fontWeight:600,fontSize:11,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.nom}</span>{l.valeur>=HOT&&<span style={{fontSize:9}} className="fire">🔥</span>}<span style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{l.tentatives||""}</span></div>
-      <div style={{display:"flex",gap:3,marginBottom:2,fontSize:9,color:"var(--text2)"}}><span>{l.service}</span>{presta&&<span style={{color:"var(--gold)"}}>🤝{presta}</span>}</div>
-      {urg&&<span style={{fontSize:8,fontWeight:700,color:"var(--red)",background:"var(--red)10",padding:"1px 5px",borderRadius:3}}>URGENT</span>}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:3}}>
-        <span style={{fontSize:12,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></span>
-        <div style={{display:"flex",gap:2}}><button onClick={e=>{e.stopPropagation();openWA(l,mN(l.memberId))}} className="wa-btn" style={{padding:"1px 4px",fontSize:9}}><i className="fa-brands fa-whatsapp"/></button></div>
+      <div style={{display:"flex",alignItems:"center",gap:3,marginBottom:2}}><Av id={l.memberId} sz={14}/><span style={{fontWeight:600,fontSize:10,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.nom}</span>{l.valeur>=HOT&&<span style={{fontSize:8,color:"var(--red)"}}>🔥</span>}</div>
+      <div style={{fontSize:9,color:"var(--text2)",marginBottom:2}}>{l.service}{l.prestaId?" · 🤝"+pN(l.prestaId):""}</div>
+      {urg&&<span style={{fontSize:8,fontWeight:700,color:"var(--red)",background:"rgba(231,76,76,.08)",padding:"1px 4px",borderRadius:3}}>URGENT</span>}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:2}}>
+        <span style={{fontSize:11,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></span>
+        <span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></span>
       </div>
       <Prog pct={Math.round((COLS.find(c=>c.id===l.status)?.proba||0)*100)} color={col.accent}/>
-    </div>})}{cards.length===0&&<div style={{padding:8,textAlign:"center",color:"var(--text4)",fontSize:10}}>—</div>}</div>
+    </div>})}</div>
   </div>})}
   </div>}
 
   {/* FOCUS */}
-  {view==="focus"&&<div>
-  <div style={{marginBottom:12,color:"var(--red)",fontWeight:700}}><i className="fa-solid fa-fire" style={{marginRight:6}}/>Focus — {urgL.length} leads urgents</div>
-  {urgL.map(l=><div key={l.id} className="card fu" style={{marginBottom:8,borderLeft:"3px solid var(--red)"}}>
-    <div style={{padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10}}><Av id={l.memberId}/><div><div style={{fontWeight:600,fontSize:14}}>{l.nom}</div><div style={{fontSize:11,color:"var(--text2)"}}>{l.service} · {COLS.find(c=>c.id===l.status)?.label} · {Math.floor(dA(l.lastInteraction))}j</div></div></div>
-      <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:16,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></span><button onClick={()=>{touch(l.id,"Contacté");flash(l.nom+" ✓")}} style={{padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:12,fontWeight:600}}>↻ Contacté</button><button onClick={()=>openWA(l,mN(l.memberId))} className="wa-btn" style={{padding:"8px 12px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/></button></div>
+  {pView==="focus"&&<div style={{flex:1,overflow:"auto"}}>
+  <div style={{color:"var(--red)",fontWeight:700,marginBottom:10}}><i className="fa-solid fa-fire"/> Focus — {urgL.length} leads urgents</div>
+  {urgL.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return <div key={l.id} className="card fu" style={{marginBottom:6,borderLeft:"3px solid var(--red)"}}>
+    <div style={{padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}><Av id={l.memberId} sz={32}/><div><div style={{fontWeight:600,fontSize:13}}>{l.nom}</div><div style={{fontSize:11,color:"var(--text2)"}}>{l.service} · {COLS.find(c=>c.id===l.status)?.label} · {Math.floor(dA(l.lastInteraction))}j</div></div></div>
+      <div style={{display:"flex",alignItems:"center",gap:6}}><div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontWeight:700}}><P$ v={E(l.valeur)} p={pm}/></div><div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)"}}><P$ v={"Marge: "+E(mg.margeNette)} p={pm}/></div></div>
+      <button onClick={()=>{touch(l.id,"Contacté");flash(l.nom+" ✓")}} style={{padding:"7px 14px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:11,fontWeight:600}}>↻</button>
+      <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"7px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/></button></div>
     </div>
-  </div>)}
-  {urgL.length===0&&<div style={{padding:40,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{fontSize:24,marginBottom:8,display:"block"}}/> Aucun lead urgent</div>}
+  </div>})}
+  {urgL.length===0&&<div style={{padding:40,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{fontSize:20,display:"block",marginBottom:6}}/> Aucun urgent</div>}
+  </div>}
+
+  {/* V13 — CALENDAR VIEW */}
+  {pView==="calendar"&&<div style={{flex:1,overflow:"auto"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+      <button onClick={()=>setCalMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()-1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-left"/></button>
+      <h3 style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:600}}>{calMonth.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</h3>
+      <button onClick={()=>setCalMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()+1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-right"/></button>
+    </div>
+    <div className="cal-grid">
+      {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(d=><div key={d} className="cal-head">{d}</div>)}
+      {calDays.map((d,i)=><div key={i} className={"cal-day"+(d.isToday?" today":"")+(d.isOther?" other":"")}>
+        <div className="cal-num" style={{color:d.isToday?"var(--gold)":"var(--text)"}}>{d.day}</div>
+        {d.events.slice(0,3).map((ev,j)=><div key={j} className="cal-ev" style={{background:ev.color+"18",color:ev.color}} onClick={()=>{if(ev.lead)setSelLead(ev.lead)}}>{ev.label}</div>)}
+        {d.events.length>3&&<div style={{fontSize:8,color:"var(--text3)",textAlign:"center"}}>+{d.events.length-3}</div>}
+      </div>)}
+    </div>
+  </div>}
+
+  {/* V13 — BULK ACTION BAR */}
+  {selIds.size>0&&<div className="bulk-bar">
+    <span className="cnt">{selIds.size} sélectionné{selIds.size>1?"s":""}</span>
+    <div style={{height:16,width:1,background:"var(--border)"}}/>
+    {COLS.filter(c=>!["injoignable"].includes(c.id)).map(c=><button key={c.id} className="bulk-btn" onClick={()=>bulkStatus(c.id)} style={{color:c.accent,borderColor:c.accent+"40"}}><i className={"fa-solid "+c.icon} style={{marginRight:3,fontSize:9}}/>{c.label}</button>)}
+    {prestas.length>0&&<select onChange={e=>{if(e.target.value)bulkAssignPresta(e.target.value);e.target.value=""}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="">Assigner presta…</option>{prestas.map(p=><option key={p.id} value={p.id}>{p.nom}</option>)}</select>}
+    <div style={{flex:1}}/>
+    <button className="bulk-btn danger" onClick={()=>setSelIds(new Set())}><i className="fa-solid fa-xmark"/> Annuler</button>
   </div>}
 </div>};
 
-/* TALENTS PAGE */
-const TalentsPage=()=>(
-<div style={{padding:"16px 20px",flex:1,overflow:"auto"}}>
-  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-    <h2 style={{fontFamily:"var(--serif)",fontSize:22,fontWeight:600}}>Gestion des Talents</h2>
-    <button onClick={()=>{setEditP(null);setShowPF(true)}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:4}}/>Prestataire</button>
+/* ═══ TALENTS ═══ */
+const Talents=()=>(
+<div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+    <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Réseau de Talents</h2>
+    <button onClick={()=>{setEditP(null);setShowPF(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Prestataire</button>
   </div>
-  {prestas.map((p,i)=>{const asg=leads.filter(l=>l.prestaId===p.id);const act=asg.filter(l=>!["signe","injoignable"].includes(l.status)).length;const sgn=asg.filter(l=>l.status==="signe").length;const ca=asg.filter(l=>l.status==="signe").reduce((s,l)=>s+l.valeur,0);const busy=act>=3;const test=sgn<3;
-  return <div key={p.id} className="card fu" style={{marginBottom:8,animationDelay:i*40+"ms",cursor:isA?"pointer":"default"}} onClick={()=>{if(isA){setEditP(p);setShowPF(true)}}}>
-    <div style={{padding:"16px 20px",display:"flex",alignItems:"center",gap:16}}>
-      <div style={{width:52,height:52,borderRadius:12,background:"var(--gold)10",border:"1px solid var(--gold)20",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,fontWeight:700,color:"var(--gold)",flexShrink:0}}>{p.nom?p.nom[0].toUpperCase():"?"}</div>
+  {prestas.map((p,i)=>{const asg=leads.filter(l=>l.prestaId===p.id);const act=asg.filter(l=>!["signe","injoignable"].includes(l.status)).length;const sgn=asg.filter(l=>l.status==="signe").length;const ca=asg.filter(l=>l.status==="signe").reduce((s,l)=>s+l.valeur,0);const busy=act>=3;const test=sgn<3;const charge=Math.min(Math.round((act/4)*100),100);
+  return <div key={p.id} className="card fu" style={{marginBottom:8,animationDelay:i*30+"ms",cursor:isA?"pointer":"default"}} onClick={()=>{if(isA){setEditP(p);setShowPF(true)}}}>
+    <div style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:14}}>
+      <div style={{width:48,height:48,borderRadius:12,background:"var(--gold)08",border:"1px solid var(--gold)15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:"var(--gold)",flexShrink:0}}>{p.nom?p.nom[0]:"?"}</div>
       <div style={{flex:1}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-          <span style={{fontWeight:700,fontSize:15}}>{p.nom}</span>
-          {test&&<span style={{fontSize:9,fontWeight:700,color:"var(--gold)",background:"var(--gold)12",padding:"2px 8px",borderRadius:12,border:"1px dashed var(--gold)30"}}>PÉRIODE D'ESSAI</span>}
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
+          <span style={{fontWeight:700,fontSize:14}}>{p.nom}</span>
+          {test&&<Badge type="gold">PÉRIODE D'ESSAI</Badge>}
           <Badge type={busy?"red":"green"}>{busy?"⚠ Overbooké":"Disponible"}</Badge>
         </div>
-        <div style={{fontSize:12,color:"var(--text2)"}}>{p.specialite}{p.tjm?" · "+p.tjm+"€/j":""}</div>
-        <div style={{display:"flex",gap:12,marginTop:6,fontSize:11,color:"var(--text3)"}}>
-          {p.contact&&<span><i className="fa-solid fa-phone" style={{marginRight:3}}/><P$ v={p.contact} p={pm}/></span>}
-          {p.email&&<span><i className="fa-solid fa-envelope" style={{marginRight:3}}/>{p.email}</span>}
-          {p.portfolio&&<a href={p.portfolio} target="_blank" rel="noopener" style={{color:"var(--blue)"}}><i className="fa-solid fa-link" style={{marginRight:3}}/>Portfolio</a>}
+        <div style={{fontSize:11,color:"var(--text2)",marginBottom:4}}>{p.specialite}{p.tjm?" · "+p.tjm+"€/j":""}</div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontSize:10,color:"var(--text3)"}}>Charge</span>
+          <div style={{width:80}}><Prog pct={charge} color={busy?"var(--red)":"var(--green)"}/></div>
+          <span style={{fontSize:10,fontFamily:"var(--mono)",color:busy?"var(--red)":"var(--green)"}}>{charge}%</span>
+        </div>
+        <div style={{display:"flex",gap:10,marginTop:4,fontSize:10,color:"var(--text3)"}}>
+          {p.contact&&<span><i className="fa-solid fa-phone" style={{marginRight:2}}/><P$ v={p.contact} p={pm}/></span>}
+          {p.email&&<span><i className="fa-solid fa-envelope" style={{marginRight:2}}/>{p.email}</span>}
+          {p.portfolio&&<a href={p.portfolio} target="_blank" style={{color:"var(--blue)"}}><i className="fa-solid fa-link" style={{marginRight:2}}/>Portfolio</a>}
         </div>
       </div>
       <div style={{textAlign:"right",flexShrink:0}}>
-        <div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>CHARGE</div>
-        <div style={{fontSize:18,fontWeight:700,fontFamily:"var(--mono)",color:busy?"var(--red)":"var(--green)"}}>{act} actifs</div>
-        <div style={{fontSize:10,color:"var(--text3)",marginTop:2}}>{sgn} signés · LTV <P$ v={E(ca*.2)} p={pm}/></div>
+        <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>PROJETS</div>
+        <div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)",color:busy?"var(--red)":"var(--green)"}}>{act}</div>
+        <div style={{fontSize:10,color:"var(--text3)"}}>LTV <P$ v={E(ca*.2)} p={pm}/></div>
       </div>
     </div>
   </div>})}
-  {prestas.length===0&&<div style={{padding:60,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-users-gear" style={{fontSize:28,display:"block",marginBottom:8}}/> Aucun prestataire</div>}
+  {prestas.length===0&&<div style={{padding:50,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-users" style={{fontSize:24,display:"block",marginBottom:8}}/> Aucun prestataire</div>}
 </div>);
 
-/* PLANNING PAGE */
-const PlanningPage=()=>{
-const upcoming=myL.filter(l=>l.nextRelance&&!["signe","injoignable"].includes(l.status)).sort((a,b)=>new Date(a.nextRelance)-new Date(b.nextRelance));
-return <div style={{padding:"16px 20px",flex:1,overflow:"auto"}}>
-  <h2 style={{fontFamily:"var(--serif)",fontSize:22,fontWeight:600,marginBottom:16}}>Calendrier des Livrables</h2>
-  <div className="card"><div className="card-body">
-    {upcoming.length===0&&<div style={{padding:20,textAlign:"center",color:"var(--text3)"}}>Aucune relance planifiée</div>}
-    {upcoming.map(l=>{const d=dU(l.nextRelance);const past=d!==null&&d<0;const today=d===0;
-    return <div key={l.id} className="tl-item fu">
-      <div className="tl-dot" style={{background:past?"var(--red)":today?"var(--gold)":"var(--green)"}}/>
-      <div className="tl-content">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div><span style={{fontWeight:600,fontSize:13}}>{l.nom}</span><span style={{fontSize:11,color:"var(--text2)",marginLeft:8}}>{l.service}</span></div>
-          <div style={{display:"flex",gap:6,alignItems:"center"}}>
-            <span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:past?"var(--red)":today?"var(--gold)":"var(--green)"}}>{l.nextRelance}</span>
-            {past&&<Badge type="red">J{d}</Badge>}
-            {today&&<Badge type="gold">Aujourd'hui</Badge>}
-            <button onClick={()=>openWA(l,mN(l.memberId))} className="wa-btn"><i className="fa-brands fa-whatsapp"/></button>
-            <button onClick={()=>{touch(l.id,"Relancé");upd(l.id,{nextRelance:addD(td(),2)});flash(l.nom+" J+2")}} style={{padding:"4px 10px",borderRadius:"var(--radius)",border:"1px solid var(--green)",color:"var(--green)",fontSize:11,fontWeight:600}}>✓</button>
-          </div>
-        </div>
-        <div style={{fontSize:11,color:"var(--text3)",marginTop:2}}><Av id={l.memberId} sz={16}/> {mN(l.memberId)} · <StatusBadge status={l.status}/></div>
-      </div>
-    </div>})}
-  </div></div>
-</div>};
-
-/* FINANCE PAGE */
-const FinancePage=()=>(
-<div style={{padding:"16px 20px",flex:1,overflow:"auto"}}>
-  <h2 style={{fontFamily:"var(--serif)",fontSize:22,fontWeight:600,marginBottom:16}}>Analyse Financière</h2>
-  {/* Top stats */}
-  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginBottom:20}}>
-    {[{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Profit Net (20%)",v:E(st.profit),c:"var(--gold)"},{l:"Com. Prosp. (10%)",v:E(st.comP),c:"var(--blue)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Cycle Moyen",v:st.avgC+"j",c:"var(--text2)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
-    <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c}}><P$ v={s.v} p={pm}/></div></div>)}
+/* ═══ AGENDA STRATÉGIQUE ═══ */
+const Agenda=()=>(
+<div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
+  <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:14}}>Agenda & Échéances — Daily Focus</h2>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:8,marginBottom:18}}>
+    {[{l:"Relances",v:agendaItems.filter(x=>x.type==="relance").length,c:agendaItems.filter(x=>x.type==="relance").length>0?"var(--red)":"var(--green)",i:"fa-bell"},
+    {l:"Dormants 3j+",v:agendaItems.filter(x=>x.type==="dormant").length,c:agendaItems.filter(x=>x.type==="dormant").length>0?"var(--bordeaux2)":"var(--green)",i:"fa-moon"},
+    {l:"Preuves Paiement",v:agendaItems.filter(x=>x.type==="paiement").length,c:agendaItems.filter(x=>x.type==="paiement").length>0?"var(--gold)":"var(--green)",i:"fa-receipt"},
+    {l:"Vérif. Commission",v:agendaItems.filter(x=>x.type==="verif").length,c:agendaItems.filter(x=>x.type==="verif").length>0?"var(--bordeaux2)":"var(--green)",i:"fa-shield"}
+    ].map((s,i)=><div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label"><i className={"fa-solid "+s.i} style={{marginRight:3}}/>{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:22}}>{s.v}</div></div>)}
   </div>
-  {/* Objectif bar */}
-  <div className="card" style={{marginBottom:16}}><div className="card-header"><span style={{fontWeight:600}}>Objectif Mensuel — {E(OBJ)}</span><span style={{fontFamily:"var(--mono)",fontWeight:700,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span></div><div className="card-body"><div className="obj-bar" style={{height:8}}><div className="obj-fill" style={{width:st.obj+"%",background:st.obj>=100?"var(--green)":"var(--gold)"}}/></div></div></div>
-  {/* Performance par prospecteur */}
-  <div className="card" style={{marginBottom:16}}><div className="card-header"><span style={{fontWeight:600}}>Performance Équipe</span></div><div className="card-body">
-  <table className="tbl"><thead><tr><th>Prospecteur</th><th>Leads</th><th>Signés</th><th>Conversion</th><th>CA</th><th>Com. Webo</th><th>Com. Prosp.</th></tr></thead>
-  <tbody>{st.byM.map((m,i)=><tr key={m.id}><td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={m.id} sz={24}/><span style={{fontWeight:600,color:m.color}}>{m.name}</span>{i===0&&st.byM.length>1&&<span>🏆</span>}</div></td>
-    <td style={{fontFamily:"var(--mono)"}}>{m.total}</td><td style={{fontFamily:"var(--mono)",color:"var(--green)"}}>{m.signes}</td>
-    <td><div style={{display:"flex",alignItems:"center",gap:6}}><Prog pct={m.conv} color={m.conv>=25?"var(--green)":"var(--red)"}/><span style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:600,color:m.conv>=25?"var(--green)":"var(--red)"}}>{m.conv}%</span></div></td>
+  {/* TIMELINE */}
+  <div className="card"><div className="card-h"><span style={{fontWeight:600}}>Timeline du jour</span><span style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--text2)"}}>{td()}</span></div>
+  <div className="card-b"><div className="tl">
+    {agendaItems.length===0&&<div style={{padding:20,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{marginRight:4}}/>Aucune tâche — pipeline sous contrôle</div>}
+    {agendaItems.map((item,i)=>(
+    <div key={i} className="tl-item fu" style={{animationDelay:i*30+"ms"}}>
+      <div className="tl-dot" style={{background:item.urgency==="bordeaux"?"var(--red)":"var(--gold)"}}/>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flex:1}}>
+        <div>
+          <div className="tl-time">{item.type==="relance"?"📅 RELANCE":item.type==="dormant"?"💤 DORMANT":item.type==="paiement"?"💳 PAIEMENT":"🛡 VÉRIFICATION"}</div>
+          <div className="tl-title">{item.label}</div>
+          <div className="tl-sub">{item.lead.service} · {mN(item.lead.memberId)} · <SBadge status={item.lead.status}/></div>
+        </div>
+        <div style={{display:"flex",gap:4,flexShrink:0}}>
+          <Badge type={item.urgency==="bordeaux"?"bordeaux":"gold"}>{item.urgency==="bordeaux"?"URGENT":"À SUIVRE"}</Badge>
+          {item.type==="relance"&&<button onClick={()=>{touch(item.lead.id,"Relancé");upd(item.lead.id,{nextRelance:addD(td(),2)});flash(item.lead.nom+" J+2")}} style={{padding:"4px 10px",borderRadius:"var(--radius)",border:"1px solid var(--green)",color:"var(--green)",fontSize:10,fontWeight:600}}>✓</button>}
+          <button onClick={()=>openWA(item.lead,mN(item.lead.memberId))} className="wa"><i className="fa-brands fa-whatsapp"/></button>
+        </div>
+      </div>
+    </div>))}
+  </div></div></div>
+</div>);
+
+/* ═══ FINANCE ═══ */
+const Finance=()=>(
+<div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
+  <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:14}}>Contrôle Financier</h2>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10,marginBottom:18}}>
+    {[{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Marge Nette WEBO",v:E(st.margeNette),c:"var(--gold)"},{l:"Part Chasseurs",v:E(st.comProsp),c:"var(--blue)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Cycle Moyen",v:st.avgC+"j",c:"var(--text2)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
+    <div key={i} className="stat-card fu" style={{animationDelay:i*30+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:22}}><P$ v={s.v} p={pm}/></div></div>)}
+  </div>
+  {/* Objectif */}
+  <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Objectif Mensuel — {E(OBJ)}</span><span style={{fontFamily:"var(--mono)",fontWeight:700,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span></div><div className="card-b"><div style={{height:6}}><Prog pct={st.obj} color={st.obj>=100?"var(--green)":"var(--gold)"}/></div></div></div>
+  {/* V13 — VISUAL CHARTS */}
+  <div className="finance-charts" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
+    {/* Commission Split Chart */}
+    <div className="chart-card">
+      <div className="chart-card-h"><span><i className="fa-solid fa-chart-pie" style={{color:"var(--gold)",marginRight:6}}/>Répartition Commission</span><button onClick={exportFinance} style={{fontSize:9,color:"var(--gold)",fontWeight:600,padding:"3px 8px",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)"}}><i className="fa-solid fa-file-csv" style={{marginRight:3}}/>Export</button></div>
+      <div style={{padding:16}}>
+        {(()=>{const total=st.ca*.2;const net=st.margeNette;const prosp=st.comProsp;const netPct=total>0?Math.round(net/total*100):100;const prospPct=total>0?Math.round(prosp/total*100):0;
+        return <div>
+          <div style={{display:"flex",height:20,borderRadius:10,overflow:"hidden",marginBottom:12}}>
+            <div style={{width:netPct+"%",background:"var(--gold)",transition:"width .8s"}}/>
+            <div style={{width:prospPct+"%",background:"var(--blue)",transition:"width .8s"}}/>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-around",fontSize:11}}>
+            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--gold)",display:"inline-block",marginRight:4}}/>Marge WEBO<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:16,color:"var(--gold)",marginTop:2}}><P$ v={E(net)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{netPct}%</div></div>
+            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--blue)",display:"inline-block",marginRight:4}}/>Part Chasseurs<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:16,color:"var(--blue)",marginTop:2}}><P$ v={E(prosp)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{prospPct}%</div></div>
+            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--green)",display:"inline-block",marginRight:4}}/>CA Total<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:16,color:"var(--green)",marginTop:2}}><P$ v={E(st.ca)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>100%</div></div>
+          </div>
+        </div>})()}
+      </div>
+    </div>
+    {/* Pipeline Value by Status */}
+    <div className="chart-card">
+      <div className="chart-card-h"><span><i className="fa-solid fa-signal" style={{color:"var(--gold)",marginRight:6}}/>Valeur par Étape</span></div>
+      <div style={{padding:"10px 14px"}}>
+        {COLS.map((col,i)=>{const val=leads.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);const cnt=leads.filter(l=>l.status===col.id).length;const maxVal=Math.max(...COLS.map(c=>leads.filter(l=>l.status===c.id).reduce((s,l)=>s+l.valeur,0)),1);const pct=Math.round(val/maxVal*100);
+        return <div key={col.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+          <div style={{width:70,fontSize:9,fontWeight:600,color:col.accent,fontFamily:"var(--mono)",flexShrink:0}}>{col.label}</div>
+          <div style={{flex:1,height:14,background:"var(--bg4)",borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",width:pct+"%",background:col.accent,borderRadius:4,transition:"width .6s"}}/></div>
+          <div style={{width:80,textAlign:"right",fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}>{cnt}× <P$ v={E(val)} p={pm}/></div>
+        </div>})}
+      </div>
+    </div>
+  </div>
+  {/* Équipe — Fondateur vs Chasseurs */}
+  <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Performance — Fondateur vs Chasseurs</span></div><div className="card-b">
+  <table className="tbl"><thead><tr><th>Apporteur</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th><th>Marge WEBO</th><th>Part Chasseur</th></tr></thead>
+  <tbody>{st.byM.map((m,i)=><tr key={m.id}>
+    <td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={m.id} sz={22}/><span style={{fontWeight:600,color:m.color}}>{m.name}</span>{i===0&&<span>🏆</span>}</div></td>
+    <td><Badge type={m.isFondateur?"gold":"blue"}>{m.role}</Badge></td>
+    <td style={{fontFamily:"var(--mono)"}}>{m.total}</td>
+    <td style={{fontFamily:"var(--mono)",color:"var(--green)"}}>{m.signes}</td>
+    <td><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:40}}><Prog pct={m.conv} color={m.conv>=25?"var(--green)":"var(--red)"}/></div><span style={{fontFamily:"var(--mono)",fontSize:11,color:m.conv>=25?"var(--green)":"var(--red)"}}>{m.conv}%</span></div></td>
     <td style={{fontFamily:"var(--mono)",fontWeight:600}}><P$ v={E(m.ca)} p={pm}/></td>
-    <td style={{fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={E(m.comW)} p={pm}/></td>
-    <td style={{fontFamily:"var(--mono)",color:"var(--green)"}}><P$ v={E(m.comP)} p={pm}/></td>
+    <td style={{fontFamily:"var(--mono)",color:"var(--gold)",fontWeight:700}}><P$ v={E(m.marge)} p={pm}/></td>
+    <td style={{fontFamily:"var(--mono)",color:m.isFondateur?"var(--text3)":"var(--blue)"}}>{m.isFondateur?"—":<P$ v={E(m.prosp)} p={pm}/>}</td>
   </tr>)}</tbody></table></div></div>
   {/* ROI Sources */}
-  <div className="card"><div className="card-header"><span style={{fontWeight:600}}>ROI par Source</span></div><div className="card-body">
-  {st.bySrc.map((s,i)=>{const mx=Math.max(...st.bySrc.map(x=>x.ca),1);const p=Math.round(s.ca/mx*100);
-  return <div key={s.source} style={{marginBottom:12}}>
-    <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontSize:12,fontWeight:600}}>{s.source}</span><span style={{fontFamily:"var(--mono)",fontSize:12}}>{s.total} leads · {s.rate}% conv. · <P$ v={E(s.ca)} p={pm}/></span></div>
-    <Prog pct={p} color="var(--gold)"/>
-  </div>})}
+  <div className="card"><div className="card-h"><span style={{fontWeight:600}}>ROI par Source d'Acquisition</span></div><div className="card-b">
+  {st.bySrc.map(s=>{const mx=Math.max(...st.bySrc.map(x=>x.ca),1);const p=Math.round(s.ca/mx*100);
+  return <div key={s.source} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600}}>{s.source}</span><span style={{fontFamily:"var(--mono)",fontSize:11}}>{s.total} leads · {s.rate}% · <P$ v={E(s.ca)} p={pm}/></span></div><Prog pct={p} color="var(--gold)"/></div>})}
   </div></div>
 </div>);
 
-/* IA PAGE */
-const IAPage=()=>(
-<div style={{padding:"16px 20px",flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-  <h2 style={{fontFamily:"var(--serif)",fontSize:22,fontWeight:600,marginBottom:12}}>Agent IA Stratégique</h2>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:6,marginBottom:12}}>
-    {[{i:"fa-chart-line",t:"Analyse",p:"Analyse pipeline: forces, risques, 3 actions."},{i:"fa-bullseye",t:"Plan",p:"Plan hebdo par prospecteur."},{i:"fa-envelope",t:"Relances",p:"Messages de relance pour leads en retard."},{i:"fa-trophy",t:"Coaching",p:"Compare prospecteurs: conversion, vitesse."},{i:"fa-crystal-ball",t:"Prévisions",p:"CA 30j: optimiste, réaliste, pessimiste."},{i:"fa-coins",t:"Cash-flow",p:"Prévision trésorerie 30-60-90j."},{i:"fa-brain",t:"Matching",p:"Meilleur prestataire pour chaque lead."},{i:"fa-chart-bar",t:"Tendances",p:"Tendances pipeline 30 derniers jours."}
-    ].map(a=><button key={a.t} onClick={()=>askAI(a.p)} style={{padding:"10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:11,fontWeight:600,display:"flex",flexDirection:"column",alignItems:"center",gap:4,transition:"all .2s"}}><i className={"fa-solid "+(a.i||"fa-star")} style={{fontSize:14,color:"var(--gold)"}}/>{a.t}</button>)}
+/* ═══ IA ═══ */
+const IA=()=>(
+<div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+  <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:10}}>Agent IA Stratégique</h2>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:4,marginBottom:8}}>
+    {[{i:"fa-chart-line",t:"Analyse",p:"Analyse pipeline: forces, risques, 3 actions prioritaires."},{i:"fa-bullseye",t:"Plan Hebdo",p:"Plan action semaine par apporteur d'affaires."},{i:"fa-envelope",t:"Relances",p:"Messages de relance personnalisés."},{i:"fa-trophy",t:"Coaching",p:"Compare Fondateur vs Chasseurs: conversion, cycle."},{i:"fa-crystal-ball",t:"Prévisions",p:"CA 30j: optimiste, réaliste, pessimiste."},{i:"fa-coins",t:"Trésorerie",p:"Prévision cash-flow 30-60-90j."},{i:"fa-brain",t:"Matching",p:"Meilleur prestataire par lead non assigné."},{i:"fa-chart-bar",t:"Tendances",p:"Évolution pipeline 30 derniers jours."}
+    ].map(a=><button key={a.t} onClick={()=>askAI(a.p)} style={{padding:8,borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"all .2s",color:"var(--text2)",fontSize:10,fontWeight:600}}><i className={"fa-solid "+(a.i||"fa-star")} style={{fontSize:13,color:"var(--gold)"}}/>{a.t}</button>)}
   </div>
   <div style={{flex:1,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-    <div style={{flex:1,overflowY:"auto",padding:12,display:"flex",flexDirection:"column",gap:6}}>
-      {aiMsgs.length===0&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)"}}><div style={{textAlign:"center"}}><i className="fa-solid fa-robot" style={{fontSize:28,display:"block",marginBottom:8,color:"var(--gold)"}}/> Posez une question stratégique</div></div>}
-      {aiMsgs.map((m,i)=><div key={i} style={{padding:"12px 14px",borderRadius:10,fontSize:13,lineHeight:1.7,whiteSpace:"pre-wrap",background:m.role==="user"?"var(--gold)08":"var(--bg3)",border:"1px solid "+(m.role==="user"?"var(--gold)15":"var(--border)"),marginLeft:m.role==="user"?20:0,marginRight:m.role==="assistant"?20:0}} className="fu">{m.content}</div>)}
-      {aiLoad&&<div style={{padding:12,color:"var(--text3)"}}><i className="fa-solid fa-spinner fa-spin"/> Analyse en cours…</div>}
+    <div style={{flex:1,overflowY:"auto",padding:10,display:"flex",flexDirection:"column",gap:6}}>
+      {aiMsgs.length===0&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)"}}><div style={{textAlign:"center"}}><i className="fa-solid fa-robot" style={{fontSize:24,display:"block",marginBottom:6,color:"var(--gold)"}}/> Question stratégique…</div></div>}
+      {aiMsgs.map((m,i)=><div key={i} className="fu" style={{padding:"10px 12px",borderRadius:8,fontSize:13,lineHeight:1.7,whiteSpace:"pre-wrap",background:m.role==="user"?"rgba(197,160,89,.06)":"var(--bg3)",border:"1px solid "+(m.role==="user"?"rgba(197,160,89,.12)":"var(--border)"),marginLeft:m.role==="user"?16:0,marginRight:m.role==="assistant"?16:0}}>{m.content}</div>)}
+      {aiLoad&&<div style={{padding:10,color:"var(--text3)"}}><i className="fa-solid fa-spinner fa-spin"/> Analyse…</div>}
       <div ref={aiRef}/>
     </div>
-    <div style={{padding:8,borderTop:"1px solid var(--border)",display:"flex",gap:6}}>
-      <input value={aiIn} onChange={e=>setAiIn(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiIn.trim()&&!aiLoad)askAI(aiIn.trim())}} placeholder="Question stratégique…" style={{...IS,flex:1}}/>
+    <div style={{padding:8,borderTop:"1px solid var(--border)",display:"flex",gap:4}}>
+      <input value={aiIn} onChange={e=>setAiIn(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiIn.trim()&&!aiLoad)askAI(aiIn.trim())}} placeholder="Question…" style={{...IS,flex:1}}/>
       <button onClick={()=>{if(aiIn.trim()&&!aiLoad)askAI(aiIn.trim())}} style={{padding:"10px 16px",borderRadius:"var(--radius)",background:aiLoad?"var(--bg3)":"var(--gold)",color:aiLoad?"var(--text3)":"var(--bg)",fontSize:14,fontWeight:700}}>{aiLoad?"…":"→"}</button>
     </div>
   </div>
 </div>);
 
-/* LEAD DETAIL PANEL (right side or modal) */
-const LeadDetail=({l,onClose})=>{if(!l)return null;const hs=healthScore(l);const col=COLS.find(c=>c.id===l.status);const presta=l.prestaId?pN(l.prestaId):"";const cd=cDays(l.dateCreated,l.status);
-return <div className="sr" style={{position:"fixed",right:0,top:0,bottom:0,width:380,maxWidth:"90vw",background:"var(--bg2)",borderLeft:"1px solid var(--border)",zIndex:200,overflowY:"auto",boxShadow:"-10px 0 30px rgba(0,0,0,.3)"}}>
-  <div style={{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-    <h3 style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:600}}>{l.nom}</h3>
-    <div style={{display:"flex",gap:4}}><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"4px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}><i className="fa-solid fa-pen"/></button><button onClick={onClose} style={{color:"var(--text3)",fontSize:14}}><i className="fa-solid fa-xmark"/></button></div>
-  </div>
-  <div style={{padding:"16px 20px"}}>
-    {/* Health */}
-    <div style={{marginBottom:16}}><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:6}}>SCORE DE SANTÉ</div>
-    <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:24,fontWeight:800,fontFamily:"var(--mono)",color:hCol(hs)}}>{hs}</span><div style={{flex:1}}><Prog pct={hs} color={hCol(hs)}/></div><Badge type={hs>=60?"green":hs>=40?"gold":"red"}>{healthLabel(hs)}</Badge></div></div>
+/* ═══ LEAD DETAIL PANEL ═══ */
+const Detail=({l,onClose})=>{if(!l)return null;const hs=healthScore(l);const col=COLS.find(c=>c.id===l.status);const mg=calcMargin(l.valeur,l.memberId);const cd=cDays(l.dateCreated,l.status);
+return <div className="rpanel">
+  <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between"}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{l.nom}</h3><div style={{display:"flex",gap:3}}><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"3px 8px",borderRadius:4,border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-pen"/></button><button onClick={onClose} style={{color:"var(--text3)",fontSize:13}}><i className="fa-solid fa-xmark"/></button></div></div>
+  <div style={{padding:"12px 16px"}}>
+    <div style={{marginBottom:12}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:4}}>SCORE DE SANTÉ</div>
+    <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:22,fontWeight:800,fontFamily:"var(--mono)",color:hCol(hs)}}>{hs}</span><div style={{flex:1}}><Prog pct={hs} color={hCol(hs)}/></div><Badge type={hs>=60?"green":hs>=40?"gold":"red"}>{hLab(hs)}</Badge></div></div>
     <div className="sep"/>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-      <div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:22,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></div></div>
-      <div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><StatusBadge status={l.status}/></div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></div></div>
+      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><SBadge status={l.status}/></div>
     </div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-      <div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>PROBABILITÉ</div><div style={{fontSize:16,fontWeight:700,fontFamily:"var(--mono)"}}>{Math.round((col?.proba||0)*100)}%</div></div>
-      <div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>TEMPÉRATURE</div><div style={{fontSize:16}}>{TEMPS.find(t=>t.id===l.temperature)?.e} {l.temperature}</div></div>
-    </div>
-    {isA&&<div style={{background:"var(--gold)08",border:"1px solid var(--gold)15",borderRadius:"var(--radius)",padding:12,marginBottom:16}}>
-      <div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>COMMISSIONS</div>
-      <div style={{display:"flex",justifyContent:"space-between"}}>
-        <span style={{fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={"Webo: "+E(l.valeur*.2)} p={pm}/></span>
-        <span style={{fontFamily:"var(--mono)",color:"var(--green)"}}><P$ v={"Prosp: "+E(l.valeur*.10)} p={pm}/></span>
+    {/* Margin breakdown */}
+    <div style={{background:"rgba(197,160,89,.06)",border:"1px solid rgba(197,160,89,.12)",borderRadius:"var(--radius)",padding:10,marginBottom:12}}>
+      <div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:6}}>VENTILATION FINANCIÈRE</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,fontSize:11,fontFamily:"var(--mono)"}}>
+        <div><span style={{color:"var(--text3)"}}>Com. WEBO 20%</span><div style={{fontWeight:700,color:"var(--gold)"}}><P$ v={E(mg.comWebo)} p={pm}/></div></div>
+        <div><span style={{color:"var(--text3)"}}>Part {TEAM.find(t=>t.id===l.memberId)?.role}</span><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?<P$ v={E(mg.comProsp)} p={pm}/>:"—"}</div></div>
+        <div style={{gridColumn:"1/3",borderTop:"1px solid var(--border)",paddingTop:6}}><span style={{color:"var(--text3)"}}>Marge Nette</span><div style={{fontSize:16,fontWeight:800,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></div></div>
       </div>
-      {cd!==null&&<div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>Cycle: {cd} jours</div>}
-    </div>}
+      {cd!==null&&<div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>Cycle: {cd}j</div>}
+    </div>
     <div className="sep"/>
-    <div style={{fontSize:11,color:"var(--text2)",marginBottom:4}}><i className="fa-solid fa-phone" style={{width:16}}/> <P$ v={l.phone||"—"} p={pm}/></div>
-    <div style={{fontSize:11,color:"var(--text2)",marginBottom:4}}><i className="fa-solid fa-envelope" style={{width:16}}/> {l.email||"—"}</div>
-    <div style={{fontSize:11,color:"var(--text2)",marginBottom:4}}><i className="fa-solid fa-location-dot" style={{width:16}}/> {l.adresse||"—"}</div>
-    <div style={{fontSize:11,color:"var(--text2)",marginBottom:4}}><i className="fa-solid fa-user" style={{width:16}}/> <span style={{color:mC(l.memberId)}}>{mN(l.memberId)}</span> · {l.source}</div>
-    {presta&&<div style={{fontSize:11,color:"var(--gold)",marginBottom:4}}><i className="fa-solid fa-handshake" style={{width:16}}/> {presta}</div>}
-    {l.externalLink&&<div style={{fontSize:11,marginBottom:4}}><a href={l.externalLink} target="_blank" style={{color:"var(--blue)"}}><i className="fa-solid fa-link" style={{width:16}}/> Lien externe</a></div>}
-    {l.notes&&<div style={{fontSize:11,color:"var(--text2)",background:"var(--bg)",borderRadius:6,padding:8,marginTop:8,lineHeight:1.6}}>{l.notes}</div>}
-    {l.activityLog&&<div style={{marginTop:12}}><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:4}}>HISTORIQUE</div><div style={{fontSize:10,color:"var(--text3)",background:"var(--bg)",borderRadius:6,padding:8,whiteSpace:"pre-wrap",maxHeight:100,overflowY:"auto"}}>{l.activityLog}</div></div>}
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-phone" style={{width:14}}/> <P$ v={l.phone||"—"} p={pm}/></div>
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-envelope" style={{width:14}}/> {l.email||"—"}</div>
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-location-dot" style={{width:14}}/> {l.adresse||"—"}</div>
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-user" style={{width:14}}/> <span style={{color:mC(l.memberId)}}>{mN(l.memberId)}</span> · {TEAM.find(t=>t.id===l.memberId)?.role} · {l.source}</div>
+    {l.prestaId&&<div style={{fontSize:10,color:"var(--gold)",marginBottom:3}}><i className="fa-solid fa-handshake" style={{width:14}}/> {pN(l.prestaId)}</div>}
+    {l.notes&&<div style={{fontSize:10,color:"var(--text2)",background:"var(--bg)",borderRadius:6,padding:6,marginTop:6}}>{l.notes}</div>}
+    {l.activityLog&&<div style={{marginTop:8}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3}}>HISTORIQUE</div><div style={{fontSize:10,color:"var(--text3)",background:"var(--bg)",borderRadius:6,padding:6,whiteSpace:"pre-wrap",maxHeight:80,overflowY:"auto"}}>{l.activityLog}</div></div>}
     <div className="sep"/>
-    <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:12}}>
-      <button onClick={()=>openWA(l,mN(l.memberId))} className="wa-btn" style={{padding:"8px 12px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/> WhatsApp</button>
-      <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"8px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}><i className="fa-solid fa-copy"/> Template</button>
-      <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé + 2 actions.")}} style={{padding:"8px 12px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11}}><i className="fa-solid fa-robot"/> IA</button>
+    <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:8}}>
+      <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"6px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/> WhatsApp</button>
+      <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-copy"/> Template</button>
+      <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé+2 actions.")}} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10}}><i className="fa-solid fa-robot"/> IA</button>
     </div>
   </div>
 </div>};
 
 return (
-<div style={{display:"flex",flexDirection:"column",height:"100dvh"}}>
+<div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>{if(showNotif)setShowNotif(false)}}>
   <Nav/>
   <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
     {page==="hub"&&<HubPage/>}
-    {page==="pipeline"&&<PipelinePage/>}
-    {page==="talents"&&<TalentsPage/>}
-    {page==="planning"&&<PlanningPage/>}
-    {page==="finance"&&<FinancePage/>}
-    {page==="ia"&&<IAPage/>}
+    {page==="pipeline"&&<Pipeline/>}
+    {page==="talents"&&<Talents/>}
+    {page==="agenda"&&<Agenda/>}
+    {page==="finance"&&<Finance/>}
+    {page==="ia"&&<IA/>}
   </div>
-
-  {/* Lead Detail Panel */}
-  {selLead&&<LeadDetail l={selLead} onClose={()=>setSelLead(null)}/>}
-
-  {/* Command Palette */}
-  {cmd&&<div className="cmd-overlay" onClick={()=>setCmd(false)}><div className="cmd-box" onClick={e=>e.stopPropagation()}><input className="cmd-input" value={cmdQ} onChange={e=>setCmdQ(e.target.value)} placeholder="Rechercher commande, lead ou prestataire…" autoFocus onKeyDown={e=>{if(e.key==="Escape")setCmd(false);if(e.key==="Enter"&&cmdRes.length>0){cmdRes[0].a();setCmd(false);setCmdQ("")}}}/><div style={{maxHeight:300,overflowY:"auto"}}>{cmdRes.map((r,i)=><div key={i} className="cmd-item" onClick={()=>{r.a();setCmd(false);setCmdQ("")}}><i className={"fa-solid "+r.i} style={{width:20,textAlign:"center",color:"var(--gold)"}}/><span>{r.l}</span></div>)}{cmdRes.length===0&&cmdQ&&<div style={{padding:16,textAlign:"center",color:"var(--text3)"}}>Aucun résultat</div>}</div></div></div>}
-
+  {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
+  {/* CMD */}
+  {cmd&&<div className="cmd-ov" onClick={()=>setCmd(false)}><div className="cmd-box" onClick={e=>e.stopPropagation()}><input className="cmd-in" value={cmdQ} onChange={e=>setCmdQ(e.target.value)} placeholder="Commande, lead ou prestataire…" autoFocus onKeyDown={e=>{if(e.key==="Escape")setCmd(false);if(e.key==="Enter"&&cmdRes.length>0){cmdRes[0].a();setCmd(false);setCmdQ("")}}}/><div style={{maxHeight:300,overflowY:"auto"}}>{cmdRes.map((r,i)=><div key={i} className="cmd-r" onClick={()=>{r.a();setCmd(false);setCmdQ("")}}><i className={"fa-solid "+r.i} style={{width:18,textAlign:"center",color:"var(--gold)"}}/><span>{r.l}</span></div>)}</div></div></div>}
   {/* MODALS */}
   {showForm&&<div className="overlay" onClick={()=>{setShowForm(false);setEditId(null)}}><div className="overlay-bg"/><div className="modal" onClick={e=>e.stopPropagation()}>
-  <LForm lead={editId?leads.find(l=>l.id===editId):null} onSave={upsert} onDel={editId?()=>del(editId):null} onX={()=>{setShowForm(false);setEditId(null)}} IS={IS} prestas={prestas} sess={sess} isA={isA} pm={pm}/>
+  <LForm lead={editId?leads.find(l=>l.id===editId):null} onSave={upsert} onDel={editId?()=>del(editId):null} onX={()=>{setShowForm(false);setEditId(null)}} prestas={prestas} sess={sess} isA={isA} pm={pm}/>
   </div></div>}
   {showVerif&&<div className="overlay" onClick={()=>setShowVerif(null)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:440}} onClick={e=>e.stopPropagation()}>
-  <VForm lead={leads.find(l=>l.id===showVerif)} onSave={updV} onX={()=>setShowVerif(null)} IS={IS}/>
-  </div></div>}
+  <VForm lead={leads.find(l=>l.id===showVerif)} onSave={updV} onX={()=>setShowVerif(null)}/></div></div>}
   {showPF&&<div className="overlay" onClick={()=>{setShowPF(false);setEditP(null)}}><div className="overlay-bg"/><div className="modal" style={{maxWidth:440}} onClick={e=>e.stopPropagation()}>
-  <PForm presta={editP} onSave={upsP} onDel={editP?()=>delP(editP.id):null} onX={()=>{setShowPF(false);setEditP(null)}} IS={IS}/>
-  </div></div>}
-  {toast&&<div className="fu" style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid var(--gold)30",borderRadius:"var(--radius)",padding:"10px 20px",color:"var(--text)",fontSize:12,fontWeight:500,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
+  <PForm presta={editP} onSave={upsP} onDel={editP?()=>delP(editP.id):null} onX={()=>{setShowPF(false);setEditP(null)}}/></div></div>}
+  {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
 }
 
-/* LEAD FORM */
-function LForm({lead,onSave,onDel,onX,IS,prestas,sess,isA,pm}){
+/* ═══ LEAD FORM ═══ */
+function LForm({lead,onSave,onDel,onX,prestas,sess,isA,pm}){
+const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",boxSizing:"border-box"};
 const[f,setF]=useState(lead?{...lead}:{nom:"",service:SERVICES[0],valeur:"",memberId:sess||"keddy",status:"nouveau",dateCreated:td(),lastInteraction:new Date().toISOString(),nextRelance:addD(td(),2),notes:"",source:SOURCES[0],echecReason:"—",tentatives:0,paymentProof:"",verifStatus:"none",verifNote:"",prestaId:"",email:"",phone:"",adresse:"",temperature:"tiede",activityLog:"",paymentLink:"",externalLink:""});
 const[pQ,setPQ]=useState("");const[showM,setShowM]=useState(false);const s=(k,v)=>setF(p=>({...p,[k]:v}));
 const fp=prestas.filter(p=>{if(!pQ)return true;const q=pQ.toLowerCase();return p.nom.toLowerCase().includes(q)||p.specialite.toLowerCase().includes(q)});
 const sp=prestas.find(p=>p.id===f.prestaId);const matches=useMemo(()=>matchP(f,prestas),[f.service,prestas]);
+const mg=f.valeur?calcMargin(Number(f.valeur),f.memberId):null;const apporteur=TEAM.find(t=>t.id===f.memberId);
 return <div>
-<div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}><h3 style={{fontFamily:"var(--serif)",fontSize:18,fontWeight:600}}>{lead?"Modifier — "+lead.nom:"Nouveau Lead"}</h3><button onClick={onX} style={{color:"var(--text3)",fontSize:16}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
+<div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:17,fontWeight:600}}>{lead?"Modifier — "+lead.nom:"Nouveau Lead"}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
 <FF l="Entreprise"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Nom"/></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Téléphone"><input style={IS} value={f.phone} onChange={e=>s("phone",e.target.value)} type="tel"/></FF><FF l="Email"><input style={IS} value={f.email} onChange={e=>s("email",e.target.value)} type="email"/></FF></div>
 <FF l="Adresse"><input style={IS} value={f.adresse} onChange={e=>s("adresse",e.target.value)}/></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Service"><select style={IS} value={f.service} onChange={e=>s("service",e.target.value)}>{SERVICES.map(v=><option key={v}>{v}</option>)}</select></FF><FF l="Valeur HT"><input style={IS} type="number" value={f.valeur} onChange={e=>s("valeur",e.target.value)}/></FF></div>
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Prospecteur"><select style={IS} value={f.memberId} onChange={e=>s("memberId",e.target.value)} disabled={!isA}>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)}</option>)}</select></FF><FF l="Source"><select style={IS} value={f.source} onChange={e=>s("source",e.target.value)}>{SOURCES.map(v=><option key={v}>{v}</option>)}</select></FF></div>
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}><FF l="Statut"><select style={IS} value={f.status} onChange={e=>s("status",e.target.value)}>{COLS.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></FF><FF l="Température"><select style={IS} value={f.temperature} onChange={e=>s("temperature",e.target.value)}>{TEMPS.map(t=><option key={t.id} value={t.id}>{t.e} {t.label}</option>)}</select></FF><FF l="Relance"><input style={IS} type="date" value={f.nextRelance} onChange={e=>s("nextRelance",e.target.value)}/></FF></div>
-<FF l="Prestataire">{sp?<div style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",borderRadius:"var(--radius)",border:"1px solid var(--gold)30",background:"var(--gold)08"}}><span style={{fontWeight:600}}>{sp.nom}</span><span style={{fontSize:11,color:"var(--gold)"}}>{sp.specialite}</span><button onClick={()=>s("prestaId","")} style={{marginLeft:"auto",color:"var(--red)",fontSize:11}}>✕</button></div>:<div><div style={{display:"flex",gap:4,marginBottom:4}}><input value={pQ} onChange={e=>setPQ(e.target.value)} placeholder="Chercher…" style={{...IS,flex:1,fontSize:13}}/><button onClick={()=>setShowM(p=>!p)} style={{padding:"8px 12px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-brain"/> Suggérer</button></div>
-{showM&&matches.map(m=><div key={m.id} className="match-card" onClick={()=>{s("prestaId",m.id);setShowM(false)}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:600}}>{m.nom} <span style={{color:"var(--gold)",fontSize:11}}>Score: {m.score}%</span></span><span style={{color:"var(--green)",fontSize:11}}>Sélectionner →</span></div></div>)}
-{!showM&&prestas.length>0&&<div style={{maxHeight:80,overflowY:"auto",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)"}}>{fp.map(p=><button key={p.id} onClick={()=>{s("prestaId",p.id);setPQ("")}} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 8px",width:"100%",textAlign:"left",color:"var(--text)",fontSize:11}}><span style={{fontWeight:600}}>{p.nom}</span><span style={{color:"var(--text2)"}}>{p.specialite}</span></button>)}</div>}
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+  <FF l="Apporteur d'Affaires"><select style={IS} value={f.memberId} onChange={e=>s("memberId",e.target.value)} disabled={!isA}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select></FF>
+  <FF l="Source"><select style={IS} value={f.source} onChange={e=>s("source",e.target.value)}>{SOURCES.map(v=><option key={v}>{v}</option>)}</select></FF>
+</div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}><FF l="Statut"><select style={IS} value={f.status} onChange={e=>s("status",e.target.value)}>{COLS.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></FF><FF l="Température"><select style={IS} value={f.temperature} onChange={e=>s("temperature",e.target.value)}>{TEMPS.map(t=><option key={t.id} value={t.id}>{t.e} {t.l}</option>)}</select></FF><FF l="Relance"><input style={IS} type="date" value={f.nextRelance} onChange={e=>s("nextRelance",e.target.value)}/></FF></div>
+<FF l="Prestataire">{sp?<div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(197,160,89,.2)",background:"rgba(197,160,89,.04)"}}><span style={{fontWeight:600}}>{sp.nom}</span><span style={{fontSize:10,color:"var(--gold)"}}>{sp.specialite}</span><button onClick={()=>s("prestaId","")} style={{marginLeft:"auto",color:"var(--red)",fontSize:10}}>✕</button></div>:<div><div style={{display:"flex",gap:4,marginBottom:3}}><input value={pQ} onChange={e=>setPQ(e.target.value)} placeholder="Chercher…" style={{...IS,flex:1,fontSize:13}}/><button onClick={()=>setShowM(p=>!p)} style={{padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-brain"/> Suggérer</button></div>
+{showM&&matches.map(m=><div key={m.id} className="match-card" onClick={()=>{s("prestaId",m.id);setShowM(false)}}><span style={{fontWeight:600}}>{m.nom}</span> <span style={{color:"var(--gold)",fontSize:11}}>Score:{m.score}%</span> <span style={{color:"var(--green)",fontSize:11,float:"right"}}>Sélectionner →</span></div>)}
+{!showM&&prestas.length>0&&<div style={{maxHeight:70,overflowY:"auto",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)"}}>{fp.map(p=><button key={p.id} onClick={()=>{s("prestaId",p.id);setPQ("")}} style={{display:"flex",gap:5,padding:"5px 7px",width:"100%",textAlign:"left",color:"var(--text)",fontSize:11}}><span style={{fontWeight:600}}>{p.nom}</span><span style={{color:"var(--text2)"}}>{p.specialite}</span></button>)}</div>}
 </div>}</FF>
 <FF l="Lien externe"><input style={IS} value={f.externalLink} onChange={e=>s("externalLink",e.target.value)} placeholder="Loom, Drive…"/></FF>
-<FF l="Notes"><textarea style={{...IS,height:50,resize:"vertical"}} value={f.notes} onChange={e=>s("notes",e.target.value)}/></FF>
+<FF l="Notes"><textarea style={{...IS,height:45,resize:"vertical"}} value={f.notes} onChange={e=>s("notes",e.target.value)}/></FF>
 {f.status==="signe"&&<><FF l="Preuve paiement"><input style={IS} value={f.paymentProof} onChange={e=>s("paymentProof",e.target.value)}/></FF><FF l="Lien paiement"><input style={IS} value={f.paymentLink} onChange={e=>s("paymentLink",e.target.value)}/></FF></>}
 {f.status==="injoignable"&&<FF l="Raison"><select style={IS} value={f.echecReason} onChange={e=>s("echecReason",e.target.value)}>{ECHECS.map(r=><option key={r}>{r}</option>)}</select></FF>}
-{f.valeur&&Number(f.valeur)>0&&isA&&<div style={{background:"var(--gold)08",border:"1px solid var(--gold)15",borderRadius:"var(--radius)",padding:12,marginBottom:12,display:"flex",justifyContent:"space-between",fontFamily:"var(--mono)"}}>
-  <div><div style={{color:"var(--gold)",fontSize:12}}>Com. Webo 20%</div><div style={{color:"var(--green)",fontSize:11}}>Prosp. 50%→{E(Number(f.valeur)*.10)}</div></div>
-  <div style={{fontSize:18,fontWeight:700,color:"var(--gold)"}}>{E(Number(f.valeur)*.2)}</div>
+{mg&&mg.comWebo>0&&<div style={{background:"rgba(197,160,89,.06)",border:"1px solid rgba(197,160,89,.12)",borderRadius:"var(--radius)",padding:10,marginBottom:10}}>
+  <div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>VENTILATION — {apporteur?.role}</div>
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,fontFamily:"var(--mono)",fontSize:12}}>
+    <div><div style={{fontSize:9,color:"var(--text3)"}}>Com. 20%</div><div style={{fontWeight:700,color:"var(--gold)"}}>{E(mg.comWebo)}</div></div>
+    <div><div style={{fontSize:9,color:"var(--text3)"}}>Part {apporteur?.role}</div><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?E(mg.comProsp):"—"}</div></div>
+    <div><div style={{fontSize:9,color:"var(--text3)"}}>Marge WEBO</div><div style={{fontWeight:800,color:"var(--gold)"}}>{E(mg.margeNette)}</div></div>
+  </div>
+  {!apporteur?.isFondateur&&<div style={{fontSize:9,color:"var(--text3)",marginTop:4}}>Chasseur → Split 50/50 de la commission</div>}
+  {apporteur?.isFondateur&&<div style={{fontSize:9,color:"var(--gold)",marginTop:4}}>Fondateur → 100% de la commission conservée</div>}
 </div>}
 <div className="sep"/>
-<div style={{display:"flex",gap:6,justifyContent:"flex-end",flexWrap:"wrap"}}>
-  {onDel&&<button onClick={onDel} style={{padding:"10px 14px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:12,fontWeight:600,marginRight:"auto"}}>Supprimer</button>}
-  <button onClick={onX} style={{padding:"10px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
-  <button onClick={()=>{if(!f.nom.trim())return;const nl=f.id?f.activityLog:addLog("","Créé");onSave({...f,id:f.id||uid(),valeur:Number(f.valeur)||0,lastInteraction:new Date().toISOString(),activityLog:nl,_isNew:!f.id})}} style={{padding:"10px 20px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>{lead?"Enregistrer":"Ajouter"}</button>
+<div style={{display:"flex",gap:4,justifyContent:"flex-end",flexWrap:"wrap"}}>
+  {onDel&&<button onClick={onDel} style={{padding:"9px 12px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:12,fontWeight:600,marginRight:"auto"}}>Supprimer</button>}
+  <button onClick={onX} style={{padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
+  <button onClick={()=>{if(!f.nom.trim())return;const nl=f.id?f.activityLog:addLog("","Créé");onSave({...f,id:f.id||uid(),valeur:Number(f.valeur)||0,lastInteraction:new Date().toISOString(),activityLog:nl,_isNew:!f.id})}} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>{lead?"Enregistrer":"Ajouter"}</button>
 </div></div>}
 
-function VForm({lead,onSave,onX,IS}){const[st,setSt]=useState(lead?.verifStatus||"pending");const[n,setN]=useState(lead?.verifNote||"");if(!lead)return null;
-return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}>Vérification — {lead.nom}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div>
-<FF l="Statut"><div style={{display:"flex",gap:4}}>{VERIFS.filter(v=>v.id!=="none").map(v=><button key={v.id} onClick={()=>setSt(v.id)} style={{flex:1,padding:8,borderRadius:"var(--radius)",border:"1px solid "+(st===v.id?(v.color||"var(--border)"):"var(--border)"),color:st===v.id?(v.color||"var(--text)"):"var(--text2)",background:st===v.id?(v.color||"")+"10":"transparent",fontSize:12,fontWeight:600}}>{v.label}</button>)}</div></FF>
-<FF l="Note"><textarea style={{...IS,height:50}} value={n} onChange={e=>setN(e.target.value)}/></FF>
-<div style={{display:"flex",gap:6,justifyContent:"flex-end"}}><button onClick={onX} style={{padding:"10px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button><button onClick={()=>onSave(lead.id,st,n)} style={{padding:"10px 20px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>Confirmer</button></div></div>}
+function VForm({lead,onSave,onX}){const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};const[st,setSt]=useState(lead?.verifStatus||"pending");const[n,setN]=useState(lead?.verifNote||"");if(!lead)return null;
+return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>Vérification — {lead.nom}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div>
+<FF l="Statut"><div style={{display:"flex",gap:3}}>{VERIFS.filter(v=>v.id!=="none").map(v=><button key={v.id} onClick={()=>setSt(v.id)} style={{flex:1,padding:7,borderRadius:"var(--radius)",border:"1px solid "+(st===v.id?(v.color||"var(--border)"):"var(--border)"),color:st===v.id?(v.color||"var(--text)"):"var(--text2)",background:st===v.id?(v.color||"")+"10":"transparent",fontSize:11,fontWeight:600}}>{v.label}</button>)}</div></FF>
+<FF l="Note"><textarea style={{...IS,height:45}} value={n} onChange={e=>setN(e.target.value)}/></FF>
+<div style={{display:"flex",gap:4,justifyContent:"flex-end"}}><button onClick={onX} style={{padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button><button onClick={()=>onSave(lead.id,st,n)} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>Confirmer</button></div></div>}
 
-function PForm({presta,onSave,onDel,onX,IS}){
+function PForm({presta,onSave,onDel,onX}){const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
 const[f,setF]=useState(presta?{...presta}:{nom:"",specialite:SPECIALITES[0],contact:"",email:"",notes:"",portfolio:"",tjm:""});const s=(k,v)=>setF(p=>({...p,[k]:v}));
-return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}>{presta?"Modifier — "+presta.nom:"Nouveau Prestataire"}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
+return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{presta?"Modifier — "+presta.nom:"Nouveau Prestataire"}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
 <FF l="Nom"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)}/></FF>
 <FF l="Spécialité"><select style={IS} value={f.specialite} onChange={e=>s("specialite",e.target.value)}>{SPECIALITES.map(v=><option key={v}>{v}</option>)}</select></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Téléphone"><input style={IS} value={f.contact} onChange={e=>s("contact",e.target.value)} type="tel"/></FF><FF l="Email"><input style={IS} value={f.email} onChange={e=>s("email",e.target.value)} type="email"/></FF></div>
 <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:8}}><FF l="Portfolio"><input style={IS} value={f.portfolio||""} onChange={e=>s("portfolio",e.target.value)}/></FF><FF l="TJM €"><input style={IS} type="number" value={f.tjm||""} onChange={e=>s("tjm",e.target.value)}/></FF></div>
-<FF l="Notes"><textarea style={{...IS,height:50}} value={f.notes} onChange={e=>s("notes",e.target.value)}/></FF><div className="sep"/>
-<div style={{display:"flex",gap:6,justifyContent:"flex-end",flexWrap:"wrap"}}>
-  {onDel&&<button onClick={onDel} style={{padding:"10px 14px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:12,fontWeight:600,marginRight:"auto"}}>Supprimer</button>}
-  <button onClick={onX} style={{padding:"10px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
-  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),_isNew:!f.id})}} style={{padding:"10px 20px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>{presta?"Enregistrer":"Ajouter"}</button>
+<FF l="Notes"><textarea style={{...IS,height:45}} value={f.notes} onChange={e=>s("notes",e.target.value)}/></FF><div className="sep"/>
+<div style={{display:"flex",gap:4,justifyContent:"flex-end",flexWrap:"wrap"}}>
+  {onDel&&<button onClick={onDel} style={{padding:"9px 12px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:12,fontWeight:600,marginRight:"auto"}}>Supprimer</button>}
+  <button onClick={onX} style={{padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
+  <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),_isNew:!f.id})}} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>{presta?"Enregistrer":"Ajouter"}</button>
 </div></div>}
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
