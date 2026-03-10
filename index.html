@@ -193,6 +193,62 @@ select,input,textarea{font-size:16px!important}
 @media(max-width:400px){
 .hub-stats{grid-template-columns:repeat(2,1fr)!important}
 }
+/* ═══ V13 — ENRICHMENT ═══ */
+.enrich-card{background:linear-gradient(135deg,rgba(41,98,255,.06),rgba(139,92,246,.06));border:1px solid rgba(41,98,255,.15);border-radius:var(--radius);padding:12px;margin-top:10px;animation:fadeUp .3s}
+.enrich-card .enrich-title{font-size:9px;font-weight:700;color:var(--blue);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.enrich-card .enrich-body{font-size:11px;color:var(--text2);line-height:1.7;white-space:pre-wrap}
+.enrich-btn{padding:6px 10px;border-radius:var(--radius);border:1px solid rgba(41,98,255,.3);color:var(--blue);font-size:10px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:4px}
+.enrich-btn:hover{background:rgba(41,98,255,.08);border-color:var(--blue)}
+.enrich-btn.loading{opacity:.6;pointer-events:none}
+/* ═══ V13 — MATCHING ═══ */
+.match-hero{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(197,160,89,.05));border:1px solid rgba(139,92,246,.15);border-radius:12px;padding:24px;margin-bottom:20px}
+.match-form{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end}
+.match-result{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:10px;transition:all .3s;position:relative;overflow:hidden;animation:fadeUp .3s ease-out both}
+.match-result:hover{border-color:rgba(139,92,246,.3);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.match-result::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.match-score{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;font-family:var(--mono);flex-shrink:0}
+.match-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.match-tag{padding:2px 8px;border-radius:12px;font-size:9px;font-weight:600;font-family:var(--mono)}
+.match-empty{text-align:center;padding:50px 20px;color:var(--text3)}
+.match-empty i{font-size:32px;display:block;margin-bottom:12px;color:rgba(139,92,246,.3)}
+/* V13.2 — Talent scoring glow */
+.talent-card{position:relative;transition:all .3s}
+.talent-card.hot{border-color:rgba(197,160,89,.35);box-shadow:0 0 12px rgba(197,160,89,.1)}
+.talent-card.warm{border-color:rgba(197,160,89,.2)}
+.heat-bar{height:3px;border-radius:2px;background:var(--bg4);overflow:hidden;margin-top:4px}
+.heat-fill{height:100%;border-radius:2px;transition:width .6s}
+/* V13.2 — Quick filters */
+.qf{display:flex;gap:4px;flex-wrap:wrap}
+.qf-btn{padding:5px 12px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid var(--border);color:var(--text2);transition:all .2s}
+.qf-btn:hover{border-color:var(--gold);color:var(--gold)}
+.qf-btn.active{background:rgba(197,160,89,.1);border-color:var(--gold);color:var(--gold)}
+/* V13.2 — Pitch button */
+.pitch-btn{padding:4px 8px;border-radius:var(--radius);border:1px solid rgba(139,92,246,.25);color:var(--purple);font-size:10px;transition:all .15s}
+.pitch-btn:hover{background:rgba(139,92,246,.06)}
+/* V13.2 — Client mode */
+.client-blur{filter:blur(5px);user-select:none;pointer-events:none}
+/* V13.2 — Agenda calendar */
+.ag-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.ag-head{font-size:9px;font-weight:700;color:var(--text3);text-align:center;padding:8px 0;font-family:var(--mono)}
+.ag-day{min-height:90px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:5px 6px;transition:all .15s;cursor:pointer}
+.ag-day:hover{border-color:var(--border2);background:var(--bg3)}
+.ag-day.ag-today{border-color:rgba(197,160,89,.4);background:rgba(197,160,89,.04)}
+.ag-day.ag-other{opacity:.25}
+.ag-num{font-size:11px;font-weight:700;font-family:var(--mono);margin-bottom:3px}
+.ag-ev{font-size:8px;padding:2px 5px;border-radius:3px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;cursor:pointer;transition:opacity .15s}
+.ag-ev:hover{opacity:.7}
+.ag-add{position:absolute;bottom:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text3);font-size:9px;display:none;align-items:center;justify-content:center}
+.ag-day:hover .ag-add{display:flex}
+@media(max-width:768px){
+.ag-day{min-height:55px;padding:3px 4px}
+.ag-ev{font-size:7px}
+.ag-num{font-size:9px}
+.ag-head{font-size:8px;padding:5px 0}
+.match-form{grid-template-columns:1fr 1fr!important}
+.match-hero{padding:16px}
+.match-result{padding:14px}
+.match-score{width:44px;height:44px;font-size:16px;border-radius:10px}
+}
 </style>
 </head>
 <body>
@@ -201,6 +257,12 @@ select,input,textarea{font-size:16px!important}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+window.onerror=function(msg,src,line,col,err){
+  var el=document.getElementById("root");
+  if(el)el.innerHTML='<div style="padding:40px;color:#E74C4C;font-family:monospace;background:#0B0E14;min-height:100vh"><h2 style="color:#C5A059">WEBO Debug</h2><p>'+msg+'</p><p>L:'+line+' C:'+col+'</p><pre style="color:#9CA3AF;font-size:11px;white-space:pre-wrap;max-width:90vw;overflow:auto">'+(err&&err.stack?err.stack:'')+'</pre></div>';
+};
+</script>
 <script type="text/babel">
 const {useState,useEffect,useCallback,useMemo,useRef}=React;
 const SB_URL="https://smgglunijtmftjchxdgy.supabase.co";
@@ -219,7 +281,7 @@ const db2L=r=>({id:r.id,nom:r.nom,service:r.service,valeur:r.valeur,memberId:r.m
 const L2db=l=>({id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.memberId,status:l.status,date_created:l.dateCreated,last_interaction:l.lastInteraction,next_relance:l.nextRelance,notes:l.notes,source:l.source,echec_reason:l.echecReason,tentatives:l.tentatives,payment_proof:l.paymentProof,verif_status:l.verifStatus,verif_note:l.verifNote,presta_id:l.prestaId,email:l.email,phone:l.phone,adresse:l.adresse,temperature:l.temperature,activity_log:l.activityLog,payment_link:l.paymentLink,external_link:l.externalLink});
 
 /* ═══ CONSTANTS ═══ */
-const COLS=[{id:"nouveau",label:"Qualifié",icon:"fa-diamond",accent:"#8B5CF6",proba:.10,urgDays:5},{id:"contacte",label:"Audit",icon:"fa-magnifying-glass",accent:"#2962FF",proba:.25,urgDays:3},{id:"relance1",label:"Négociation",icon:"fa-handshake",accent:"#C5A059",proba:.40,urgDays:4},{id:"relance2",label:"Closing",icon:"fa-gavel",accent:"#E74C4C",proba:.60,urgDays:7},{id:"call",label:"Due Diligence",icon:"fa-shield-halved",accent:"#7C5CBF",proba:.80,urgDays:5},{id:"injoignable",label:"Perdu",icon:"fa-ban",accent:"#5A6270",proba:0,urgDays:999},{id:"signe",label:"Signé",icon:"fa-circle-check",accent:"#089981",proba:1,urgDays:999}];
+const COLS=[{id:"nouveau",label:"Identifie",icon:"fa-crosshairs",accent:"#64748b",proba:.05,urgDays:7},{id:"recherche",label:"Recherche",icon:"fa-magnifying-glass-chart",accent:"#6366f1",proba:.10,urgDays:5},{id:"contacte",label:"1er Contact",icon:"fa-paper-plane",accent:"#2962FF",proba:.20,urgDays:3},{id:"relance1",label:"Relance",icon:"fa-rotate",accent:"#f59e0b",proba:.30,urgDays:3},{id:"qualifie",label:"Qualifie",icon:"fa-clipboard-check",accent:"#C5A059",proba:.45,urgDays:4},{id:"call",label:"RDV / Call",icon:"fa-phone-volume",accent:"#a855f7",proba:.60,urgDays:5},{id:"proposition",label:"Proposition",icon:"fa-file-signature",accent:"#ec4899",proba:.75,urgDays:7},{id:"relance2",label:"Closing",icon:"fa-gavel",accent:"#E74C4C",proba:.85,urgDays:5},{id:"signe",label:"Signe",icon:"fa-circle-check",accent:"#089981",proba:1,urgDays:999},{id:"injoignable",label:"Perdu",icon:"fa-ban",accent:"#5A6270",proba:0,urgDays:999}];
 const SERVICES=["Web Design","Montage Vidéo","Vidéaste"];
 const SOURCES=["DM Instagram","LinkedIn","Email froid","Appel à froid","Prospection terrain","Référence","Autre"];
 const ECHECS=["—","Prix trop élevé","Pas de besoin","Déjà équipé","Pas de budget","Concurrent choisi","Projet reporté"];
@@ -280,7 +342,11 @@ const[privacy,setPrivacy]=useState(false);const[selLead,setSelLead]=useState(nul
 const[notifs,setNotifs]=useState([]);const[showNotif,setShowNotif]=useState(false);
 const[selIds,setSelIds]=useState(new Set());const[calMonth,setCalMonth]=useState(new Date());
 const[actFeed,setActFeed]=useState([]);
-const aiRef=useRef(null);const pm=privacy;
+const[enrichData,setEnrichData]=useState({});const[enrichLoading,setEnrichLoading]=useState(null);
+const[matchCrit,setMatchCrit]=useState({service:"",budget:"",duree:"",competence:""});const[matchRes,setMatchRes]=useState(null);const[matchLoading,setMatchLoading]=useState(false);
+const[tFilter,setTFilter]=useState("all");const[clientMode,setClientMode]=useState(false);
+const[agMonth,setAgMonth]=useState(new Date());const[agEvents,setAgEvents]=useState([]);const[showAgForm,setShowAgForm]=useState(null);
+const aiRef=useRef(null);const pm=privacy||clientMode;
 const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2200)};
 const pN=id=>prestas.find(x=>x.id===id)?.nom||"";
 
@@ -289,14 +355,34 @@ const unreadN=useMemo(()=>notifs.filter(n=>!n.read).length,[notifs]);
 const markAllRead=()=>setNotifs(p=>p.map(n=>({...n,read:true})));
 const addActivity=(who,act,tgt,col)=>{const a={id:uid(),who,action:act,target:tgt,color:col||mC(who),time:new Date().toISOString()};setActFeed(p=>[a,...p].slice(0,100))};
 const csvEsc=v=>{const s=String(v||"");if(s.includes(",")||s.includes("\n")||s.includes('"'))return '"'+s.replace(/"/g,'""')+'"';return s};
-const doExportCSV=(rows,fn,cols)=>{const txt=cols.join(",")+
-"\n"+rows.map(r=>cols.map(c=>csvEsc(r[c])).join(",")).join("\n");const blob=new Blob(["\uFEFF"+txt],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn+"-"+td()+".csv";a.click();URL.revokeObjectURL(u);flash("Export OK")};
+const doExportCSV=(rows,fn,cols)=>{const txt=cols.join(",")+"\n"+rows.map(r=>cols.map(c=>csvEsc(r[c])).join(",")).join("\n");const blob=new Blob(["\uFEFF"+txt],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn+"-"+td()+".csv";a.click();URL.revokeObjectURL(u);flash("Export OK")};
 const exportLeads=()=>{const cols=["Entreprise","Statut","Service","Valeur","Apporteur","Source","Tel","Email","DateCreation","Relance","Prestataire","Notes"];const rows=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Apporteur:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,Relance:l.nextRelance,Prestataire:pN(l.prestaId),Notes:l.notes}));doExportCSV(rows,"webo-leads",cols)};
 const exportFinance=()=>{const cols=["Entreprise","Service","Valeur","Com20","PartChasseur","MargeNette","Apporteur","Role","Date"];const sg=leads.filter(l=>l.status==="signe");const rows=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Com20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Apporteur:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,Date:l.dateCreated}});doExportCSV(rows,"webo-finance",cols)};
 const toggleSel=id=>setSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
 const selAll=()=>{const ids=filt.map(l=>l.id);setSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
 const bulkStatus=async status=>{const ids=[...selIds];for(const id of ids){const l=leads.find(x=>x.id===id);if(!l)continue;const nl=addLog(l.activityLog,"Bulk>"+COLS.find(c=>c.id===status)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,status,lastInteraction:new Date().toISOString(),activityLog:nl}:x));await sb.from("leads").update({status,last_interaction:new Date().toISOString(),activity_log:nl}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads OK");addActivity(sess,"bulk",ids.length+" leads")};
+/* V13.2 — Talent heat score */
+const heatScore=(p)=>{let s=0;const act=leads.filter(l=>l.prestaId===p.id&&!["signe","injoignable"].includes(l.status)).length;const tjm=Number(p.tjm)||0;if(act===0)s+=40;else if(act<2)s+=20;if(tjm>0&&tjm<=400)s+=30;else if(tjm>0&&tjm<=600)s+=20;else if(tjm>0)s+=5;const sgn=leads.filter(l=>l.prestaId===p.id&&l.status==="signe").length;if(sgn>=3)s+=20;else if(sgn>=1)s+=10;if(p.portfolio)s+=10;return Math.min(s,100)};
+const heatCol=s=>s>=70?"var(--gold)":s>=40?"var(--green)":"var(--text3)";
+const heatLab=s=>s>=70?"Hot":s>=40?"Warm":"Cold";
+
+/* V13.2 — Pitch Express */
+const pitchCopy=(p)=>{const prenom=(p.nom||"").split(" ")[0];const txt="WEBO - "+prenom+" | Expert "+p.specialite+" | TJM "+(p.tjm||"NC")+"E";cp(txt,flash)};
+
+/* V13.2 — Client mode anonymizer */
+const anon=v=>{if(!clientMode||!v)return v;const s=String(v);if(s.includes("@"))return s[0]+"***@***";if(/^[+0-9]/.test(s))return s.slice(0,4)+"****";const parts=s.split(" ");if(parts.length>1)return parts[0]+" "+parts[1][0]+".";return s};
+
+/* V13.2 — Agenda calendar */
+const addAgEvent=(date,title,time,color)=>{const ev={id:uid(),date,title,time:time||"09:00",color:color||"var(--purple)"};setAgEvents(p=>[...p,ev]);flash("Event ajoute")};
+const delAgEvent=id=>setAgEvents(p=>p.filter(e=>e.id!==id));
+
 const bulkPresta=async pid=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,prestaId:pid}:x));await sb.from("leads").update({presta_id:pid}).eq("id",id)}setSelIds(new Set());flash("Assignes")};
+
+/* V13 — DATA ENRICHMENT via Claude API */
+const enrichLead=async(lead)=>{if(enrichLoading)return;setEnrichLoading(lead.id);try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,tools:[{type:"web_search_20250305",name:"web_search"}],messages:[{role:"user",content:"Recherche des informations sur cette entreprise/personne pour un courtier d'affaires. Entreprise: "+lead.nom+". Secteur: "+lead.service+". Notes existantes: "+(lead.notes||"aucune")+". Donne-moi en francais: 1) Actu recente du secteur ou de l'entreprise 2) Un angle d'approche commercial percutant 3) Un sujet de conversation pour ouvrir l'appel. Sois concret et actionnable, max 150 mots."}]})});const d=await r.json();const txt=(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Pas de donnees";setEnrichData(p=>({...p,[lead.id]:{text:txt,date:td()}}));flash("Intel "+lead.nom+" OK");addActivity(sess,"a enrichi",lead.nom,"var(--blue)")}catch(e){setEnrichData(p=>({...p,[lead.id]:{text:"Erreur de recherche. Verifiez la connexion.",date:td()}}));flash("Erreur enrichissement")}setEnrichLoading(null)};
+
+/* V13 — REVERSE MODE MATCHING */
+const runMatch=()=>{setMatchLoading(true);const results=prestas.map(p=>{let score=0;const reasons=[];const sp=(p.specialite||"").toLowerCase();const sv=(matchCrit.service||"").toLowerCase();const comp=(matchCrit.competence||"").toLowerCase();if(sv&&(sp.includes(sv)||sv.includes(sp))){score+=35;reasons.push("Specialite OK")}else if(sv&&(sp.includes("web")&&sv.includes("web"))||(sp.includes("vid")&&sv.includes("vid"))){score+=20;reasons.push("Specialite proche")}if(comp&&sp.includes(comp)){score+=15;reasons.push("Competence match")}const tjm=Number(p.tjm)||0;const budget=Number(matchCrit.budget)||0;if(budget>0&&tjm>0){if(tjm<=budget){score+=25;reasons.push("TJM "+tjm+" < budget "+budget)}else if(tjm<=budget*1.2){score+=10;reasons.push("TJM proche")}else{reasons.push("TJM "+tjm+" > budget")}}else if(budget===0){score+=10}const asg=leads.filter(l=>l.prestaId===p.id&&!["signe","injoignable"].includes(l.status)).length;if(asg===0){score+=15;reasons.push("100% dispo")}else if(asg<3){score+=8;reasons.push(asg+" projet(s) en cours")}else{reasons.push("Charge elevee: "+asg)}const sgn=leads.filter(l=>l.prestaId===p.id&&l.status==="signe").length;if(sgn>=3){score+=10;reasons.push("Prouve: "+sgn+" signes")}else if(sgn>=1){score+=5;reasons.push(sgn+" signe(s)")}return{...p,score:Math.min(score,100),reasons,charge:asg,signes:sgn}}).filter(p=>p.score>0).sort((a,b)=>b.score-a.score);setMatchRes(results);setMatchLoading(false)};
 
 const doLogin=()=>{const q=logId.trim().toLowerCase();const a=ACCTS.find(x=>x.login===q||x.email===q);if(!a){setLogErr("Identifiant inconnu");return}if(logPw!==a.pass){setLogErr("Mot de passe incorrect");return}setSess(a.id);try{localStorage.setItem("webo_session",a.id)}catch(e){}};
 
@@ -329,6 +415,7 @@ const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);r
 const srt=c=>{if(sortBy==="valeur")return[...c].sort((a,b)=>b.valeur-a.valeur);if(sortBy==="date")return[...c].sort((a,b)=>new Date(b.dateCreated)-new Date(a.dateCreated));return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
 const calDays=useMemo(()=>{const y=calMonth.getFullYear(),mo=calMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.toISOString().slice(0,10);const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({tp:"rel",lb:l.nom,cl:"var(--red)",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({tp:"sig",lb:l.nom,cl:"var(--green)",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({tp:"pay",lb:l.nom,cl:"var(--gold)",lead:l}));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[calMonth,myL,leads]);
+const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.toISOString().slice(0,10);const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));agEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.time||"12:00"}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myL,leads,agEvents]);
 
 /* Agenda: relances du jour + overdue + 3 days dormant */
 const agendaItems=useMemo(()=>{const items=[];
@@ -354,7 +441,7 @@ return{total:src.length,signes:sg.length,stale,od,urg:urgL.length,ca,w,tw:w+ca,m
 
 /* CMD palette */
 const cmdRes=useMemo(()=>{if(!cmdQ)return[];const q=cmdQ.toLowerCase();return[
-...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-users",l:"Nouveau Prestataire",a:()=>{setPage("talents");setShowPF(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")}].filter(c=>c.l.toLowerCase().includes(q)),
+...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-users",l:"Nouveau Prestataire",a:()=>{setPage("talents");setShowPF(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")},{i:"fa-wand-magic-sparkles",l:"Mode Matching",a:()=>setPage("matching")}].filter(c=>c.l.toLowerCase().includes(q)),
 ...leads.filter(l=>l.nom.toLowerCase().includes(q)).slice(0,5).map(l=>({i:"fa-user",l:l.nom+" — "+l.service,a:()=>{setSelLead(l);setPage("pipeline")}}))
 ]},[cmdQ,leads]);
 
@@ -402,6 +489,7 @@ const Nav=()=>(
     </div>}
     </div>
     <button className="nb" onClick={exportLeads} title="CSV"><i className="fa-solid fa-file-csv"/></button>
+    <button className="nb" onClick={()=>setClientMode(p=>!p)} title={clientMode?"Mode Admin":"Mode Client"} style={{color:clientMode?"var(--purple)":"var(--text2)"}}><i className={"fa-solid "+(clientMode?"fa-user-tie":"fa-user-secret")}/></button>
     <button className="nb" onClick={()=>setPrivacy(p=>!p)} style={{color:privacy?"var(--red)":"var(--text2)"}}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")}/></button>
     <button className="nb" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓")}}><i className="fa-solid fa-cloud-arrow-down"/></button>
     <div style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}><Av id={sess} sz={22}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(sess)}</span><span style={{fontSize:9,color:"var(--text3)"}}>{sU?.role}</span><span className={"sync-dot "+sync}/></div>
@@ -447,6 +535,7 @@ const HubPage=()=>(
     {icon:"fa-chart-pie",title:"Contrôle Financier",desc:"CA, marge nette, ROI, commissions Fondateur vs Chasseurs.",pg:"finance",cnt:E(st.margeNette)},
     {icon:"fa-robot",title:"Agent IA Stratégique",desc:"Analyse, coaching, prévisions automatisées.",pg:"ia",cnt:"IA"},
     {icon:"fa-calendar-days",title:"Calendrier",desc:"Vue mensuelle des relances et échéances.",pg:"cal",cnt:st.agenda+" évts"},
+    {icon:"fa-wand-magic-sparkles",title:"Mode Matching",desc:"Mission > profils. Score de compatibilité automatique.",pg:"matching",cnt:prestas.length+" prestas"},
     ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>{if(c.pg==="cal"){setPage("pipeline");setPView("calendar")}else setPage(c.pg)}}>
       <div className="hub-card-icon"><i className={"fa-solid "+c.icon}/></div>
       <h3>{c.title}</h3><p>{c.desc}</p><div className="cnt">{c.cnt}</div>
@@ -549,77 +638,133 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
 </div>};
 
 /* ═══ TALENTS ═══ */
-const Talents=()=>(
-<div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
-  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-    <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Réseau de Talents</h2>
-    <button onClick={()=>{setEditP(null);setShowPF(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Prestataire</button>
+const Talents=()=>{
+const sorted=useMemo(()=>{let list=prestas.map(p=>{const asg=leads.filter(l=>l.prestaId===p.id);const act=asg.filter(l=>!["signe","injoignable"].includes(l.status)).length;const sgn=asg.filter(l=>l.status==="signe").length;const ca=asg.filter(l=>l.status==="signe").reduce((s,l)=>s+l.valeur,0);const heat=heatScore(p);return{...p,act,sgn,ca,heat,busy:act>=3,test:sgn<3,charge:Math.min(Math.round((act/4)*100),100)}});if(tFilter==="topTjm")list=list.filter(p=>p.tjm).sort((a,b)=>(Number(a.tjm)||999)-(Number(b.tjm)||999));else if(tFilter==="dispo")list=list.filter(p=>p.act===0);else if(tFilter==="relancer")list=list.filter(p=>p.sgn>0&&p.act===0);else list=list.sort((a,b)=>b.heat-a.heat);return list},[prestas,leads,tFilter]);
+return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,flexWrap:"wrap",gap:8}}>
+    <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Reseau de Talents</h2>
+    <div style={{display:"flex",gap:6,alignItems:"center"}}>
+      <div className="qf">
+        <button className={"qf-btn"+(tFilter==="all"?" active":"")} onClick={()=>setTFilter("all")}>Tous ({prestas.length})</button>
+        <button className={"qf-btn"+(tFilter==="topTjm"?" active":"")} onClick={()=>setTFilter("topTjm")}><i className="fa-solid fa-arrow-down-short-wide" style={{marginRight:3}}/>Top TJM</button>
+        <button className={"qf-btn"+(tFilter==="dispo"?" active":"")} onClick={()=>setTFilter("dispo")}><i className="fa-solid fa-circle-check" style={{marginRight:3}}/>Disponibles</button>
+        <button className={"qf-btn"+(tFilter==="relancer"?" active":"")} onClick={()=>setTFilter("relancer")}><i className="fa-solid fa-rotate" style={{marginRight:3}}/>A Relancer</button>
+      </div>
+      <button onClick={()=>{setEditP(null);setShowPF(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Prestataire</button>
+    </div>
   </div>
-  {prestas.map((p,i)=>{const asg=leads.filter(l=>l.prestaId===p.id);const act=asg.filter(l=>!["signe","injoignable"].includes(l.status)).length;const sgn=asg.filter(l=>l.status==="signe").length;const ca=asg.filter(l=>l.status==="signe").reduce((s,l)=>s+l.valeur,0);const busy=act>=3;const test=sgn<3;const charge=Math.min(Math.round((act/4)*100),100);
-  return <div key={p.id} className="card fu" style={{marginBottom:8,animationDelay:i*30+"ms",cursor:isA?"pointer":"default"}} onClick={()=>{if(isA){setEditP(p);setShowPF(true)}}}>
+  {sorted.map((p,i)=>{const hc=heatCol(p.heat);
+  return <div key={p.id} className={"card talent-card fu"+(p.heat>=70?" hot":p.heat>=40?" warm":"")} style={{marginBottom:8,animationDelay:i*30+"ms",cursor:isA?"pointer":"default"}} onClick={()=>{if(isA){setEditP(p);setShowPF(true)}}}>
     <div style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:14}}>
-      <div style={{width:48,height:48,borderRadius:12,background:"var(--gold)08",border:"1px solid var(--gold)15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:700,color:"var(--gold)",flexShrink:0}}>{p.nom?p.nom[0]:"?"}</div>
+      <div style={{width:48,height:48,borderRadius:12,background:hc+"12",border:"2px solid "+hc+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:700,color:hc,flexShrink:0,position:"relative"}}>{p.nom?p.nom[0]:"?"}<div style={{position:"absolute",bottom:-2,right:-2,fontSize:7,fontWeight:800,fontFamily:"var(--mono)",padding:"1px 4px",borderRadius:8,background:hc+"20",color:hc}}>{p.heat}</div></div>
       <div style={{flex:1}}>
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
-          <span style={{fontWeight:700,fontSize:14}}>{p.nom}</span>
-          {test&&<Badge type="gold">PÉRIODE D'ESSAI</Badge>}
-          <Badge type={busy?"red":"green"}>{busy?"⚠ Overbooké":"Disponible"}</Badge>
+          <span style={{fontWeight:700,fontSize:14}}>{clientMode?anon(p.nom):p.nom}</span>
+          <Badge type={p.heat>=70?"gold":p.heat>=40?"green":"ghost"}>{heatLab(p.heat)}</Badge>
+          {p.test&&<Badge type="gold">ESSAI</Badge>}
+          <Badge type={p.busy?"red":"green"}>{p.busy?"Overbooke":"Dispo"}</Badge>
         </div>
-        <div style={{fontSize:11,color:"var(--text2)",marginBottom:4}}>{p.specialite}{p.tjm?" · "+p.tjm+"€/j":""}</div>
+        <div style={{fontSize:11,color:"var(--text2)",marginBottom:4}}>{p.specialite}{p.tjm?" | "+p.tjm+"E/j":""}</div>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
           <span style={{fontSize:10,color:"var(--text3)"}}>Charge</span>
-          <div style={{width:80}}><Prog pct={charge} color={busy?"var(--red)":"var(--green)"}/></div>
-          <span style={{fontSize:10,fontFamily:"var(--mono)",color:busy?"var(--red)":"var(--green)"}}>{charge}%</span>
+          <div style={{width:80}}><Prog pct={p.charge} color={p.busy?"var(--red)":"var(--green)"}/></div>
+          <span style={{fontSize:10,fontFamily:"var(--mono)",color:p.busy?"var(--red)":"var(--green)"}}>{p.charge}%</span>
         </div>
+        <div className="heat-bar"><div className="heat-fill" style={{width:p.heat+"%",background:hc}}/></div>
         <div style={{display:"flex",gap:10,marginTop:4,fontSize:10,color:"var(--text3)"}}>
-          {p.contact&&<span><i className="fa-solid fa-phone" style={{marginRight:2}}/><P$ v={p.contact} p={pm}/></span>}
-          {p.email&&<span><i className="fa-solid fa-envelope" style={{marginRight:2}}/>{p.email}</span>}
+          {p.contact&&<span className={clientMode?"client-blur":""}><i className="fa-solid fa-phone" style={{marginRight:2}}/>{p.contact}</span>}
+          {p.email&&<span>{clientMode?anon(p.email):p.email}</span>}
           {p.portfolio&&<a href={p.portfolio} target="_blank" style={{color:"var(--blue)"}}><i className="fa-solid fa-link" style={{marginRight:2}}/>Portfolio</a>}
         </div>
       </div>
-      <div style={{textAlign:"right",flexShrink:0}}>
-        <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>PROJETS</div>
-        <div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)",color:busy?"var(--red)":"var(--green)"}}>{act}</div>
-        <div style={{fontSize:10,color:"var(--text3)"}}>LTV <P$ v={E(ca*.2)} p={pm}/></div>
+      <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:4,flexShrink:0}}>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>PROJETS</div>
+          <div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)",color:p.busy?"var(--red)":"var(--green)"}}>{p.act}</div>
+          <div style={{fontSize:10,color:"var(--text3)"}}>LTV <P$ v={E(p.ca*.2)} p={pm}/></div>
+        </div>
+        <button className="pitch-btn" onClick={e=>{e.stopPropagation();pitchCopy(p)}} title="Pitch Express"><i className="fa-solid fa-share-from-square"/></button>
       </div>
     </div>
   </div>})}
-  {prestas.length===0&&<div style={{padding:50,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-users" style={{fontSize:24,display:"block",marginBottom:8}}/> Aucun prestataire</div>}
-</div>);
+  {sorted.length===0&&<div style={{padding:50,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-users" style={{fontSize:24,display:"block",marginBottom:8}}/> Aucun prestataire{tFilter!=="all"?" avec ce filtre":""}</div>}
+</div>};
 
-/* ═══ AGENDA STRATÉGIQUE ═══ */
-const Agenda=()=>(
-<div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
-  <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:14}}>Agenda & Échéances — Daily Focus</h2>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:8,marginBottom:18}}>
-    {[{l:"Relances",v:agendaItems.filter(x=>x.type==="relance").length,c:agendaItems.filter(x=>x.type==="relance").length>0?"var(--red)":"var(--green)",i:"fa-bell"},
-    {l:"Dormants 3j+",v:agendaItems.filter(x=>x.type==="dormant").length,c:agendaItems.filter(x=>x.type==="dormant").length>0?"var(--bordeaux2)":"var(--green)",i:"fa-moon"},
-    {l:"Preuves Paiement",v:agendaItems.filter(x=>x.type==="paiement").length,c:agendaItems.filter(x=>x.type==="paiement").length>0?"var(--gold)":"var(--green)",i:"fa-receipt"},
-    {l:"Vérif. Commission",v:agendaItems.filter(x=>x.type==="verif").length,c:agendaItems.filter(x=>x.type==="verif").length>0?"var(--bordeaux2)":"var(--green)",i:"fa-shield"}
-    ].map((s,i)=><div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label"><i className={"fa-solid "+s.i} style={{marginRight:3}}/>{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:22}}>{s.v}</div></div>)}
+/* ═══ AGENDA ═══ */
+const Agenda=()=>{
+const[agView,setAgView]=useState("cal");
+const todayEvts=useMemo(()=>agDays.find(d=>d.isToday)?.evts||[],[agDays]);
+return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
+    <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Agenda</h2>
+    <div style={{display:"flex",gap:4,alignItems:"center"}}>
+      <button onClick={()=>setAgView("cal")} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(agView==="cal"?"var(--gold)":"var(--border)"),color:agView==="cal"?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:agView==="cal"?"rgba(197,160,89,.06)":"transparent"}}><i className="fa-solid fa-calendar-days" style={{marginRight:3}}/>Mois</button>
+      <button onClick={()=>setAgView("list")} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(agView==="list"?"var(--gold)":"var(--border)"),color:agView==="list"?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:agView==="list"?"rgba(197,160,89,.06)":"transparent"}}><i className="fa-solid fa-list" style={{marginRight:3}}/>Liste</button>
+    </div>
   </div>
-  {/* TIMELINE */}
-  <div className="card"><div className="card-h"><span style={{fontWeight:600}}>Timeline du jour</span><span style={{fontSize:11,fontFamily:"var(--mono)",color:"var(--text2)"}}>{td()}</span></div>
-  <div className="card-b"><div className="tl">
-    {agendaItems.length===0&&<div style={{padding:20,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{marginRight:4}}/>Aucune tâche — pipeline sous contrôle</div>}
-    {agendaItems.map((item,i)=>(
-    <div key={i} className="tl-item fu" style={{animationDelay:i*30+"ms"}}>
-      <div className="tl-dot" style={{background:item.urgency==="bordeaux"?"var(--red)":"var(--gold)"}}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flex:1}}>
-        <div>
-          <div className="tl-time">{item.type==="relance"?"📅 RELANCE":item.type==="dormant"?"💤 DORMANT":item.type==="paiement"?"💳 PAIEMENT":"🛡 VÉRIFICATION"}</div>
-          <div className="tl-title">{item.label}</div>
-          <div className="tl-sub">{item.lead.service} · {mN(item.lead.memberId)} · <SBadge status={item.lead.status}/></div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:14}}>
+    {[{l:"Relances",v:agendaItems.filter(x=>x.type==="relance").length,c:agendaItems.filter(x=>x.type==="relance").length>0?"var(--red)":"var(--green)",i:"fa-bell"},{l:"Dormants",v:agendaItems.filter(x=>x.type==="dormant").length,c:agendaItems.filter(x=>x.type==="dormant").length>0?"var(--bordeaux2)":"var(--green)",i:"fa-moon"},{l:"Paiements",v:agendaItems.filter(x=>x.type==="paiement").length,c:agendaItems.filter(x=>x.type==="paiement").length>0?"var(--gold)":"var(--green)",i:"fa-receipt"},{l:"Custom",v:agEvents.length,c:agEvents.length>0?"var(--purple)":"var(--text3)",i:"fa-calendar-plus"}].map((s,i)=>
+    <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label"><i className={"fa-solid "+s.i} style={{marginRight:3}}/>{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:20}}>{s.v}</div></div>)}
+  </div>
+  {agView==="cal"&&<div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+      <button onClick={()=>setAgMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()-1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-left"/></button>
+      <div style={{textAlign:"center"}}><h3 style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:600,textTransform:"capitalize"}}>{agMonth.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</h3><button onClick={()=>setAgMonth(new Date())} style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)"}}>Aujourdhui</button></div>
+      <button onClick={()=>setAgMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()+1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-right"/></button>
+    </div>
+    <div className="ag-cal">
+      {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(d=><div key={d} className="ag-head">{d}</div>)}
+      {agDays.map((d,i)=><div key={i} className={"ag-day"+(d.isToday?" ag-today":"")+(d.isOther?" ag-other":"")} style={{position:"relative"}} onClick={()=>setShowAgForm(d.ds)}>
+        <div className="ag-num" style={{color:d.isToday?"var(--gold)":"var(--text)"}}>{d.day}</div>
+        {d.evts.slice(0,4).map((ev,j)=><div key={ev.id||j} className="ag-ev" style={{background:(ev.cl||"var(--gold)")+"18",color:ev.cl}} onClick={e=>{e.stopPropagation();if(ev.lead)setSelLead(ev.lead)}}><span style={{fontSize:7,marginRight:2}}>{ev.time}</span>{ev.tp==="relance"?"📅":ev.tp==="signe"?"✓":ev.tp==="paiement"?"💳":"📌"} {ev.lb}</div>)}
+        {d.evts.length>4&&<div style={{fontSize:7,color:"var(--text3)",textAlign:"center"}}>+{d.evts.length-4}</div>}
+        <div className="ag-add">+</div>
+      </div>)}
+    </div>
+  </div>}
+  {agView==="list"&&<div>
+    <div className="card"><div className="card-h"><span style={{fontWeight:600}}>Aujourdhui — {td()}</span><span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)"}}>{todayEvts.length} events</span></div>
+    <div className="card-b">
+      {todayEvts.length===0&&<div style={{padding:20,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{marginRight:4}}/>RAS</div>}
+      {todayEvts.map((ev,i)=><div key={ev.id||i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid var(--border)"}}>
+        <div style={{width:50,fontSize:11,fontFamily:"var(--mono)",color:"var(--text3)"}}>{ev.time}</div>
+        <div style={{width:6,height:6,borderRadius:"50%",background:ev.cl,flexShrink:0}}/>
+        <div style={{flex:1,fontSize:12}}>{ev.lb}</div>
+        {ev.lead&&<button onClick={()=>setSelLead(ev.lead)} style={{fontSize:10,color:"var(--gold)"}}>Voir</button>}
+        {ev.tp==="custom"&&<button onClick={()=>delAgEvent(ev.id)} style={{fontSize:10,color:"var(--red)"}}>x</button>}
+      </div>)}
+    </div></div>
+    <div style={{marginTop:12}}><div className="card"><div className="card-h"><span style={{fontWeight:600}}>Pipeline — A faire</span></div><div className="card-b"><div className="tl">
+      {agendaItems.length===0&&<div style={{padding:16,textAlign:"center",color:"var(--text3)"}}>Pipeline sous controle</div>}
+      {agendaItems.slice(0,15).map((item,i)=><div key={i} className="tl-item fu" style={{animationDelay:i*30+"ms"}}>
+        <div className="tl-dot" style={{background:item.urgency==="bordeaux"?"var(--red)":"var(--gold)"}}/>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flex:1}}>
+          <div>
+            <div className="tl-time">{item.type==="relance"?"RELANCE":item.type==="dormant"?"DORMANT":item.type==="paiement"?"PAIEMENT":"VERIF"}</div>
+            <div className="tl-title">{item.label}</div>
+            <div className="tl-sub">{item.lead.service} | {mN(item.lead.memberId)} | <SBadge status={item.lead.status}/></div>
+          </div>
+          <div style={{display:"flex",gap:4,flexShrink:0}}>
+            <Badge type={item.urgency==="bordeaux"?"bordeaux":"gold"}>{item.urgency==="bordeaux"?"URGENT":"A SUIVRE"}</Badge>
+            {item.type==="relance"&&<button onClick={()=>{touch(item.lead.id,"Relance");upd(item.lead.id,{nextRelance:addD(td(),2)});flash(item.lead.nom+" J+2")}} style={{padding:"4px 10px",borderRadius:"var(--radius)",border:"1px solid var(--green)",color:"var(--green)",fontSize:10,fontWeight:600}}>Done</button>}
+            <button onClick={()=>openWA(item.lead,mN(item.lead.memberId))} className="wa"><i className="fa-brands fa-whatsapp"/></button>
+          </div>
         </div>
-        <div style={{display:"flex",gap:4,flexShrink:0}}>
-          <Badge type={item.urgency==="bordeaux"?"bordeaux":"gold"}>{item.urgency==="bordeaux"?"URGENT":"À SUIVRE"}</Badge>
-          {item.type==="relance"&&<button onClick={()=>{touch(item.lead.id,"Relancé");upd(item.lead.id,{nextRelance:addD(td(),2)});flash(item.lead.nom+" J+2")}} style={{padding:"4px 10px",borderRadius:"var(--radius)",border:"1px solid var(--green)",color:"var(--green)",fontSize:10,fontWeight:600}}>✓</button>}
-          <button onClick={()=>openWA(item.lead,mN(item.lead.memberId))} className="wa"><i className="fa-brands fa-whatsapp"/></button>
-        </div>
-      </div>
-    </div>))}
-  </div></div></div>
-</div>);
+      </div>)}
+    </div></div></div></div>
+  </div>}
+  {showAgForm&&<div className="overlay" onClick={()=>setShowAgForm(null)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:380}} onClick={e=>e.stopPropagation()}>
+    <AgForm date={showAgForm} onSave={(t,time,col)=>{addAgEvent(showAgForm,t,time,col);setShowAgForm(null)}} onX={()=>setShowAgForm(null)}/>
+  </div></div>}
+</div>};
+function AgForm({date,onSave,onX}){const[t,setT]=useState("");const[time,setTime]=useState("09:00");const[col,setCol]=useState("var(--purple)");const IS2={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
+return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>Nouvel event — {date}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div>
+<div className="ff"><label>Titre</label><input style={IS2} value={t} onChange={e=>setT(e.target.value)} placeholder="Call client, Deadline..." autoFocus/></div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+<div className="ff"><label>Heure</label><input style={IS2} type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
+<div className="ff"><label>Couleur</label><div style={{display:"flex",gap:4,marginTop:4}}>{["var(--purple)","var(--gold)","var(--red)","var(--green)","var(--blue)"].map(c=><button key={c} onClick={()=>setCol(c)} style={{width:24,height:24,borderRadius:6,background:c,border:col===c?"2px solid var(--text)":"2px solid transparent"}}/>)}</div></div>
+</div>
+<div style={{display:"flex",gap:4,justifyContent:"flex-end",marginTop:10}}><button onClick={onX} style={{padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button><button onClick={()=>{if(t.trim())onSave(t.trim(),time,col)}} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>Ajouter</button></div></div>}
 
 /* ═══ FINANCE ═══ */
 const Finance=()=>(
@@ -703,6 +848,53 @@ const IA=()=>(
   </div>
 </div>);
 
+/* ═══ MATCHING INVERSÉ ═══ */
+const Matching=()=>{const mc=matchCrit;const smc=(k,v)=>setMatchCrit(p=>({...p,[k]:v}));
+return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
+  <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:14}}>Mode Matching</h2>
+  <div className="match-hero">
+    <div style={{fontSize:13,fontWeight:600,marginBottom:4}}>Trouvez le prestataire ideal</div>
+    <div style={{fontSize:11,color:"var(--text2)",marginBottom:14}}>Saisissez les criteres de votre mission. Le CRM calcule un Score de Compatibilite.</div>
+    <div className="match-form">
+      <div className="ff"><label>Service</label><select style={{...IS,fontSize:13}} value={mc.service} onChange={e=>smc("service",e.target.value)}><option value="">Tous</option>{SERVICES.map(s=><option key={s}>{s}</option>)}</select></div>
+      <div className="ff"><label>Budget TJM max</label><input style={{...IS,fontSize:13}} type="number" placeholder="600" value={mc.budget} onChange={e=>smc("budget",e.target.value)}/></div>
+      <div className="ff"><label>Duree (mois)</label><input style={{...IS,fontSize:13}} type="number" placeholder="3" value={mc.duree} onChange={e=>smc("duree",e.target.value)}/></div>
+      <div className="ff"><label>Competence cle</label><input style={{...IS,fontSize:13}} placeholder="React, SEO..." value={mc.competence} onChange={e=>smc("competence",e.target.value)}/></div>
+      <button onClick={runMatch} style={{padding:"10px 20px",borderRadius:"var(--radius)",background:"var(--purple)",color:"#fff",fontSize:13,fontWeight:700,height:42}}>{matchLoading?"...":"Matcher"}</button>
+    </div>
+  </div>
+  {matchRes===null&&<div className="match-empty"><i className="fa-solid fa-wand-magic-sparkles"/>Definissez vos criteres et lancez le matching.<br/>Le CRM suggerera les meilleurs profils.</div>}
+  {matchRes&&matchRes.length===0&&<div className="match-empty"><i className="fa-solid fa-user-slash"/>Aucun prestataire ne correspond. Ajustez vos criteres ou ajoutez des prestataires.</div>}
+  {matchRes&&matchRes.length>0&&<div>
+    <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:10}}>{matchRes.length} PROFIL{matchRes.length>1?"S":""} TROUVES</div>
+    {matchRes.map((p,i)=>{const sCol=p.score>=70?"var(--green)":p.score>=40?"var(--gold)":"var(--red)";const rank=i<3?["#C5A059","#9CA3AF","#8B4513"][i]:null;
+    return <div key={p.id} className="match-result" style={{animationDelay:i*60+"ms"}}>
+      <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:sCol}}/>
+      <div style={{display:"flex",gap:16,alignItems:"center"}}>
+        <div className="match-score" style={{background:sCol+"18",color:sCol,border:"2px solid "+sCol+"30"}}>{p.score}</div>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:3}}>
+            {rank&&<div style={{width:20,height:20,borderRadius:"50%",background:rank,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:i===0?"var(--bg)":"var(--text)"}}>{i+1}</div>}
+            <span style={{fontWeight:700,fontSize:15}}>{p.nom}</span>
+            <span style={{fontSize:11,color:"var(--purple)",fontFamily:"var(--mono)"}}>{p.specialite}</span>
+            {p.tjm&&<span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{p.tjm}E/j</span>}
+          </div>
+          <div className="match-tags">
+            {p.reasons.map((r,j)=><span key={j} className="match-tag" style={{background:r.includes("OK")||r.includes("dispo")||r.includes("Prouve")||r.includes("budget")?"rgba(8,153,129,.1)":r.includes("elevee")||r.includes(">")?"rgba(231,76,76,.1)":"rgba(197,160,89,.1)",color:r.includes("OK")||r.includes("dispo")||r.includes("Prouve")||r.includes("budget")?"var(--green)":r.includes("elevee")||r.includes(">")?"var(--red)":"var(--gold)"}}>{r}</span>)}
+          </div>
+          <div style={{display:"flex",gap:16,marginTop:8,fontSize:10,color:"var(--text3)"}}>
+            <span>Charge: {p.charge} projet{p.charge>1?"s":""}</span>
+            <span>Signes: {p.signes}</span>
+            {p.email&&<span><i className="fa-solid fa-envelope" style={{marginRight:3}}/>{p.email}</span>}
+            {p.contact&&<span><i className="fa-solid fa-phone" style={{marginRight:3}}/><P$ v={p.contact} p={pm}/></span>}
+          </div>
+        </div>
+        <button onClick={()=>{setPage("talents")}} style={{padding:"8px 14px",borderRadius:"var(--radius)",border:"1px solid var(--purple)",color:"var(--purple)",fontSize:11,fontWeight:600,flexShrink:0}}>Voir fiche</button>
+      </div>
+    </div>})}
+  </div>}
+</div>};
+
 /* ═══ LEAD DETAIL PANEL ═══ */
 const Detail=({l,onClose})=>{if(!l)return null;const hs=healthScore(l);const col=COLS.find(c=>c.id===l.status);const mg=calcMargin(l.valeur,l.memberId);const cd=cDays(l.dateCreated,l.status);
 return <div className="rpanel">
@@ -738,7 +930,12 @@ return <div className="rpanel">
       <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"6px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/> WhatsApp</button>
       <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-copy"/> Template</button>
       <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé+2 actions.")}} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10}}><i className="fa-solid fa-robot"/> IA</button>
+      <button className={"enrich-btn"+(enrichLoading===l.id?" loading":"")} onClick={()=>enrichLead(l)}><i className={"fa-solid "+(enrichLoading===l.id?"fa-spinner fa-spin":"fa-satellite-dish")}/> {enrichLoading===l.id?"Recherche...":"Enrichir"}</button>
     </div>
+    {enrichData[l.id]&&<div className="enrich-card">
+      <div className="enrich-title"><i className="fa-solid fa-satellite-dish"/> DATA ENRICHMENT <span style={{fontSize:8,color:"var(--text3)",fontWeight:400}}>{enrichData[l.id].date}</span></div>
+      <div className="enrich-body">{enrichData[l.id].text}</div>
+    </div>}
   </div>
 </div>};
 
@@ -752,6 +949,7 @@ return (
     {page==="agenda"&&<Agenda/>}
     {page==="finance"&&<Finance/>}
     {page==="ia"&&<IA/>}
+    {page==="matching"&&<Matching/>}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
   {/* CMD */}
