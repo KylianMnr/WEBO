@@ -124,8 +124,6 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .ff{margin-bottom:10px}
 .wa{padding:4px 8px;border-radius:var(--radius);border:1px solid rgba(37,211,102,.2);color:#25D366;font-size:11px;transition:all .15s}.wa:hover{background:rgba(37,211,102,.06)}
 .match-card{background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:8px;padding:8px;margin-top:4px;cursor:pointer;transition:all .15s}.match-card:hover{background:rgba(139,92,246,.12)}
-
-/* ═══ V13 — NOTIFICATIONS ═══ */
 .notif-wrap{position:relative}
 .notif-bell{position:relative;cursor:pointer;padding:7px 10px;border-radius:var(--radius);transition:all .2s}
 .notif-bell:hover{background:var(--bg3)}
@@ -135,13 +133,11 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .notif-item:hover{background:var(--bg3)}
 .notif-item.unread{border-left:3px solid var(--gold)}
 .notif-ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px}
-/* ═══ V13 — BULK ACTIONS ═══ */
 .bulk-bar{position:sticky;bottom:0;left:0;right:0;background:linear-gradient(180deg,transparent,var(--bg) 20%);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(197,160,89,.15);padding:12px 18px;display:flex;align-items:center;gap:10px;z-index:50;animation:fadeUp .2s}
 .bulk-cnt{font-family:var(--mono);font-weight:700;color:var(--gold);font-size:14px}
 .bulk-btn{padding:6px 12px;border-radius:var(--radius);font-size:10px;font-weight:600;transition:all .15s;border:1px solid var(--border);color:var(--text2)}
 .bulk-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(197,160,89,.06)}
 .chk{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
-/* ═══ V13 — CALENDAR ═══ */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .cal-head{font-size:9px;font-weight:700;color:var(--text3);text-align:center;padding:8px 0;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
 .cal-day{min-height:80px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;transition:all .2s;cursor:pointer;overflow:hidden}
@@ -150,73 +146,57 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .cal-day.other{opacity:.3}
 .cal-num{font-size:11px;font-weight:700;font-family:var(--mono);margin-bottom:2px}
 .cal-ev{font-size:8px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;cursor:pointer}
-/* ═══ V13 — CHARTS ═══ */
 .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .chart-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .chart-hd span{font-size:11px;font-weight:600;font-family:var(--mono);color:var(--text2)}
 .funnel-step{display:flex;align-items:center;gap:10px;padding:7px 14px;transition:background .15s}
 .funnel-step:hover{background:var(--bg3)}
 .funnel-bar{height:22px;border-radius:4px;transition:width .8s ease-out;min-width:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:700;color:rgba(255,255,255,.9);font-family:var(--mono)}
-/* ═══ V13 — ACTIVITY FEED ═══ */
 .feed{max-height:280px;overflow-y:auto}
 .feed-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .15s;animation:fadeUp .3s ease-out both}
 .feed-item:hover{background:var(--bg3)}
 .feed-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
-/* ═══ V13 — MOBILE PERFECT ═══ */
 @media(max-width:768px){
-  .topnav{padding:0 8px;height:46px;gap:4px}
-  .logo .w{font-size:18px}.logo .r{font-size:15px}
-  .logo-tag,.lb-mini{display:none}
-  .nb{padding:6px 8px;font-size:10px}
-  .hub{padding:14px 10px}
-  .hub-title{font-size:22px!important}
-  .hub-stats{grid-template-columns:repeat(3,1fr)!important;gap:6px}
-  .hub-stats .stat-card{padding:10px 12px}
-  .hub-stats .stat-val{font-size:16px!important}
-  .hub-grid{grid-template-columns:1fr!important;gap:10px}
-  .hub-card{padding:16px 14px}
-  .hub-card h3{font-size:14px}
-  .kanban-col{min-width:220px;flex:none}
-  .rpanel{width:92vw;max-width:92vw}
-  .notif-panel{width:92vw;right:-60px;max-height:70vh}
-  .modal{width:98%;padding:18px;max-height:92vh;border-radius:10px}
-  .bulk-bar{padding:10px 12px;gap:6px;flex-wrap:wrap}
-  .bulk-btn{padding:5px 8px;font-size:9px}
-  .cal-day{min-height:52px;padding:3px 4px}
-  .cal-ev{font-size:7px}
-  .cal-num{font-size:9px}
-  .cal-head{font-size:8px;padding:5px 0}
-  .tbl th,.tbl td{padding:7px 6px;font-size:10px}
-  h2{font-size:16px!important}
-  .stat-card{padding:10px}
-  .card-h{padding:10px 14px}
-  .card-b{padding:10px 14px}
-  .chart-card .chart-hd{padding:10px 12px}
-  .funnel-step{padding:5px 10px;gap:6px}
-  .funnel-step>div:first-child{width:60px!important;font-size:8px!important}
-  .funnel-bar{height:18px;font-size:9px}
-  .feed-item{padding:8px 10px}
-  select,input,textarea{font-size:16px!important}
-  .finance-grid{grid-template-columns:1fr!important}
+.topnav{padding:0 8px;height:46px;gap:4px}
+.logo .w{font-size:18px}.logo .r{font-size:15px}
+.logo-tag,.lb-mini{display:none}
+.nb{padding:6px 8px;font-size:10px}
+.hub{padding:14px 10px}
+.hub-title{font-size:22px!important}
+.hub-stats{grid-template-columns:repeat(3,1fr)!important;gap:6px}
+.hub-stats .stat-card{padding:10px 12px}
+.hub-stats .stat-val{font-size:16px!important}
+.hub-grid{grid-template-columns:1fr!important;gap:10px}
+.hub-card{padding:16px 14px}
+.hub-card h3{font-size:14px}
+.kanban-col{min-width:220px;flex:none}
+.rpanel{width:92vw;max-width:92vw}
+.notif-panel{width:92vw;right:-60px;max-height:70vh}
+.modal{width:98%;padding:18px;max-height:92vh;border-radius:10px}
+.bulk-bar{padding:10px 12px;gap:6px;flex-wrap:wrap}
+.bulk-btn{padding:5px 8px;font-size:9px}
+.cal-day{min-height:52px;padding:3px 4px}
+.cal-ev{font-size:7px}
+.cal-num{font-size:9px}
+.cal-head{font-size:8px;padding:5px 0}
+.tbl th,.tbl td{padding:7px 6px;font-size:10px}
+h2{font-size:16px!important}
+.stat-card{padding:10px}
+.card-h{padding:10px 14px}
+.card-b{padding:10px 14px}
+.funnel-step{padding:5px 10px;gap:6px}
+.funnel-bar{height:18px;font-size:9px}
+.feed-item{padding:8px 10px}
+.finance-grid{grid-template-columns:1fr!important}
+select,input,textarea{font-size:16px!important}
 }
 @media(max-width:400px){
-  .hub-stats{grid-template-columns:repeat(2,1fr)!important}
-  .topnav .nb span{display:none}
+.hub-stats{grid-template-columns:repeat(2,1fr)!important}
 }
-
 </style>
 </head>
 <body>
 <div id="root"></div>
-<div id="err" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;padding:20px;background:#0a0a0a;color:#ff4444;font-family:monospace;font-size:12px;z-index:99999;white-space:pre-wrap;overflow:auto"></div>
-<script>
-var errDiv=document.getElementById('err');
-var origError=console.error;
-console.error=function(){origError.apply(console,arguments);errDiv.style.display='block';errDiv.textContent+='[console.error] '+Array.from(arguments).join(' ')+'\n\n'};
-window.onerror=function(m,s,l,c,e){errDiv.style.display='block';errDiv.textContent+='[onerror] '+m+' L:'+l+' C:'+c+'\n'+(e&&e.stack?e.stack:'')+'\n\n'};
-window.addEventListener('unhandledrejection',function(e){errDiv.style.display='block';errDiv.textContent+='[promise] '+e.reason+'\n\n'});
-setTimeout(function(){if(!document.getElementById('root').firstChild){errDiv.style.display='block';errDiv.textContent+='[timeout] App did not render after 5s. Check if Babel compiled correctly.\n'}},5000);
-</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
@@ -304,25 +284,19 @@ const aiRef=useRef(null);const pm=privacy;
 const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2200)};
 const pN=id=>prestas.find(x=>x.id===id)?.nom||"";
 
-/* V13 — Notifications */
 const addNotif=(icon,color,msg,leadId)=>{const n={id:uid(),icon,color,msg,time:new Date().toISOString(),read:false,leadId};setNotifs(p=>[n,...p].slice(0,50))};
-const unreadCount=useMemo(()=>notifs.filter(n=>!n.read).length,[notifs]);
+const unreadN=useMemo(()=>notifs.filter(n=>!n.read).length,[notifs]);
 const markAllRead=()=>setNotifs(p=>p.map(n=>({...n,read:true})));
-
-/* V13 — Activity Feed */
-const addActivity=(who,action,target,color)=>{const a={id:uid(),who,action,target,color:color||mC(who),time:new Date().toISOString()};setActFeed(p=>[a,...p].slice(0,100))};
-
-/* V13 — CSV Export */
-const csvEscape=v=>{const s=String(v||'');const q=String.fromCharCode(34);return(s.indexOf(',')>=0||s.indexOf(q)>=0)?q+s.split(q).join(q+q)+q:s};
-const exportCSV=(rows,filename,cols)=>{const hdr=cols.join(',');const body=rows.map(r=>cols.map(c=>csvEscape(r[c])).join(',')).join(String.fromCharCode(10));const bom=String.fromCharCode(0xFEFF);const blob=new Blob([bom+hdr+String.fromCharCode(10)+body],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=filename+'-'+td()+'.csv';a.click();URL.revokeObjectURL(u);flash('Export OK')};
-const exportLeads=()=>{const cols=["Entreprise","Statut","Service","Valeur","Apporteur","Source","Tel","Email","DateCreation","ProchaineRelance","Prestataire","Notes"];const rows=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Apporteur:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,ProchaineRelance:l.nextRelance,Prestataire:pN(l.prestaId),Notes:l.notes}));exportCSV(rows,"webo-leads",cols)};
-const exportFinance=()=>{const cols=["Entreprise","Service","Valeur","Commission20","PartChasseur","MargeNette","Apporteur","Role","DateSignature"];const sg=leads.filter(l=>l.status==="signe");const rows=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Commission20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Apporteur:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,DateSignature:l.dateCreated}});exportCSV(rows,"webo-finance",cols)};
-
-/* V13 — Bulk Actions */
+const addActivity=(who,act,tgt,col)=>{const a={id:uid(),who,action:act,target:tgt,color:col||mC(who),time:new Date().toISOString()};setActFeed(p=>[a,...p].slice(0,100))};
+const csvEsc=v=>{const s=String(v||"");if(s.includes(",")||s.includes("\n")||s.includes('"'))return '"'+s.replace(/"/g,'""')+'"';return s};
+const doExportCSV=(rows,fn,cols)=>{const txt=cols.join(",")+
+"\n"+rows.map(r=>cols.map(c=>csvEsc(r[c])).join(",")).join("\n");const blob=new Blob(["\uFEFF"+txt],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn+"-"+td()+".csv";a.click();URL.revokeObjectURL(u);flash("Export OK")};
+const exportLeads=()=>{const cols=["Entreprise","Statut","Service","Valeur","Apporteur","Source","Tel","Email","DateCreation","Relance","Prestataire","Notes"];const rows=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Apporteur:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,Relance:l.nextRelance,Prestataire:pN(l.prestaId),Notes:l.notes}));doExportCSV(rows,"webo-leads",cols)};
+const exportFinance=()=>{const cols=["Entreprise","Service","Valeur","Com20","PartChasseur","MargeNette","Apporteur","Role","Date"];const sg=leads.filter(l=>l.status==="signe");const rows=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Com20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Apporteur:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,Date:l.dateCreated}});doExportCSV(rows,"webo-finance",cols)};
 const toggleSel=id=>setSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
 const selAll=()=>{const ids=filt.map(l=>l.id);setSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
-const bulkStatus=async status=>{const ids=[...selIds];for(const id of ids){const l=leads.find(x=>x.id===id);if(!l)continue;const nl=addLog(l.activityLog,"Bulk:"+COLS.find(c=>c.id===status)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,status,lastInteraction:new Date().toISOString(),activityLog:nl}:x));await sb.from("leads").update({status,last_interaction:new Date().toISOString(),activity_log:nl}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads mis a jour");addActivity(sess,"bulk",ids.length+" leads")};
-const bulkPresta=async pid=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,prestaId:pid}:x));await sb.from("leads").update({presta_id:pid}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads assignes")};
+const bulkStatus=async status=>{const ids=[...selIds];for(const id of ids){const l=leads.find(x=>x.id===id);if(!l)continue;const nl=addLog(l.activityLog,"Bulk>"+COLS.find(c=>c.id===status)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,status,lastInteraction:new Date().toISOString(),activityLog:nl}:x));await sb.from("leads").update({status,last_interaction:new Date().toISOString(),activity_log:nl}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads OK");addActivity(sess,"bulk",ids.length+" leads")};
+const bulkPresta=async pid=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,prestaId:pid}:x));await sb.from("leads").update({presta_id:pid}).eq("id",id)}setSelIds(new Set());flash("Assignes")};
 
 const doLogin=()=>{const q=logId.trim().toLowerCase();const a=ACCTS.find(x=>x.login===q||x.email===q);if(!a){setLogErr("Identifiant inconnu");return}if(logPw!==a.pass){setLogErr("Mot de passe incorrect");return}setSess(a.id);try{localStorage.setItem("webo_session",a.id)}catch(e){}};
 
@@ -330,7 +304,7 @@ useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTARE
 
 /* CRUD */
 const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");if(l._isNew){addNotif("fa-plus","var(--green)","Nouveau: "+c.nom,c.id);addActivity(sess,"a ajouté",c.nom,"var(--green)")}else{addActivity(sess,"a modifié",c.nom,"var(--blue)")}await sb.from("leads").upsert(L2db(c))},[sess]);
-const del=useCallback(async id=>{const ll=leads.find(x=>x.id===id);setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");addActivity(sess,"a supprimé",ll?.nom||"","var(--red)");await sb.from("leads").delete().eq("id",id)},[leads,sess]);
+const del=useCallback(async id=>{const dl=leads.find(x=>x.id===id);setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");addActivity(sess,"a supprimé",dl?.nom||"","var(--red)");await sb.from("leads").delete().eq("id",id)},[leads,sess]);
 const touch=useCallback(async(id,msg)=>{const l=leads.find(x=>x.id===id);if(!l)return;const t=(l.tentatives||0)+1;const nl=addLog(l.activityLog,msg||"Contact #"+t);setLeads(p=>p.map(x=>x.id===id?{...x,lastInteraction:new Date().toISOString(),tentatives:t,activityLog:nl}:x));await sb.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t,activity_log:nl}).eq("id",id)},[leads]);
 const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={status:"status",lastInteraction:"last_interaction",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",activityLog:"activity_log"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});await sb.from("leads").update(db).eq("id",id)},[]);
 const updV=useCallback(async(id,vs,vn)=>{const nl=addLog(leads.find(l=>l.id===id)?.activityLog||"","Vérif:"+vs);setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,activityLog:nl}:l));setShowVerif(null);flash("Vérif ✓");await sb.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td(),activity_log:nl}).eq("id",id)},[leads]);
@@ -338,7 +312,7 @@ const upsP=useCallback(async p=>{const c={...p};delete c._isNew;setPrestas(pr=>p
 const delP=useCallback(async id=>{setPrestas(pr=>pr.filter(x=>x.id!==id));setShowPF(false);setEditP(null);flash("Supprimé");await sb.from("prestataires").delete().eq("id",id)},[]);
 
 const onDS=(e,id)=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
-const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));const cLab=COLS.find(c=>c.id===col)?.label;flash(l?.nom+" → "+cLab);addActivity(sess,"a déplacé",l?.nom+" → "+cLab);if(col==="signe")addNotif("fa-trophy","var(--green)",l?.nom+" signé! "+E(l?.valeur),id);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}setDragOver(null)};
+const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));const cLb=COLS.find(c=>c.id===col)?.label;flash(l?.nom+" → "+cLb);addActivity(sess,"a déplacé",(l?.nom||"")+" → "+cLb);if(col==="signe")addNotif("fa-trophy","var(--green)",(l?.nom||"")+" signé! "+E(l?.valeur||0),id);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}setDragOver(null)};
 
 const askAI=async pr=>{setAiMsgs(p=>[...p,{role:"user",content:pr}]);setAiIn("");setAiLoad(true);try{const sg=leads.filter(l=>l.status==="signe");const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:"Assistant WEBO Asset Management. Com 20%, Fondateur garde 100%, Chasseur split 50%. "+leads.length+" leads, "+sg.length+" signés. Français, expert, concret.",messages:[...aiMsgs.slice(-6).map(m=>({role:m.role,content:m.content})),{role:"user",content:pr}]})});const d=await r.json();const t=(d.content||[]).map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n")||"Erreur";setAiMsgs(p=>[...p,{role:"assistant",content:t}])}catch(e){setAiMsgs(p=>[...p,{role:"assistant",content:"Erreur IA."}])}setAiLoad(false)};
 useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"})},[aiMsgs,aiLoad]);
@@ -347,21 +321,14 @@ useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"}
 useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads").select("*");setLeads((lr.data||[]).map(db2L));try{const pr=await sb.from("prestataires").select("*");setPrestas(pr.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
 useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
-
-/* V13 — Auto notifs on load */
-useEffect(()=>{if(!ready||notifs.length>0)return;const init=[];
-urgL.slice(0,5).forEach(l=>init.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" — inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));
-leads.filter(l=>l.status==="signe"&&!l.paymentProof).slice(0,3).forEach(l=>init.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));
-if(init.length>0)setNotifs(init)},[ready]);
+useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="signe"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
 
 /* Computed */
 const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===sess),[leads,sess,isA]);
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
 const srt=c=>{if(sortBy==="valeur")return[...c].sort((a,b)=>b.valeur-a.valeur);if(sortBy==="date")return[...c].sort((a,b)=>new Date(b.dateCreated)-new Date(a.dateCreated));return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
-
-/* V13 — Calendar */
-const calDays=useMemo(()=>{const y=calMonth.getFullYear(),mo=calMonth.getMonth();const first=new Date(y,mo,1);const last=new Date(y,mo+1,0);const startOff=(first.getDay()+6)%7;const totalCells=Math.ceil((startOff+last.getDate())/7)*7;const days=[];for(let i=0;i<totalCells;i++){const d=new Date(y,mo,i-startOff+1);const ds=d.toISOString().slice(0,10);const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({tp:"relance",lb:l.nom,cl:"var(--red)",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({tp:"signe",lb:l.nom,cl:"var(--green)",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({tp:"pay",lb:l.nom,cl:"var(--gold)",lead:l}));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[calMonth,myL,leads]);
+const calDays=useMemo(()=>{const y=calMonth.getFullYear(),mo=calMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.toISOString().slice(0,10);const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({tp:"rel",lb:l.nom,cl:"var(--red)",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({tp:"sig",lb:l.nom,cl:"var(--green)",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({tp:"pay",lb:l.nom,cl:"var(--gold)",lead:l}));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[calMonth,myL,leads]);
 
 /* Agenda: relances du jour + overdue + 3 days dormant */
 const agendaItems=useMemo(()=>{const items=[];
@@ -425,16 +392,16 @@ const Nav=()=>(
   <div style={{display:"flex",gap:4,alignItems:"center"}}>
     {page!=="hub"&&<button className="nb" onClick={()=>setPage("hub")}><i className="fa-solid fa-arrow-left"/> Hub</button>}
     <button className="nb" onClick={()=>setCmd(true)}><i className="fa-solid fa-magnifying-glass"/></button>
-    <div className="notif-wrap"><button className="notif-bell" onClick={e=>{e.stopPropagation();setShowNotif(p=>!p)}}><i className="fa-solid fa-bell" style={{fontSize:13,color:showNotif?"var(--gold)":"var(--text2)"}}/>{unreadCount>0&&<div className="notif-dot"/>}</button>
+    <div className="notif-wrap"><button className="notif-bell" onClick={e=>{e.stopPropagation();setShowNotif(p=>!p)}}><i className="fa-solid fa-bell" style={{fontSize:13,color:showNotif?"var(--gold)":"var(--text2)"}}/>{unreadN>0&&<div className="notif-dot"/>}</button>
     {showNotif&&<div className="notif-panel" onClick={e=>e.stopPropagation()}>
-      <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:13}}>Notifications</span>{unreadCount>0&&<button onClick={markAllRead} style={{fontSize:10,color:"var(--gold)",fontWeight:600}}>Tout lu</button>}</div>
-      {notifs.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-regular fa-bell-slash" style={{display:"block",fontSize:18,marginBottom:6}}/> Aucune notification</div>:notifs.slice(0,20).map(n=><div key={n.id} className={"notif-item"+(n.read?"":" unread")} onClick={()=>{if(n.leadId){const ll=leads.find(x=>x.id===n.leadId);if(ll){setSelLead(ll);setPage("pipeline")}}setNotifs(p=>p.map(x=>x.id===n.id?{...x,read:true}:x));setShowNotif(false)}}>
+      <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:13}}>Notifications</span>{unreadN>0&&<button onClick={markAllRead} style={{fontSize:10,color:"var(--gold)",fontWeight:600}}>Tout lu</button>}</div>
+      {notifs.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}>Aucune notification</div>:notifs.slice(0,20).map(n=><div key={n.id} className={"notif-item"+(n.read?"":" unread")} onClick={()=>{if(n.leadId){const nl=leads.find(x=>x.id===n.leadId);if(nl){setSelLead(nl);setPage("pipeline")}}setNotifs(p=>p.map(x=>x.id===n.id?{...x,read:true}:x));setShowNotif(false)}}>
         <div className="notif-ic" style={{background:(n.color||"var(--gold)")+"15",color:n.color||"var(--gold)"}}><i className={"fa-solid "+(n.icon||"fa-bell")}/></div>
         <div style={{flex:1}}><div style={{fontSize:12,lineHeight:1.4}}>{n.msg}</div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:2}}>{fA(hA(n.time))}</div></div>
       </div>)}
     </div>}
     </div>
-    <button className="nb" onClick={exportLeads} title="Export CSV"><i className="fa-solid fa-file-csv"/></button>
+    <button className="nb" onClick={exportLeads} title="CSV"><i className="fa-solid fa-file-csv"/></button>
     <button className="nb" onClick={()=>setPrivacy(p=>!p)} style={{color:privacy?"var(--red)":"var(--text2)"}}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")}/></button>
     <button className="nb" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓")}}><i className="fa-solid fa-cloud-arrow-down"/></button>
     <div style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}><Av id={sess} sz={22}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(sess)}</span><span style={{fontSize:9,color:"var(--text3)"}}>{sU?.role}</span><span className={"sync-dot "+sync}/></div>
@@ -452,11 +419,10 @@ const HubPage=()=>(
     {[{l:"Portefeuille",v:st.total,c:"var(--gold)"},{l:"Signés",v:st.signes,c:"var(--green)"},{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Marge Nette",v:E(st.margeNette),c:"var(--gold)"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"},{l:"Agenda",v:st.agenda+" tâches",c:st.agenda>0?"var(--red)":"var(--green)"}].map((s,i)=>
     <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:20}}><P$ v={s.v} p={pm}/></div></div>)}
   </div>
-  {/* V13 — FUNNEL + FEED */}
   <div style={{display:"grid",gridTemplateColumns:isA?"1fr 1fr":"1fr",gap:14,marginBottom:24}}>
     <div className="chart-card">
       <div className="chart-hd"><span><i className="fa-solid fa-filter" style={{color:"var(--gold)",marginRight:6}}/>Funnel</span><span style={{color:"var(--text3)"}}>{st.total} leads</span></div>
-      <div style={{padding:"4px 0"}}>{COLS.filter(c=>c.id!=="injoignable").map((col,i)=>{const cnt=myL.filter(l=>l.status===col.id).length;const maxC=Math.max(...COLS.map(c=>myL.filter(l=>l.status===c.id).length),1);const pct=Math.round(cnt/maxC*100);const val=myL.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);
+      <div style={{padding:"4px 0"}}>{COLS.filter(c=>c.id!=="injoignable").map((col,i)=>{const cnt=myL.filter(l=>l.status===col.id).length;const mx=Math.max(...COLS.map(c=>myL.filter(l=>l.status===c.id).length),1);const pct=Math.round(cnt/mx*100);const val=myL.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);
       return <div key={col.id} className="funnel-step">
         <div style={{width:80,fontSize:9,fontWeight:600,color:col.accent,flexShrink:0}}><i className={"fa-solid "+col.icon} style={{marginRight:4,fontSize:8}}/>{col.label}</div>
         <div style={{flex:1}}><div className="funnel-bar" style={{width:Math.max(pct,8)+"%",background:"linear-gradient(90deg,"+col.accent+"CC,"+col.accent+"55)"}}>{cnt>0?cnt:""}</div></div>
@@ -466,7 +432,7 @@ const HubPage=()=>(
     {isA&&<div className="chart-card">
       <div className="chart-hd"><span><i className="fa-solid fa-bolt" style={{color:"var(--gold)",marginRight:6}}/>Activité</span><span style={{color:"var(--text3)"}}>{actFeed.length}</span></div>
       <div className="feed">
-        {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-clock" style={{display:"block",fontSize:18,marginBottom:6}}/>Actions de l equipe ici</div>:
+        {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}>Actions de l'équipe ici</div>:
         actFeed.slice(0,15).map((a,i)=><div key={a.id} className="feed-item" style={{animationDelay:i*30+"ms"}}>
           <div className="feed-dot" style={{background:a.color||"var(--gold)"}}/>
           <div style={{flex:1}}><div style={{fontSize:12,color:"var(--text2)",lineHeight:1.5}}><strong style={{color:mC(a.who)}}>{mN(a.who)}</strong> {a.action} <strong style={{color:"var(--text)"}}>{a.target}</strong></div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{fA(hA(a.time))}</div></div>
@@ -481,7 +447,7 @@ const HubPage=()=>(
     {icon:"fa-chart-pie",title:"Contrôle Financier",desc:"CA, marge nette, ROI, commissions Fondateur vs Chasseurs.",pg:"finance",cnt:E(st.margeNette)},
     {icon:"fa-robot",title:"Agent IA Stratégique",desc:"Analyse, coaching, prévisions automatisées.",pg:"ia",cnt:"IA"},
     {icon:"fa-calendar-days",title:"Calendrier",desc:"Vue mensuelle des relances et échéances.",pg:"cal",cnt:st.agenda+" évts"},
-    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>{if(c.pg==="cal"){setPage("pipeline");setPView("calendar")}else{setPage(c.pg)}}}>
+    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>{if(c.pg==="cal"){setPage("pipeline");setPView("calendar")}else setPage(c.pg)}}>
       <div className="hub-card-icon"><i className={"fa-solid "+c.icon}/></div>
       <h3>{c.title}</h3><p>{c.desc}</p><div className="cnt">{c.cnt}</div>
     </div>)}
@@ -557,8 +523,6 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
   </div>})}
   {urgL.length===0&&<div style={{padding:40,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{fontSize:20,display:"block",marginBottom:6}}/> Aucun urgent</div>}
   </div>}
-
-  {/* V13 — CALENDAR */}
   {pView==="calendar"&&<div style={{flex:1,overflow:"auto"}}>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
       <button onClick={()=>setCalMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()-1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-left"/></button>
@@ -569,13 +533,11 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
       {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(d=><div key={d} className="cal-head">{d}</div>)}
       {calDays.map((d,i)=><div key={i} className={"cal-day"+(d.isToday?" today":"")+(d.isOther?" other":"")}>
         <div className="cal-num" style={{color:d.isToday?"var(--gold)":"var(--text)"}}>{d.day}</div>
-        {d.evts.slice(0,3).map((ev,j)=><div key={j} className="cal-ev" style={{background:(ev.cl||"var(--gold)")+"18",color:ev.cl}} onClick={e=>{e.stopPropagation();if(ev.lead)setSelLead(ev.lead)}}>{ev.tp==="relance"?"📅 ":ev.tp==="signe"?"✓ ":"💳 "}{ev.lb}</div>)}
+        {d.evts.slice(0,3).map((ev,j)=><div key={j} className="cal-ev" style={{background:(ev.cl||"var(--gold)")+"18",color:ev.cl}} onClick={e=>{e.stopPropagation();if(ev.lead)setSelLead(ev.lead)}}>{ev.tp==="rel"?"📅 ":ev.tp==="sig"?"✓ ":"💳 "}{ev.lb}</div>)}
         {d.evts.length>3&&<div style={{fontSize:8,color:"var(--text3)",textAlign:"center"}}>+{d.evts.length-3}</div>}
       </div>)}
     </div>
   </div>}
-
-  {/* V13 — BULK BAR */}
   {selIds.size>0&&<div className="bulk-bar">
     <span className="bulk-cnt">{selIds.size} sélectionné{selIds.size>1?"s":""}</span>
     <div style={{height:16,width:1,background:"var(--border)"}}/>
@@ -667,29 +629,28 @@ const Finance=()=>(
     {[{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Marge Nette WEBO",v:E(st.margeNette),c:"var(--gold)"},{l:"Part Chasseurs",v:E(st.comProsp),c:"var(--blue)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Cycle Moyen",v:st.avgC+"j",c:"var(--text2)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
     <div key={i} className="stat-card fu" style={{animationDelay:i*30+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:22}}><P$ v={s.v} p={pm}/></div></div>)}
   </div>
-  {/* V13 — VISUAL CHARTS */}
   <div className="finance-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
     <div className="chart-card">
-      <div className="chart-hd"><span><i className="fa-solid fa-chart-pie" style={{color:"var(--gold)",marginRight:6}}/>Répartition Commission</span><button onClick={exportFinance} style={{fontSize:9,color:"var(--gold)",fontWeight:600,padding:"3px 8px",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)"}}><i className="fa-solid fa-file-csv" style={{marginRight:3}}/>Export</button></div>
+      <div className="chart-hd"><span><i className="fa-solid fa-chart-pie" style={{color:"var(--gold)",marginRight:6}}/>Commission</span><button onClick={exportFinance} style={{fontSize:9,color:"var(--gold)",fontWeight:600,padding:"3px 8px",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)"}}><i className="fa-solid fa-file-csv" style={{marginRight:3}}/>Export</button></div>
       <div style={{padding:16}}>
-        {(()=>{const total=st.ca*.2;const net=st.margeNette;const prosp=st.comProsp;const netP=total>0?Math.round(net/total*100):100;const prP=total>0?Math.round(prosp/total*100):0;
+        {(()=>{const total=st.ca*.2;const net=st.margeNette;const prosp=st.comProsp;const nP=total>0?Math.round(net/total*100):100;const pP=total>0?Math.round(prosp/total*100):0;
         return <div>
           <div style={{display:"flex",height:18,borderRadius:10,overflow:"hidden",marginBottom:14}}>
-            <div style={{width:netP+"%",background:"var(--gold)",transition:"width .8s"}}/>
-            <div style={{width:prP+"%",background:"var(--blue)",transition:"width .8s"}}/>
+            <div style={{width:nP+"%",background:"var(--gold)",transition:"width .8s"}}/>
+            <div style={{width:pP+"%",background:"var(--blue)",transition:"width .8s"}}/>
           </div>
           <div style={{display:"flex",justifyContent:"space-around",fontSize:11}}>
-            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--gold)",display:"inline-block",marginRight:4}}/>Marge WEBO<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:15,color:"var(--gold)",marginTop:2}}><P$ v={E(net)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{netP}%</div></div>
-            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--blue)",display:"inline-block",marginRight:4}}/>Chasseurs<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:15,color:"var(--blue)",marginTop:2}}><P$ v={E(prosp)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{prP}%</div></div>
-            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--green)",display:"inline-block",marginRight:4}}/>CA Total<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:15,color:"var(--green)",marginTop:2}}><P$ v={E(st.ca)} p={pm}/></div></div>
+            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--gold)",display:"inline-block",marginRight:4}}/>Marge<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:15,color:"var(--gold)",marginTop:2}}><P$ v={E(net)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{nP}%</div></div>
+            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--blue)",display:"inline-block",marginRight:4}}/>Chasseurs<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:15,color:"var(--blue)",marginTop:2}}><P$ v={E(prosp)} p={pm}/></div><div style={{fontSize:10,color:"var(--text3)"}}>{pP}%</div></div>
+            <div style={{textAlign:"center"}}><div style={{width:10,height:10,borderRadius:3,background:"var(--green)",display:"inline-block",marginRight:4}}/>CA<div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:15,color:"var(--green)",marginTop:2}}><P$ v={E(st.ca)} p={pm}/></div></div>
           </div>
         </div>})()}
       </div>
     </div>
     <div className="chart-card">
-      <div className="chart-hd"><span><i className="fa-solid fa-signal" style={{color:"var(--gold)",marginRight:6}}/>Valeur par Etape</span></div>
+      <div className="chart-hd"><span><i className="fa-solid fa-signal" style={{color:"var(--gold)",marginRight:6}}/>Par Etape</span></div>
       <div style={{padding:"10px 14px"}}>
-        {COLS.map(col=>{const val=leads.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);const cnt=leads.filter(l=>l.status===col.id).length;const maxV=Math.max(...COLS.map(c=>leads.filter(l=>l.status===c.id).reduce((s,l)=>s+l.valeur,0)),1);const pct=Math.round(val/maxV*100);
+        {COLS.map(col=>{const val=leads.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);const cnt=leads.filter(l=>l.status===col.id).length;const mxV=Math.max(...COLS.map(c=>leads.filter(l=>l.status===c.id).reduce((s,l)=>s+l.valeur,0)),1);const pct=Math.round(val/mxV*100);
         return <div key={col.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
           <div style={{width:65,fontSize:9,fontWeight:600,color:col.accent,fontFamily:"var(--mono)",flexShrink:0}}>{col.label}</div>
           <div style={{flex:1,height:12,background:"var(--bg4)",borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:pct+"%",background:col.accent,borderRadius:3,transition:"width .6s"}}/></div>
@@ -784,7 +745,7 @@ return <div className="rpanel">
 return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>setShowNotif(false)}>
   <Nav/>
-  <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+  <div style={{flex:1,overflowX:"hidden",overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page==="hub"&&<HubPage/>}
     {page==="pipeline"&&<Pipeline/>}
     {page==="talents"&&<Talents/>}
