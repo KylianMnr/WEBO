@@ -138,14 +138,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .bulk-btn{padding:6px 12px;border-radius:var(--radius);font-size:10px;font-weight:600;transition:all .15s;border:1px solid var(--border);color:var(--text2)}
 .bulk-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(197,160,89,.06)}
 .chk{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-head{font-size:9px;font-weight:700;color:var(--text3);text-align:center;padding:8px 0;font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
-.cal-day{min-height:80px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:4px 6px;transition:all .2s;cursor:pointer;overflow:hidden}
-.cal-day:hover{border-color:var(--border2);background:var(--bg3)}
-.cal-day.today{border-color:rgba(197,160,89,.4);background:rgba(197,160,89,.04)}
-.cal-day.other{opacity:.3}
-.cal-num{font-size:11px;font-weight:700;font-family:var(--mono);margin-bottom:2px}
-.cal-ev{font-size:8px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;cursor:pointer}
+/* Pipeline calendar removed — using Agenda only */
 .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .chart-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .chart-hd span{font-size:11px;font-weight:600;font-family:var(--mono);color:var(--text2)}
@@ -175,10 +168,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .modal{width:98%;padding:18px;max-height:92vh;border-radius:10px}
 .bulk-bar{padding:10px 12px;gap:6px;flex-wrap:wrap}
 .bulk-btn{padding:5px 8px;font-size:9px}
-.cal-day{min-height:52px;padding:3px 4px}
-.cal-ev{font-size:7px}
-.cal-num{font-size:9px}
-.cal-head{font-size:8px;padding:5px 0}
+
 .tbl th,.tbl td{padding:7px 6px;font-size:10px}
 h2{font-size:16px!important}
 .stat-card{padding:10px}
@@ -363,7 +353,7 @@ const[now,setNow]=useState(Date.now());const[aiMsgs,setAiMsgs]=useState([]);cons
 const[cmd,setCmd]=useState(false);const[cmdQ,setCmdQ]=useState("");
 const[privacy,setPrivacy]=useState(false);const[selLead,setSelLead]=useState(null);
 const[notifs,setNotifs]=useState([]);const[showNotif,setShowNotif]=useState(false);
-const[selIds,setSelIds]=useState(new Set());const[calMonth,setCalMonth]=useState(new Date());
+const[selIds,setSelIds]=useState(new Set());
 const[actFeed,setActFeed]=useState([]);
 const[enrichData,setEnrichData]=useState({});const[enrichLoading,setEnrichLoading]=useState(null);
 const[matchCrit,setMatchCrit]=useState({service:"",budget:"",duree:"",competence:""});const[matchRes,setMatchRes]=useState(null);const[matchLoading,setMatchLoading]=useState(false);
@@ -437,7 +427,6 @@ const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===sess),[leads,sess,i
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
 const srt=c=>{if(sortBy==="valeur")return[...c].sort((a,b)=>b.valeur-a.valeur);if(sortBy==="date")return[...c].sort((a,b)=>new Date(b.dateCreated)-new Date(a.dateCreated));return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
-const calDays=useMemo(()=>{const y=calMonth.getFullYear(),mo=calMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.toISOString().slice(0,10);const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({tp:"rel",lb:l.nom,cl:"var(--red)",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({tp:"sig",lb:l.nom,cl:"var(--green)",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({tp:"pay",lb:l.nom,cl:"var(--gold)",lead:l}));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[calMonth,myL,leads]);
 const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.toISOString().slice(0,10);const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));agEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.time||"12:00"}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myL,leads,agEvents]);
 
 /* Agenda: relances du jour + overdue + 3 days dormant */
@@ -557,9 +546,8 @@ const HubPage=()=>(
     {icon:"fa-calendar-check",title:"Agenda & Échéances",desc:"Daily Focus : relances, audits, deadlines paiement.",pg:"agenda",cnt:st.agenda+" tâches"},
     {icon:"fa-chart-pie",title:"Contrôle Financier",desc:"CA, marge nette, ROI, commissions Fondateur vs Chasseurs.",pg:"finance",cnt:E(st.margeNette)},
     {icon:"fa-robot",title:"Agent IA Stratégique",desc:"Analyse, coaching, prévisions automatisées.",pg:"ia",cnt:"IA"},
-    {icon:"fa-calendar-days",title:"Calendrier",desc:"Vue mensuelle des relances et échéances.",pg:"cal",cnt:st.agenda+" évts"},
     {icon:"fa-wand-magic-sparkles",title:"Mode Matching",desc:"Mission > profils. Score de compatibilité automatique.",pg:"matching",cnt:prestas.length+" prestas"},
-    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>{if(c.pg==="cal"){setPage("pipeline");setPView("calendar")}else setPage(c.pg)}}>
+    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>setPage(c.pg)}>
       <div className="hub-card-icon"><i className={"fa-solid "+c.icon}/></div>
       <h3>{c.title}</h3><p>{c.desc}</p><div className="cnt">{c.cnt}</div>
     </div>)}
@@ -568,7 +556,7 @@ const HubPage=()=>(
 
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
-const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"},{id:"calendar",l:"Calendrier",i:"fa-calendar-days"}];
+const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"}];
 return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",flexDirection:"column"}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
     <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Pipeline Commercial</h2>
@@ -635,21 +623,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
   </div>})}
   {urgL.length===0&&<div style={{padding:40,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{fontSize:20,display:"block",marginBottom:6}}/> Aucun urgent</div>}
   </div>}
-  {pView==="calendar"&&<div style={{flex:1,overflow:"auto"}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-      <button onClick={()=>setCalMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()-1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-left"/></button>
-      <h3 style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:600,textTransform:"capitalize"}}>{calMonth.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</h3>
-      <button onClick={()=>setCalMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()+1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-right"/></button>
-    </div>
-    <div className="cal-grid">
-      {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(d=><div key={d} className="cal-head">{d}</div>)}
-      {calDays.map((d,i)=><div key={i} className={"cal-day"+(d.isToday?" today":"")+(d.isOther?" other":"")}>
-        <div className="cal-num" style={{color:d.isToday?"var(--gold)":"var(--text)"}}>{d.day}</div>
-        {d.evts.slice(0,3).map((ev,j)=><div key={j} className="cal-ev" style={{background:(ev.cl||"var(--gold)")+"18",color:ev.cl}} onClick={e=>{e.stopPropagation();if(ev.lead)setSelLead(ev.lead)}}>{ev.tp==="rel"?"📅 ":ev.tp==="sig"?"✓ ":"💳 "}{ev.lb}</div>)}
-        {d.evts.length>3&&<div style={{fontSize:8,color:"var(--text3)",textAlign:"center"}}>+{d.evts.length-3}</div>}
-      </div>)}
-    </div>
-  </div>}
+
   {selIds.size>0&&<div className="bulk-bar">
     <span className="bulk-cnt">{selIds.size} sélectionné{selIds.size>1?"s":""}</span>
     <div style={{height:16,width:1,background:"var(--border)"}}/>
@@ -737,9 +711,9 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
     </div>
     <div className="ag-cal">
       {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map(d=><div key={d} className="ag-head">{d}</div>)}
-      {agDays.map((d,i)=><div key={i} className={"ag-day"+(d.isToday?" ag-today":"")+(d.isOther?" ag-other":"")} style={{position:"relative"}} onClick={()=>setShowAgForm(d.ds)}>
+      {agDays.map((d,i)=><div key={i} className={"ag-day"+(d.isToday?" ag-today":"")+(d.isOther?" ag-other":"")} style={{position:"relative"}} onClick={()=>{setSelLead(null);setShowAgForm(d.ds)}}>
         <div className="ag-num" style={{color:d.isToday?"var(--gold)":"var(--text)"}}>{d.day}</div>
-        {d.evts.slice(0,4).map((ev,j)=><div key={ev.id||j} className="ag-ev" style={{background:(ev.cl||"var(--gold)")+"18",color:ev.cl}} onClick={e=>{e.stopPropagation();if(ev.lead)setSelLead(ev.lead)}}><span style={{fontSize:7,marginRight:2}}>{ev.time}</span>{ev.tp==="relance"?"📅":ev.tp==="signe"?"✓":ev.tp==="paiement"?"💳":"📌"} {ev.lb}</div>)}
+        {d.evts.slice(0,4).map((ev,j)=><div key={ev.id||j} className="ag-ev" style={{background:(ev.cl||"var(--gold)")+"18",color:ev.cl}} onClick={e=>{e.stopPropagation();setSelLead(null);setShowAgForm(d.ds)}}><span style={{fontSize:7,marginRight:2}}>{ev.time}</span>{ev.tp==="relance"?"📅":ev.tp==="signe"?"✓":ev.tp==="paiement"?"💳":"📌"} {ev.lb}</div>)}
         {d.evts.length>4&&<div style={{fontSize:7,color:"var(--text3)",textAlign:"center"}}>+{d.evts.length-4}</div>}
         <div className="ag-add">+</div>
       </div>)}
@@ -776,7 +750,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
       </div>)}
     </div></div></div></div>
   </div>}
-  {showAgForm&&<DayPanel date={showAgForm} evts={agDays.find(d=>d.ds===showAgForm)?.evts||[]} onClose={()=>setShowAgForm(null)} onAddEvent={(t,time,col)=>addAgEvent(showAgForm,t,time,col)} onDelEvent={delAgEvent} onLeadClick={l=>{setSelLead(l);setShowAgForm(null)}} onMoveLead={(leadId,newDate)=>{upd(leadId,{nextRelance:newDate});flash("Relance deplacee")}} leads={myL} prestas={prestas} sess={sess}/>}
+  {showAgForm&&<DayPanel date={showAgForm} evts={agDays.find(d=>d.ds===showAgForm)?.evts||[]} onClose={()=>setShowAgForm(null)} onAddEvent={(t,time,col)=>addAgEvent(showAgForm,t,time,col)} onDelEvent={delAgEvent} onLeadClick={l=>{setShowAgForm(null);setTimeout(()=>setSelLead(l),100)}} onMoveLead={(leadId,newDate)=>{upd(leadId,{nextRelance:newDate});flash("Relance deplacee")}} leads={myL} prestas={prestas} sess={sess}/>}
 </div>};
 function DayPanel({date,evts,onClose,onAddEvent,onDelEvent,onLeadClick,onMoveLead,leads,prestas,sess}){
 const[showNew,setShowNew]=useState(false);const[nt,setNt]=useState("");const[ntime,setNtime]=useState("09:00");const[ncol,setNcol]=useState("var(--purple)");
