@@ -227,6 +227,29 @@ select,input,textarea{font-size:16px!important}
 .pitch-btn:hover{background:rgba(139,92,246,.06)}
 /* V13.2 — Client mode */
 .client-blur{filter:blur(5px);user-select:none;pointer-events:none}
+/* V13.2 — Day Panel */
+.day-panel{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:95vw;background:var(--bg2);border-left:1px solid var(--border);z-index:300;overflow-y:auto;box-shadow:-10px 0 40px rgba(0,0,0,.35);animation:slideR .25s ease-out}
+.day-panel::-webkit-scrollbar{width:3px}
+.day-hdr{padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:5}
+.day-date{font-family:var(--serif);font-size:20px;font-weight:600}
+.day-sub{font-size:11px;color:var(--text3);margin-top:2px;text-transform:capitalize}
+.day-timeline{padding:8px 20px 20px}
+.day-hour{display:flex;gap:12px;min-height:46px;border-top:1px solid rgba(42,45,53,.4);position:relative}
+.day-hour-label{width:40px;font-size:10px;font-family:var(--mono);color:var(--text3);padding-top:4px;flex-shrink:0}
+.day-hour-content{flex:1;padding:4px 0;display:flex;flex-direction:column;gap:3px}
+.day-ev{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;transition:all .2s;cursor:pointer}
+.day-ev:hover{background:var(--bg3)}
+.day-ev-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.day-ev-body{flex:1}
+.day-ev-title{font-size:12px;font-weight:600}
+.day-ev-meta{font-size:10px;color:var(--text3);margin-top:1px}
+.day-ev-actions{display:flex;gap:3px;opacity:0;transition:opacity .15s}
+.day-ev:hover .day-ev-actions{opacity:1}
+.day-act-btn{padding:3px 7px;border-radius:4px;border:1px solid var(--border);color:var(--text2);font-size:9px;transition:all .15s}
+.day-act-btn:hover{border-color:var(--gold);color:var(--gold)}
+.day-act-btn.del:hover{border-color:var(--red);color:var(--red)}
+.day-new-form{padding:14px 20px;border-top:1px solid var(--border);background:var(--bg);position:sticky;bottom:0}
+@media(max-width:768px){.day-panel{width:100vw;max-width:100vw}.day-ev-actions{opacity:1}}
 /* V13.2 — Agenda calendar */
 .ag-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .ag-head{font-size:9px;font-weight:700;color:var(--text3);text-align:center;padding:8px 0;font-family:var(--mono)}
@@ -753,18 +776,75 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
       </div>)}
     </div></div></div></div>
   </div>}
-  {showAgForm&&<div className="overlay" onClick={()=>setShowAgForm(null)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:380}} onClick={e=>e.stopPropagation()}>
-    <AgForm date={showAgForm} onSave={(t,time,col)=>{addAgEvent(showAgForm,t,time,col);setShowAgForm(null)}} onX={()=>setShowAgForm(null)}/>
-  </div></div>}
+  {showAgForm&&<DayPanel date={showAgForm} evts={agDays.find(d=>d.ds===showAgForm)?.evts||[]} onClose={()=>setShowAgForm(null)} onAddEvent={(t,time,col)=>addAgEvent(showAgForm,t,time,col)} onDelEvent={delAgEvent} onLeadClick={l=>{setSelLead(l);setShowAgForm(null)}} onMoveLead={(leadId,newDate)=>{upd(leadId,{nextRelance:newDate});flash("Relance deplacee")}} leads={myL} prestas={prestas} sess={sess}/>}
 </div>};
-function AgForm({date,onSave,onX}){const[t,setT]=useState("");const[time,setTime]=useState("09:00");const[col,setCol]=useState("var(--purple)");const IS2={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
-return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>Nouvel event — {date}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div>
-<div className="ff"><label>Titre</label><input style={IS2} value={t} onChange={e=>setT(e.target.value)} placeholder="Call client, Deadline..." autoFocus/></div>
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-<div className="ff"><label>Heure</label><input style={IS2} type="time" value={time} onChange={e=>setTime(e.target.value)}/></div>
-<div className="ff"><label>Couleur</label><div style={{display:"flex",gap:4,marginTop:4}}>{["var(--purple)","var(--gold)","var(--red)","var(--green)","var(--blue)"].map(c=><button key={c} onClick={()=>setCol(c)} style={{width:24,height:24,borderRadius:6,background:c,border:col===c?"2px solid var(--text)":"2px solid transparent"}}/>)}</div></div>
-</div>
-<div style={{display:"flex",gap:4,justifyContent:"flex-end",marginTop:10}}><button onClick={onX} style={{padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button><button onClick={()=>{if(t.trim())onSave(t.trim(),time,col)}} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>Ajouter</button></div></div>}
+function DayPanel({date,evts,onClose,onAddEvent,onDelEvent,onLeadClick,onMoveLead,leads,prestas,sess}){
+const[showNew,setShowNew]=useState(false);const[nt,setNt]=useState("");const[ntime,setNtime]=useState("09:00");const[ncol,setNcol]=useState("var(--purple)");
+const[showAddLead,setShowAddLead]=useState(false);const[leadSearch,setLeadSearch]=useState("");
+const IS2={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
+const dt=new Date(date+"T12:00:00");
+const dayLabel=dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const hours=[];for(let h=7;h<=21;h++)hours.push(h);
+const evByHour={};evts.forEach(ev=>{const hr=parseInt((ev.time||"09").split(":")[0])||9;if(!evByHour[hr])evByHour[hr]=[];evByHour[hr].push(ev)});
+const filteredLeads=leads.filter(l=>{if(!leadSearch)return false;const q=leadSearch.toLowerCase();return l.nom.toLowerCase().includes(q)||l.service.toLowerCase().includes(q)}).slice(0,5);
+return <div className="day-panel">
+  <div className="day-hdr">
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div><div className="day-date">{dt.getDate()} {dt.toLocaleDateString("fr-FR",{month:"long"})}</div><div className="day-sub">{dayLabel}</div></div>
+      <div style={{display:"flex",gap:4}}>
+        <button onClick={()=>setShowNew(true)} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Event</button>
+        <button onClick={onClose} style={{padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text3)",fontSize:13}}><i className="fa-solid fa-xmark"/></button>
+      </div>
+    </div>
+    <div style={{display:"flex",gap:6,marginTop:10}}>
+      <div style={{fontSize:11,color:"var(--text2)"}}><span style={{fontFamily:"var(--mono)",fontWeight:700,color:"var(--gold)"}}>{evts.length}</span> event{evts.length>1?"s":""}</div>
+      <div style={{fontSize:11,color:"var(--text3)"}}>|</div>
+      <button onClick={()=>setShowAddLead(p=>!p)} style={{fontSize:11,color:"var(--blue)",fontWeight:600}}><i className="fa-solid fa-user-plus" style={{marginRight:3}}/>Ajouter un prospect</button>
+    </div>
+    {showAddLead&&<div style={{marginTop:8}}>
+      <input style={{...IS2,fontSize:13,marginBottom:4}} value={leadSearch} onChange={e=>setLeadSearch(e.target.value)} placeholder="Chercher un lead..." autoFocus/>
+      {filteredLeads.map(l=><div key={l.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 8px",borderRadius:6,cursor:"pointer",transition:"background .15s",fontSize:12}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
+        <div><span style={{fontWeight:600}}>{l.nom}</span> <span style={{color:"var(--text3)",fontSize:10}}>{l.service}</span></div>
+        <button onClick={()=>{onMoveLead(l.id,date);setShowAddLead(false);setLeadSearch("")}} style={{padding:"3px 8px",borderRadius:4,border:"1px solid var(--green)",color:"var(--green)",fontSize:10,fontWeight:600}}>Planifier</button>
+      </div>)}
+      {leadSearch&&filteredLeads.length===0&&<div style={{fontSize:11,color:"var(--text3)",padding:6}}>Aucun lead trouve</div>}
+    </div>}
+  </div>
+  <div className="day-timeline">
+    {hours.map(h=>{const hEvts=evByHour[h]||[];
+    return <div key={h} className="day-hour">
+      <div className="day-hour-label">{String(h).padStart(2,"0")}:00</div>
+      <div className="day-hour-content">
+        {hEvts.map(ev=><div key={ev.id} className="day-ev">
+          <div className="day-ev-dot" style={{background:ev.cl||"var(--gold)"}}/>
+          <div className="day-ev-body">
+            <div className="day-ev-title">{ev.tp==="relance"?"📅 ":ev.tp==="signe"?"✓ ":ev.tp==="paiement"?"💳 ":"📌 "}{ev.lb}</div>
+            <div className="day-ev-meta">{ev.time}{ev.lead?" | "+ev.lead.service+" | "+(COLS.find(c=>c.id===ev.lead.status)?.label||""):""}</div>
+          </div>
+          <div className="day-ev-actions">
+            {ev.lead&&<button className="day-act-btn" onClick={()=>onLeadClick(ev.lead)}>Voir</button>}
+            {ev.lead&&<button className="day-act-btn" onClick={()=>openWA(ev.lead,mN(ev.lead.memberId))}><i className="fa-brands fa-whatsapp"/></button>}
+            {ev.tp==="custom"&&<button className="day-act-btn del" onClick={()=>onDelEvent(ev.id)}>Suppr</button>}
+            {ev.lead&&ev.tp==="relance"&&<button className="day-act-btn del" onClick={()=>onMoveLead(ev.lead.id,"")}>Retirer</button>}
+          </div>
+        </div>)}
+        {hEvts.length===0&&<div style={{minHeight:20}}/>}
+      </div>
+    </div>})}
+  </div>
+  {showNew&&<div className="day-new-form">
+    <div style={{fontSize:10,fontWeight:600,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:8}}>NOUVEL EVENT</div>
+    <div className="ff"><label>Titre</label><input style={IS2} value={nt} onChange={e=>setNt(e.target.value)} placeholder="Call client, Deadline, RDV..." autoFocus/></div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+      <div className="ff"><label>Heure</label><input style={IS2} type="time" value={ntime} onChange={e=>setNtime(e.target.value)}/></div>
+      <div className="ff"><label>Couleur</label><div style={{display:"flex",gap:4,marginTop:4}}>{["var(--purple)","var(--gold)","var(--red)","var(--green)","var(--blue)"].map(c=><button key={c} onClick={()=>setNcol(c)} style={{width:22,height:22,borderRadius:6,background:c,border:ncol===c?"2px solid var(--text)":"2px solid transparent"}}/>)}</div></div>
+    </div>
+    <div style={{display:"flex",gap:4,justifyContent:"flex-end",marginTop:8}}>
+      <button onClick={()=>setShowNew(false)} style={{padding:"8px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Annuler</button>
+      <button onClick={()=>{if(nt.trim()){onAddEvent(nt.trim(),ntime,ncol);setNt("");setNtime("09:00");setShowNew(false)}}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}>Ajouter</button>
+    </div>
+  </div>}
+</div>}
 
 /* ═══ FINANCE ═══ */
 const Finance=()=>(
