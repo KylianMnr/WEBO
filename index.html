@@ -275,6 +275,10 @@ select,input,textarea{font-size:16px!important}
 .persona-btn{padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;transition:all .2s;flex:1;text-align:center}
 .persona-btn.sel{background:rgba(197,160,89,.1);border-color:var(--gold);color:var(--gold)}
 
+.k-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:60px;border-radius:8px;background:rgba(197,160,89,.06);border:1px solid rgba(197,160,89,.08);color:rgba(197,160,89,.25);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .3s;cursor:pointer;backdrop-filter:blur(4px)}
+.k-arrow:hover{background:rgba(197,160,89,.15);color:var(--gold);border-color:rgba(197,160,89,.25)}
+.k-arrow-l{left:2px}.k-arrow-r{right:2px}
+@media(max-width:768px){.k-arrow{width:24px;height:44px;font-size:11px;opacity:.5}.k-arrow:hover{opacity:1}}
 /* V16 smooth scroll */
 .kanban-scroll,.hub-grid,.hub-stats{-ms-overflow-style:none;scrollbar-width:none}
 .kanban-scroll::-webkit-scrollbar,.hub-grid::-webkit-scrollbar,.hub-stats::-webkit-scrollbar{display:none}
@@ -379,7 +383,7 @@ const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[
 const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("webo_gemini_key")||""}catch(e){return""}});const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const gemini=async(prompt,search)=>{if(!apiKey)throw new Error("Cle API manquante. Cliquez sur la cle dans la nav.");const body={contents:[{parts:[{text:prompt}]}]};if(search)body.tools=[{google_search:{}}];const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur "+r.status)}const d=await r.json();if(!d.candidates||!d.candidates[0]||!d.candidates[0].content)throw new Error("Reponse bloquee ou vide");return d.candidates[0].content.parts.map(p=>p.text||"").join("")};
 const geminiChat=async(msgs,sys)=>{if(!apiKey)throw new Error("Cle API manquante.");const clean=msgs.filter(m=>m.content&&!m.content.startsWith("Erreur"));const contents=clean.map((m,i)=>({role:m.role==="assistant"?"model":"user",parts:[{text:i===0&&sys?(sys+"\n\n"+m.content):m.content}]}));if(contents.length===0)throw new Error("Aucun message");if(contents[0].role!=="user")contents.unshift({role:"user",parts:[{text:sys||"Bonjour"}]});const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:contents})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur "+r.status)}const d=await r.json();if(d.candidates&&d.candidates[0]&&d.candidates[0].content)return d.candidates[0].content.parts.map(p=>p.text||"").join("");throw new Error("Reponse vide de Gemini")};
-const[page,setPage]=useState("hub");const[pView,setPView]=useState("table");
+const[page,setPage]=useState("hub");const[pView,setPView]=useState("kanban");
 const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
 const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[sortBy,setSortBy]=useState("default");
 const[toast,setToast]=useState(null);const[showVerif,setShowVerif]=useState(null);
@@ -674,7 +678,7 @@ return <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"col
   </tr>})}</tbody></table></div>}
 
   {/* KANBAN */}
-  {pView==="kanban"&&<div className="kanban-scroll" style={{flex:1,minWidth:0}}>
+  {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
   {COLS.map(col=>{const cards=srt(filt.filter(l=>l.status===col.id));const cv=cards.reduce((s,l)=>s+l.valeur,0);
   return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
     <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
@@ -694,7 +698,7 @@ return <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"col
       <Prog pct={Math.round((COLS.find(c=>c.id===l.status)?.proba||0)*100)} color={col.accent}/>
     </div>})}</div>
   </div>})}
-  </div>}
+  </div></div>}
 
   {/* FOCUS */}
   {pView==="focus"&&<div style={{flex:1,overflow:"auto"}}>
@@ -1077,7 +1081,7 @@ return <div className="rpanel">
       <button onClick={()=>setOutreachPresta(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(107,26,26,.4)",color:"#E88",fontSize:10,display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope-open-text"/> Cold Mail</button>
       <button className={"enrich-btn"+(enrichLoading===l.id?" loading":"")} onClick={()=>enrichLead(l)}><i className={"fa-solid "+(enrichLoading===l.id?"fa-spinner fa-spin":"fa-satellite-dish")}/> {enrichLoading===l.id?"Recherche...":"Enrichir"}</button>
       {l.externalLink&&<a href={l.externalLink} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-arrow-up-right-from-square"/> Site</a>}
-      {l.email&&<a href={"mailto:"+l.email} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--purple)",color:"var(--purple)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope"/> Mail</a>}
+
       {l.phone&&<a href={"tel:"+l.phone} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--green)",color:"var(--green)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-phone"/> Appeler</a>}
     </div>
     {enrichData[l.id]&&<div className="enrich-card">
@@ -1090,7 +1094,7 @@ return <div className="rpanel">
 return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>setShowNotif(false)}>
   <Nav/>
-  <div style={{flex:1,overflowX:"hidden",overflowY:"auto",display:"flex",flexDirection:"column"}}>
+  <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page==="hub"&&<HubPage/>}
     {page==="pipeline"&&<Pipeline/>}
     {page==="talents"&&<Talents/>}
@@ -1138,7 +1142,6 @@ return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><
 <div className="sep"/>
 <div style={{display:"flex",gap:6,justifyContent:"flex-end",flexWrap:"wrap"}}>
 <button onClick={()=>{cp(mailBody,flash);setSent(true)}} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-copy"/>Copier</button>
-{email&&<a href={mailto} target="_blank" onClick={()=>setSent(true)} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:11,fontWeight:600,textDecoration:"none",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-envelope"/>Mail natif</a>}
 {email&&<a href={gmailUrl} target="_blank" onClick={()=>setSent(true)} style={{padding:"9px 16px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,#EA4335,#FBBC04,#34A853,#4285F4)",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center",gap:4}}><i className="fa-brands fa-google"/>Gmail</a>}
 </div>
 {sent&&<div style={{marginTop:8,display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:6,background:"rgba(8,153,129,.08)",border:"1px solid rgba(8,153,129,.2)"}}><i className="fa-solid fa-check-circle" style={{color:"var(--green)"}}/><span style={{fontSize:10,color:"var(--green)",fontWeight:600}}>Mail prepare le {td()}</span></div>}
