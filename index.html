@@ -344,8 +344,8 @@ const fA=h=>{if(!h)return"";if(h<1)return"<1h";if(h<24)return Math.floor(h)+"h";
 const dU=i=>{if(!i)return null;return Math.ceil((new Date(i+"T23:59:59").getTime()-Date.now())/8.64e7)};
 const mN=id=>(TEAM.find(t=>t.id===id)?.name||id).split(" ")[0];
 const mC=id=>TEAM.find(t=>t.id===id)?.color||"#5A6270";
-const td=()=>new Date().toISOString().slice(0,10);
-const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+const td=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const addD=(d,n)=>{const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
 const cDays=(c,s)=>s==="signe"&&c?Math.floor((Date.now()-new Date(c).getTime())/8.64e7):null;
 const isUrg=l=>{const c=COLS.find(x=>x.id===l.status);return c&&c.urgDays<999&&dA(l.lastInteraction)>=c.urgDays};
 const genTpl=(l,mn)=>(TPL[l.status]||TPL.nouveau).replace(/\[N\]/g,l.nom.split(" ")[0]).replace(/\[E\]/g,l.nom).replace(/\[S\]/g,l.service).replace(/\[P\]/g,mn);
@@ -464,7 +464,7 @@ const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,eff
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
 const srt=c=>{if(sortBy==="valeur")return[...c].sort((a,b)=>b.valeur-a.valeur);if(sortBy==="date")return[...c].sort((a,b)=>new Date(b.dateCreated)-new Date(a.dateCreated));return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
-const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.toISOString().slice(0,10);const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));agEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.time||"12:00"}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myL,leads,agEvents]);
+const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const evts=[];myL.filter(l=>l.nextRelance===ds&&!["signe","injoignable"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myL.filter(l=>l.status==="signe"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));leads.filter(l=>l.status==="signe"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));agEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.time||"12:00"}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myL,leads,agEvents]);
 
 /* Agenda: relances du jour + overdue + 3 days dormant */
 const agendaItems=useMemo(()=>{const items=[];
@@ -549,18 +549,47 @@ const Nav=()=>(
 </nav>);
 
 /* ═══ HUB ═══ */
-const HubPage=()=>(
+const HubPage=()=>{
+const me=st.byM.find(m=>m.id===effSess)||{};
+const rank=st.byM.findIndex(m=>m.id===effSess)+1;
+const myWeek=myL.filter(l=>(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7).length;
+const myUrg=myL.filter(isUrg).length;
+const isFond=TEAM.find(t=>t.id===effSess)?.isFondateur;
+const myMoney=isA?st.margeNette:(me.prosp||0);
+const moneyLabel=isA?"Marge Nette":"Ma Commission";
+const moneyEmoji=isA?"🏆":"💸";
+return(
 <div className="hub">
   <div className="hub-header fu">
     <div><h1 className="hub-title">Bienvenue, {sU?.name||""}</h1><p className="hub-sub">{sU?.role} — WEBO Asset Management</p></div>
-    <button onClick={generateRapport} style={{padding:"8px 14px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-chart-bar" style={{marginRight:4}}/>Rapport</button>
+    <div style={{display:"flex",gap:6}}><button onClick={generateRapport} style={{padding:"8px 14px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-chart-bar" style={{marginRight:4}}/>Rapport</button></div>
   </div>
-  {!isA&&<div className="card fu" style={{marginBottom:14,borderLeft:"3px solid "+mC(sess)}}><div className="card-h"><span style={{fontWeight:700,fontSize:14,color:mC(sess)}}><i className="fa-solid fa-trophy" style={{marginRight:6}}/>Mon Dashboard</span></div><div className="card-b"><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>{[{l:"Signes",v:(st.byM.find(m=>m.id===sess)||{}).signes||0,c:"var(--green)"},{l:"Conv.",v:((st.byM.find(m=>m.id===sess)||{}).conv||0)+"%",c:((st.byM.find(m=>m.id===sess)||{}).conv||0)>=25?"var(--green)":"var(--red)"},{l:"Com.",v:E((st.byM.find(m=>m.id===sess)||{}).prosp||0),c:"var(--blue)"}].map((s,i)=><div key={i} style={{textAlign:"center"}}><div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:18,fontWeight:700,fontFamily:"var(--mono)",color:s.c}}>{s.v}</div></div>)}</div></div></div>}
-  <div className="hub-stats">
-    {[{l:"Portefeuille",v:st.total,c:"var(--gold)",e:"📁"},{l:"Signés",v:st.signes,c:"var(--green)",e:"✅"},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},...(realAdmin?[{l:"Marge",v:E(st.margeNette),c:"var(--gold)",e:"🏆"}]:[]),{l:"Pipeline",v:E(st.tw),c:"#7C5CBF",e:"📈"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)",e:st.obj>=80?"🎯":"⚡"},{l:"Agenda",v:st.agenda,c:st.agenda>0?"var(--red)":"var(--green)",e:"📅"}].map((s,i)=>
-    <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms",borderLeft:"3px solid "+s.c}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><div className="stat-label">{s.l}</div><span style={{fontSize:16}}>{s.e}</span></div><div className="stat-val" style={{color:s.c,fontSize:20,marginTop:4}}><P$ v={s.v} p={pm}/></div></div>)}
+  {/* ═══ DASHBOARD ═══ */}
+  <div className="card fu" style={{marginBottom:18,background:"linear-gradient(135deg,rgba(197,160,89,.04),rgba(41,98,255,.02))",border:"1px solid rgba(197,160,89,.12)"}}>
+    <div style={{padding:"16px 20px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <Av id={effSess} sz={42}/>
+          <div><div style={{fontWeight:700,fontSize:16}}>{sU?.name}</div><div style={{fontSize:11,color:"var(--text2)"}}>{sU?.role}{rank>0?" | Classement: #"+rank+"/"+TEAM.length:""}</div></div>
+        </div>
+        {rank<=3&&<div style={{fontSize:28}}>{rank===1?"🥇":rank===2?"🥈":"🥉"}</div>}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))",gap:10,marginBottom:14}}>
+        {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Signés",v:me.signes||0,c:"var(--green)",e:"✅"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:moneyLabel,v:E(myMoney),c:isA?"var(--gold)":"var(--blue)",e:moneyEmoji},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF",e:"📈"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].map((s,i)=>
+        <div key={i} className="fu" style={{animationDelay:i*40+"ms",textAlign:"center",padding:"10px 6px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
+          <div style={{fontSize:18,marginBottom:2}}>{s.e}</div>
+          <div style={{fontSize:16,fontWeight:800,fontFamily:"var(--mono)",color:s.c}}>{typeof s.v==="string"?<P$ v={s.v} p={pm}/>:s.v}</div>
+          <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:.5,textTransform:"uppercase",marginTop:2}}>{s.l}</div>
+        </div>)}
+      </div>
+      <div style={{display:"flex",gap:8,alignItems:"center"}}>
+        <div style={{flex:1}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3}}>OBJECTIF MENSUEL — {E(OBJ)}</div><div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:st.obj>=100?"var(--green)":st.obj>=50?"var(--gold)":"var(--red)",width:Math.min(st.obj,100)+"%",transition:"width 1s ease-out"}}/></div></div>
+        <span style={{fontFamily:"var(--mono)",fontWeight:800,fontSize:18,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span>
+      </div>
+    </div>
   </div>
-  <div style={{display:"grid",gridTemplateColumns:isA?"1fr 1fr":"1fr",gap:14,marginBottom:24}}>
+  {/* ═══ FUNNEL + ACTIVITY ═══ */}
+  <div style={{display:"grid",gridTemplateColumns:isA?"1fr 1fr":"1fr",gap:14,marginBottom:18}}>
     <div className="chart-card">
       <div className="chart-hd"><span><i className="fa-solid fa-filter" style={{color:"var(--gold)",marginRight:6}}/>Funnel</span><span style={{color:"var(--text3)"}}>{st.total} leads</span></div>
       <div style={{padding:"4px 0"}}>{COLS.filter(c=>c.id!=="injoignable").map((col,i)=>{const cnt=myL.filter(l=>l.status===col.id).length;const mx=Math.max(...COLS.map(c=>myL.filter(l=>l.status===c.id).length),1);const pct=Math.round(cnt/mx*100);const val=myL.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);
@@ -573,7 +602,7 @@ const HubPage=()=>(
     {isA&&<div className="chart-card">
       <div className="chart-hd"><span><i className="fa-solid fa-bolt" style={{color:"var(--gold)",marginRight:6}}/>Activité</span><span style={{color:"var(--text3)"}}>{actFeed.length}</span></div>
       <div className="feed">
-        {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}>Actions de l'équipe ici</div>:
+        {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}>Actions ici</div>:
         actFeed.slice(0,15).map((a,i)=><div key={a.id} className="feed-item" style={{animationDelay:i*30+"ms"}}>
           <div className="feed-dot" style={{background:a.color||"var(--gold)"}}/>
           <div style={{flex:1}}><div style={{fontSize:12,color:"var(--text2)",lineHeight:1.5}}><strong style={{color:mC(a.who)}}>{mN(a.who)}</strong> {a.action} <strong style={{color:"var(--text)"}}>{a.target}</strong></div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{fA(hA(a.time))}</div></div>
@@ -581,11 +610,24 @@ const HubPage=()=>(
       </div>
     </div>}
   </div>
+  {/* ═══ LEADERBOARD COMPLET (visible par tous) ═══ */}
+  <div className="card fu" style={{marginBottom:18}}>
+    <div className="card-h"><span style={{fontWeight:700,fontSize:13}}><i className="fa-solid fa-ranking-star" style={{color:"var(--gold)",marginRight:6}}/>Classement</span></div>
+    <div className="card-b" style={{padding:"8px 14px"}}>
+      {st.byM.map((m,i)=>{const isMe=m.id===effSess;return <div key={m.id} className="fu" style={{display:"flex",alignItems:"center",gap:10,padding:"8px 6px",borderRadius:8,background:isMe?"rgba(197,160,89,.06)":"transparent",borderLeft:isMe?"3px solid var(--gold)":"3px solid transparent",animationDelay:i*50+"ms"}}>
+        <div style={{fontSize:18,width:28,textAlign:"center"}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)}</div>
+        <Av id={m.id} sz={28}/>
+        <div style={{flex:1}}><div style={{fontWeight:600,fontSize:12,color:m.color}}>{m.name}{isMe?" (vous)":""}</div><div style={{fontSize:10,color:"var(--text3)"}}>{m.role}</div></div>
+        <div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:13,color:"var(--green)"}}>{m.signes} signés</div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{m.conv}% conv.</div></div>
+      </div>})}
+    </div>
+  </div>
+  {/* ═══ MODULES ═══ */}
   <div className="hub-grid">
     {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊"},
     {icon:"fa-users-gear",title:"Talents",desc:"Prestataires, compétences, charge",pg:"talents",cnt:prestas.length+" prestas",ac:"#8B5CF6",em:"🤝"},
     {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
-    {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:realAdmin?E(st.margeNette):E(st.ca),ac:"#089981",em:"💰"},
+    {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
     {icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
     {icon:"fa-wand-magic-sparkles",title:"Matching",desc:"Score de compatibilité auto",pg:"matching",cnt:prestas.length,ac:"#ec4899",em:"✨"},
     ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac}} onClick={()=>setPage(c.pg)}>
@@ -596,12 +638,12 @@ const HubPage=()=>(
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontFamily:"var(--mono)",fontSize:13,fontWeight:700,color:c.ac}}>{c.cnt}</span><i className={"fa-solid fa-arrow-right"} style={{fontSize:10,color:"var(--text4)"}}/></div>
     </div>)}
   </div>
-</div>);
+</div>)};
 
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
 const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"}];
-return <div style={{padding:"14px 18px",flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+return <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",minWidth:0}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
     <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Pipeline Commercial</h2>
     <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
@@ -616,7 +658,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"hidden",display:"flex",
 
   {/* TABLE */}
   {pView==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",overflow:"auto",flex:1,WebkitOverflowScrolling:"touch"}}>
-  <table className="tbl"><thead><tr><th style={{width:30}}><input type="checkbox" className="chk" onChange={selAll} checked={selIds.size>0&&selIds.size===filt.length}/></th><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th>{realAdmin&&<th>Marge Nette</th>}<th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
+  <table className="tbl"><thead><tr><th style={{width:30}}><input type="checkbox" className="chk" onChange={selAll} checked={selIds.size>0&&selIds.size===filt.length}/></th><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th>{isA&&<th>Marge Nette</th>}<th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
   <tbody>{srt(filt).map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);const h=hA(l.lastInteraction);
   return <tr key={l.id} style={{borderLeft:urg?"3px solid var(--red)":"3px solid transparent",background:selIds.has(l.id)?"rgba(197,160,89,.04)":"transparent"}} onClick={()=>setSelLead(l)}>
     <td onClick={e=>e.stopPropagation()}><input type="checkbox" className="chk" checked={selIds.has(l.id)} onChange={()=>toggleSel(l.id)}/></td>
@@ -624,7 +666,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"hidden",display:"flex",
     <td><SBadge status={l.status}/></td>
     <td style={{fontSize:11,color:"var(--text2)"}}>{l.service}</td>
     <td style={{fontFamily:"var(--mono)",fontWeight:600}}><P$ v={E(l.valeur)} p={pm}/></td>
-    {realAdmin&&<td style={{fontFamily:"var(--mono)",fontWeight:600,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></td>}
+    {isA&&<td style={{fontFamily:"var(--mono)",fontWeight:600,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></td>}
     <td><span style={{color:mC(l.memberId),fontWeight:600,fontSize:11}}>{mN(l.memberId)}</span><span style={{fontSize:9,color:"var(--text3)",marginLeft:4}}>{TEAM.find(t=>t.id===l.memberId)?.role}</span></td>
     <td>{TEMPS.find(t=>t.id===l.temperature)?.e}</td>
     <td style={{fontSize:10,color:"var(--text3)"}}>{h?fA(h):"—"}{urg&&<span style={{color:"var(--red)",fontWeight:700,marginLeft:3}}>●</span>}</td>
@@ -632,7 +674,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"hidden",display:"flex",
   </tr>})}</tbody></table></div>}
 
   {/* KANBAN */}
-  {pView==="kanban"&&<div className="kanban-scroll" style={{flex:1}}>
+  {pView==="kanban"&&<div className="kanban-scroll" style={{flex:1,minWidth:0}}>
   {COLS.map(col=>{const cards=srt(filt.filter(l=>l.status===col.id));const cv=cards.reduce((s,l)=>s+l.valeur,0);
   return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
     <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
@@ -647,7 +689,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"hidden",display:"flex",
       {urg&&<span style={{fontSize:8,fontWeight:700,color:"var(--red)",background:"rgba(231,76,76,.08)",padding:"1px 4px",borderRadius:3}}>URGENT</span>}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:2}}>
         <span style={{fontSize:11,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></span>
-        {realAdmin&&<span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></span>}
+        {isA&&<span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></span>}
       </div>
       <Prog pct={Math.round((COLS.find(c=>c.id===l.status)?.proba||0)*100)} color={col.accent}/>
     </div>})}</div>
@@ -660,7 +702,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"hidden",display:"flex",
   {urgL.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return <div key={l.id} className="card fu" style={{marginBottom:6,borderLeft:"3px solid var(--red)"}}>
     <div style={{padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:8}}><Av id={l.memberId} sz={32}/><div><div style={{fontWeight:600,fontSize:13}}>{l.nom}</div><div style={{fontSize:11,color:"var(--text2)"}}>{l.service} · {COLS.find(c=>c.id===l.status)?.label} · {Math.floor(dA(l.lastInteraction))}j</div></div></div>
-      <div style={{display:"flex",alignItems:"center",gap:6}}><div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontWeight:700}}><P$ v={E(l.valeur)} p={pm}/></div>{realAdmin&&<div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)"}}><P$ v={"Marge: "+E(mg.margeNette)} p={pm}/></div>}</div>
+      <div style={{display:"flex",alignItems:"center",gap:6}}><div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontWeight:700}}><P$ v={E(l.valeur)} p={pm}/></div>{isA&&<div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)"}}><P$ v={"Marge: "+E(mg.margeNette)} p={pm}/></div>}</div>
       <button onClick={()=>{touch(l.id,"Contacté");flash(l.nom+" ✓")}} style={{padding:"7px 14px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:11,fontWeight:600}}>↻</button>
       <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"7px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/></button></div>
     </div>
@@ -872,7 +914,7 @@ const Finance=()=>(
 <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:14}}>Contrôle Financier</h2>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10,marginBottom:18}}>
-    {[{l:"CA Signé",v:E(st.ca),c:"var(--green)"},...(realAdmin?[{l:"Marge Nette WEBO",v:E(st.margeNette),c:"var(--gold)"}]:[]),{l:"Part Chasseurs",v:E(st.comProsp),c:"var(--blue)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Cycle Moyen",v:st.avgC+"j",c:"var(--text2)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
+    {[{l:"CA Signé",v:E(st.ca),c:"var(--green)"},...(isA?[{l:"Marge Nette WEBO",v:E(st.margeNette),c:"var(--gold)"}]:[]),{l:"Part Chasseurs",v:E(st.comProsp),c:"var(--blue)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Cycle Moyen",v:st.avgC+"j",c:"var(--text2)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
     <div key={i} className="stat-card fu" style={{animationDelay:i*30+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:22}}><P$ v={s.v} p={pm}/></div></div>)}
   </div>
   <div className="finance-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
@@ -910,7 +952,7 @@ const Finance=()=>(
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Objectif Mensuel — {E(OBJ)}</span><span style={{fontFamily:"var(--mono)",fontWeight:700,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span></div><div className="card-b"><div style={{height:6}}><Prog pct={st.obj} color={st.obj>=100?"var(--green)":"var(--gold)"}/></div></div></div>
   {/* Équipe — Fondateur vs Chasseurs */}
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Performance — Fondateur vs Chasseurs</span></div><div className="card-b">
-  <table className="tbl"><thead><tr><th>Apporteur</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th>{realAdmin&&<th>Marge WEBO</th>}{realAdmin&&<th>Part Chasseur</th>}</tr></thead>
+  <table className="tbl"><thead><tr><th>Apporteur</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th>{isA&&<th>Marge WEBO</th>}{isA&&<th>Part Chasseur</th>}</tr></thead>
   <tbody>{st.byM.map((m,i)=><tr key={m.id}>
     <td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={m.id} sz={22}/><span style={{fontWeight:600,color:m.color}}>{m.name}</span>{i===0&&<span>🏆</span>}</div></td>
     <td><Badge type={m.isFondateur?"gold":"blue"}>{m.role}</Badge></td>
@@ -918,8 +960,8 @@ const Finance=()=>(
     <td style={{fontFamily:"var(--mono)",color:"var(--green)"}}>{m.signes}</td>
     <td><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:40}}><Prog pct={m.conv} color={m.conv>=25?"var(--green)":"var(--red)"}/></div><span style={{fontFamily:"var(--mono)",fontSize:11,color:m.conv>=25?"var(--green)":"var(--red)"}}>{m.conv}%</span></div></td>
     <td style={{fontFamily:"var(--mono)",fontWeight:600}}><P$ v={E(m.ca)} p={pm}/></td>
-    {realAdmin&&<td style={{fontFamily:"var(--mono)",color:"var(--gold)",fontWeight:700}}><P$ v={E(m.marge)} p={pm}/></td>}
-    {realAdmin&&<td style={{fontFamily:"var(--mono)",color:m.isFondateur?"var(--text3)":"var(--blue)"}}>{m.isFondateur?"—":<P$ v={E(m.prosp)} p={pm}/>}</td>}
+    {isA&&<td style={{fontFamily:"var(--mono)",color:"var(--gold)",fontWeight:700}}><P$ v={E(m.marge)} p={pm}/></td>}
+    {isA&&<td style={{fontFamily:"var(--mono)",color:m.isFondateur?"var(--text3)":"var(--blue)"}}>{m.isFondateur?"—":<P$ v={E(m.prosp)} p={pm}/>}</td>}
   </tr>)}</tbody></table></div></div>
   {/* ROI Sources */}
   <div className="card"><div className="card-h"><span style={{fontWeight:600}}>ROI par Source d'Acquisition</span></div><div className="card-b">
@@ -1014,8 +1056,8 @@ return <div className="rpanel">
       <div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:6}}>VENTILATION FINANCIÈRE</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,fontSize:11,fontFamily:"var(--mono)"}}>
         <div><span style={{color:"var(--text3)"}}>Com. WEBO 20%</span><div style={{fontWeight:700,color:"var(--gold)"}}><P$ v={E(mg.comWebo)} p={pm}/></div></div>
-        {realAdmin&&<div><span style={{color:"var(--text3)"}}>Part {TEAM.find(t=>t.id===l.memberId)?.role}</span><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?<P$ v={E(mg.comProsp)} p={pm}/>:"—"}</div></div>}
-        {realAdmin&&<div style={{gridColumn:"1/3",borderTop:"1px solid var(--border)",paddingTop:6}}><span style={{color:"var(--text3)"}}>Marge Nette</span><div style={{fontSize:16,fontWeight:800,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></div></div>}
+        {isA&&<div><span style={{color:"var(--text3)"}}>Part {TEAM.find(t=>t.id===l.memberId)?.role}</span><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?<P$ v={E(mg.comProsp)} p={pm}/>:"—"}</div></div>}
+        {isA&&<div style={{gridColumn:"1/3",borderTop:"1px solid var(--border)",paddingTop:6}}><span style={{color:"var(--text3)"}}>Marge Nette</span><div style={{fontSize:16,fontWeight:800,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></div></div>}
       </div>
       {cd!==null&&<div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>Cycle: {cd}j</div>}
     </div>
@@ -1135,8 +1177,8 @@ return <div>
   <div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>VENTILATION — {apporteur?.role}</div>
   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,fontFamily:"var(--mono)",fontSize:12}}>
     <div><div style={{fontSize:9,color:"var(--text3)"}}>Com. 20%</div><div style={{fontWeight:700,color:"var(--gold)"}}>{E(mg.comWebo)}</div></div>
-    {realAdmin&&<div><div style={{fontSize:9,color:"var(--text3)"}}>Part {apporteur?.role}</div><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?E(mg.comProsp):"—"}</div></div>}
-    {realAdmin&&<div><div style={{fontSize:9,color:"var(--text3)"}}>Marge WEBO</div><div style={{fontWeight:800,color:"var(--gold)"}}>{E(mg.margeNette)}</div></div>}
+    {isA&&<div><div style={{fontSize:9,color:"var(--text3)"}}>Part {apporteur?.role}</div><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?E(mg.comProsp):"—"}</div></div>}
+    {isA&&<div><div style={{fontSize:9,color:"var(--text3)"}}>Marge WEBO</div><div style={{fontWeight:800,color:"var(--gold)"}}>{E(mg.margeNette)}</div></div>}
   </div>
   {!apporteur?.isFondateur&&<div style={{fontSize:9,color:"var(--text3)",marginTop:4}}>Chasseur → Split 50/50 de la commission</div>}
   {apporteur?.isFondateur&&<div style={{fontSize:9,color:"var(--gold)",marginTop:4}}>Fondateur → 100% de la commission conservée</div>}
