@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management — Hub v15</title>
+<title>WEBO Asset Management — Hub v16</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -18,7 +18,7 @@
 --radius:8px;--glass:rgba(17,21,32,.78);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:400;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:13px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:400;min-height:100dvh;-webkit-font-smoothing:antialiased;font-size:13px;background-image:radial-gradient(circle at 20% 50%,rgba(197,160,89,.02) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(41,98,255,.02) 0%,transparent 50%)}
 ::selection{background:var(--gold);color:var(--bg)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -26,13 +26,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @keyframes glow{0%,100%{box-shadow:0 0 6px rgba(197,160,89,.15)}50%{box-shadow:0 0 20px rgba(197,160,89,.3)}}
 @keyframes urgPulse{0%,100%{border-color:var(--bordeaux)}50%{border-color:var(--red)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
 .fu{animation:fadeUp .35s ease-out both}.fi{animation:fadeIn .3s ease-out both}
 button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border:none;background:transparent}
 select,input,textarea{font-family:var(--sans);font-size:14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;outline:none;transition:border-color .2s}
 select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 /* TOPNAV */
-.topnav{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;height:54px;gap:12px}
+.topnav{position:sticky;top:0;z-index:100;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(197,160,89,.08);padding:0 20px;display:flex;align-items:center;height:56px;gap:12px}
 .logo{display:flex;align-items:baseline;gap:1px;text-decoration:none;cursor:pointer}
 .logo .w{font-family:var(--serif);font-weight:700;font-size:22px;color:var(--gold);font-style:italic}
 .logo .r{font-family:var(--serif);font-weight:600;font-size:18px;color:var(--text)}
@@ -46,31 +48,31 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .lb-item{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600}
 .lb-rank{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;font-family:var(--mono)}
 /* HUB */
-.hub{padding:40px 24px;max-width:1200px;margin:0 auto}
-.hub-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:16px}
-.hub-title{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1.2}
+.hub{padding:24px 20px;max-width:1300px;margin:0 auto}
+.hub-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.hub-title{font-family:var(--serif);font-size:28px;font-weight:700;line-height:1.2;background:linear-gradient(135deg,var(--gold),#E8D5A8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hub-sub{font-size:13px;color:var(--text2);font-weight:300;margin-top:4px}
-.hub-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:28px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:all .25s}
-.stat-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.hub-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:22px;overscroll-behavior-x:contain}
+.stat-card{background:linear-gradient(145deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;padding:16px;transition:all .3s;position:relative;overflow:hidden}
+.stat-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 25px rgba(197,160,89,.08)}
 .stat-label{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);margin-bottom:3px}
-.stat-val{font-size:24px;font-weight:700;font-family:var(--mono);line-height:1.1}
-.hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
-.hub-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px 22px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
-.hub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0;transition:opacity .3s}
-.hub-card:hover{border-color:rgba(197,160,89,.3);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.stat-val{font-size:22px;font-weight:800;font-family:var(--mono);line-height:1.1}
+.hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.hub-card{background:linear-gradient(145deg,var(--bg2),rgba(30,36,54,.6));border:1px solid var(--border);border-radius:14px;padding:22px 20px;cursor:pointer;transition:all .35s;position:relative;overflow:hidden}
+.hub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2),transparent);opacity:0;transition:opacity .3s}
+.hub-card:hover{border-color:rgba(197,160,89,.25);transform:translateY(-4px) scale(1.01);box-shadow:0 16px 48px rgba(0,0,0,.3),0 0 0 1px rgba(197,160,89,.1)}
 .hub-card:hover::before{opacity:1}
-.hub-card-icon{width:44px;height:44px;border-radius:10px;background:rgba(197,160,89,.08);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:18px;color:var(--gold)}
+.hub-card-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,rgba(197,160,89,.12),rgba(197,160,89,.04));border:1px solid rgba(197,160,89,.1);display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:20px;color:var(--gold)}
 .hub-card h3{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:5px}
 .hub-card p{font-size:11px;color:var(--text2);line-height:1.6}
-.hub-card .cnt{position:absolute;top:18px;right:18px;font-family:var(--mono);font-size:22px;font-weight:800;color:rgba(197,160,89,.12)}
+.hub-card .cnt{position:absolute;top:16px;right:16px;font-family:var(--mono);font-size:28px;font-weight:900;color:rgba(197,160,89,.06)}
 /* TABLE */
 .tbl{width:100%;border-collapse:separate;border-spacing:0}
 .tbl th{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:5}
 .tbl td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
-.tbl tbody tr{transition:background .15s;cursor:pointer}.tbl tbody tr:hover{background:var(--bg3)}
+.tbl tbody tr{transition:all .15s;cursor:pointer}.tbl tbody tr:hover{background:rgba(197,160,89,.03)}
 /* BADGE */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-family:var(--mono)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-family:var(--mono)}
 .badge-green{color:var(--green);background:rgba(8,153,129,.1);border:1px solid rgba(8,153,129,.2)}
 .badge-red{color:var(--red);background:rgba(231,76,76,.1);border:1px solid rgba(231,76,76,.2)}
 .badge-gold{color:var(--gold);background:rgba(197,160,89,.1);border:1px solid rgba(197,160,89,.2)}
@@ -79,12 +81,12 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .badge-ghost{color:var(--text3);background:var(--bg4);border:1px solid var(--border)}
 .badge-bordeaux{color:#E88;background:rgba(74,14,14,.4);border:1px solid rgba(107,26,26,.6)}
 /* CARD */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);transition:all .25s}
+.card{background:linear-gradient(160deg,var(--bg2),rgba(23,28,40,.7));border:1px solid var(--border);border-radius:12px;transition:all .25s}
 .card:hover{border-color:var(--border2);box-shadow:0 6px 20px rgba(0,0,0,.12)}
 .card-h{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .card-b{padding:14px 18px}
 /* PROGRESS */
-.prog{height:4px;border-radius:2px;background:var(--bg4);overflow:hidden}.prog-fill{height:100%;border-radius:2px;transition:width .6s}
+.prog{height:5px;border-radius:3px;background:var(--bg4);overflow:hidden}.prog-fill{height:100%;border-radius:3px;transition:width .8s ease-out}
 /* TIMELINE */
 .tl{position:relative;padding-left:24px}
 .tl::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;background:var(--border)}
@@ -98,13 +100,13 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 /* MODAL */
 .overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeIn .12s}
 .overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)}
-.modal{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:95%;max-width:540px;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:fadeUp .25s}
+.modal{position:relative;background:linear-gradient(160deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:16px;padding:28px;width:95%;max-width:540px;max-height:85vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(197,160,89,.05);animation:fadeUp .25s}
 .modal::-webkit-scrollbar{width:3px}
 /* KANBAN */
-.kanban-scroll{display:flex;gap:8px;overflow-x:auto;padding:8px;flex:1;-webkit-overflow-scrolling:touch}.kanban-scroll::-webkit-scrollbar{display:none}
-.kanban-col{min-width:230px;flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:6px;display:flex;flex-direction:column}
-.kc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:9px;margin-bottom:4px;cursor:grab;transition:all .2s}
-.kc:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.18);border-color:var(--border2)}.kc:active{cursor:grabbing}
+.kanban-scroll{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding:10px;flex:1;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scroll-behavior:smooth;overscroll-behavior-x:contain}.kanban-scroll::-webkit-scrollbar{display:none}
+.kanban-col{min-width:260px;width:260px;flex-shrink:0;background:linear-gradient(180deg,var(--bg),rgba(17,21,32,.4));border:1px solid var(--border);border-radius:10px;padding:8px;display:flex;flex-direction:column;scroll-snap-align:start}
+.kc{background:linear-gradient(145deg,var(--bg2),rgba(23,28,40,.5));border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:5px;cursor:grab;transition:all .2s}
+.kc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.25);border-color:rgba(197,160,89,.2)}.kc:active{cursor:grabbing;transform:scale(.98)}
 .kcol.over{background:rgba(41,98,255,.04)!important}
 /* CMD */
 .cmd-ov{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:flex-start;justify-content:center;padding-top:15vh;animation:fadeIn .1s}
@@ -113,10 +115,10 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .cmd-r{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s;font-size:13px}
 .cmd-r:hover{background:var(--bg3)}
 /* RIGHT PANEL */
-.rpanel{position:fixed;right:0;top:0;bottom:0;width:380px;max-width:90vw;background:var(--bg2);border-left:1px solid var(--border);z-index:200;overflow-y:auto;box-shadow:-10px 0 30px rgba(0,0,0,.25);animation:slideR .2s ease-out}
+.rpanel{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:90vw;background:linear-gradient(180deg,var(--bg2),var(--bg3));border-left:1px solid rgba(197,160,89,.08);z-index:200;overflow-y:auto;box-shadow:-16px 0 48px rgba(0,0,0,.35);animation:slideR .2s ease-out}
 .rpanel::-webkit-scrollbar{width:3px}
 /* UTILS */
-.sep{height:1px;background:linear-gradient(90deg,transparent,rgba(197,160,89,.2),transparent);margin:10px 0}
+.sep{height:1px;background:linear-gradient(90deg,transparent,rgba(197,160,89,.25),transparent);margin:12px 0}
 .blur{filter:blur(6px);user-select:none;pointer-events:none}
 .sync-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .sync-dot.on{background:var(--green)}.sync-dot.off{background:var(--red)}.sync-dot.loading{background:var(--gold);animation:pulse 1s infinite}
@@ -139,12 +141,12 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .bulk-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(197,160,89,.06)}
 .chk{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
 /* Pipeline calendar removed — using Agenda only */
-.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.chart-card{background:linear-gradient(160deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .chart-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .chart-hd span{font-size:11px;font-weight:600;font-family:var(--mono);color:var(--text2)}
 .funnel-step{display:flex;align-items:center;gap:10px;padding:7px 14px;transition:background .15s}
 .funnel-step:hover{background:var(--bg3)}
-.funnel-bar{height:22px;border-radius:4px;transition:width .8s ease-out;min-width:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:10px;font-weight:700;color:rgba(255,255,255,.9);font-family:var(--mono)}
+.funnel-bar{height:26px;border-radius:8px;transition:width .8s ease-out;min-width:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:10px;font-weight:700;color:rgba(255,255,255,.95);font-family:var(--mono);box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
 .feed{max-height:280px;overflow-y:auto}
 .feed-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .15s;animation:fadeUp .3s ease-out both}
 .feed-item:hover{background:var(--bg3)}
@@ -155,14 +157,14 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .logo-tag,.lb-mini{display:none}
 .nb{padding:6px 8px;font-size:10px}
 .hub{padding:14px 10px}
-.hub-title{font-size:22px!important}
-.hub-stats{grid-template-columns:repeat(3,1fr)!important;gap:6px}
+.hub-title{font-size:20px!important}
+.hub-stats{grid-template-columns:repeat(2,1fr)!important;gap:4px!important}.stat-card{padding:10px!important}
 .hub-stats .stat-card{padding:10px 12px}
 .hub-stats .stat-val{font-size:16px!important}
-.hub-grid{grid-template-columns:1fr!important;gap:10px}
+.hub-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px!important}.hub-card{padding:14px 12px!important}
 .hub-card{padding:16px 14px}
 .hub-card h3{font-size:14px}
-.kanban-col{min-width:220px;flex:none}
+.kanban-col{min-width:240px!important;width:240px!important;flex:none!important}
 .rpanel{width:92vw;max-width:92vw}
 .notif-panel{width:92vw;right:-60px;max-height:70vh}
 .modal{width:98%;padding:18px;max-height:92vh;border-radius:10px}
@@ -181,7 +183,7 @@ h2{font-size:16px!important}
 select,input,textarea{font-size:16px!important}
 }
 @media(max-width:400px){
-.hub-stats{grid-template-columns:repeat(2,1fr)!important}
+
 }
 /* ═══ V13 — ENRICHMENT ═══ */
 .enrich-card{background:linear-gradient(135deg,rgba(41,98,255,.06),rgba(139,92,246,.06));border:1px solid rgba(41,98,255,.15);border-radius:var(--radius);padding:12px;margin-top:10px;animation:fadeUp .3s}
@@ -262,6 +264,8 @@ select,input,textarea{font-size:16px!important}
 .match-result{padding:14px}
 .match-score{width:44px;height:44px;font-size:16px;border-radius:10px}
 }
+.ai-fab{opacity:.85;transition:all .3s}.ai-fab:hover{opacity:1;transform:scale(1.1)}
+@media(max-width:768px){.ai-fab{opacity:.4!important;width:40px!important;height:40px!important;bottom:14px!important;right:14px!important;font-size:15px!important}}
 /* V15 */
 .outreach-card{background:linear-gradient(135deg,rgba(197,160,89,.04),rgba(74,14,14,.04));border:1px solid rgba(197,160,89,.15);border-radius:var(--radius);padding:12px;margin-top:8px}
 .outreach-btn{padding:5px 10px;border-radius:var(--radius);font-size:10px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
@@ -270,6 +274,21 @@ select,input,textarea{font-size:16px!important}
 .mail-sent-tag{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:10px;font-size:8px;font-weight:600;background:rgba(197,160,89,.1);color:var(--gold);font-family:var(--mono)}
 .persona-btn{padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;transition:all .2s;flex:1;text-align:center}
 .persona-btn.sel{background:rgba(197,160,89,.1);border-color:var(--gold);color:var(--gold)}
+
+/* V16 smooth scroll */
+.kanban-scroll,.hub-grid,.hub-stats{-ms-overflow-style:none;scrollbar-width:none}
+.kanban-scroll::-webkit-scrollbar,.hub-grid::-webkit-scrollbar,.hub-stats::-webkit-scrollbar{display:none}
+@media(max-width:768px){
+  .kanban-scroll{padding:6px!important;gap:8px!important;scroll-padding:6px}
+  .tbl{min-width:700px}
+}
+/* V16 iPhone */
+@supports(-webkit-touch-callout:none){
+  body{padding-bottom:env(safe-area-inset-bottom)}
+  .topnav{padding-top:env(safe-area-inset-top)}
+  .bulk-bar{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .ai-fab{bottom:calc(20px + env(safe-area-inset-bottom))!important}
+}
 </style>
 </head>
 <body>
@@ -294,7 +313,8 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY);
 const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
 {id:"keddy",name:"Keddy",role:"Chasseur",color:"#2962FF",isAdmin:false,isFondateur:false,login:"keddy",email:"keddy@webo.fr",pass:"Keddy2024!"},
-{id:"dylan",name:"Dylan",role:"Chasseur",color:"#089981",isAdmin:false,isFondateur:false,login:"dylan",email:"dylan@webo.fr",pass:"Dylan2024!"}];
+{id:"dylan",name:"Dylan",role:"Chasseur",color:"#089981",isAdmin:false,isFondateur:false,login:"dylan",email:"dylan@webo.fr",pass:"Dylan2024!"},
+{id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur}));
 
 /* ═══ DATA MAPPING ═══ */
@@ -354,9 +374,9 @@ const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"
 function App(){
 const[sess,setSess]=useState(()=>{try{return localStorage.getItem("webo_session")||""}catch(e){return""}});
 const[logId,setLogId]=useState("");const[logPw,setLogPw]=useState("");const[logErr,setLogErr]=useState("");
-const isA=TEAM.find(t=>t.id===sess)?.isAdmin||false;const sU=TEAM.find(t=>t.id===sess);
+const realAdmin=TEAM.find(t=>t.id===sess)?.isAdmin||false;const effSess=viewAs||sess;const isA=TEAM.find(t=>t.id===effSess)?.isAdmin||false;const sU=TEAM.find(t=>t.id===effSess);
 const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");
-const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("webo_gemini_key")||""}catch(e){return""}});const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
+const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("webo_gemini_key")||""}catch(e){return""}});const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const gemini=async(prompt,search)=>{if(!apiKey)throw new Error("Cle API manquante. Cliquez sur la cle dans la nav.");const body={contents:[{parts:[{text:prompt}]}]};if(search)body.tools=[{google_search:{}}];const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur "+r.status)}const d=await r.json();if(!d.candidates||!d.candidates[0]||!d.candidates[0].content)throw new Error("Reponse bloquee ou vide");return d.candidates[0].content.parts.map(p=>p.text||"").join("")};
 const geminiChat=async(msgs,sys)=>{if(!apiKey)throw new Error("Cle API manquante.");const clean=msgs.filter(m=>m.content&&!m.content.startsWith("Erreur"));const contents=clean.map((m,i)=>({role:m.role==="assistant"?"model":"user",parts:[{text:i===0&&sys?(sys+"\n\n"+m.content):m.content}]}));if(contents.length===0)throw new Error("Aucun message");if(contents[0].role!=="user")contents.unshift({role:"user",parts:[{text:sys||"Bonjour"}]});const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:contents})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur "+r.status)}const d=await r.json();if(d.candidates&&d.candidates[0]&&d.candidates[0].content)return d.candidates[0].content.parts.map(p=>p.text||"").join("");throw new Error("Reponse vide de Gemini")};
 const[page,setPage]=useState("hub");const[pView,setPView]=useState("table");
@@ -440,7 +460,7 @@ useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clear
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="signe"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
 
 /* Computed */
-const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===sess),[leads,sess,isA]);
+const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,effSess,isA]);
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
 const srt=c=>{if(sortBy==="valeur")return[...c].sort((a,b)=>b.valeur-a.valeur);if(sortBy==="date")return[...c].sort((a,b)=>new Date(b.dateCreated)-new Date(a.dateCreated));return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
@@ -519,10 +539,11 @@ const Nav=()=>(
     </div>
     <button className="nb" onClick={exportLeads} title="CSV"><i className="fa-solid fa-file-csv"/></button>
     <button className="nb" onClick={()=>setClientMode(p=>!p)} title={clientMode?"Mode Admin":"Mode Client"} style={{color:clientMode?"var(--purple)":"var(--text2)"}}><i className={"fa-solid "+(clientMode?"fa-user-tie":"fa-user-secret")}/></button>
+    {realAdmin&&<select value={viewAs||sess} onChange={e=>{const v=e.target.value;setViewAs(v===sess?"":v)}} style={{padding:"4px 8px",borderRadius:"var(--radius)",border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:viewAs?"rgba(139,92,246,.08)":"var(--bg)",color:viewAs?"var(--purple)":"var(--text2)",fontSize:10,fontWeight:600,fontFamily:"var(--mono)"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name.split(" ")[0]}</option>)}</select>}
     <button className="nb" onClick={()=>setShowApiCfg(true)} title="Cle API" style={{color:apiKey?"var(--green)":"var(--red)"}}><i className="fa-solid fa-key"/></button>
     <button className="nb" onClick={()=>setPrivacy(p=>!p)} style={{color:privacy?"var(--red)":"var(--text2)"}}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")}/></button>
     <button className="nb" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓")}}><i className="fa-solid fa-cloud-arrow-down"/></button>
-    <div style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}><Av id={sess} sz={22}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(sess)}</span><span style={{fontSize:9,color:"var(--text3)"}}>{sU?.role}</span><span className={"sync-dot "+sync}/></div>
+    <div style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}><Av id={effSess} sz={22}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(effSess)}</span>{viewAs&&<span style={{fontSize:8,color:"var(--purple)",fontFamily:"var(--mono)"}}>VUE</span>}<span style={{fontSize:9,color:"var(--text3)"}}>{sU?.role}</span><span className={"sync-dot "+sync}/></div>
     <button className="nb" onClick={()=>{setSess("");try{localStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--text3)"}}><i className="fa-solid fa-power-off"/></button>
   </div>
 </nav>);
@@ -536,8 +557,8 @@ const HubPage=()=>(
   </div>
   {!isA&&<div className="card fu" style={{marginBottom:14,borderLeft:"3px solid "+mC(sess)}}><div className="card-h"><span style={{fontWeight:700,fontSize:14,color:mC(sess)}}><i className="fa-solid fa-trophy" style={{marginRight:6}}/>Mon Dashboard</span></div><div className="card-b"><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>{[{l:"Signes",v:(st.byM.find(m=>m.id===sess)||{}).signes||0,c:"var(--green)"},{l:"Conv.",v:((st.byM.find(m=>m.id===sess)||{}).conv||0)+"%",c:((st.byM.find(m=>m.id===sess)||{}).conv||0)>=25?"var(--green)":"var(--red)"},{l:"Com.",v:E((st.byM.find(m=>m.id===sess)||{}).prosp||0),c:"var(--blue)"}].map((s,i)=><div key={i} style={{textAlign:"center"}}><div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:18,fontWeight:700,fontFamily:"var(--mono)",color:s.c}}>{s.v}</div></div>)}</div></div></div>}
   <div className="hub-stats">
-    {[{l:"Portefeuille",v:st.total,c:"var(--gold)"},{l:"Signés",v:st.signes,c:"var(--green)"},{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Marge Nette",v:E(st.margeNette),c:"var(--gold)"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"},{l:"Agenda",v:st.agenda+" tâches",c:st.agenda>0?"var(--red)":"var(--green)"}].map((s,i)=>
-    <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:20}}><P$ v={s.v} p={pm}/></div></div>)}
+    {[{l:"Portefeuille",v:st.total,c:"var(--gold)",e:"📁"},{l:"Signés",v:st.signes,c:"var(--green)",e:"✅"},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},...(realAdmin?[{l:"Marge",v:E(st.margeNette),c:"var(--gold)",e:"🏆"}]:[]),{l:"Pipeline",v:E(st.tw),c:"#7C5CBF",e:"📈"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)",e:st.obj>=80?"🎯":"⚡"},{l:"Agenda",v:st.agenda,c:st.agenda>0?"var(--red)":"var(--green)",e:"📅"}].map((s,i)=>
+    <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms",borderLeft:"3px solid "+s.c}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><div className="stat-label">{s.l}</div><span style={{fontSize:16}}>{s.e}</span></div><div className="stat-val" style={{color:s.c,fontSize:20,marginTop:4}}><P$ v={s.v} p={pm}/></div></div>)}
   </div>
   <div style={{display:"grid",gridTemplateColumns:isA?"1fr 1fr":"1fr",gap:14,marginBottom:24}}>
     <div className="chart-card">
@@ -561,15 +582,18 @@ const HubPage=()=>(
     </div>}
   </div>
   <div className="hub-grid">
-    {[{icon:"fa-chart-line",title:"Pipeline Commercial",desc:"Kanban, leads, prospection, cycle de vente.",pg:"pipeline",cnt:st.total+" deals"},
-    {icon:"fa-users-gear",title:"Réseau de Talents",desc:"Prestataires d'élite, compétences, charge.",pg:"talents",cnt:prestas.length+" prestas"},
-    {icon:"fa-calendar-check",title:"Agenda & Échéances",desc:"Daily Focus : relances, audits, deadlines paiement.",pg:"agenda",cnt:st.agenda+" tâches"},
-    {icon:"fa-chart-pie",title:"Contrôle Financier",desc:"CA, marge nette, ROI, commissions Fondateur vs Chasseurs.",pg:"finance",cnt:E(st.margeNette)},
-    {icon:"fa-robot",title:"Agent IA Stratégique",desc:"Analyse, coaching, prévisions automatisées.",pg:"ia",cnt:"IA"},
-    {icon:"fa-wand-magic-sparkles",title:"Mode Matching",desc:"Mission > profils. Score de compatibilité automatique.",pg:"matching",cnt:prestas.length+" prestas"},
-    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+7)*40+"ms"}} onClick={()=>setPage(c.pg)}>
-      <div className="hub-card-icon"><i className={"fa-solid "+c.icon}/></div>
-      <h3>{c.title}</h3><p>{c.desc}</p><div className="cnt">{c.cnt}</div>
+    {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊"},
+    {icon:"fa-users-gear",title:"Talents",desc:"Prestataires, compétences, charge",pg:"talents",cnt:prestas.length+" prestas",ac:"#8B5CF6",em:"🤝"},
+    {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
+    {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:realAdmin?E(st.margeNette):E(st.ca),ac:"#089981",em:"💰"},
+    {icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
+    {icon:"fa-wand-magic-sparkles",title:"Matching",desc:"Score de compatibilité auto",pg:"matching",cnt:prestas.length,ac:"#ec4899",em:"✨"},
+    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac}} onClick={()=>setPage(c.pg)}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
+        <div style={{width:44,height:44,borderRadius:12,background:c.ac+"15",border:"1px solid "+c.ac+"25",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{c.em}</div>
+        <div><h3 style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:700,margin:0}}>{c.title}</h3><p style={{fontSize:10,color:"var(--text3)",margin:0}}>{c.desc}</p></div>
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontFamily:"var(--mono)",fontSize:13,fontWeight:700,color:c.ac}}>{c.cnt}</span><i className={"fa-solid fa-arrow-right"} style={{fontSize:10,color:"var(--text4)"}}/></div>
     </div>)}
   </div>
 </div>);
@@ -577,7 +601,7 @@ const HubPage=()=>(
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
 const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"}];
-return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",flexDirection:"column"}}>
+return <div style={{padding:"14px 18px",flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
     <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Pipeline Commercial</h2>
     <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
@@ -591,8 +615,8 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
   </div>
 
   {/* TABLE */}
-  {pView==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",overflow:"auto",flex:1}}>
-  <table className="tbl"><thead><tr><th style={{width:30}}><input type="checkbox" className="chk" onChange={selAll} checked={selIds.size>0&&selIds.size===filt.length}/></th><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th><th>Marge Nette</th><th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
+  {pView==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",overflow:"auto",flex:1,WebkitOverflowScrolling:"touch"}}>
+  <table className="tbl"><thead><tr><th style={{width:30}}><input type="checkbox" className="chk" onChange={selAll} checked={selIds.size>0&&selIds.size===filt.length}/></th><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th>{realAdmin&&<th>Marge Nette</th>}<th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
   <tbody>{srt(filt).map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);const h=hA(l.lastInteraction);
   return <tr key={l.id} style={{borderLeft:urg?"3px solid var(--red)":"3px solid transparent",background:selIds.has(l.id)?"rgba(197,160,89,.04)":"transparent"}} onClick={()=>setSelLead(l)}>
     <td onClick={e=>e.stopPropagation()}><input type="checkbox" className="chk" checked={selIds.has(l.id)} onChange={()=>toggleSel(l.id)}/></td>
@@ -600,7 +624,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
     <td><SBadge status={l.status}/></td>
     <td style={{fontSize:11,color:"var(--text2)"}}>{l.service}</td>
     <td style={{fontFamily:"var(--mono)",fontWeight:600}}><P$ v={E(l.valeur)} p={pm}/></td>
-    <td style={{fontFamily:"var(--mono)",fontWeight:600,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></td>
+    {realAdmin&&<td style={{fontFamily:"var(--mono)",fontWeight:600,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></td>}
     <td><span style={{color:mC(l.memberId),fontWeight:600,fontSize:11}}>{mN(l.memberId)}</span><span style={{fontSize:9,color:"var(--text3)",marginLeft:4}}>{TEAM.find(t=>t.id===l.memberId)?.role}</span></td>
     <td>{TEMPS.find(t=>t.id===l.temperature)?.e}</td>
     <td style={{fontSize:10,color:"var(--text3)"}}>{h?fA(h):"—"}{urg&&<span style={{color:"var(--red)",fontWeight:700,marginLeft:3}}>●</span>}</td>
@@ -623,7 +647,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
       {urg&&<span style={{fontSize:8,fontWeight:700,color:"var(--red)",background:"rgba(231,76,76,.08)",padding:"1px 4px",borderRadius:3}}>URGENT</span>}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:2}}>
         <span style={{fontSize:11,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></span>
-        <span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></span>
+        {realAdmin&&<span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></span>}
       </div>
       <Prog pct={Math.round((COLS.find(c=>c.id===l.status)?.proba||0)*100)} color={col.accent}/>
     </div>})}</div>
@@ -636,7 +660,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto",display:"flex",fl
   {urgL.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return <div key={l.id} className="card fu" style={{marginBottom:6,borderLeft:"3px solid var(--red)"}}>
     <div style={{padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:8}}><Av id={l.memberId} sz={32}/><div><div style={{fontWeight:600,fontSize:13}}>{l.nom}</div><div style={{fontSize:11,color:"var(--text2)"}}>{l.service} · {COLS.find(c=>c.id===l.status)?.label} · {Math.floor(dA(l.lastInteraction))}j</div></div></div>
-      <div style={{display:"flex",alignItems:"center",gap:6}}><div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontWeight:700}}><P$ v={E(l.valeur)} p={pm}/></div><div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)"}}><P$ v={"Marge: "+E(mg.margeNette)} p={pm}/></div></div>
+      <div style={{display:"flex",alignItems:"center",gap:6}}><div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontWeight:700}}><P$ v={E(l.valeur)} p={pm}/></div>{realAdmin&&<div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)"}}><P$ v={"Marge: "+E(mg.margeNette)} p={pm}/></div>}</div>
       <button onClick={()=>{touch(l.id,"Contacté");flash(l.nom+" ✓")}} style={{padding:"7px 14px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:11,fontWeight:600}}>↻</button>
       <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"7px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/></button></div>
     </div>
@@ -775,7 +799,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   {showAgForm&&<DayPanel date={showAgForm} evts={agDays.find(d=>d.ds===showAgForm)?.evts||[]} onClose={()=>setShowAgForm(null)} onAddEvent={(t,time,col)=>addAgEvent(showAgForm,t,time,col)} onDelEvent={delAgEvent} onLeadClick={l=>{setShowAgForm(null);setTimeout(()=>setSelLead(l),100)}} onMoveLead={(leadId,newDate)=>{upd(leadId,{nextRelance:newDate});flash("Relance deplacee")}} leads={myL} prestas={prestas} sess={sess}/>}
 </div>};
 function DayPanel({date,evts,onClose,onAddEvent,onDelEvent,onLeadClick,onMoveLead,leads,prestas,sess}){
-const[showNew,setShowNew]=useState(false);const[nt,setNt]=useState("");const[ntime,setNtime]=useState("09:00");const[ncol,setNcol]=useState("var(--purple)");
+const[showNew,setShowNew]=useState(false);const[nt,setNt]=useState("");const[ntime,setNtime]=useState("09:00");const[ncol,setNcol]=useState("var(--purple)");const[nFor,setNFor]=useState("");
 const[showAddLead,setShowAddLead]=useState(false);const[leadSearch,setLeadSearch]=useState("");
 const IS2={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
 const dt=new Date(date+"T12:00:00");
@@ -831,6 +855,7 @@ return <div className="day-panel">
   {showNew&&<div className="day-new-form">
     <div style={{fontSize:10,fontWeight:600,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:8}}>NOUVEL EVENT</div>
     <div className="ff"><label>Titre</label><input style={IS2} value={nt} onChange={e=>setNt(e.target.value)} placeholder="Call client, Deadline, RDV..." autoFocus/></div>
+    <div className="ff"><label>Pour</label><select style={IS2} value={nFor||""} onChange={e=>setNFor(e.target.value)}><option value="">Moi</option>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name.split(" ")[0]}</option>)}</select></div>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
       <div className="ff"><label>Heure</label><input style={IS2} type="time" value={ntime} onChange={e=>setNtime(e.target.value)}/></div>
       <div className="ff"><label>Couleur</label><div style={{display:"flex",gap:4,marginTop:4}}>{["var(--purple)","var(--gold)","var(--red)","var(--green)","var(--blue)"].map(c=><button key={c} onClick={()=>setNcol(c)} style={{width:22,height:22,borderRadius:6,background:c,border:ncol===c?"2px solid var(--text)":"2px solid transparent"}}/>)}</div></div>
@@ -847,7 +872,7 @@ const Finance=()=>(
 <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:14}}>Contrôle Financier</h2>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10,marginBottom:18}}>
-    {[{l:"CA Signé",v:E(st.ca),c:"var(--green)"},{l:"Marge Nette WEBO",v:E(st.margeNette),c:"var(--gold)"},{l:"Part Chasseurs",v:E(st.comProsp),c:"var(--blue)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Cycle Moyen",v:st.avgC+"j",c:"var(--text2)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
+    {[{l:"CA Signé",v:E(st.ca),c:"var(--green)"},...(realAdmin?[{l:"Marge Nette WEBO",v:E(st.margeNette),c:"var(--gold)"}]:[]),{l:"Part Chasseurs",v:E(st.comProsp),c:"var(--blue)"},{l:"Pipeline Pondéré",v:E(st.tw),c:"#7C5CBF"},{l:"Cycle Moyen",v:st.avgC+"j",c:"var(--text2)"},{l:"Objectif",v:st.obj+"%",c:st.obj>=80?"var(--green)":"var(--gold)"}].map((s,i)=>
     <div key={i} className="stat-card fu" style={{animationDelay:i*30+"ms"}}><div className="stat-label">{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:22}}><P$ v={s.v} p={pm}/></div></div>)}
   </div>
   <div className="finance-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
@@ -885,7 +910,7 @@ const Finance=()=>(
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Objectif Mensuel — {E(OBJ)}</span><span style={{fontFamily:"var(--mono)",fontWeight:700,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span></div><div className="card-b"><div style={{height:6}}><Prog pct={st.obj} color={st.obj>=100?"var(--green)":"var(--gold)"}/></div></div></div>
   {/* Équipe — Fondateur vs Chasseurs */}
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Performance — Fondateur vs Chasseurs</span></div><div className="card-b">
-  <table className="tbl"><thead><tr><th>Apporteur</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th><th>Marge WEBO</th><th>Part Chasseur</th></tr></thead>
+  <table className="tbl"><thead><tr><th>Apporteur</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th>{realAdmin&&<th>Marge WEBO</th>}{realAdmin&&<th>Part Chasseur</th>}</tr></thead>
   <tbody>{st.byM.map((m,i)=><tr key={m.id}>
     <td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={m.id} sz={22}/><span style={{fontWeight:600,color:m.color}}>{m.name}</span>{i===0&&<span>🏆</span>}</div></td>
     <td><Badge type={m.isFondateur?"gold":"blue"}>{m.role}</Badge></td>
@@ -893,8 +918,8 @@ const Finance=()=>(
     <td style={{fontFamily:"var(--mono)",color:"var(--green)"}}>{m.signes}</td>
     <td><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:40}}><Prog pct={m.conv} color={m.conv>=25?"var(--green)":"var(--red)"}/></div><span style={{fontFamily:"var(--mono)",fontSize:11,color:m.conv>=25?"var(--green)":"var(--red)"}}>{m.conv}%</span></div></td>
     <td style={{fontFamily:"var(--mono)",fontWeight:600}}><P$ v={E(m.ca)} p={pm}/></td>
-    <td style={{fontFamily:"var(--mono)",color:"var(--gold)",fontWeight:700}}><P$ v={E(m.marge)} p={pm}/></td>
-    <td style={{fontFamily:"var(--mono)",color:m.isFondateur?"var(--text3)":"var(--blue)"}}>{m.isFondateur?"—":<P$ v={E(m.prosp)} p={pm}/>}</td>
+    {realAdmin&&<td style={{fontFamily:"var(--mono)",color:"var(--gold)",fontWeight:700}}><P$ v={E(m.marge)} p={pm}/></td>}
+    {realAdmin&&<td style={{fontFamily:"var(--mono)",color:m.isFondateur?"var(--text3)":"var(--blue)"}}>{m.isFondateur?"—":<P$ v={E(m.prosp)} p={pm}/>}</td>}
   </tr>)}</tbody></table></div></div>
   {/* ROI Sources */}
   <div className="card"><div className="card-h"><span style={{fontWeight:600}}>ROI par Source d'Acquisition</span></div><div className="card-b">
@@ -989,8 +1014,8 @@ return <div className="rpanel">
       <div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:6}}>VENTILATION FINANCIÈRE</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,fontSize:11,fontFamily:"var(--mono)"}}>
         <div><span style={{color:"var(--text3)"}}>Com. WEBO 20%</span><div style={{fontWeight:700,color:"var(--gold)"}}><P$ v={E(mg.comWebo)} p={pm}/></div></div>
-        <div><span style={{color:"var(--text3)"}}>Part {TEAM.find(t=>t.id===l.memberId)?.role}</span><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?<P$ v={E(mg.comProsp)} p={pm}/>:"—"}</div></div>
-        <div style={{gridColumn:"1/3",borderTop:"1px solid var(--border)",paddingTop:6}}><span style={{color:"var(--text3)"}}>Marge Nette</span><div style={{fontSize:16,fontWeight:800,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></div></div>
+        {realAdmin&&<div><span style={{color:"var(--text3)"}}>Part {TEAM.find(t=>t.id===l.memberId)?.role}</span><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?<P$ v={E(mg.comProsp)} p={pm}/>:"—"}</div></div>}
+        {realAdmin&&<div style={{gridColumn:"1/3",borderTop:"1px solid var(--border)",paddingTop:6}}><span style={{color:"var(--text3)"}}>Marge Nette</span><div style={{fontSize:16,fontWeight:800,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></div></div>}
       </div>
       {cd!==null&&<div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>Cycle: {cd}j</div>}
     </div>
@@ -1007,6 +1032,7 @@ return <div className="rpanel">
       <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"6px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/> WhatsApp</button>
       <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-copy"/> Template</button>
       <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé+2 actions.")}} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10}}><i className="fa-solid fa-robot"/> IA</button>
+      <button onClick={()=>setOutreachPresta(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(107,26,26,.4)",color:"#E88",fontSize:10,display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope-open-text"/> Cold Mail</button>
       <button className={"enrich-btn"+(enrichLoading===l.id?" loading":"")} onClick={()=>enrichLead(l)}><i className={"fa-solid "+(enrichLoading===l.id?"fa-spinner fa-spin":"fa-satellite-dish")}/> {enrichLoading===l.id?"Recherche...":"Enrichir"}</button>
       {l.externalLink&&<a href={l.externalLink} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-arrow-up-right-from-square"/> Site</a>}
       {l.email&&<a href={"mailto:"+l.email} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--purple)",color:"var(--purple)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope"/> Mail</a>}
@@ -1036,7 +1062,7 @@ return (
   {cmd&&<div className="cmd-ov" onClick={()=>setCmd(false)}><div className="cmd-box" onClick={e=>e.stopPropagation()}><input className="cmd-in" value={cmdQ} onChange={e=>setCmdQ(e.target.value)} placeholder="Commande, lead ou prestataire…" autoFocus onKeyDown={e=>{if(e.key==="Escape")setCmd(false);if(e.key==="Enter"&&cmdRes.length>0){cmdRes[0].a();setCmd(false);setCmdQ("")}}}/><div style={{maxHeight:300,overflowY:"auto"}}>{cmdRes.map((r,i)=><div key={i} className="cmd-r" onClick={()=>{r.a();setCmd(false);setCmdQ("")}}><i className={"fa-solid "+r.i} style={{width:18,textAlign:"center",color:"var(--gold)"}}/><span>{r.l}</span></div>)}</div></div></div>}
   {/* MODALS */}
   {showForm&&<div className="overlay" onClick={()=>{setShowForm(false);setEditId(null)}}><div className="overlay-bg"/><div className="modal" onClick={e=>e.stopPropagation()}>
-  <LForm lead={editId?leads.find(l=>l.id===editId):null} onSave={upsert} onDel={editId?()=>del(editId):null} onX={()=>{setShowForm(false);setEditId(null)}} prestas={prestas} sess={sess} isA={isA} pm={pm} gemini={gemini}/>
+  <LForm lead={editId?leads.find(l=>l.id===editId):null} onSave={upsert} onDel={editId?()=>del(editId):null} onX={()=>{setShowForm(false);setEditId(null)}} prestas={prestas} sess={effSess} isA={isA} realAdmin={realAdmin} pm={pm} gemini={gemini}/>
   </div></div>}
   {showVerif&&<div className="overlay" onClick={()=>setShowVerif(null)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:440}} onClick={e=>e.stopPropagation()}>
   <VForm lead={leads.find(l=>l.id===showVerif)} onSave={updV} onX={()=>setShowVerif(null)}/></div></div>}
@@ -1044,40 +1070,40 @@ return (
   <PForm presta={editP} onSave={upsP} onDel={editP?()=>delP(editP.id):null} onX={()=>{setShowPF(false);setEditP(null)}}/></div></div>}
   {showApiCfg&&<div className="overlay" onClick={()=>setShowApiCfg(false)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:480}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}>Configuration IA</h3><button onClick={()=>setShowApiCfg(false)} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/><p style={{fontSize:12,color:"var(--text2)",marginBottom:10}}>Cle API Google Gemini (gratuite) pour le scanner, enrichissement et agent IA.</p><FF l="Cle API"><input style={{width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid "+(apiKey?"var(--green)":"var(--border)"),background:"var(--bg)",color:"var(--text)",fontSize:13,outline:"none",fontFamily:"var(--mono)"}} value={apiKey} onChange={e=>{setApiKey(e.target.value);try{localStorage.setItem("webo_gemini_key",e.target.value)}catch(x){}}} placeholder="AIzaSy..." type="password"/></FF><div style={{display:"flex",alignItems:"center",gap:6,marginTop:6}}><div className={"sync-dot "+(apiKey?"on":"off")}/><span style={{fontSize:11,color:apiKey?"var(--green)":"var(--red)"}}>{apiKey?"OK":"Aucune cle"}</span></div></div></div>}
   {showRapport&&rapportData&&<div className="overlay" onClick={()=>setShowRapport(false)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:500}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}>Rapport Hebdo</h3><button onClick={()=>setShowRapport(false)} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:10}}>{[{l:"Leads sem.",v:rapportData.wL,c:"var(--blue)"},{l:"Signes sem.",v:rapportData.wS,c:"var(--green)"},{l:"CA sem.",v:E(rapportData.wCA),c:"var(--green)"},{l:"Pipeline",v:rapportData.pipe,c:"var(--gold)"},{l:"Encaisse",v:E(rapportData.enc),c:"var(--green)"},{l:"Urgents",v:rapportData.urg,c:"var(--red)"}].map((s,i)=><div key={i} style={{background:"var(--bg)",borderRadius:6,padding:6,textAlign:"center"}}><div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:15,fontWeight:700,fontFamily:"var(--mono)",color:s.c}}>{s.v}</div></div>)}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--gold)"}}>Top:</strong> {rapportData.topPerf}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--green)"}}>Cash:</strong> {E(rapportData.enc)} / {E(rapportData.theo)} ({rapportData.theo>0?Math.round(rapportData.enc/rapportData.theo*100):0}%)</div>{rapportData.stale>0&&<div style={{fontSize:12,color:"var(--red)"}}>Dormants: {rapportData.stale}</div>}<div className="sep"/><div style={{display:"flex",gap:4,justifyContent:"flex-end"}}><button onClick={()=>{cp("RAPPORT WEBO "+rapportData.date+": "+rapportData.wL+" leads, "+rapportData.wS+" signes, Pipeline "+rapportData.pipe+", Cash "+E(rapportData.enc)+"/"+E(rapportData.theo),flash)}} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Copier</button><button onClick={()=>{askAI("Rapport hebdo: "+rapportData.wL+" leads, "+rapportData.wS+" signes, "+rapportData.stale+" dormants, cash "+E(rapportData.enc)+"/"+E(rapportData.theo)+". 3 actions.");setShowRapport(false);setPage("ia")}} style={{padding:"7px 12px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}>IA</button></div></div></div>}
-  {outreachPresta&&<OutreachModal p={outreachPresta} onClose={()=>setOutreachPresta(null)} flash={flash}/>}
+  {outreachPresta&&<OutreachModal target={outreachPresta} onClose={()=>setOutreachPresta(null)} flash={flash}/>}
+  <button onClick={()=>setPage("ia")} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
 }
 
 /* ═══ SMART OUTREACH ═══ */
-function OutreachModal({p,onClose,flash}){
-const[persona,setPersona]=useState("direct");
+function OutreachModal({target,onClose,flash}){
 const[sent,setSent]=useState(false);
-const an=anonName(p.nom);
-const tjm=p.tjm?p.tjm+"E/j":"TJM sur devis";
-const spec=p.specialite||"son domaine";
-const notes=p.notes||"";
-const directMail="Bonjour,\n\nJe suis Kylian Meunier, fondateur de WEBO Asset Management. Nous mettons en relation des entreprises avec des experts triés sur le volet.\n\nJ'ai identifié "+an+" comme un profil de haut niveau en "+spec+"."+( notes?" Son approche ("+notes+") correspond exactement à ce que nos clients recherchent.":"")+"\n\nSes conditions ("+tjm+") sont en ligne avec notre marché. Nous prenons en charge toute la partie commerciale — "+an+" se concentre sur son expertise, nous lui apportons les missions.\n\nDisponible pour un call de 10 minutes cette semaine ?\n\nKylian Meunier\nFondateur — WEBO Asset Management";
-const stratMail="Bonjour,\n\nKylian Meunier, WEBO Asset Management. Nous construisons un réseau fermé d'experts premium pour nos clients en croissance.\n\nAprès analyse, le profil de "+an+" en "+spec+" retient notre attention."+( notes?" Ses compétences ("+notes+") répondent à une demande croissante sur notre portefeuille.":"")+"\n\nNotre modèle : zéro prospection pour "+an+". WEBO identifie les missions, négocie les contrats, et sécurise les paiements. Le tout à des conditions attractives ("+tjm+").\n\nSouhaitez-vous qu'on explore cette collaboration lors d'un échange stratégique de 15 minutes ?\n\nKylian Meunier\nFondateur & Expert en Croissance — WEBO Asset Management";
-const mail=persona==="direct"?directMail:stratMail;
-const subject="WEBO x "+an+" — Collaboration "+spec;
-const mailto="mailto:"+encodeURIComponent(p.email||"")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(mail);
-return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:580}} onClick={e=>e.stopPropagation()}>
-<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}><i className="fa-solid fa-envelope-open-text" style={{color:"var(--gold)",marginRight:6}}/>Smart Outreach</h3><button onClick={onClose} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div>
-<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10,padding:8,background:"var(--bg)",borderRadius:"var(--radius)"}}><div style={{width:36,height:36,borderRadius:10,background:"rgba(197,160,89,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:"var(--gold)"}}>{p.nom?p.nom[0]:"?"}</div><div><div style={{fontWeight:700,fontSize:13}}>{an}</div><div style={{fontSize:10,color:"var(--text2)"}}>{spec} | {tjm}{p.email?" | "+p.email:""}</div></div></div>
-<div style={{marginBottom:10}}><div style={{fontSize:9,fontWeight:700,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,marginBottom:4}}>PERSONA</div><div style={{display:"flex",gap:4}}><button className={"persona-btn"+(persona==="direct"?" sel":"")} onClick={()=>setPersona("direct")} style={{border:"1px solid "+(persona==="direct"?"var(--gold)":"var(--border)")}}><i className="fa-solid fa-bolt" style={{marginRight:3}}/>Direct / Efficace</button><button className={"persona-btn"+(persona==="strategie"?" sel":"")} onClick={()=>setPersona("strategie")} style={{border:"1px solid "+(persona==="strategie"?"var(--gold)":"var(--border)")}}><i className="fa-solid fa-chess" style={{marginRight:3}}/>Conseil / Stratégique</button></div></div>
-<div style={{fontSize:9,fontWeight:700,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,marginBottom:4}}>OBJET</div>
-<div style={{fontSize:12,fontWeight:600,marginBottom:8,padding:6,background:"var(--bg)",borderRadius:4}}>{subject}</div>
-<div style={{fontSize:9,fontWeight:700,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,marginBottom:4}}>APERCU</div>
-<div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:"var(--radius)",padding:10,fontSize:11,color:"var(--text2)",lineHeight:1.7,whiteSpace:"pre-wrap",maxHeight:220,overflowY:"auto"}}>{mail}</div>
-<div style={{fontSize:9,color:"var(--text3)",marginTop:4}}><i className="fa-solid fa-shield-halved" style={{marginRight:3}}/>Nom anonymise: {an} (nom complet jamais expose)</div>
+const prenom=target?.nom?target.nom.split(" ")[0]:"";
+const entreprise=target?.nom||target?.name||"";
+const email=target?.email||"";
+const mailObj="Acceleration de votre marche : Securiser la trajectoire de "+entreprise;
+const mailBody="Bonjour "+prenom+",\n\nL'acceleration de votre marche impose aujourd'hui une velocite impitoyable. A votre stade de croissance, le moindre grain de sable dans l'execution de vos projets digitaux impacte directement votre rentabilite.\n\nChez WEBO, nous concevons des dispositifs tactiques pour garantir votre expertise autour de trois leviers de developpement majeurs :\n\n- L'integration d'agents IA telephoniques : pour automatiser votre relation client et absorber vos flux d'appels sans aucune friction.\n- La refonte et creation Web : qui ne sont plus une simple option aujourd'hui, mais un veritable levier de developpement.\n- La strategie Reseaux Sociaux : pour capitaliser sur un canal d'acquisition extremement puissant, mais paradoxalement tres mal exploite par la majorite des acteurs de votre secteur.\n\nL'objectif n'est pas de vous livrer une simple prestation technique, mais d'implementer ces moteurs d'acquisition pour accelerer votre tunnel de revenus et securiser vos objectifs du trimestre.\n\nSeriez-vous ouvert a un diagnostic strategique de 10 minutes pour evaluer le potentiel de ces leviers chez vous ?\n\nBien a vous,\nKylian Meunier\nDirecteur de WEBO";
+const mailto="mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent(mailObj)+"&body="+encodeURIComponent(mailBody);
+const gmailUrl="https://mail.google.com/mail/?view=cm&to="+encodeURIComponent(email)+"&su="+encodeURIComponent(mailObj)+"&body="+encodeURIComponent(mailBody);
+return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:640,maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:17}}><i className="fa-solid fa-envelope-open-text" style={{color:"var(--gold)",marginRight:6}}/>Cold Email</h3><button onClick={onClose} style={{color:"var(--text3)",fontSize:14}}><i className="fa-solid fa-xmark"/></button></div>
+<div style={{display:"flex",gap:8,marginBottom:10,padding:10,background:"var(--bg)",borderRadius:"var(--radius)",alignItems:"center"}}><div style={{width:38,height:38,borderRadius:10,background:"rgba(197,160,89,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:"var(--gold)",fontSize:16,flexShrink:0}}>{prenom?prenom[0]:"?"}</div><div style={{flex:1,minWidth:0}}><div style={{fontWeight:700,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{entreprise}</div><div style={{fontSize:11,color:"var(--text2)"}}>{email||"Pas d email"}{target?.service?" | "+target.service:""}</div></div></div>
+<div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:4}}>OBJET</div>
+<div style={{fontSize:12,fontWeight:600,marginBottom:10,padding:8,background:"var(--bg)",borderRadius:6,border:"1px solid var(--border)"}}>{mailObj}</div>
+<div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:4}}>CORPS DU MAIL</div>
+<div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:"var(--radius)",padding:12,fontSize:12,color:"var(--text2)",lineHeight:1.8,whiteSpace:"pre-wrap",maxHeight:280,overflowY:"auto"}}>{mailBody}</div>
 <div className="sep"/>
-<div style={{display:"flex",gap:4,justifyContent:"flex-end"}}><button onClick={()=>{cp(mail,flash);setSent(true)}} className="outreach-btn gold" style={{padding:"8px 14px"}}><i className="fa-solid fa-copy"/>Copier</button><a href={mailto} target="_blank" onClick={()=>setSent(true)} className="outreach-btn bx" style={{padding:"8px 14px",textDecoration:"none"}}><i className="fa-solid fa-envelope"/>Ouvrir Mail</a></div>
-{sent&&<div className="mail-sent-tag" style={{marginTop:8}}><i className="fa-solid fa-check-circle"/>Mail prepare le {td()}</div>}
+<div style={{display:"flex",gap:6,justifyContent:"flex-end",flexWrap:"wrap"}}>
+<button onClick={()=>{cp(mailBody,flash);setSent(true)}} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-copy"/>Copier</button>
+{email&&<a href={mailto} target="_blank" onClick={()=>setSent(true)} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:11,fontWeight:600,textDecoration:"none",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-envelope"/>Mail natif</a>}
+{email&&<a href={gmailUrl} target="_blank" onClick={()=>setSent(true)} style={{padding:"9px 16px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,#EA4335,#FBBC04,#34A853,#4285F4)",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center",gap:4}}><i className="fa-brands fa-google"/>Gmail</a>}
+</div>
+{sent&&<div style={{marginTop:8,display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:6,background:"rgba(8,153,129,.08)",border:"1px solid rgba(8,153,129,.2)"}}><i className="fa-solid fa-check-circle" style={{color:"var(--green)"}}/><span style={{fontSize:10,color:"var(--green)",fontWeight:600}}>Mail prepare le {td()}</span></div>}
 </div></div>}
 
 /* ═══ LEAD FORM ═══ */
-function LForm({lead,onSave,onDel,onX,prestas,sess,isA,pm,gemini}){
+function LForm({lead,onSave,onDel,onX,prestas,sess,isA,realAdmin,pm,gemini}){
 const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",boxSizing:"border-box"};
 const[f,setF]=useState(lead?{...lead}:{nom:"",service:SERVICES[0],valeur:"",memberId:sess||"keddy",status:"nouveau",dateCreated:td(),lastInteraction:new Date().toISOString(),nextRelance:addD(td(),2),notes:"",source:SOURCES[0],echecReason:"—",tentatives:0,paymentProof:"",verifStatus:"none",verifNote:"",prestaId:"",email:"",phone:"",adresse:"",temperature:"tiede",activityLog:"",paymentLink:"",externalLink:"",paymentStatus:"non_facture"});
 const[pQ,setPQ]=useState("");const[showM,setShowM]=useState(false);const[scanUrl,setScanUrl]=useState("");const[scanLoad,setScanLoad]=useState(false);const[scanErr,setScanErr]=useState("");const s=(k,v)=>setF(p=>({...p,[k]:v}));
@@ -1091,26 +1117,26 @@ return <div>
 <FF l="Entreprise"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Nom"/></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Téléphone"><input style={IS} value={f.phone} onChange={e=>s("phone",e.target.value)} type="tel"/></FF><FF l="Email"><input style={IS} value={f.email} onChange={e=>s("email",e.target.value)} type="email"/></FF></div>
 <FF l="Adresse"><input style={IS} value={f.adresse} onChange={e=>s("adresse",e.target.value)}/></FF>
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Service"><select style={IS} value={f.service} onChange={e=>s("service",e.target.value)}>{SERVICES.map(v=><option key={v}>{v}</option>)}</select></FF><FF l="Valeur HT"><input style={IS} type="number" value={f.valeur} onChange={e=>s("valeur",e.target.value)}/></FF></div>
+<div className="sep"/><div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>DETAILS MISSION</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Service"><select style={IS} value={f.service} onChange={e=>s("service",e.target.value)}>{SERVICES.map(v=><option key={v}>{v}</option>)}</select></FF><FF l="Valeur HT"><input style={IS} type="number" value={f.valeur} onChange={e=>s("valeur",e.target.value)}/></FF></div>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-  <FF l="Apporteur d'Affaires"><select style={IS} value={f.memberId} onChange={e=>s("memberId",e.target.value)} disabled={!isA}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select></FF>
+  <FF l="Apporteur d'Affaires"><select style={IS} value={f.memberId} onChange={e=>s("memberId",e.target.value)} disabled={!realAdmin}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select></FF>
   <FF l="Source"><select style={IS} value={f.source} onChange={e=>s("source",e.target.value)}>{SOURCES.map(v=><option key={v}>{v}</option>)}</select></FF>
 </div>
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}><FF l="Statut"><select style={IS} value={f.status} onChange={e=>s("status",e.target.value)}>{COLS.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></FF><FF l="Température"><select style={IS} value={f.temperature} onChange={e=>s("temperature",e.target.value)}>{TEMPS.map(t=><option key={t.id} value={t.id}>{t.e} {t.l}</option>)}</select></FF><FF l="Relance"><input style={IS} type="date" value={f.nextRelance} onChange={e=>s("nextRelance",e.target.value)}/></FF></div>
+<div className="sep"/><div style={{fontSize:9,fontWeight:700,color:"var(--blue)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>PIPELINE</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}><FF l="Statut"><select style={IS} value={f.status} onChange={e=>s("status",e.target.value)}>{COLS.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></FF><FF l="Température"><select style={IS} value={f.temperature} onChange={e=>s("temperature",e.target.value)}>{TEMPS.map(t=><option key={t.id} value={t.id}>{t.e} {t.l}</option>)}</select></FF><FF l="Relance"><input style={IS} type="date" value={f.nextRelance} onChange={e=>s("nextRelance",e.target.value)}/></FF></div>
 <FF l="Prestataire">{sp?<div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(197,160,89,.2)",background:"rgba(197,160,89,.04)"}}><span style={{fontWeight:600}}>{sp.nom}</span><span style={{fontSize:10,color:"var(--gold)"}}>{sp.specialite}</span><button onClick={()=>s("prestaId","")} style={{marginLeft:"auto",color:"var(--red)",fontSize:10}}>✕</button></div>:<div><div style={{display:"flex",gap:4,marginBottom:3}}><input value={pQ} onChange={e=>setPQ(e.target.value)} placeholder="Chercher…" style={{...IS,flex:1,fontSize:13}}/><button onClick={()=>setShowM(p=>!p)} style={{padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-brain"/> Suggérer</button></div>
 {showM&&matches.map(m=><div key={m.id} className="match-card" onClick={()=>{s("prestaId",m.id);setShowM(false)}}><span style={{fontWeight:600}}>{m.nom}</span> <span style={{color:"var(--gold)",fontSize:11}}>Score:{m.score}%</span> <span style={{color:"var(--green)",fontSize:11,float:"right"}}>Sélectionner →</span></div>)}
 {!showM&&prestas.length>0&&<div style={{maxHeight:70,overflowY:"auto",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)"}}>{fp.map(p=><button key={p.id} onClick={()=>{s("prestaId",p.id);setPQ("")}} style={{display:"flex",gap:5,padding:"5px 7px",width:"100%",textAlign:"left",color:"var(--text)",fontSize:11}}><span style={{fontWeight:600}}>{p.nom}</span><span style={{color:"var(--text2)"}}>{p.specialite}</span></button>)}</div>}
 </div>}</FF>
 <FF l="Lien externe"><input style={IS} value={f.externalLink} onChange={e=>s("externalLink",e.target.value)} placeholder="Loom, Drive…"/></FF>
-<FF l="Notes"><textarea style={{...IS,height:45,resize:"vertical"}} value={f.notes} onChange={e=>s("notes",e.target.value)}/></FF>
+<FF l="Notes"><div style={{position:"relative"}}><textarea style={{...IS,height:60,resize:"vertical",paddingRight:70}} value={f.notes} onChange={e=>s("notes",e.target.value)} placeholder="Ajouter une note..."/><button onClick={()=>{const ts=new Date().toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});s("notes",(f.notes?f.notes+"\n":"")+ts+" — ")}} style={{position:"absolute",top:6,right:6,padding:"4px 8px",borderRadius:4,border:"1px solid var(--gold)",color:"var(--gold)",fontSize:9,fontWeight:600,background:"var(--bg)"}}><i className="fa-solid fa-clock" style={{marginRight:2}}/>Now</button></div></FF>
 {f.status==="signe"&&<><FF l="Statut Paiement"><select style={IS} value={f.paymentStatus||"non_facture"} onChange={e=>s("paymentStatus",e.target.value)}>{PAY_ST.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select></FF><FF l="Preuve paiement"><input style={IS} value={f.paymentProof} onChange={e=>s("paymentProof",e.target.value)}/></FF><FF l="Lien paiement"><input style={IS} value={f.paymentLink} onChange={e=>s("paymentLink",e.target.value)}/></FF></>}
 {f.status==="injoignable"&&<FF l="Raison"><select style={IS} value={f.echecReason} onChange={e=>s("echecReason",e.target.value)}>{ECHECS.map(r=><option key={r}>{r}</option>)}</select></FF>}
 {mg&&mg.comWebo>0&&<div style={{background:"rgba(197,160,89,.06)",border:"1px solid rgba(197,160,89,.12)",borderRadius:"var(--radius)",padding:10,marginBottom:10}}>
   <div style={{fontSize:10,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>VENTILATION — {apporteur?.role}</div>
   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,fontFamily:"var(--mono)",fontSize:12}}>
     <div><div style={{fontSize:9,color:"var(--text3)"}}>Com. 20%</div><div style={{fontWeight:700,color:"var(--gold)"}}>{E(mg.comWebo)}</div></div>
-    <div><div style={{fontSize:9,color:"var(--text3)"}}>Part {apporteur?.role}</div><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?E(mg.comProsp):"—"}</div></div>
-    <div><div style={{fontSize:9,color:"var(--text3)"}}>Marge WEBO</div><div style={{fontWeight:800,color:"var(--gold)"}}>{E(mg.margeNette)}</div></div>
+    {realAdmin&&<div><div style={{fontSize:9,color:"var(--text3)"}}>Part {apporteur?.role}</div><div style={{fontWeight:700,color:mg.comProsp>0?"var(--blue)":"var(--text3)"}}>{mg.comProsp>0?E(mg.comProsp):"—"}</div></div>}
+    {realAdmin&&<div><div style={{fontSize:9,color:"var(--text3)"}}>Marge WEBO</div><div style={{fontWeight:800,color:"var(--gold)"}}>{E(mg.margeNette)}</div></div>}
   </div>
   {!apporteur?.isFondateur&&<div style={{fontSize:9,color:"var(--text3)",marginTop:4}}>Chasseur → Split 50/50 de la commission</div>}
   {apporteur?.isFondateur&&<div style={{fontSize:9,color:"var(--gold)",marginTop:4}}>Fondateur → 100% de la commission conservée</div>}
@@ -1128,9 +1154,9 @@ return <div><div style={{display:"flex",justifyContent:"space-between",marginBot
 <FF l="Note"><textarea style={{...IS,height:45}} value={n} onChange={e=>setN(e.target.value)}/></FF>
 <div style={{display:"flex",gap:4,justifyContent:"flex-end"}}><button onClick={onX} style={{padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button><button onClick={()=>onSave(lead.id,st,n)} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>Confirmer</button></div></div>}
 
-function PForm({presta,onSave,onDel,onX}){const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
+function PForm({presta,onSave,onDel,onX}){const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",boxSizing:"border-box"};
 const[f,setF]=useState(presta?{...presta}:{nom:"",specialite:SPECIALITES[0],contact:"",email:"",notes:"",portfolio:"",tjm:""});const s=(k,v)=>setF(p=>({...p,[k]:v}));
-return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{presta?"Modifier — "+presta.nom:"Nouveau Prestataire"}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
+return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{presta?"Modifier — "+presta.nom:<span><i className="fa-solid fa-user-plus" style={{color:"var(--purple)",marginRight:6}}/>Nouveau Prestataire</span>}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
 <FF l="Nom"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)}/></FF>
 <FF l="Spécialité"><select style={IS} value={f.specialite} onChange={e=>s("specialite",e.target.value)}>{SPECIALITES.map(v=><option key={v}>{v}</option>)}</select></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Téléphone"><input style={IS} value={f.contact} onChange={e=>s("contact",e.target.value)} type="tel"/></FF><FF l="Email"><input style={IS} value={f.email} onChange={e=>s("email",e.target.value)} type="email"/></FF></div>
