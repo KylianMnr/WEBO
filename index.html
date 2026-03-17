@@ -383,7 +383,8 @@ const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[
 const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("webo_gemini_key")||""}catch(e){return""}});const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const gemini=async(prompt,search)=>{if(!apiKey)throw new Error("Cle API manquante. Cliquez sur la cle dans la nav.");const body={contents:[{parts:[{text:prompt}]}]};if(search)body.tools=[{google_search:{}}];const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur "+r.status)}const d=await r.json();if(!d.candidates||!d.candidates[0]||!d.candidates[0].content)throw new Error("Reponse bloquee ou vide");return d.candidates[0].content.parts.map(p=>p.text||"").join("")};
 const geminiChat=async(msgs,sys)=>{if(!apiKey)throw new Error("Cle API manquante.");const clean=msgs.filter(m=>m.content&&!m.content.startsWith("Erreur"));const contents=clean.map((m,i)=>({role:m.role==="assistant"?"model":"user",parts:[{text:i===0&&sys?(sys+"\n\n"+m.content):m.content}]}));if(contents.length===0)throw new Error("Aucun message");if(contents[0].role!=="user")contents.unshift({role:"user",parts:[{text:sys||"Bonjour"}]});const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:contents})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur "+r.status)}const d=await r.json();if(d.candidates&&d.candidates[0]&&d.candidates[0].content)return d.candidates[0].content.parts.map(p=>p.text||"").join("");throw new Error("Reponse vide de Gemini")};
-const[page,setPage]=useState("hub");const[pView,setPView]=useState("kanban");
+const[page,_setPage]=useState("hub");
+const setPage=useCallback(p=>{_setPage(p);setTimeout(()=>{const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0},0)},[]);const[pView,setPView]=useState("kanban");
 const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
 const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[sortBy,setSortBy]=useState("default");
 const[toast,setToast]=useState(null);const[showVerif,setShowVerif]=useState(null);
@@ -558,7 +559,6 @@ const me=st.byM.find(m=>m.id===effSess)||{};
 const rank=st.byM.findIndex(m=>m.id===effSess)+1;
 const myWeek=myL.filter(l=>(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7).length;
 const myUrg=myL.filter(isUrg).length;
-const isFond=TEAM.find(t=>t.id===effSess)?.isFondateur;
 const myMoney=isA?st.margeNette:(me.prosp||0);
 const moneyLabel=isA?"Marge Nette":"Ma Commission";
 const moneyEmoji=isA?"🏆":"💸";
@@ -614,7 +614,7 @@ return(
       </div>
     </div>}
   </div>
-  {/* ═══ LEADERBOARD COMPLET (visible par tous) ═══ */}
+  {/* ═══ LEADERBOARD ═══ */}
   <div className="card fu" style={{marginBottom:18}}>
     <div className="card-h"><span style={{fontWeight:700,fontSize:13}}><i className="fa-solid fa-ranking-star" style={{color:"var(--gold)",marginRight:6}}/>Classement</span></div>
     <div className="card-b" style={{padding:"8px 14px"}}>
@@ -1094,7 +1094,7 @@ return <div className="rpanel">
 return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>setShowNotif(false)}>
   <Nav/>
-  <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
+  <div className="main-scroll" style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page==="hub"&&<HubPage/>}
     {page==="pipeline"&&<Pipeline/>}
     {page==="talents"&&<Talents/>}
