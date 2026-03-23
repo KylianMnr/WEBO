@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management — Hub v16</title>
+<title>WEBO Asset Management — Hub v19</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -318,6 +318,33 @@ h2{font-size:16px!important}
 
 .ai-fab{opacity:.85;transition:all .3s}.ai-fab:hover{opacity:1;transform:scale(1.1)}
 
+/* V19 — Pipeline Pro */
+.pill-bar{display:flex;gap:3px;padding:2px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.pill{padding:5px 12px;border-radius:6px;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px;border:none;background:transparent;font-family:var(--sans)}
+.pill:hover{color:var(--text2);background:var(--bg3)}
+.pill.active{background:var(--bg3);color:var(--gold);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.pill .pill-cnt{background:var(--bg4);padding:1px 6px;border-radius:10px;font-size:9px;font-family:var(--mono)}
+.pill.active .pill-cnt{background:rgba(197,160,89,.15);color:var(--gold)}
+.view-toggle{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.vt-btn{padding:6px 14px;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;transition:all .15s;border:none;background:var(--bg);font-family:var(--sans);display:flex;align-items:center;gap:4px}
+.vt-btn:hover{color:var(--text2)}
+.vt-btn.active{background:var(--gold);color:var(--bg)}
+.dg{width:100%;border-collapse:separate;border-spacing:0}
+.dg th{font-size:8px;font-weight:700;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;font-family:var(--mono);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:5}
+.dg td{padding:5px 8px;border-bottom:1px solid rgba(42,45,53,.4);font-size:11px;vertical-align:middle}
+.dg tbody tr{transition:background .1s;cursor:pointer}.dg tbody tr:hover{background:rgba(197,160,89,.03)}
+.dg .sel{background:rgba(197,160,89,.06)}
+.dg .urg{border-left:2px solid var(--red)}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;flex-shrink:0}
+@media(max-width:768px){
+.pill-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
+.pill-bar::-webkit-scrollbar{display:none}
+.pill{font-size:9px;padding:4px 8px}
+.vt-btn{padding:5px 10px;font-size:9px}
+.dg th{padding:4px 5px;font-size:7px}
+.dg td{padding:4px 5px;font-size:10px}
+}
+
 /* V15 */
 .outreach-card{background:linear-gradient(135deg,rgba(197,160,89,.04),rgba(74,14,14,.04));border:1px solid rgba(197,160,89,.15);border-radius:var(--radius);padding:12px;margin-top:8px}
 .outreach-btn{padding:5px 10px;border-radius:var(--radius);font-size:10px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
@@ -463,7 +490,7 @@ const doExportCSV=(rows,fn,cols)=>{const txt=cols.join(",")+"\n"+rows.map(r=>col
 const exportLeads=()=>{const cols=["Entreprise","Statut","Service","Valeur","Apporteur","Source","Tel","Email","DateCreation","Relance","Prestataire","Notes"];const rows=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Apporteur:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,Relance:l.nextRelance,Prestataire:pN(l.prestaId),Notes:l.notes}));doExportCSV(rows,"webo-leads",cols)};
 const exportFinance=()=>{const cols=["Entreprise","Service","Valeur","Com20","PartChasseur","MargeNette","Apporteur","Role","Date"];const sg=leads.filter(l=>l.status==="signe");const rows=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Com20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Apporteur:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,Date:l.dateCreated}});doExportCSV(rows,"webo-finance",cols)};
 const toggleSel=id=>setSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
-const selAll=()=>{const ids=psFilt.map(l=>l.id);setSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
+
 const bulkStatus=async status=>{const ids=[...selIds];for(const id of ids){const l=leads.find(x=>x.id===id);if(!l)continue;const nl=addLog(l.activityLog,"Bulk>"+COLS.find(c=>c.id===status)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,status,lastInteraction:new Date().toISOString(),activityLog:nl}:x));await sb.from("leads").update({status,last_interaction:new Date().toISOString(),activity_log:nl}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads OK");addActivity(sess,"bulk",ids.length+" leads")};
 /* V13.2 — Talent heat score */
 const heatScore=(p)=>{let s=0;const act=leads.filter(l=>l.prestaId===p.id&&!["signe","injoignable"].includes(l.status)).length;const tjm=Number(p.tjm)||0;if(act===0)s+=40;else if(act<2)s+=20;if(tjm>0&&tjm<=400)s+=30;else if(tjm>0&&tjm<=600)s+=20;else if(tjm>0)s+=5;const sgn=leads.filter(l=>l.prestaId===p.id&&l.status==="signe").length;if(sgn>=3)s+=20;else if(sgn>=1)s+=10;if(p.portfolio)s+=10;return Math.min(s,100)};
@@ -695,48 +722,65 @@ return(
 
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
-const views=[{id:"table",l:"Tableau",i:"fa-table"},{id:"kanban",l:"Kanban",i:"fa-columns"},{id:"focus",l:"Focus",i:"fa-fire"}];
 const[tPage,setTPage]=useState(0);const PER=50;const[kMax,setKMax]=useState({});const KPER=15;
-const[pSearch,setPSearch]=useState("");const psFilt=useMemo(()=>{if(!pSearch)return filt;const q=pSearch.toLowerCase();return filt.filter(l=>l.nom.toLowerCase().includes(q)||l.service.toLowerCase().includes(q)||(l.email||"").toLowerCase().includes(q)||(l.phone||"").includes(q)||(l.notes||"").toLowerCase().includes(q))},[filt,pSearch]);
-return <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",minWidth:0}}>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,flexWrap:"wrap",gap:8}}>
-    <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Pipeline Commercial</h2>
-    <div style={{display:"flex",gap:4,alignItems:"center",flexWrap:"wrap"}}>
-      {views.map(v=><button key={v.id} onClick={()=>setPView(v.id)} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(pView===v.id?"var(--gold)":"var(--border)"),color:pView===v.id?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:pView===v.id?"rgba(197,160,89,.06)":"transparent"}}><i className={"fa-solid "+v.i} style={{marginRight:3}}/>{v.l}</button>)}
-      <span style={{width:1,height:18,background:"var(--border)"}}/>
-      {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:11,width:"auto"}}><option value="all">Tous</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)} ({m.role})</option>)}</select>}
-      <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:11,width:"auto"}}><option value="default">Tri</option><option value="valeur">Valeur↓</option><option value="date">Date↓</option></select>
-      {pView==="table"&&<button onClick={exportLeads} className="nb" style={{fontSize:10,border:"1px solid var(--border)"}} title="CSV"><i className="fa-solid fa-file-csv" style={{marginRight:2}}/>CSV</button>}
-      <div style={{display:"flex",alignItems:"center",gap:4,flex:1,maxWidth:220}}><i className="fa-solid fa-search" style={{color:"var(--text3)",fontSize:10}}/><input value={pSearch} onChange={e=>{setPSearch(e.target.value);setTPage(0)}} placeholder="Rechercher..." style={{...IS,padding:"5px 8px",fontSize:11,flex:1,border:"none",background:"var(--bg3)",borderRadius:6}}/>{pSearch&&<button onClick={()=>setPSearch("")} style={{color:"var(--text3)",fontSize:10}}><i className="fa-solid fa-xmark"/></button>}</div>
-      <span style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{psFilt.length}/{myL.length}</span>
-      <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Lead</button>
+const[pSearch,setPSearch]=useState("");
+const[quickF,setQuickF]=useState("actifs");
+const quickFiltered=useMemo(()=>{let base=filt;if(quickF==="relancer")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3));else if(quickF==="dormants")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=72);else if(quickF==="actifs")base=base.filter(l=>!["signe","injoignable"].includes(l.status));return base},[filt,quickF,now]);
+const psFilt=useMemo(()=>{if(!pSearch)return quickFiltered;const q=pSearch.toLowerCase();return quickFiltered.filter(l=>l.nom.toLowerCase().includes(q)||l.service.toLowerCase().includes(q)||(l.email||"").toLowerCase().includes(q)||(l.phone||"").includes(q)||(l.notes||"").toLowerCase().includes(q))},[quickFiltered,pSearch]);
+const qCounts=useMemo(()=>{const a=filt.filter(l=>!["signe","injoignable"].includes(l.status)).length;const r=filt.filter(l=>!["signe","injoignable"].includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3)).length;const d=filt.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=72).length;return{actifs:a,relancer:r,dormants:d,tous:filt.length}},[filt,now]);
+return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,gap:10}}>
+  {/* HEADER */}
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+    <div style={{display:"flex",alignItems:"center",gap:10}}>
+      <h2 style={{fontFamily:"var(--serif)",fontSize:18,fontWeight:700,margin:0}}>Pipeline</h2>
+      <span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)",background:"var(--bg3)",padding:"2px 8px",borderRadius:10}}>{psFilt.length}</span>
+    </div>
+    <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+      {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="all">Equipe</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)}</option>)}</select>}
+      <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="default">Tri</option><option value="valeur">Valeur</option><option value="date">Date</option></select>
+      <div style={{display:"flex",alignItems:"center",gap:3,background:"var(--bg3)",borderRadius:6,padding:"3px 8px"}}><i className="fa-solid fa-search" style={{color:"var(--text4)",fontSize:9}}/><input value={pSearch} onChange={e=>{setPSearch(e.target.value);setTPage(0)}} placeholder="Rechercher..." style={{background:"transparent",border:"none",color:"var(--text)",fontSize:11,outline:"none",width:120,padding:"2px 0"}}/>{pSearch&&<button onClick={()=>setPSearch("")} style={{color:"var(--text3)",fontSize:9,lineHeight:1}}><i className="fa-solid fa-xmark"/></button>}</div>
+      {pView==="table"&&<button onClick={exportLeads} style={{padding:"4px 8px",borderRadius:6,border:"1px solid var(--border)",color:"var(--text3)",fontSize:9}}><i className="fa-solid fa-file-csv"/></button>}
+      <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"6px 14px",borderRadius:8,background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Lead</button>
     </div>
   </div>
 
-  {/* TABLE */}
-  {pView==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",overflow:"auto",flex:1,WebkitOverflowScrolling:"touch"}}>
-  <table className="tbl"><thead><tr><th style={{width:30}}><input type="checkbox" className="chk" onChange={selAll} checked={selIds.size>0&&selIds.size===psFilt.length}/></th><th>Entreprise</th><th>Statut</th><th>Service</th><th>Valeur</th>{isA&&<th>Marge Nette</th>}<th>Apporteur</th><th>Temp.</th><th>Activité</th><th></th></tr></thead>
-  <tbody>{srt(psFilt).slice(tPage*PER,(tPage+1)*PER).map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);const h=hA(l.lastInteraction);
-  return <tr key={l.id} style={{borderLeft:urg?"3px solid var(--red)":"3px solid transparent",background:selIds.has(l.id)?"rgba(197,160,89,.04)":"transparent"}} onClick={()=>setSelLead(l)}>
-    <td onClick={e=>e.stopPropagation()}><input type="checkbox" className="chk" checked={selIds.has(l.id)} onChange={()=>toggleSel(l.id)}/></td>
-    <td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={l.memberId} sz={26}/><div><div style={{fontWeight:600,fontSize:12}}>{l.nom}{l.valeur>=HOT&&<span style={{color:"var(--red)",marginLeft:3,fontSize:10}}>🔥</span>}</div><div style={{fontSize:10,color:"var(--text3)"}}>{l.email||l.phone||""}</div></div></div></td>
-    <td><SBadge status={l.status}/></td>
-    <td style={{fontSize:11,color:"var(--text2)"}}>{l.service}</td>
-    <td style={{fontFamily:"var(--mono)",fontWeight:600}}><P$ v={E(l.valeur)} p={pm}/></td>
-    {isA&&<td style={{fontFamily:"var(--mono)",fontWeight:600,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></td>}
-    <td><span style={{color:mC(l.memberId),fontWeight:600,fontSize:11}}>{mN(l.memberId)}</span><span style={{fontSize:9,color:"var(--text3)",marginLeft:4}}>{TEAM.find(t=>t.id===l.memberId)?.role}</span></td>
-    <td>{TEMPS.find(t=>t.id===l.temperature)?.e}</td>
-    <td style={{fontSize:10,color:"var(--text3)"}}>{h?fA(h):"—"}{urg&&<span style={{color:"var(--red)",fontWeight:700,marginLeft:3}}>●</span>}</td>
-    <td onClick={e=>e.stopPropagation()}><div style={{display:"flex",gap:3}}><button onClick={()=>openWA(l,mN(l.memberId))} className="wa"><i className="fa-brands fa-whatsapp"/></button><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"3px 7px",borderRadius:4,border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-pen"/></button></div></td>
-  </tr>})}</tbody></table></div>}
+  {/* PILLS + VIEW TOGGLE */}
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+    <div className="pill-bar">
+      {[{id:"actifs",l:"Actifs",i:"fa-bolt"},{id:"relancer",l:"A relancer",i:"fa-bell"},{id:"dormants",l:"Dormants",i:"fa-moon"},{id:"tous",l:"Tous",i:"fa-layer-group"}].map(p=><button key={p.id} className={"pill"+(quickF===p.id?" active":"")} onClick={()=>{setQuickF(p.id);setTPage(0)}}><i className={"fa-solid "+p.i}/>{p.l}<span className="pill-cnt">{qCounts[p.id]}</span></button>)}
+    </div>
+    <div className="view-toggle">
+      {[{id:"kanban",i:"fa-columns",l:"Kanban"},{id:"table",i:"fa-table-cells",l:"Liste"},{id:"focus",i:"fa-fire",l:"Focus"}].map(v=><button key={v.id} className={"vt-btn"+(pView===v.id?" active":"")} onClick={()=>setPView(v.id)}><i className={"fa-solid "+v.i}/><span className="vt-label">{v.l}</span></button>)}
+    </div>
+  </div>
 
-  {/* KANBAN */}
-  {pView==="table"&&psFilt.length>PER&&<div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:8,padding:"10px",background:"var(--bg2)",borderTop:"1px solid var(--border)",borderRadius:"0 0 var(--radius) var(--radius)"}}><button onClick={()=>setTPage(p=>Math.max(0,p-1))} disabled={tPage===0} style={{padding:"5px 12px",borderRadius:6,border:"1px solid var(--border)",color:tPage===0?"var(--text4)":"var(--gold)",fontSize:11,fontWeight:600}}>Précédent</button><span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text2)"}}>{tPage+1}/{Math.ceil(psFilt.length/PER)} ({psFilt.length} leads)</span><button onClick={()=>setTPage(p=>Math.min(Math.ceil(psFilt.length/PER)-1,p+1))} disabled={(tPage+1)*PER>=psFilt.length} style={{padding:"5px 12px",borderRadius:6,border:"1px solid var(--border)",color:(tPage+1)*PER>=psFilt.length?"var(--text4)":"var(--gold)",fontSize:11,fontWeight:600}}>Suivant</button></div>}
+  {/* ═══ DATA GRID (Liste compacte Notion-style) ═══ */}
+  {pView==="table"&&<div style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:10,overflow:"auto",flex:1,WebkitOverflowScrolling:"touch"}}>
+  <table className="dg"><thead><tr>
+    <th style={{width:28}}><input type="checkbox" className="chk" onChange={()=>{const ids=psFilt.map(l=>l.id);setSelIds(p=>p.size===ids.length?new Set():new Set(ids))}} checked={selIds.size>0&&selIds.size===psFilt.length}/></th>
+    <th>Prospect</th><th>Statut</th><th>Service</th><th>Budget</th><th>Relance</th><th>Source</th>{isA&&<th>Marge</th>}<th>Temp.</th>
+  </tr></thead>
+  <tbody>{srt(psFilt).slice(tPage*PER,(tPage+1)*PER).map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);const rd=dU(l.nextRelance);const col=COLS.find(c=>c.id===l.status);
+  return <tr key={l.id} className={(selIds.has(l.id)?"sel ":"")+(urg?"urg":"")} onClick={()=>setSelLead(l)}>
+    <td onClick={e=>e.stopPropagation()}><input type="checkbox" className="chk" checked={selIds.has(l.id)} onChange={()=>toggleSel(l.id)}/></td>
+    <td><div style={{display:"flex",alignItems:"center",gap:6,minWidth:140}}><Av id={l.memberId} sz={22}/><div><div style={{fontWeight:600,fontSize:11,lineHeight:1.3}}>{l.nom}{l.valeur>=HOT&&<span style={{color:"var(--red)",marginLeft:2,fontSize:9}}>🔥</span>}</div><div style={{fontSize:9,color:"var(--text3)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:150}}>{l.email||l.phone||mN(l.memberId)}</div></div></div></td>
+    <td><div style={{display:"flex",alignItems:"center"}}><span className="status-dot" style={{background:col?.accent||"var(--text3)"}}/><span style={{fontSize:10,color:col?.accent,fontWeight:600}}>{col?.label}</span></div></td>
+    <td style={{fontSize:10,color:"var(--text2)"}}>{l.service}</td>
+    <td style={{fontFamily:"var(--mono)",fontWeight:600,fontSize:11}}><P$ v={E(l.valeur)} p={pm}/></td>
+    <td>{l.nextRelance?<span style={{fontFamily:"var(--mono)",fontSize:10,color:rd!==null&&rd<=0?"var(--red)":rd!==null&&rd<=2?"var(--gold)":"var(--text3)"}}>{l.nextRelance.slice(5)}{rd!==null&&rd<=0&&<span style={{marginLeft:2}}>⚠</span>}</span>:<span style={{color:"var(--text4)",fontSize:10}}>—</span>}</td>
+    <td style={{fontSize:9,color:"var(--text3)"}}>{l.source}</td>
+    {isA&&<td style={{fontFamily:"var(--mono)",fontSize:10,fontWeight:600,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></td>}
+    <td style={{fontSize:12}}>{TEMPS.find(x=>x.id===l.temperature)?.e}</td>
+  </tr>})}</tbody></table>
+  {psFilt.length>PER&&<div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:10,padding:"8px",borderTop:"1px solid var(--border)"}}><button onClick={()=>setTPage(p=>Math.max(0,p-1))} disabled={tPage===0} style={{padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)",color:tPage===0?"var(--text4)":"var(--gold)",fontSize:10,fontWeight:600}}><i className="fa-solid fa-chevron-left" style={{marginRight:3}}/>Préc</button><span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)"}}>{tPage*PER+1}-{Math.min((tPage+1)*PER,psFilt.length)} sur {psFilt.length}</span><button onClick={()=>setTPage(p=>Math.min(Math.ceil(psFilt.length/PER)-1,p+1))} disabled={(tPage+1)*PER>=psFilt.length} style={{padding:"4px 10px",borderRadius:6,border:"1px solid var(--border)",color:(tPage+1)*PER>=psFilt.length?"var(--text4)":"var(--gold)",fontSize:10,fontWeight:600}}>Suiv<i className="fa-solid fa-chevron-right" style={{marginLeft:3}}/></button></div>}
+  </div>}
+
+  {/* ═══ KANBAN ═══ */}
   {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
   {COLS.map(col=>{const allCards=srt(psFilt.filter(l=>l.status===col.id));const cards=allCards.slice(0,kMax[col.id]||KPER);const hasMore=allCards.length>(kMax[col.id]||KPER);const cv=allCards.reduce((s,l)=>s+l.valeur,0);
   return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
     <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
-      <div style={{display:"flex",alignItems:"center",gap:3}}><i className={"fa-solid "+col.icon} style={{fontSize:9,color:col.accent}}/><span style={{fontSize:10,fontWeight:600,color:col.accent,fontFamily:"var(--mono)"}}>{col.label}</span></div>
+      <div style={{display:"flex",alignItems:"center",gap:3}}><span className="status-dot" style={{background:col.accent}}/><span style={{fontSize:10,fontWeight:600,color:col.accent,fontFamily:"var(--mono)"}}>{col.label}</span></div>
       <span style={{fontSize:10,fontWeight:700,color:col.accent,fontFamily:"var(--mono)"}}><P$ v={E(cv)} p={pm}/></span>
     </div>
     <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",padding:"0 4px 3px"}}>{allCards.length} · {Math.round(col.proba*100)}%</div>
@@ -749,12 +793,12 @@ return <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"col
         <span style={{fontSize:11,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></span>
         {isA&&<span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></span>}
       </div>
-      <Prog pct={Math.round((COLS.find(c=>c.id===l.status)?.proba||0)*100)} color={col.accent}/>
+      <Prog pct={Math.round((col.proba||0)*100)} color={col.accent}/>
     </div>})}{hasMore&&<button onClick={()=>setKMax(p=>({...p,[col.id]:(p[col.id]||KPER)+KPER}))} style={{width:"100%",padding:"6px",borderRadius:6,border:"1px solid var(--border)",color:"var(--gold)",fontSize:10,fontWeight:600,marginTop:2,background:"var(--bg2)"}}><i className="fa-solid fa-chevron-down" style={{marginRight:3}}/>{allCards.length-(kMax[col.id]||KPER)} de plus</button>}</div>
   </div>})}
   </div></div>}
 
-  {/* FOCUS */}
+  {/* ═══ FOCUS ═══ */}
   {pView==="focus"&&<div style={{flex:1,overflow:"auto"}}>
   <div style={{color:"var(--red)",fontWeight:700,marginBottom:10}}><i className="fa-solid fa-fire"/> Focus — {urgL.length} leads urgents</div>
   {urgL.slice(0,30).map(l=>{const mg=calcMargin(l.valeur,l.memberId);return <div key={l.id} className="card fu" style={{marginBottom:6,borderLeft:"3px solid var(--red)"}}>
@@ -768,13 +812,13 @@ return <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"col
   {urgL.length===0&&<div style={{padding:40,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-check-circle" style={{fontSize:20,display:"block",marginBottom:6}}/> Aucun urgent</div>}
   </div>}
 
+  {/* BULK BAR */}
   {selIds.size>0&&<div className="bulk-bar">
-    <span className="bulk-cnt">{selIds.size} sélectionné{selIds.size>1?"s":""}</span>
+    <span className="bulk-cnt">{selIds.size}</span>
     <div style={{height:16,width:1,background:"var(--border)"}}/>
     {COLS.filter(c=>c.id!=="injoignable").map(c=><button key={c.id} className="bulk-btn" onClick={()=>bulkStatus(c.id)} style={{color:c.accent,borderColor:c.accent+"40"}}><i className={"fa-solid "+c.icon} style={{marginRight:3,fontSize:8}}/>{c.label}</button>)}
     {prestas.length>0&&<select onChange={e=>{if(e.target.value)bulkPresta(e.target.value);e.target.value=""}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="">Presta...</option>{prestas.map(p=><option key={p.id} value={p.id}>{p.nom}</option>)}</select>}
-    <div style={{flex:1}}/>
-    <button className="bulk-btn" onClick={()=>setSelIds(new Set())} style={{borderColor:"rgba(231,76,76,.3)",color:"var(--red)"}}><i className="fa-solid fa-xmark" style={{marginRight:3}}/>Annuler</button>
+    <button className="bulk-btn" style={{borderColor:"rgba(231,76,76,.3)",color:"var(--red)",marginLeft:"auto"}} onClick={()=>setSelIds(new Set())}><i className="fa-solid fa-xmark" style={{marginRight:3}}/>Annuler</button>
   </div>}
 </div>};
 
