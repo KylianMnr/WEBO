@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management — Hub v24</title>
+<title>WEBO Asset Management — Hub v25</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -392,19 +392,19 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY);
 /* ═══ AUTH ═══ */
 const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
-{id:"keddy",name:"Keddy",role:"Chasseur",color:"#2962FF",isAdmin:false,isFondateur:false,login:"keddy",email:"keddy@webo.fr",pass:"Keddy2024!"},
-{id:"dylan",name:"Dylan",role:"Chasseur",color:"#089981",isAdmin:false,isFondateur:false,login:"dylan",email:"dylan@webo.fr",pass:"Dylan2024!"},
 {id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"},
 {id:"guillaume",name:"Guillaume Blondel",role:"Technique",color:"#6366f1",isAdmin:true,isFondateur:false,login:"guillaume",email:"guillaume@webo.fr",pass:"Guillaume2024!"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur}));
 
 /* ═══ DATA MAPPING ═══ */
-const db2L=r=>{let tl=[];try{tl=typeof r.timeline==="string"?JSON.parse(r.timeline||"[]"):(r.timeline||[])}catch(e){tl=[]}return{id:r.id,nom:r.nom,service:r.service,valeur:r.valeur,memberId:r.member_id,status:r.status,dateCreated:r.date_created||"",lastInteraction:r.last_interaction||"",nextRelance:r.next_relance||"",notes:r.notes||"",source:r.source||"DM Instagram",echecReason:r.echec_reason||"—",tentatives:r.tentatives||0,paymentProof:r.payment_proof||"",verifStatus:r.verif_status||"none",verifNote:r.verif_note||"",prestaId:r.presta_id||"",email:r.email||"",phone:r.phone||"",adresse:r.adresse||"",temperature:r.temperature||"tiede",activityLog:r.activity_log||"",paymentLink:r.payment_link||"",externalLink:r.external_link||"",paymentStatus:r.payment_status||"non_facture",linkedinUrl:r.linkedin_url||"",linkedinCampaign:r.linkedin_campaign||false,auditScore:r.audit_score!=null?r.audit_score:"",auditPdfLink:r.audit_pdf_link||"",auditErreurs:r.audit_erreurs||"",linkedinStep:r.linkedin_step||"non_contacte",timeline:tl}};
-const L2db=l=>({id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.memberId,status:l.status,date_created:l.dateCreated,last_interaction:l.lastInteraction,next_relance:l.nextRelance,notes:l.notes,source:l.source,echec_reason:l.echecReason,tentatives:l.tentatives,payment_proof:l.paymentProof,verif_status:l.verifStatus,verif_note:l.verifNote,presta_id:l.prestaId,email:l.email,phone:l.phone,adresse:l.adresse,temperature:l.temperature,activity_log:l.activityLog,payment_link:l.paymentLink,external_link:l.externalLink,payment_status:l.paymentStatus,linkedin_url:l.linkedinUrl,linkedin_campaign:l.linkedinCampaign||false,audit_score:l.auditScore!==""?Number(l.auditScore):null,audit_pdf_link:l.auditPdfLink,audit_erreurs:l.auditErreurs,linkedin_step:l.linkedinStep,timeline:l.timeline||[]});
+const db2L=r=>{let tl=[];try{tl=typeof r.timeline==="string"?JSON.parse(r.timeline||"[]"):(r.timeline||[])}catch(e){tl=[]}return{id:r.id,nom:r.nom,service:r.service,valeur:r.valeur,memberId:r.member_id,status:r.status,dateCreated:r.date_created||"",lastInteraction:r.last_interaction||"",nextRelance:r.next_relance||"",notes:r.notes||"",source:r.source||"DM Instagram",echecReason:r.echec_reason||"—",tentatives:r.tentatives||0,paymentProof:r.payment_proof||"",verifStatus:r.verif_status||"none",verifNote:r.verif_note||"",prestaId:r.presta_id||"",email:r.email||"",phone:r.phone||"",adresse:r.adresse||"",temperature:r.temperature||"tiede",activityLog:r.activity_log||"",paymentLink:r.payment_link||"",externalLink:r.external_link||"",paymentStatus:r.payment_status||"non_facture",linkedinUrl:r.linkedin_url||"",linkedinCampaign:r.linkedin_campaign||false,auditScore:r.audit_score!=null?r.audit_score:"",auditPdfLink:r.audit_pdf_link||"",auditErreurs:r.audit_erreurs||"",linkedinStep:r.linkedin_step||"non_contacte",timeline:tl,cms:r.cms||"—",prodStatus:r.prod_status||"a_auditer"}};
+const L2db=l=>({id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.memberId,status:l.status,date_created:l.dateCreated,last_interaction:l.lastInteraction,next_relance:l.nextRelance,notes:l.notes,source:l.source,echec_reason:l.echecReason,tentatives:l.tentatives,payment_proof:l.paymentProof,verif_status:l.verifStatus,verif_note:l.verifNote,presta_id:l.prestaId,email:l.email,phone:l.phone,adresse:l.adresse,temperature:l.temperature,activity_log:l.activityLog,payment_link:l.paymentLink,external_link:l.externalLink,payment_status:l.paymentStatus,linkedin_url:l.linkedinUrl,linkedin_campaign:l.linkedinCampaign||false,audit_score:l.auditScore!==""?Number(l.auditScore):null,audit_pdf_link:l.auditPdfLink,audit_erreurs:l.auditErreurs,linkedin_step:l.linkedinStep,timeline:l.timeline||[],cms:l.cms||"—",prod_status:l.prodStatus||"a_auditer"});
 
 /* ═══ CONSTANTS ═══ */
 const COLS=[{id:"nouveau",label:"Identifie",icon:"fa-crosshairs",accent:"#64748b",proba:.05,urgDays:7},{id:"recherche",label:"Recherche",icon:"fa-magnifying-glass-chart",accent:"#6366f1",proba:.10,urgDays:5},{id:"contacte",label:"1er Contact",icon:"fa-paper-plane",accent:"#2962FF",proba:.20,urgDays:3},{id:"relance1",label:"Relance",icon:"fa-rotate",accent:"#f59e0b",proba:.30,urgDays:3},{id:"qualifie",label:"Qualifie",icon:"fa-clipboard-check",accent:"#C5A059",proba:.45,urgDays:4},{id:"call",label:"RDV / Call",icon:"fa-phone-volume",accent:"#a855f7",proba:.60,urgDays:5},{id:"proposition",label:"Proposition",icon:"fa-file-signature",accent:"#ec4899",proba:.75,urgDays:7},{id:"relance2",label:"Closing",icon:"fa-gavel",accent:"#E74C4C",proba:.85,urgDays:5},{id:"signe",label:"Signe",icon:"fa-circle-check",accent:"#089981",proba:1,urgDays:999},{id:"injoignable",label:"Perdu",icon:"fa-ban",accent:"#5A6270",proba:0,urgDays:999}];
 const SERVICES=["Mise en Conformité EAA","Audit Accessibilité","Conformité RGPD","Web Design","Montage Vidéo","Vidéaste"];
+const CMS_OPTIONS=["—","Shopify","Magento","PrestaShop","WordPress","Custom","Autre"];
+const PROD_COLS=[{id:"a_auditer",label:"À Auditer",icon:"fa-folder-open",accent:"#64748b"},{id:"scan_auto",label:"Scan Automatique",icon:"fa-magnifying-glass-chart",accent:"#6366f1"},{id:"audit_manuel",label:"Audit Manuel en cours",icon:"fa-user-gear",accent:"#f59e0b"},{id:"rapport_genere",label:"Rapport Généré",icon:"fa-file-circle-check",accent:"#a855f7"},{id:"contre_audit",label:"Contre-audit (Remédiation)",icon:"fa-shield-halved",accent:"#089981"}];
 const SOURCES=["DM Instagram","LinkedIn","Email froid","Appel à froid","Prospection terrain","Référence","Autre"];
 const ECHECS=["—","Prix trop élevé","Pas de besoin","Déjà équipé","Pas de budget","Concurrent choisi","Projet reporté"];
 const GHOST_MAP={"DM Instagram":"Email/Appel","LinkedIn":"DM/Appel","Email froid":"DM/LinkedIn","Appel à froid":"DM/Email","Prospection terrain":"Email/Appel","Référence":"Via ref","Autre":"DM+Email"};
@@ -462,7 +462,7 @@ const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("webo_gemi
 const gemini=async(prompt,search)=>{if(aiProvider==="claude"){if(!claudeKey)throw new Error("Cle API Claude manquante. Cliquez sur la cle dans la nav.");const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":claudeKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2000,messages:[{role:"user",content:prompt}]})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Claude "+r.status)}const d=await r.json();return(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||""}if(!apiKey)throw new Error("Cle API Gemini manquante. Cliquez sur la cle dans la nav.");const body={contents:[{parts:[{text:prompt}]}]};if(search)body.tools=[{google_search:{}}];const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Gemini "+r.status)}const d=await r.json();if(!d.candidates||!d.candidates[0]||!d.candidates[0].content)throw new Error("Reponse bloquee ou vide");return d.candidates[0].content.parts.map(p=>p.text||"").join("")};
 const geminiChat=async(msgs,sys)=>{const clean=msgs.filter(m=>m.content&&!m.content.startsWith("Erreur"));if(aiProvider==="claude"){if(!claudeKey)throw new Error("Cle API Claude manquante.");const cMsgs=clean.map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.content}));if(cMsgs.length===0)throw new Error("Aucun message");if(cMsgs[0].role!=="user")cMsgs.unshift({role:"user",content:sys||"Bonjour"});const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":claudeKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2000,system:sys||"",messages:cMsgs})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Claude "+r.status)}const d=await r.json();return(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||""}if(!apiKey)throw new Error("Cle API Gemini manquante.");const contents=clean.map((m,i)=>({role:m.role==="assistant"?"model":"user",parts:[{text:i===0&&sys?(sys+"\n\n"+m.content):m.content}]}));if(contents.length===0)throw new Error("Aucun message");if(contents[0].role!=="user")contents.unshift({role:"user",parts:[{text:sys||"Bonjour"}]});const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:contents})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Gemini "+r.status)}const d=await r.json();if(d.candidates&&d.candidates[0]&&d.candidates[0].content)return d.candidates[0].content.parts.map(p=>p.text||"").join("");throw new Error("Reponse vide");};
 const[page,_setPage]=useState("hub");
-const setPage=useCallback(p=>{_setPage(p);setTimeout(()=>{const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0},0)},[]);const[pView,setPView]=useState("kanban");
+const setPage=useCallback(p=>{_setPage(p);setTimeout(()=>{const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0},0)},[]);const[pView,setPView]=useState("kanban");const[pipelineMode,setPipelineMode]=useState("prospection");
 const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
 const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[sortBy,setSortBy]=useState("default");
 const[toast,setToast]=useState(null);const[showVerif,setShowVerif]=useState(null);
@@ -535,13 +535,13 @@ useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTARE
 const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");if(l._isNew){addNotif("fa-plus","var(--green)","Nouveau: "+c.nom,c.id);addActivity(sess,"a ajouté",c.nom,"var(--green)")}else{addActivity(sess,"a modifié",c.nom,"var(--blue)")}await sb.from("leads").upsert(L2db(c))},[sess]);
 const del=useCallback(async id=>{const dl=leads.find(x=>x.id===id);setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");addActivity(sess,"a supprimé",dl?.nom||"","var(--red)");await sb.from("leads").delete().eq("id",id)},[leads,sess]);
 const touch=useCallback(async(id,msg)=>{const l=leads.find(x=>x.id===id);if(!l)return;const t=(l.tentatives||0)+1;const nl=addLog(l.activityLog,msg||"Contact #"+t);setLeads(p=>p.map(x=>x.id===id?{...x,lastInteraction:new Date().toISOString(),tentatives:t,activityLog:nl}:x));await sb.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t,activity_log:nl}).eq("id",id)},[leads]);
-const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={status:"status",lastInteraction:"last_interaction",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",activityLog:"activity_log",paymentStatus:"payment_status",linkedinUrl:"linkedin_url",linkedinCampaign:"linkedin_campaign",auditScore:"audit_score",auditPdfLink:"audit_pdf_link",auditErreurs:"audit_erreurs",linkedinStep:"linkedin_step",timeline:"timeline"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});await sb.from("leads").update(db).eq("id",id)},[]);
+const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={status:"status",lastInteraction:"last_interaction",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",activityLog:"activity_log",paymentStatus:"payment_status",linkedinUrl:"linkedin_url",linkedinCampaign:"linkedin_campaign",auditScore:"audit_score",auditPdfLink:"audit_pdf_link",auditErreurs:"audit_erreurs",linkedinStep:"linkedin_step",timeline:"timeline",cms:"cms",prodStatus:"prod_status"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});await sb.from("leads").update(db).eq("id",id)},[]);
 const updV=useCallback(async(id,vs,vn)=>{const nl=addLog(leads.find(l=>l.id===id)?.activityLog||"","Vérif:"+vs);setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,activityLog:nl}:l));setShowVerif(null);flash("Vérif ✓");await sb.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td(),activity_log:nl}).eq("id",id)},[leads]);
 const upsP=useCallback(async p=>{const c={...p};delete c._isNew;setPrestas(pr=>pr.some(x=>x.id===c.id)?pr.map(x=>x.id===c.id?c:x):[...pr,c]);setShowPF(false);setEditP(null);flash("Presta ✓");await sb.from("prestataires").upsert(c)},[]);
 const delP=useCallback(async id=>{setPrestas(pr=>pr.filter(x=>x.id!==id));setShowPF(false);setEditP(null);flash("Supprimé");await sb.from("prestataires").delete().eq("id",id)},[]);
 
 const onDS=(e,id)=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id)};
-const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));const cLb=COLS.find(c=>c.id===col)?.label;flash(l?.nom+" → "+cLb);addActivity(sess,"a déplacé",(l?.nom||"")+" → "+cLb);if(col==="signe")addNotif("fa-trophy","var(--green)",(l?.nom||"")+" signé! "+E(l?.valeur||0),id);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}setDragOver(null)};
+const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);if(pipelineMode==="production"){const pLb=PROD_COLS.find(c=>c.id===col)?.label;const nl=addLog(l?.activityLog||"","Prod→"+pLb);setLeads(p=>p.map(x=>x.id===id?{...x,prodStatus:col,activityLog:nl}:x));flash((l?.nom||"")+" → "+pLb);addActivity(sess,"production",(l?.nom||"")+" → "+pLb,"var(--purple)");await sb.from("leads").update({prod_status:col,activity_log:nl}).eq("id",id)}else{const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,...nd,activityLog:nl}:x));const cLb=COLS.find(c=>c.id===col)?.label;flash(l?.nom+" → "+cLb);addActivity(sess,"a déplacé",(l?.nom||"")+" → "+cLb);if(col==="signe")addNotif("fa-trophy","var(--green)",(l?.nom||"")+" signé! "+E(l?.valeur||0),id);await sb.from("leads").update({status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl}).eq("id",id)}}setDragOver(null)};
 
 const askAI=async pr=>{setAiMsgs(p=>[...p,{role:"user",content:pr}]);setAiIn("");setAiLoad(true);try{const sg=leads.filter(l=>l.status==="signe");const t=await geminiChat([...aiMsgs.slice(-6).map(m=>({role:m.role,content:m.content})),{role:"user",content:pr}],"Assistant WEBO Asset Management. Com 20%, Fondateur garde 100%, Chasseur split 50%. "+leads.length+" leads, "+sg.length+" signes. Francais, expert, concret.")||"Erreur";setAiMsgs(p=>[...p,{role:"assistant",content:t}])}catch(e){setAiMsgs(p=>[...p,{role:"assistant",content:"Erreur: "+(e.message||"Connexion echouee").slice(0,200)}])}setAiLoad(false)};
 useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"})},[aiMsgs,aiLoad]);
@@ -583,7 +583,7 @@ const cEnc=sg.filter(l=>l.paymentStatus==="encaisse").reduce((s,l)=>s+l.valeur,0
 
 /* CMD palette */
 const cmdRes=useMemo(()=>{if(!cmdQ)return[];const q=cmdQ.toLowerCase();return[
-...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-users",l:"Nouveau Prestataire",a:()=>{setPage("talents");setShowPF(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")},{i:"fa-wand-magic-sparkles",l:"Mode Matching",a:()=>setPage("matching")}].filter(c=>c.l.toLowerCase().includes(q)),
+...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")}].filter(c=>c.l.toLowerCase().includes(q)),
 ...leads.filter(l=>l.nom.toLowerCase().includes(q)).slice(0,5).map(l=>({i:"fa-user",l:l.nom+" — "+l.service,a:()=>{setSelLead(l);setPage("pipeline")}}))
 ]},[cmdQ,leads]);
 
@@ -609,15 +609,6 @@ const Nav=()=>(
   <span className="logo" onClick={()=>setPage("hub")}><span className="w">W</span><span className="r">ebo</span></span>
   <span className="logo-tag">Asset Management</span>
   <div style={{flex:1}}/>
-  {/* LEADERBOARD LIVE */}
-  <div className="lb-mini">
-    <span style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginRight:4}}>TOP</span>
-    {leaderboard.slice(0,3).map((m,i)=><div key={m.id} className="lb-item">
-      <div className="lb-rank" style={{background:i===0?"var(--gold)":i===1?"var(--text3)":"#8B4513",color:i===0?"var(--bg)":"var(--text)"}}>{i+1}</div>
-      <span style={{color:m.color}}>{mN(m.id)}</span>
-      <span style={{fontFamily:"var(--mono)",color:"var(--green)"}}>{m.signes}</span>
-    </div>)}
-  </div>
   <div style={{display:"flex",gap:4,alignItems:"center"}}>
     {page!=="hub"&&<button className="nb" onClick={()=>setPage("hub")}><i className="fa-solid fa-arrow-left"/> Hub</button>}
     <button className="nb" onClick={()=>setCmd(true)}><i className="fa-solid fa-magnifying-glass"/></button>
@@ -644,7 +635,6 @@ const Nav=()=>(
 /* ═══ HUB ═══ */
 const HubPage=()=>{
 const me=st.byM.find(m=>m.id===effSess)||{};
-const rank=st.byM.findIndex(m=>m.id===effSess)+1;
 const myWeek=myL.filter(l=>(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7).length;
 const myUrg=myL.filter(isUrg).length;
 const myMoney=isA?st.margeNette:(me.prosp||0);
@@ -662,9 +652,8 @@ return(
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <Av id={effSess} sz={42}/>
-          <div><div style={{fontWeight:700,fontSize:16}}>{sU?.name}</div><div style={{fontSize:11,color:"var(--text2)"}}>{sU?.role}{rank>0?" | Classement: #"+rank+"/"+TEAM.length:""}</div></div>
+          <div><div style={{fontWeight:700,fontSize:16}}>{sU?.name}</div><div style={{fontSize:11,color:"var(--text2)"}}>{sU?.role}</div></div>
         </div>
-        {rank<=3&&<div style={{fontSize:28}}>{rank===1?"🥇":rank===2?"🥈":"🥉"}</div>}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))",gap:10,marginBottom:14}}>
         {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Signés",v:me.signes||0,c:"var(--green)",e:"✅"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:moneyLabel,v:E(myMoney),c:isA?"var(--gold)":"var(--blue)",e:moneyEmoji},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF",e:"📈"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].map((s,i)=>
@@ -702,26 +691,13 @@ return(
       </div>
     </div>}
   </div>
-  {/* ═══ LEADERBOARD ═══ */}
-  <div className="card fu" style={{marginBottom:18}}>
-    <div className="card-h"><span style={{fontWeight:700,fontSize:13}}><i className="fa-solid fa-ranking-star" style={{color:"var(--gold)",marginRight:6}}/>Classement</span></div>
-    <div className="card-b" style={{padding:"8px 14px"}}>
-      {st.byM.map((m,i)=>{const isMe=m.id===effSess;return <div key={m.id} className="fu" style={{display:"flex",alignItems:"center",gap:10,padding:"8px 6px",borderRadius:8,background:isMe?"rgba(197,160,89,.06)":"transparent",borderLeft:isMe?"3px solid var(--gold)":"3px solid transparent",animationDelay:i*50+"ms"}}>
-        <div style={{fontSize:18,width:28,textAlign:"center"}}>{i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)}</div>
-        <Av id={m.id} sz={28}/>
-        <div style={{flex:1}}><div style={{fontWeight:600,fontSize:12,color:m.color}}>{m.name}{isMe?" (vous)":""}</div><div style={{fontSize:10,color:"var(--text3)"}}>{m.role}</div></div>
-        <div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontWeight:700,fontSize:13,color:"var(--green)"}}>{m.signes} signés</div><div style={{fontSize:10,color:"var(--text3)",fontFamily:"var(--mono)"}}>{m.conv}% conv.</div></div>
-      </div>})}
-    </div>
-  </div>
+
   {/* ═══ MODULES ═══ */}
   <div className="hub-grid">
     {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊"},
-    {icon:"fa-users-gear",title:"Talents",desc:"Prestataires, compétences, charge",pg:"talents",cnt:prestas.length+" prestas",ac:"#8B5CF6",em:"🤝"},
     {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
     {icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
-    {icon:"fa-wand-magic-sparkles",title:"Matching",desc:"Score de compatibilité auto",pg:"matching",cnt:prestas.length,ac:"#ec4899",em:"✨"},
     ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac}} onClick={()=>setPage(c.pg)}>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
         <div style={{width:44,height:44,borderRadius:12,background:c.ac+"15",border:"1px solid "+c.ac+"25",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{c.em}</div>
@@ -743,9 +719,13 @@ const qCounts=useMemo(()=>{const a=filt.filter(l=>!["signe","injoignable"].inclu
 return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,gap:10}}>
   {/* HEADER */}
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-    <div style={{display:"flex",alignItems:"center",gap:10}}>
+    <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
       <h2 style={{fontFamily:"var(--serif)",fontSize:18,fontWeight:700,margin:0}}>Pipeline</h2>
       <span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)",background:"var(--bg3)",padding:"2px 8px",borderRadius:10}}>{psFilt.length}</span>
+      <div style={{display:"flex",gap:0,borderRadius:8,overflow:"hidden",border:"1px solid "+(pipelineMode==="production"?"var(--purple)":"var(--gold)")}}>
+        <button onClick={()=>setPipelineMode("prospection")} style={{padding:"6px 12px",fontSize:11,fontWeight:700,background:pipelineMode==="prospection"?"var(--gold)":"transparent",color:pipelineMode==="prospection"?"var(--bg)":"var(--text2)",border:"none"}}><i className="fa-solid fa-handshake" style={{marginRight:4}}/>Prospection</button>
+        <button onClick={()=>setPipelineMode("production")} style={{padding:"6px 12px",fontSize:11,fontWeight:700,background:pipelineMode==="production"?"var(--purple)":"transparent",color:pipelineMode==="production"?"#fff":"var(--text2)",border:"none"}}><i className="fa-solid fa-gears" style={{marginRight:4}}/>Production EAA</button>
+      </div>
     </div>
     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
       {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="all">Equipe</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)}</option>)}</select>}
@@ -791,13 +771,13 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
 
   {/* ═══ KANBAN ═══ */}
   {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
-  {COLS.map(col=>{const allCards=srt(psFilt.filter(l=>l.status===col.id));const cards=allCards.slice(0,kMax[col.id]||KPER);const hasMore=allCards.length>(kMax[col.id]||KPER);const cv=allCards.reduce((s,l)=>s+l.valeur,0);
+  {(pipelineMode==="production"?PROD_COLS:COLS).map(col=>{const allCards=srt(psFilt.filter(l=>pipelineMode==="production"?(l.prodStatus||"a_auditer")===col.id:l.status===col.id));const cards=allCards.slice(0,kMax[col.id]||KPER);const hasMore=allCards.length>(kMax[col.id]||KPER);const cv=allCards.reduce((s,l)=>s+l.valeur,0);
   return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
     <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:3}}><span className="status-dot" style={{background:col.accent}}/><span style={{fontSize:10,fontWeight:600,color:col.accent,fontFamily:"var(--mono)"}}>{col.label}</span></div>
       <span style={{fontSize:10,fontWeight:700,color:col.accent,fontFamily:"var(--mono)"}}><P$ v={E(cv)} p={pm}/></span>
     </div>
-    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",padding:"0 4px 3px"}}>{allCards.length} · {Math.round(col.proba*100)}%</div>
+    <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",padding:"0 4px 3px"}}>{allCards.length}{col.proba!==undefined?" · "+Math.round(col.proba*100)+"%":""}</div>
     <div style={{flex:1,overflowY:"auto"}}>{cards.map(l=>{const urg=isUrg(l);const mg=calcMargin(l.valeur,l.memberId);
     return <div key={l.id} className="kc" draggable onDragStart={e=>onDS(e,l.id)} onDragEnd={()=>setDragOver(null)} onClick={()=>setSelLead(l)} style={{borderLeft:"3px solid "+(urg?"var(--red)":"transparent")}}>
       <div style={{display:"flex",alignItems:"center",gap:3,marginBottom:2}}><Av id={l.memberId} sz={14}/><span style={{fontWeight:600,fontSize:10,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{l.nom}</span>{l.linkedinCampaign&&<span style={{fontSize:7,fontWeight:700,color:"var(--blue)",background:"rgba(41,98,255,.1)",padding:"1px 4px",borderRadius:3,fontFamily:"var(--mono)",whiteSpace:"nowrap"}}>🤖 IN</span>}{l.valeur>=HOT&&<span style={{fontSize:8,color:"var(--red)"}}>🔥</span>}</div>
@@ -1175,7 +1155,7 @@ return <div className="rpanel">
     <div className="sep"/>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
       <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></div></div>
-      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><SBadge status={l.status}/></div>
+      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><SBadge status={l.status}/>{l.prodStatus&&l.prodStatus!=="a_auditer"&&<div style={{marginTop:3,fontSize:9,color:"var(--purple)",fontFamily:"var(--mono)"}}><i className="fa-solid fa-gears" style={{marginRight:3}}/>{PROD_COLS.find(p=>p.id===l.prodStatus)?.label}</div>}</div>
     </div>
     {/* ═══ CARTE ALERTE EAA ═══ */}
     {hasAudit&&<div style={{background:"linear-gradient(135deg,"+aBgFull+".06),"+aBgFull+".02))",border:"1px solid "+aColor+"30",borderRadius:12,padding:14,marginBottom:12,position:"relative",overflow:"hidden"}}>
@@ -1183,7 +1163,7 @@ return <div className="rpanel">
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{width:44,height:44,borderRadius:12,background:aBgFull+".12)",border:"2px solid "+aColor+"40",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column"}}><span style={{fontSize:16,fontWeight:900,fontFamily:"var(--mono)",color:aColor,lineHeight:1}}>{aScore}</span><span style={{fontSize:6,fontWeight:700,color:aColor,opacity:.7}}>/100</span></div>
-          <div><div style={{fontSize:10,fontWeight:700,color:aColor,fontFamily:"var(--mono)",letterSpacing:1}}>AUDIT EAA</div><div style={{fontSize:9,color:"var(--text3)"}}>{aScore>80?"Conforme":aScore>50?"Partiellement conforme":"Non conforme"}</div></div>
+          <div><div style={{fontSize:10,fontWeight:700,color:aColor,fontFamily:"var(--mono)",letterSpacing:1}}>AUDIT EAA</div><div style={{fontSize:9,color:"var(--text3)"}}>{aScore>80?"Conforme":aScore>50?"Partiellement conforme":"Non conforme"}{l.cms&&l.cms!=="—"?" · "+l.cms:""}</div></div>
         </div>
         {l.auditPdfLink&&<a href={l.auditPdfLink} target="_blank" rel="noopener" style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+aColor+"40",color:aColor,fontSize:9,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-file-pdf"/> PDF</a>}
       </div>
@@ -1213,6 +1193,8 @@ return <div className="rpanel">
       <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-copy"/> Template</button>
       <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé+2 actions.")}} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10}}><i className="fa-solid fa-robot"/> IA</button>
       <button onClick={()=>setOutreachPresta(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(107,26,26,.4)",color:"#E88",fontSize:10,display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope-open-text"/> Cold Mail</button>
+      <WebhookBtn label="Générer Devis EAA" icon="fa-file-invoice-dollar" color="var(--gold)" url="https://hook.eu1.make.com/webo-devis-eaa" payload={{id:l.id,nom:l.nom,email:l.email,phone:l.phone,adresse:l.adresse,service:l.service,valeur:l.valeur,audit_score:l.auditScore,audit_erreurs:l.auditErreurs,cms:l.cms,prod_status:l.prodStatus,linkedin_url:l.linkedinUrl}} flash={flash}/>
+      <WebhookBtn label="⚠️ Alerte Arcom" icon="fa-triangle-exclamation" color="var(--red)" url="https://hook.eu1.make.com/webo-alerte-arcom" payload={{id:l.id,nom:l.nom,email:l.email,phone:l.phone,audit_score:l.auditScore,sender:"Johanna",date:new Date().toISOString()}} flash={flash}/>
       <button className={"enrich-btn"+(enrichLoading===l.id?" loading":"")} onClick={()=>enrichLead(l)}><i className={"fa-solid "+(enrichLoading===l.id?"fa-spinner fa-spin":"fa-satellite-dish")}/> {enrichLoading===l.id?"Recherche...":"Enrichir"}</button>
       {l.externalLink&&<a href={l.externalLink} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-arrow-up-right-from-square"/> Site</a>}
       {l.linkedinUrl&&<a href={l.linkedinUrl} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid #0A66C2",color:"#0A66C2",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-brands fa-linkedin"/> LinkedIn</a>}
@@ -1240,11 +1222,9 @@ return (
   <div className="main-scroll" style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page==="hub"&&<HubPage/>}
     {page==="pipeline"&&<Pipeline/>}
-    {page==="talents"&&<Talents/>}
     {page==="agenda"&&<Agenda/>}
     {page==="finance"&&<Finance/>}
     {page==="ia"&&<IA/>}
-    {page==="matching"&&<Matching/>}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
   {/* CMD */}
@@ -1362,7 +1342,7 @@ return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><
 /* ═══ LEAD FORM ═══ */
 function LForm({lead,onSave,onDel,onX,prestas,sess,isA,realAdmin,pm,gemini}){
 const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",boxSizing:"border-box"};
-const[f,setF]=useState(lead?{...lead,timeline:lead.timeline||[]}:{nom:"",service:SERVICES[0],valeur:"",memberId:sess||"keddy",status:"nouveau",dateCreated:td(),lastInteraction:new Date().toISOString(),nextRelance:addD(td(),2),notes:"",source:SOURCES[0],echecReason:"—",tentatives:0,paymentProof:"",verifStatus:"none",verifNote:"",prestaId:"",email:"",phone:"",adresse:"",temperature:"tiede",activityLog:"",paymentLink:"",externalLink:"",paymentStatus:"non_facture",linkedinUrl:"",linkedinCampaign:false,auditScore:"",auditPdfLink:"",auditErreurs:"",linkedinStep:"non_contacte",timeline:[]});
+const[f,setF]=useState(lead?{...lead,timeline:lead.timeline||[]}:{nom:"",service:SERVICES[0],valeur:"",memberId:sess||"keddy",status:"nouveau",dateCreated:td(),lastInteraction:new Date().toISOString(),nextRelance:addD(td(),2),notes:"",source:SOURCES[0],echecReason:"—",tentatives:0,paymentProof:"",verifStatus:"none",verifNote:"",prestaId:"",email:"",phone:"",adresse:"",temperature:"tiede",activityLog:"",paymentLink:"",externalLink:"",paymentStatus:"non_facture",linkedinUrl:"",linkedinCampaign:false,auditScore:"",auditPdfLink:"",auditErreurs:"",linkedinStep:"non_contacte",timeline:[],cms:"—",prodStatus:"a_auditer"});
 const[tlInput,setTlInput]=useState("");
 const[pQ,setPQ]=useState("");const[showM,setShowM]=useState(false);const[scanUrl,setScanUrl]=useState("");const[scanLoad,setScanLoad]=useState(false);const[scanErr,setScanErr]=useState("");const s=(k,v)=>setF(p=>({...p,[k]:v}));
 const fp=prestas.filter(p=>{if(!pQ)return true;const q=pQ.toLowerCase();return p.nom.toLowerCase().includes(q)||p.specialite.toLowerCase().includes(q)});
@@ -1390,8 +1370,9 @@ return <div>
 {/* ═══ SECTION DIAGNOSTIC EAA ═══ */}
 <div style={{background:"linear-gradient(135deg,rgba(231,76,76,.04),rgba(197,160,89,.04))",border:"1px solid rgba(231,76,76,.12)",borderRadius:10,padding:14,marginBottom:12}}>
 <div style={{fontSize:9,fontWeight:700,color:"var(--red)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:8,display:"flex",alignItems:"center",gap:5}}><i className="fa-solid fa-universal-access"/>DIAGNOSTIC EAA</div>
-<div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:8}}><FF l="Score Audit (0-100)"><input style={IS} type="number" min="0" max="100" value={f.auditScore} onChange={e=>s("auditScore",e.target.value)} placeholder="0-100"/></FF><FF l="Lien PDF Audit"><input style={IS} value={f.auditPdfLink} onChange={e=>s("auditPdfLink",e.target.value)} placeholder="https://…rapport.pdf"/></FF></div>
-<FF l="Erreurs techniques (top 3)"><textarea style={{...IS,height:60,resize:"vertical",fontSize:12,lineHeight:1.6}} value={f.auditErreurs} onChange={e=>s("auditErreurs",e.target.value)} placeholder="1. Contraste insuffisant sur les CTA&#10;2. Images sans attribut alt&#10;3. Navigation clavier impossible"/></FF>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}><FF l="Score EAA Réel (0-100)"><input style={IS} type="number" min="0" max="100" value={f.auditScore} onChange={e=>s("auditScore",e.target.value)} placeholder="0-100"/></FF><FF l="CMS"><select style={IS} value={f.cms||"—"} onChange={e=>s("cms",e.target.value)}>{CMS_OPTIONS.map(o=><option key={o}>{o}</option>)}</select></FF><FF l="Statut Production"><select style={IS} value={f.prodStatus||"a_auditer"} onChange={e=>s("prodStatus",e.target.value)}>{PROD_COLS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select></FF></div>
+<FF l="Lien PDF Audit"><input style={IS} value={f.auditPdfLink} onChange={e=>s("auditPdfLink",e.target.value)} placeholder="https://…rapport.pdf"/></FF>
+<FF l="Top 3 Erreurs Critiques"><textarea style={{...IS,height:60,resize:"vertical",fontSize:12,lineHeight:1.6}} value={f.auditErreurs} onChange={e=>s("auditErreurs",e.target.value)} placeholder="1. Contraste insuffisant sur les CTA&#10;2. Images sans attribut alt&#10;3. Navigation clavier impossible"/></FF>
 </div>
 {/* ═══ SECTION MULTICANAL ═══ */}
 <div style={{background:"linear-gradient(135deg,rgba(41,98,255,.04),rgba(10,102,194,.04))",border:"1px solid rgba(41,98,255,.12)",borderRadius:10,padding:14,marginBottom:12}}>
