@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management — Hub v22</title>
+<title>WEBO Asset Management — Hub v23</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -394,7 +394,8 @@ const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
 {id:"keddy",name:"Keddy",role:"Chasseur",color:"#2962FF",isAdmin:false,isFondateur:false,login:"keddy",email:"keddy@webo.fr",pass:"Keddy2024!"},
 {id:"dylan",name:"Dylan",role:"Chasseur",color:"#089981",isAdmin:false,isFondateur:false,login:"dylan",email:"dylan@webo.fr",pass:"Dylan2024!"},
-{id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"}];
+{id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"},
+{id:"guillaume",name:"Guillaume Blondel",role:"Technique",color:"#6366f1",isAdmin:true,isFondateur:false,login:"guillaume",email:"guillaume@webo.fr",pass:"Guillaume2024!"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur}));
 
 /* ═══ DATA MAPPING ═══ */
@@ -403,7 +404,7 @@ const L2db=l=>({id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.
 
 /* ═══ CONSTANTS ═══ */
 const COLS=[{id:"nouveau",label:"Identifie",icon:"fa-crosshairs",accent:"#64748b",proba:.05,urgDays:7},{id:"recherche",label:"Recherche",icon:"fa-magnifying-glass-chart",accent:"#6366f1",proba:.10,urgDays:5},{id:"contacte",label:"1er Contact",icon:"fa-paper-plane",accent:"#2962FF",proba:.20,urgDays:3},{id:"relance1",label:"Relance",icon:"fa-rotate",accent:"#f59e0b",proba:.30,urgDays:3},{id:"qualifie",label:"Qualifie",icon:"fa-clipboard-check",accent:"#C5A059",proba:.45,urgDays:4},{id:"call",label:"RDV / Call",icon:"fa-phone-volume",accent:"#a855f7",proba:.60,urgDays:5},{id:"proposition",label:"Proposition",icon:"fa-file-signature",accent:"#ec4899",proba:.75,urgDays:7},{id:"relance2",label:"Closing",icon:"fa-gavel",accent:"#E74C4C",proba:.85,urgDays:5},{id:"signe",label:"Signe",icon:"fa-circle-check",accent:"#089981",proba:1,urgDays:999},{id:"injoignable",label:"Perdu",icon:"fa-ban",accent:"#5A6270",proba:0,urgDays:999}];
-const SERVICES=["Web Design","Montage Vidéo","Vidéaste","Conformité EAA","Audit Accessibilité"];
+const SERVICES=["Mise en Conformité EAA","Audit Accessibilité","Conformité RGPD","Web Design","Montage Vidéo","Vidéaste"];
 const SOURCES=["DM Instagram","LinkedIn","Email froid","Appel à froid","Prospection terrain","Référence","Autre"];
 const ECHECS=["—","Prix trop élevé","Pas de besoin","Déjà équipé","Pas de budget","Concurrent choisi","Projet reporté"];
 const GHOST_MAP={"DM Instagram":"Email/Appel","LinkedIn":"DM/Appel","Email froid":"DM/LinkedIn","Appel à froid":"DM/Email","Prospection terrain":"Email/Appel","Référence":"Via ref","Autre":"DM+Email"};
@@ -474,7 +475,7 @@ const[selIds,setSelIds]=useState(new Set());
 const[actFeed,setActFeed]=useState([]);
 const[enrichData,setEnrichData]=useState({});const[enrichLoading,setEnrichLoading]=useState(null);
 const[matchCrit,setMatchCrit]=useState({service:"",budget:"",duree:"",competence:""});const[matchRes,setMatchRes]=useState(null);const[matchLoading,setMatchLoading]=useState(false);
-const[tFilter,setTFilter]=useState("all");const[clientMode,setClientMode]=useState(false);
+const[tFilter,setTFilter]=useState("all");const[clientMode,setClientMode]=useState(false);const[tSelIds,setTSelIds]=useState(new Set());
 const[agMonth,setAgMonth]=useState(new Date());const[agEvents,setAgEvents]=useState([]);const[showAgForm,setShowAgForm]=useState(null);
 const aiRef=useRef(null);const pm=privacy||clientMode;
 const[rapportData,setRapportData]=useState(null);const[showRapport,setShowRapport]=useState(false);
@@ -510,6 +511,11 @@ const addAgEvent=(date,title,time,color)=>{const ev={id:uid(),date,title,time:ti
 const delAgEvent=id=>setAgEvents(p=>p.filter(e=>e.id!==id));
 
 const bulkPresta=async pid=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,prestaId:pid}:x));await sb.from("leads").update({presta_id:pid}).eq("id",id)}setSelIds(new Set());flash("Assignes")};
+
+/* V22+ — Bulk delete prestataires */
+const toggleTSel=id=>setTSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
+const tSelAll=()=>{const ids=prestas.map(p=>p.id);setTSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
+const bulkDelPrestas=async()=>{if(!confirm("Supprimer "+tSelIds.size+" prestataire(s) ? Irreversible."))return;const ids=[...tSelIds];for(const id of ids){setPrestas(p=>p.filter(x=>x.id!==id));await sb.from("prestataires").delete().eq("id",id)}setTSelIds(new Set());flash(ids.length+" supprime(s)");addActivity(sess,"a supprime",ids.length+" prestas","var(--red)")};
 
 /* V13 — DATA ENRICHMENT via Claude API */
 const enrichLead=async(lead)=>{if(enrichLoading)return;setEnrichLoading(lead.id);try{const txt=await gemini("Recherche des informations sur cette entreprise/personne pour un courtier d affaires. Entreprise: "+lead.nom+". Secteur: "+lead.service+". Notes existantes: "+(lead.notes||"aucune")+". Donne-moi en francais: 1) Actu recente du secteur ou de l entreprise 2) Un angle d approche commercial percutant 3) Un sujet de conversation pour ouvrir l appel. Sois concret et actionnable, max 150 mots.",true)||"Pas de donnees";setEnrichData(p=>({...p,[lead.id]:{text:txt,date:td()}}));flash("Intel "+lead.nom+" OK");addActivity(sess,"a enrichi",lead.nom,"var(--blue)")}catch(e){setEnrichData(p=>({...p,[lead.id]:{text:"Erreur de recherche. Verifiez la connexion.",date:td()}}));flash("Erreur: "+(e.message||"").slice(0,50))}setEnrichLoading(null)};
@@ -831,7 +837,7 @@ const Talents=()=>{
 const sorted=useMemo(()=>{let list=prestas.map(p=>{const asg=leads.filter(l=>l.prestaId===p.id);const act=asg.filter(l=>!["signe","injoignable"].includes(l.status)).length;const sgn=asg.filter(l=>l.status==="signe").length;const ca=asg.filter(l=>l.status==="signe").reduce((s,l)=>s+l.valeur,0);const heat=heatScore(p);return{...p,act,sgn,ca,heat,busy:act>=3,test:sgn<3,charge:Math.min(Math.round((act/4)*100),100)}});if(tFilter==="topTjm")list=list.filter(p=>p.tjm).sort((a,b)=>(Number(a.tjm)||999)-(Number(b.tjm)||999));else if(tFilter==="dispo")list=list.filter(p=>p.act===0);else if(tFilter==="relancer")list=list.filter(p=>p.sgn>0&&p.act===0);else list=list.sort((a,b)=>b.heat-a.heat);return list},[prestas,leads,tFilter]);
 return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,flexWrap:"wrap",gap:8}}>
-    <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Reseau de Talents</h2>
+    <div style={{display:"flex",alignItems:"center",gap:8}}><h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Reseau de Talents</h2>{prestas.length>0&&<button onClick={tSelAll} style={{fontSize:10,color:tSelIds.size>0?"var(--gold)":"var(--text3)",fontFamily:"var(--mono)"}}>{tSelIds.size>0?tSelIds.size+" sel. — Deselect":"Tout select."}</button>}</div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
       <div className="qf">
         <button className={"qf-btn"+(tFilter==="all"?" active":"")} onClick={()=>setTFilter("all")}>Tous ({prestas.length})</button>
@@ -842,11 +848,12 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
       <button onClick={()=>{setEditP(null);setShowPF(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Prestataire</button>
     </div>
   </div>
-  {sorted.map((p,i)=>{const hc=heatCol(p.heat);
-  return <div key={p.id} className={"card talent-card fu"+(p.heat>=70?" hot":p.heat>=40?" warm":"")} style={{marginBottom:8,animationDelay:i*30+"ms",cursor:isA?"pointer":"default"}} onClick={()=>{if(isA){setEditP(p);setShowPF(true)}}}>
+  {sorted.map((p,i)=>{const hc=heatCol(p.heat);const isTSel=tSelIds.has(p.id);
+  return <div key={p.id} className={"card talent-card fu"+(p.heat>=70?" hot":p.heat>=40?" warm":"")} style={{marginBottom:8,animationDelay:i*30+"ms",cursor:isA?"pointer":"default",border:isTSel?"1px solid var(--gold)":""}}>
     <div style={{padding:"14px 18px",display:"flex",alignItems:"center",gap:14}}>
-      <div style={{width:48,height:48,borderRadius:12,background:hc+"12",border:"2px solid "+hc+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:700,color:hc,flexShrink:0,position:"relative"}}>{p.nom?p.nom[0]:"?"}<div style={{position:"absolute",bottom:-2,right:-2,fontSize:7,fontWeight:800,fontFamily:"var(--mono)",padding:"1px 4px",borderRadius:8,background:hc+"20",color:hc}}>{p.heat}</div></div>
-      <div style={{flex:1}}>
+      <input type="checkbox" className="chk" checked={isTSel} onChange={()=>toggleTSel(p.id)} onClick={e=>e.stopPropagation()} style={{flexShrink:0}}/>
+      <div onClick={()=>{if(isA){setEditP(p);setShowPF(true)}}} style={{width:48,height:48,borderRadius:12,background:hc+"12",border:"2px solid "+hc+"40",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,fontWeight:700,color:hc,flexShrink:0,position:"relative",cursor:isA?"pointer":"default"}}>{p.nom?p.nom[0]:"?"}<div style={{position:"absolute",bottom:-2,right:-2,fontSize:7,fontWeight:800,fontFamily:"var(--mono)",padding:"1px 4px",borderRadius:8,background:hc+"20",color:hc}}>{p.heat}</div></div>
+      <div style={{flex:1,cursor:isA?"pointer":"default"}} onClick={()=>{if(isA){setEditP(p);setShowPF(true)}}}>
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:3}}>
           <span style={{fontWeight:700,fontSize:14}}>{clientMode?anon(p.nom):p.nom}</span>
           <Badge type={p.heat>=70?"gold":p.heat>=40?"green":"ghost"}>{heatLab(p.heat)}</Badge>
@@ -878,6 +885,13 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
     </div>
   </div>})}
   {sorted.length===0&&<div style={{padding:50,textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-users" style={{fontSize:24,display:"block",marginBottom:8}}/> Aucun prestataire{tFilter!=="all"?" avec ce filtre":""}</div>}
+  {tSelIds.size>0&&<div className="bulk-bar">
+    <span className="bulk-cnt">{tSelIds.size} prestataire{tSelIds.size>1?"s":""}</span>
+    <div style={{height:16,width:1,background:"var(--border)"}}/>
+    <button className="bulk-btn" onClick={bulkDelPrestas} style={{borderColor:"rgba(231,76,76,.3)",color:"var(--red)"}}><i className="fa-solid fa-trash" style={{marginRight:3}}/>Supprimer la selection</button>
+    <div style={{flex:1}}/>
+    <button className="bulk-btn" onClick={()=>setTSelIds(new Set())}><i className="fa-solid fa-xmark" style={{marginRight:3}}/>Annuler</button>
+  </div>}
 </div>};
 
 /* ═══ AGENDA ═══ */
@@ -1208,7 +1222,7 @@ return <div className="rpanel">
       <div style={{fontSize:8,fontWeight:700,color:"var(--purple)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:8,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-bolt"/>AUTOMATISATIONS</div>
       <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
         <button onClick={()=>setScriptLead(l)} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:4,transition:"all .15s"}}><i className="fa-solid fa-phone-volume"/>Script d'Appel</button>
-        <WebhookBtn label="Renvoyer l'Audit" icon="fa-file-pdf" color="var(--red)" url="https://hook.eu1.make.com/6kuucg67yaizju2y188oifihvfj9hj3l" payload={{id:l.id,nom:l.nom,email:l.email,audit_score:l.auditScore,audit_pdf_link:l.auditPdfLink}} flash={flash}/>
+        <WebhookBtn label="Renvoyer l'Audit" icon="fa-file-pdf" color="var(--red)" url="https://hook.eu1.make.com/WEBHOOK_ACTION_PLACEHOLDER" payload={{id:l.id,nom:l.nom,email:l.email,audit_score:l.auditScore,audit_pdf_link:l.auditPdfLink}} flash={flash}/>
       </div>
     </div>
   </div>
@@ -1281,7 +1295,7 @@ return <button onClick={fire} disabled={st==="loading"} style={{padding:"7px 12p
 function ScriptModal({lead,onClose,flash}){
 const[script,setScript]=useState("");const[loading,setLoading]=useState(false);const[error,setError]=useState("");
 if(!lead)return null;
-const generate=async()=>{setLoading(true);setError("");setScript("");try{const r=await fetch("https://hook.eu1.make.com/fhwu71tf9cb1mb91cfrix3pvc910hgf6",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({entreprise:lead.nom,contact:lead.phone||lead.email||"",email:lead.email||"",service:lead.service,audit_score:lead.auditScore,audit_erreurs:lead.auditErreurs,linkedin_step:lead.linkedinStep,valeur:lead.valeur,status:lead.status})});if(!r.ok)throw new Error("Erreur "+r.status);const txt=await r.text();setScript(txt)}catch(e){setError((e.message||"Erreur").slice(0,120))}setLoading(false)};
+const generate=async()=>{setLoading(true);setError("");setScript("");try{const r=await fetch("https://hook.eu1.make.com/WEBHOOK_IA_PLACEHOLDER",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({entreprise:lead.nom,contact:lead.phone||lead.email||"",email:lead.email||"",service:lead.service,audit_score:lead.auditScore,audit_erreurs:lead.auditErreurs,linkedin_step:lead.linkedinStep,valeur:lead.valeur,status:lead.status})});if(!r.ok)throw new Error("Erreur "+r.status);const txt=await r.text();setScript(txt)}catch(e){setError((e.message||"Erreur").slice(0,120))}setLoading(false)};
 return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:600,maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
   <h3 style={{fontFamily:"var(--serif)",fontSize:17,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:20}}>📞</span> Script d'Appel</h3>
