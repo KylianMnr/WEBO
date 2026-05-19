@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management — Hub v25</title>
+<title>WEBO Asset Management — Hub v26</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -16,6 +16,14 @@
 --text:#F5F5F7;--text2:#9CA3AF;--text3:#5A6270;--text4:#3A4050;
 --serif:'Playfair Display',Georgia,serif;--sans:'Inter',-apple-system,sans-serif;--mono:'JetBrains Mono',monospace;
 --radius:8px;--glass:rgba(17,21,32,.78);
+}
+[data-theme="light"]{
+--bg:#F5F5F7;--bg2:#FFFFFF;--bg3:#F0F0F3;--bg4:#E6E6EA;--bg5:#DEDEE2;
+--border:#D8D8DC;--border2:#C0C0C5;
+--gold:#A07A38;--gold2:#B89248;--bordeaux:#7A1F1F;--bordeaux2:#A02828;--bordeaux-bg:#FFEEEE;
+--green:#067961;--red:#C73838;--blue:#1E54E0;--purple:#7045D0;
+--text:#1A1A1F;--text2:#4A4A52;--text3:#7A7A82;--text4:#A8A8B0;
+--glass:rgba(255,255,255,.85);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:400;min-height:100dvh;-webkit-font-smoothing:antialiased;font-size:13px;background-image:radial-gradient(circle at 20% 50%,rgba(197,160,89,.02) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(41,98,255,.02) 0%,transparent 50%)}
@@ -458,11 +466,13 @@ const[sess,setSess]=useState(()=>{try{return localStorage.getItem("webo_session"
 const[logId,setLogId]=useState("");const[logPw,setLogPw]=useState("");const[logErr,setLogErr]=useState("");
 const realAdmin=TEAM.find(t=>t.id===sess)?.isAdmin||false;const effSess=viewAs||sess;const isA=TEAM.find(t=>t.id===effSess)?.isAdmin||false;const sU=TEAM.find(t=>t.id===effSess);
 const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");
-const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("webo_gemini_key")||""}catch(e){return""}});const[claudeKey,setClaudeKey]=useState(()=>{try{return localStorage.getItem("webo_claude_key")||""}catch(e){return""}});const[aiProvider,setAiProvider]=useState(()=>{try{return localStorage.getItem("webo_ai_provider")||"gemini"}catch(e){return"gemini"}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
+const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("webo_theme")||"dark"}catch(e){return"dark"}});const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("webo_gemini_key")||""}catch(e){return""}});const[claudeKey,setClaudeKey]=useState(()=>{try{return localStorage.getItem("webo_claude_key")||""}catch(e){return""}});const[aiProvider,setAiProvider]=useState(()=>{try{return localStorage.getItem("webo_ai_provider")||"gemini"}catch(e){return"gemini"}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const gemini=async(prompt,search)=>{if(aiProvider==="claude"){if(!claudeKey)throw new Error("Cle API Claude manquante. Cliquez sur la cle dans la nav.");const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":claudeKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2000,messages:[{role:"user",content:prompt}]})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Claude "+r.status)}const d=await r.json();return(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||""}if(!apiKey)throw new Error("Cle API Gemini manquante. Cliquez sur la cle dans la nav.");const body={contents:[{parts:[{text:prompt}]}]};if(search)body.tools=[{google_search:{}}];const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Gemini "+r.status)}const d=await r.json();if(!d.candidates||!d.candidates[0]||!d.candidates[0].content)throw new Error("Reponse bloquee ou vide");return d.candidates[0].content.parts.map(p=>p.text||"").join("")};
 const geminiChat=async(msgs,sys)=>{const clean=msgs.filter(m=>m.content&&!m.content.startsWith("Erreur"));if(aiProvider==="claude"){if(!claudeKey)throw new Error("Cle API Claude manquante.");const cMsgs=clean.map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.content}));if(cMsgs.length===0)throw new Error("Aucun message");if(cMsgs[0].role!=="user")cMsgs.unshift({role:"user",content:sys||"Bonjour"});const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":claudeKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:2000,system:sys||"",messages:cMsgs})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Claude "+r.status)}const d=await r.json();return(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||""}if(!apiKey)throw new Error("Cle API Gemini manquante.");const contents=clean.map((m,i)=>({role:m.role==="assistant"?"model":"user",parts:[{text:i===0&&sys?(sys+"\n\n"+m.content):m.content}]}));if(contents.length===0)throw new Error("Aucun message");if(contents[0].role!=="user")contents.unshift({role:"user",parts:[{text:sys||"Bonjour"}]});const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key="+apiKey,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents:contents})});if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||"Erreur Gemini "+r.status)}const d=await r.json();if(d.candidates&&d.candidates[0]&&d.candidates[0].content)return d.candidates[0].content.parts.map(p=>p.text||"").join("");throw new Error("Reponse vide");};
 const[page,_setPage]=useState("hub");
 const setPage=useCallback(p=>{_setPage(p);setTimeout(()=>{const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0},0)},[]);const[pView,setPView]=useState("kanban");const[pipelineMode,setPipelineMode]=useState("prospection");
+const[tPage,setTPage]=useState(0);const[kMax,setKMax]=useState({});const[pSearch,setPSearch]=useState("");const[quickF,setQuickF]=useState("actifs");
+const[svcFilter,setSvcFilter]=useState("all");const[noteFilter,setNoteFilter]=useState("all");const[agView,setAgView]=useState("cal");
 const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
 const[dragOver,setDragOver]=useState(null);const[fM,setFM]=useState("all");const[sortBy,setSortBy]=useState("default");
 const[toast,setToast]=useState(null);const[showVerif,setShowVerif]=useState(null);
@@ -550,6 +560,7 @@ useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"}
 useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads").select("*").order("date_created",{ascending:false});setLeads((lr.data||[]).map(db2L));try{const pr=await sb.from("prestataires").select("*");setPrestas(pr.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
 useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
+useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem("webo_theme",theme)}catch(e){}},[theme]);
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="signe"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
 
 /* Computed */
@@ -626,6 +637,7 @@ const Nav=()=>(
     {realAdmin&&<select value={viewAs||sess} onChange={e=>{const v=e.target.value;setViewAs(v===sess?"":v)}} style={{padding:"4px 8px",borderRadius:"var(--radius)",border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:viewAs?"rgba(139,92,246,.08)":"var(--bg)",color:viewAs?"var(--purple)":"var(--text2)",fontSize:10,fontWeight:600,fontFamily:"var(--mono)"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name.split(" ")[0]}</option>)}</select>}
     <button className="nb" onClick={()=>setShowApiCfg(true)} title="Cle API" style={{color:((aiProvider==="claude"&&claudeKey)||(aiProvider==="gemini"&&apiKey))?"var(--green)":"var(--red)"}}><i className="fa-solid fa-key"/></button>
     <button className="nb" onClick={()=>setPrivacy(p=>!p)} style={{color:privacy?"var(--red)":"var(--text2)"}}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")}/></button>
+    <button className="nb" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} title={theme==="dark"?"Mode clair":"Mode sombre"}><i className={"fa-solid "+(theme==="dark"?"fa-sun":"fa-moon")} style={{color:theme==="dark"?"#FBBF24":"#6366f1"}}/></button>
     <button className="nb" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓")}}><i className="fa-solid fa-cloud-arrow-down"/></button>
     <div style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:"var(--radius)",border:"1px solid var(--border)"}}><Av id={effSess} sz={22}/><span style={{fontSize:11,fontWeight:600,color:sU?.color}}>{mN(effSess)}</span>{viewAs&&<span style={{fontSize:8,color:"var(--purple)",fontFamily:"var(--mono)"}}>VUE</span>}<span style={{fontSize:9,color:"var(--text3)"}}>{sU?.role}</span><span className={"sync-dot "+sync}/></div>
     <button className="nb" onClick={()=>{setSess("");try{localStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--text3)"}}><i className="fa-solid fa-power-off"/></button>
@@ -710,10 +722,8 @@ return(
 
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
-const[tPage,setTPage]=useState(0);const PER=50;const[kMax,setKMax]=useState({});const KPER=15;
-const[pSearch,setPSearch]=useState("");
-const[quickF,setQuickF]=useState("actifs");
-const quickFiltered=useMemo(()=>{let base=filt;if(quickF==="relancer")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3));else if(quickF==="dormants")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=72);else if(quickF==="actifs")base=base.filter(l=>!["signe","injoignable"].includes(l.status));else if(quickF==="urgEaa")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&l.auditScore!==""&&l.auditScore!=null&&Number(l.auditScore)<50);else if(quickF==="aRelancer")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&l.nextRelance&&dU(l.nextRelance)<=0);else if(quickF==="seqActive")base=base.filter(l=>l.linkedinCampaign===true);return base},[filt,quickF,now]);
+const PER=50;const KPER=15;
+const quickFiltered=useMemo(()=>{let base=filt;if(quickF==="relancer")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3));else if(quickF==="dormants")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=72);else if(quickF==="actifs")base=base.filter(l=>!["signe","injoignable"].includes(l.status));else if(quickF==="urgEaa")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&l.auditScore!==""&&l.auditScore!=null&&Number(l.auditScore)<50);else if(quickF==="aRelancer")base=base.filter(l=>!["signe","injoignable"].includes(l.status)&&l.nextRelance&&dU(l.nextRelance)<=0);else if(quickF==="seqActive")base=base.filter(l=>l.linkedinCampaign===true);if(svcFilter!=="all")base=base.filter(l=>l.service===svcFilter);if(noteFilter==="with")base=base.filter(l=>(l.notes&&l.notes.trim())||(l.timeline&&l.timeline.length>0));else if(noteFilter==="without")base=base.filter(l=>!(l.notes&&l.notes.trim())&&!(l.timeline&&l.timeline.length>0));return base},[filt,quickF,svcFilter,noteFilter,now]);
 const psFilt=useMemo(()=>{if(!pSearch)return quickFiltered;const q=pSearch.toLowerCase();return quickFiltered.filter(l=>l.nom.toLowerCase().includes(q)||l.service.toLowerCase().includes(q)||(l.email||"").toLowerCase().includes(q)||(l.phone||"").includes(q)||(l.notes||"").toLowerCase().includes(q))},[quickFiltered,pSearch]);
 const qCounts=useMemo(()=>{const a=filt.filter(l=>!["signe","injoignable"].includes(l.status)).length;const r=filt.filter(l=>!["signe","injoignable"].includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3)).length;const d=filt.filter(l=>!["signe","injoignable"].includes(l.status)&&hA(l.lastInteraction)>=72).length;const uEaa=filt.filter(l=>!["signe","injoignable"].includes(l.status)&&l.auditScore!==""&&l.auditScore!=null&&Number(l.auditScore)<50).length;const aRel=filt.filter(l=>!["signe","injoignable"].includes(l.status)&&l.nextRelance&&dU(l.nextRelance)<=0).length;const seqA=filt.filter(l=>l.linkedinCampaign===true).length;return{actifs:a,relancer:r,dormants:d,tous:filt.length,urgEaa:uEaa,aRelancer:aRel,seqActive:seqA}},[filt,now]);
 return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,gap:10}}>
@@ -731,6 +741,8 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
       {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="all">Equipe</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)}</option>)}</select>}
       <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="default">Tri</option><option value="valeur">Valeur</option><option value="date">Date</option></select>
       <div style={{display:"flex",alignItems:"center",gap:3,background:"var(--bg3)",borderRadius:6,padding:"3px 8px"}}><i className="fa-solid fa-search" style={{color:"var(--text4)",fontSize:9}}/><input value={pSearch} onChange={e=>{setPSearch(e.target.value);setTPage(0)}} placeholder="Rechercher..." style={{background:"transparent",border:"none",color:"var(--text)",fontSize:11,outline:"none",width:120,padding:"2px 0"}}/>{pSearch&&<button onClick={()=>setPSearch("")} style={{color:"var(--text3)",fontSize:9,lineHeight:1}}><i className="fa-solid fa-xmark"/></button>}</div>
+      <select value={svcFilter} onChange={e=>{setSvcFilter(e.target.value);setTPage(0)}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:svcFilter!=="all"?"var(--gold)":"var(--border)"}}><option value="all">📁 Tous services</option>{SERVICES.map(s=><option key={s} value={s}>{s}</option>)}</select>
+      <select value={noteFilter} onChange={e=>{setNoteFilter(e.target.value);setTPage(0)}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:noteFilter!=="all"?"var(--gold)":"var(--border)"}}><option value="all">📝 Notes</option><option value="with">Avec notes</option><option value="without">Sans notes</option></select>
       {pView==="table"&&<button onClick={exportLeads} style={{padding:"4px 8px",borderRadius:6,border:"1px solid var(--border)",color:"var(--text3)",fontSize:9}}><i className="fa-solid fa-file-csv"/></button>}
       <button onClick={()=>{setEditId(null);setShowForm(true)}} style={{padding:"6px 14px",borderRadius:8,background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Lead</button>
     </div>
@@ -882,7 +894,6 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
 
 /* ═══ AGENDA ═══ */
 const Agenda=()=>{
-const[agView,setAgView]=useState("cal");
 const todayEvts=useMemo(()=>agDays.find(d=>d.isToday)?.evts||[],[agDays]);
 return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12,flexWrap:"wrap",gap:8}}>
@@ -1076,8 +1087,8 @@ const Finance=()=>(
   </div></div>
 </div>);
 
-/* ═══ IA ═══ */
-const IA=()=>(
+/* ═══ IA — Inline JSX (not component function) to prevent remount/focus loss ═══ */
+const iaUI=(
 <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
   <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:10}}>Agent IA Stratégique</h2>
   <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:4,marginBottom:8}}>
@@ -1091,10 +1102,7 @@ const IA=()=>(
       {aiLoad&&<div style={{padding:10,color:"var(--text3)"}}><i className="fa-solid fa-spinner fa-spin"/> Analyse…</div>}
       <div ref={aiRef}/>
     </div>
-    <div style={{padding:8,borderTop:"1px solid var(--border)",display:"flex",gap:4}}>
-      <input value={aiIn} onChange={e=>setAiIn(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&aiIn.trim()&&!aiLoad)askAI(aiIn.trim())}} placeholder="Question…" style={{...IS,flex:1}}/>
-      <button onClick={()=>{if(aiIn.trim()&&!aiLoad)askAI(aiIn.trim())}} style={{padding:"10px 16px",borderRadius:"var(--radius)",background:aiLoad?"var(--bg3)":"var(--gold)",color:aiLoad?"var(--text3)":"var(--bg)",fontSize:14,fontWeight:700}}>{aiLoad?"…":"→"}</button>
-    </div>
+    <AIInputBar onSend={(t)=>askAI(t)} loading={aiLoad}/>
   </div>
 </div>);
 
@@ -1153,6 +1161,25 @@ return <div className="rpanel">
     <div style={{marginBottom:12}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:4}}>SCORE DE SANTÉ</div>
     <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:22,fontWeight:800,fontFamily:"var(--mono)",color:hCol(hs)}}>{hs}</span><div style={{flex:1}}><Prog pct={hs} color={hCol(hs)}/></div><Badge type={hs>=60?"green":hs>=40?"gold":"red"}>{hLab(hs)}</Badge></div></div>
     <div className="sep"/>
+    {/* ═══ NOTES PROMINENT BLOCK ═══ */}
+    {((l.timeline&&l.timeline.length>0)||(l.notes&&l.notes.trim()))&&<div style={{background:"linear-gradient(135deg,rgba(197,160,89,.08),rgba(139,92,246,.04))",border:"1px solid rgba(197,160,89,.2)",borderRadius:10,padding:12,marginBottom:12,position:"relative"}}>
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+        <i className="fa-solid fa-note-sticky" style={{color:"var(--gold)",fontSize:14}}/>
+        <span style={{fontSize:10,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5}}>OÙ J'EN SUIS</span>
+        <button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{marginLeft:"auto",fontSize:9,color:"var(--gold)",fontWeight:600}}><i className="fa-solid fa-pen-to-square" style={{marginRight:3}}/>Éditer</button>
+      </div>
+      {l.timeline&&l.timeline.length>0&&<div style={{marginBottom:l.notes?10:0}}>
+        {l.timeline.slice(0,3).map((e,i)=>{const d=new Date(e.date);const ds=d.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"});const ts=d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});return <div key={i} style={{padding:"6px 0",borderBottom:i<Math.min(2,l.timeline.length-1)?"1px solid rgba(197,160,89,.1)":"none"}}>
+          <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:2}}><span style={{fontSize:9,fontFamily:"var(--mono)",color:i===0?"var(--gold)":"var(--text3)",fontWeight:i===0?700:400}}>{ds} {ts}</span>{i===0&&<span style={{fontSize:7,fontWeight:700,color:"var(--gold)",background:"rgba(197,160,89,.15)",padding:"1px 5px",borderRadius:8,fontFamily:"var(--mono)"}}>DERNIER</span>}</div>
+          <div style={{fontSize:12,color:"var(--text)",lineHeight:1.6,fontWeight:i===0?500:400}}>{e.texte}</div>
+        </div>})}
+        {l.timeline.length>3&&<div style={{textAlign:"center",fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginTop:4}}>+{l.timeline.length-3} entrée(s) plus ancienne(s)</div>}
+      </div>}
+      {l.notes&&l.notes.trim()&&<div style={{background:"var(--bg)",borderRadius:6,padding:8,border:"1px solid var(--border)"}}>
+        <div style={{fontSize:8,fontWeight:700,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,marginBottom:3}}>NOTES LIBRES</div>
+        <div style={{fontSize:12,color:"var(--text)",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{l.notes}</div>
+      </div>}
+    </div>}
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
       <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></div></div>
       <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><SBadge status={l.status}/>{l.prodStatus&&l.prodStatus!=="a_auditer"&&<div style={{marginTop:3,fontSize:9,color:"var(--purple)",fontFamily:"var(--mono)"}}><i className="fa-solid fa-gears" style={{marginRight:3}}/>{PROD_COLS.find(p=>p.id===l.prodStatus)?.label}</div>}</div>
@@ -1185,7 +1212,9 @@ return <div className="rpanel">
     <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-location-dot" style={{width:14}}/> {l.adresse?<a href={"https://maps.google.com/?q="+encodeURIComponent(l.adresse)} target="_blank" rel="noopener" style={{color:"var(--text2)",textDecoration:"none"}}>{l.adresse}</a>:"—"}</div>
     <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-user" style={{width:14}}/> <span style={{color:mC(l.memberId)}}>{mN(l.memberId)}</span> · {TEAM.find(t=>t.id===l.memberId)?.role} · {l.source}</div>
     {l.prestaId&&<div style={{fontSize:10,color:"var(--gold)",marginBottom:3}}><i className="fa-solid fa-handshake" style={{width:14}}/> {pN(l.prestaId)}</div>}
-    {l.notes&&<div style={{fontSize:10,color:"var(--text2)",background:"var(--bg)",borderRadius:6,padding:6,marginTop:6}}>{l.notes}</div>}
+
+    {/* Quick note input */}
+    <QuickNote lead={l} onAdd={(text)=>{const entry={date:new Date().toISOString(),texte:text};const newTl=[entry,...(l.timeline||[])];upd(l.id,{timeline:newTl});flash("Note ajoutee")}}/>
     {l.activityLog&&<div style={{marginTop:8}}><div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>HISTORIQUE</div><div className="tl" style={{maxHeight:120,overflowY:"auto"}}>{l.activityLog.split("\n").filter(Boolean).slice(0,8).map((e,i)=>{const p=e.split("—");return <div key={i} className="tl-item" style={{padding:"3px 0"}}><div className="tl-dot" style={{background:e.includes(">")||e.includes("Bulk")?"var(--blue)":e.includes("Cree")?"var(--green)":"var(--text3)"}}/><div className="tl-time">{p[0]}</div><div style={{fontSize:10,color:"var(--text2)"}}>{p.slice(1).join("—")}</div></div>})}</div></div>}
     <div className="sep"/>
     <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:8}}>
@@ -1224,7 +1253,7 @@ return (
     {page==="pipeline"&&<Pipeline/>}
     {page==="agenda"&&<Agenda/>}
     {page==="finance"&&<Finance/>}
-    {page==="ia"&&<IA/>}
+    {page==="ia"&&iaUI}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
   {/* CMD */}
@@ -1426,6 +1455,28 @@ return <div><div style={{display:"flex",justifyContent:"space-between",marginBot
   <button onClick={onX} style={{padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
   <button onClick={()=>{if(!f.nom.trim())return;onSave({...f,id:f.id||uid(),_isNew:!f.id})}} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:13,fontWeight:700}}>{presta?"Enregistrer":"Ajouter"}</button>
 </div></div>}
+
+/* V26 — AI Input Bar (module-scope = stable component, no remount, no focus loss) */
+function AIInputBar({onSend,loading}){
+const[val,setVal]=useState("");
+const send=()=>{const t=val.trim();if(t&&!loading){onSend(t);setVal("")}};
+const IS2={flex:1,padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",fontFamily:"var(--sans)"};
+return <div style={{padding:8,borderTop:"1px solid var(--border)",display:"flex",gap:4}}>
+  <input style={IS2} value={val} onChange={e=>setVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}} placeholder="Question..." autoFocus/>
+  <button onClick={send} disabled={loading||!val.trim()} style={{padding:"10px 16px",borderRadius:"var(--radius)",background:(loading||!val.trim())?"var(--bg3)":"var(--gold)",color:(loading||!val.trim())?"var(--text3)":"var(--bg)",fontSize:14,fontWeight:700}}>{loading?"...":"→"}</button>
+</div>}
+
+/* V26 — Quick Note Component (module-scope for stable reference) */
+function QuickNote({lead,onAdd}){
+const[txt,setTxt]=useState("");
+const IS={width:"100%",padding:"8px 10px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:12,outline:"none",fontFamily:"var(--sans)"};
+return <div style={{marginTop:10,padding:10,background:"rgba(197,160,89,.04)",borderRadius:8,border:"1px dashed rgba(197,160,89,.2)"}}>
+  <div style={{fontSize:8,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.2,marginBottom:5}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>NOUVELLE NOTE</div>
+  <div style={{display:"flex",gap:4}}>
+    <input style={IS} value={txt} onChange={e=>setTxt(e.target.value)} placeholder="Tape ta note..." onKeyDown={e=>{if(e.key==="Enter"&&txt.trim()){onAdd(txt.trim());setTxt("")}}}/>
+    <button onClick={()=>{if(txt.trim()){onAdd(txt.trim());setTxt("")}}} style={{padding:"8px 14px",borderRadius:6,background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}>Ajouter</button>
+  </div>
+</div>}
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
