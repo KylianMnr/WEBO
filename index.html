@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO Asset Management — Hub v27</title>
+<title>WEBO Asset Management — Hub v28</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -554,6 +554,44 @@ const bulkDelLeads=async()=>{if(!confirm("Supprimer "+selIds.size+" lead(s) ? Ce
 const toggleTSel=id=>setTSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
 const tSelAll=()=>{const ids=prestas.map(p=>p.id);setTSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
 const bulkDelPrestas=async()=>{if(!confirm("Supprimer "+tSelIds.size+" prestataire(s) ? Irreversible."))return;const ids=[...tSelIds];for(const id of ids){setPrestas(p=>p.filter(x=>x.id!==id));await sb.from("prestataires").delete().eq("id",id)}setTSelIds(new Set());flash(ids.length+" supprime(s)");addActivity(sess,"a supprime",ids.length+" prestas","var(--red)")};
+
+/* V28 — COLD MAIL EAA : tracking automatique après envoi */
+const onColdMailSent=useCallback(async(lead,objet)=>{
+  const stamp=new Date().toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"});
+  const entry=stamp+"—📧 Cold Mail EAA envoyé"+(objet?" ("+objet.slice(0,40)+"...)":"")+" par "+mN(sess);
+  const newLog=lead.activityLog?(entry+"\n"+lead.activityLog):entry;
+  const newTl=[{date:new Date().toISOString(),texte:"📧 Cold Mail EAA — "+(objet||"envoyé")},...(lead.timeline||[])];
+  const newStatus=lead.status==="identifier"?"contact_std":lead.status;
+  const tents=(lead.tentatives||0)+1;
+  const nowIso=new Date().toISOString();
+  setLeads(p=>p.map(x=>x.id===lead.id?{...x,activityLog:newLog,timeline:newTl,status:newStatus,lastInteraction:nowIso,tentatives:tents}:x));
+  await sb.from("leads").update({activity_log:newLog,timeline:newTl,status:newStatus,last_interaction:nowIso,tentatives:tents}).eq("id",lead.id);
+  addNotif("fa-envelope-open-text","#E88","Cold Mail envoyé à "+lead.nom,lead.id);
+  addActivity(sess,"📧 cold mail",lead.nom,"#E88");
+  flash("Tracking OK ✓");
+},[sess,leads]);
+
+/* V28 — COLD MAIL EAA : génération IA */
+const aiGenColdMail=useCallback(async(lead,persona)=>{
+  const ctx="Entreprise cible : "+lead.nom+"\nService proposé : "+lead.service+(lead.adresse?"\nLocalisation : "+lead.adresse:"")+(lead.auditScore?"\nScore audit accessibilité : "+lead.auditScore+"/100":"")+(lead.auditErreurs?"\nErreurs critiques détectées : "+lead.auditErreurs:"")+(lead.cms&&lead.cms!=="—"?"\nCMS utilisé : "+lead.cms:"")+(lead.notes?"\nNotes prospecteur : "+lead.notes.slice(0,300):"");
+  const personas={
+    direct:"DIRECT / SANCTIONS : ton ferme et factuel, appuie sur le risque légal (loi 28 juin 2025, EAA, RGAA, sanctions Arcom jusqu'à 250 000€), création d'urgence",
+    pedago:"PÉDAGOGIQUE / SOFT : ton bienveillant, vulgarise l'enjeu accessibilité numérique, met en lumière l'opportunité d'inclusion (12M de personnes en situation de handicap en France), pas de menace",
+    roi:"ROI / BUSINESS : ton entrepreneurial, parle perte de clients (15% de marché inaccessible), impact SEO Google, image de marque, conversion. Chiffres et bénéfices business."
+  };
+  const prompt="Tu es expert en cold email B2B FR pour WEBO Asset Management, agence de mise en conformité European Accessibility Act (EAA).\n\nCONTEXTE OBLIGATOIRE :\n- Loi française du 28 juin 2025 : sites e-commerce + services publics doivent être accessibles (norme RGAA/EAA)\n- S'applique aux entreprises >2M€ CA ou >10 salariés\n- Sanctions Arcom : jusqu'à 250 000€ par manquement\n- WEBO propose : audit accessibilité, mise en conformité, certification\n\nCIBLE :\n"+ctx+"\n\nSTYLE DEMANDÉ : "+personas[persona]+"\n\nMISSION : Rédige un cold email FR percutant de 120 à 150 mots MAX, structuré ainsi :\n1) Accroche personnalisée (référence à l'entreprise, son secteur ou son site)\n2) Mise en lumière du risque/opportunité spécifique EAA\n3) Une preuve de crédibilité WEBO en 1 phrase\n4) Appel à action clair (RDV 15min audit gratuit)\n\nSignature : Kylian Meunier — WEBO Asset Management\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet doit faire 40-60 caractères, accrocheur, sans emoji.\nLe body utilise \\n pour les retours à la ligne.";
+  const raw=await gemini(prompt,false);
+  let cleaned=raw.trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
+  const m=cleaned.match(/\{[\s\S]*\}/);
+  if(m)cleaned=m[0];
+  try{
+    const parsed=JSON.parse(cleaned);
+    if(!parsed.objet||!parsed.body)throw new Error("JSON incomplet");
+    return parsed;
+  }catch(e){
+    throw new Error("Format IA invalide : "+(cleaned.slice(0,80)));
+  }
+},[aiProvider,apiKey,claudeKey]);
 
 /* V13 — DATA ENRICHMENT via Claude API */
 const enrichLead=async(lead)=>{if(enrichLoading)return;setEnrichLoading(lead.id);try{const txt=await gemini("Recherche des informations sur cette entreprise/personne pour un courtier d affaires. Entreprise: "+lead.nom+". Secteur: "+lead.service+". Notes existantes: "+(lead.notes||"aucune")+". Donne-moi en francais: 1) Actu recente du secteur ou de l entreprise 2) Un angle d approche commercial percutant 3) Un sujet de conversation pour ouvrir l appel. Sois concret et actionnable, max 150 mots.",true)||"Pas de donnees";setEnrichData(p=>({...p,[lead.id]:{text:txt,date:td()}}));flash("Intel "+lead.nom+" OK");addActivity(sess,"a enrichi",lead.nom,"var(--blue)")}catch(e){setEnrichData(p=>({...p,[lead.id]:{text:"Erreur de recherche. Verifiez la connexion.",date:td()}}));flash("Erreur: "+(e.message||"").slice(0,50))}setEnrichLoading(null)};
@@ -1245,7 +1283,7 @@ return <div className="rpanel">
       <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"6px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/> WhatsApp</button>
       <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-copy"/> Template</button>
       <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé+2 actions.")}} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10}}><i className="fa-solid fa-robot"/> IA</button>
-      <button onClick={()=>setOutreachPresta(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(107,26,26,.4)",color:"#E88",fontSize:10,display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope-open-text"/> Cold Mail</button>
+      <button onClick={()=>setOutreachLead(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(107,26,26,.4)",color:"#E88",fontSize:10,display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope-open-text"/> Cold Mail EAA</button>
       <WebhookBtn label="Générer Devis EAA" icon="fa-file-invoice-dollar" color="var(--gold)" url="https://hook.eu1.make.com/webo-devis-eaa" payload={{id:l.id,nom:l.nom,email:l.email,phone:l.phone,adresse:l.adresse,service:l.service,valeur:l.valeur,audit_score:l.auditScore,audit_erreurs:l.auditErreurs,cms:l.cms,prod_status:l.prodStatus,linkedin_url:l.linkedinUrl}} flash={flash}/>
       <WebhookBtn label="⚠️ Alerte Arcom" icon="fa-triangle-exclamation" color="var(--red)" url="https://hook.eu1.make.com/webo-alerte-arcom" payload={{id:l.id,nom:l.nom,email:l.email,phone:l.phone,audit_score:l.auditScore,sender:"Johanna",date:new Date().toISOString()}} flash={flash}/>
       <button className={"enrich-btn"+(enrichLoading===l.id?" loading":"")} onClick={()=>enrichLead(l)}><i className={"fa-solid "+(enrichLoading===l.id?"fa-spinner fa-spin":"fa-satellite-dish")}/> {enrichLoading===l.id?"Recherche...":"Enrichir"}</button>
@@ -1314,37 +1352,178 @@ return (
 {apiTestRes&&apiTestRes.state!=="loading"&&<div style={{marginTop:8,padding:"8px 12px",borderRadius:6,background:apiTestRes.state==="ok"?"rgba(8,153,129,.06)":"rgba(231,76,76,.06)",border:"1px solid "+(apiTestRes.state==="ok"?"rgba(8,153,129,.15)":"rgba(231,76,76,.15)"),fontSize:11,color:apiTestRes.state==="ok"?"var(--green)":"var(--red)"}}><i className={"fa-solid "+(apiTestRes.state==="ok"?"fa-check-circle":"fa-triangle-exclamation")} style={{marginRight:4}}/>{apiTestRes.msg}</div>}
 </div></div>}
   {showRapport&&rapportData&&<div className="overlay" onClick={()=>setShowRapport(false)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:500}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}>Rapport Hebdo</h3><button onClick={()=>setShowRapport(false)} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:10}}>{[{l:"Leads sem.",v:rapportData.wL,c:"var(--blue)"},{l:"Signes sem.",v:rapportData.wS,c:"var(--green)"},{l:"CA sem.",v:E(rapportData.wCA),c:"var(--green)"},{l:"Pipeline",v:rapportData.pipe,c:"var(--gold)"},{l:"Encaisse",v:E(rapportData.enc),c:"var(--green)"},{l:"Urgents",v:rapportData.urg,c:"var(--red)"}].map((s,i)=><div key={i} style={{background:"var(--bg)",borderRadius:6,padding:6,textAlign:"center"}}><div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:15,fontWeight:700,fontFamily:"var(--mono)",color:s.c}}>{s.v}</div></div>)}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--gold)"}}>Top:</strong> {rapportData.topPerf}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--green)"}}>Cash:</strong> {E(rapportData.enc)} / {E(rapportData.theo)} ({rapportData.theo>0?Math.round(rapportData.enc/rapportData.theo*100):0}%)</div>{rapportData.stale>0&&<div style={{fontSize:12,color:"var(--red)"}}>Dormants: {rapportData.stale}</div>}<div className="sep"/><div style={{display:"flex",gap:4,justifyContent:"flex-end"}}><button onClick={()=>{cp("RAPPORT WEBO "+rapportData.date+": "+rapportData.wL+" leads, "+rapportData.wS+" signes, Pipeline "+rapportData.pipe+", Cash "+E(rapportData.enc)+"/"+E(rapportData.theo),flash)}} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Copier</button><button onClick={()=>{askAI("Rapport hebdo: "+rapportData.wL+" leads, "+rapportData.wS+" signes, "+rapportData.stale+" dormants, cash "+E(rapportData.enc)+"/"+E(rapportData.theo)+". 3 actions.");setShowRapport(false);setPage("ia")}} style={{padding:"7px 12px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}>IA</button></div></div></div>}
-  {outreachPresta&&<OutreachModal target={outreachPresta} onClose={()=>setOutreachPresta(null)} flash={flash}/>}
+  {outreachPresta&&<OutreachModal target={outreachPresta} type="presta" onClose={()=>setOutreachPresta(null)} flash={flash}/>}
+  {outreachLead&&<OutreachModal target={outreachLead} type="lead" onClose={()=>setOutreachLead(null)} flash={flash} aiGen={aiGenColdMail} onSent={onColdMailSent} prospecteurName={mN(sess)}/>}
   {scriptLead&&<ScriptModal lead={scriptLead} onClose={()=>setScriptLead(null)} flash={flash}/>}
   <button onClick={()=>setPage("ia")} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
 }
 
-/* ═══ SMART OUTREACH ═══ */
-function OutreachModal({target,onClose,flash}){
+/* ═══ COLD MAIL EAA v28 ═══ */
+const COLD_PERSONAS=[
+{id:"direct",label:"Direct / Sanctions",icon:"fa-triangle-exclamation",color:"#E74C4C",desc:"Risque légal Arcom 250k€"},
+{id:"pedago",label:"Pédagogique / Soft",icon:"fa-hand-holding-heart",color:"#089981",desc:"Inclusion 12M personnes"},
+{id:"roi",label:"ROI / Business",icon:"fa-chart-line",color:"#C5A059",desc:"Perte clients + SEO"}
+];
+
+const COLD_TPL_LEAD={
+direct:{
+  objet:"Conformité EAA — Sanctions Arcom à partir du 28 juin 2025",
+  body:"Bonjour [N],\n\nDepuis le 28 juin 2025, la loi française rend l'accessibilité numérique (RGAA/EAA) obligatoire pour tout site e-commerce ou service en ligne d'entreprise > 2M€ CA ou > 10 salariés.\n\nLes sanctions Arcom peuvent atteindre 250 000 € par manquement, et [E] entre dans le périmètre.\n\nChez WEBO Asset Management, nous accompagnons les entreprises dans leur mise en conformité [S] : audit complet, plan de remédiation et certification.\n\nUn audit gratuit de votre site de 15 minutes vous permettrait de mesurer immédiatement votre exposition au risque.\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nWEBO Asset Management"
+},
+pedago:{
+  objet:"Rendre [E] accessible aux 12 millions de Français en situation de handicap",
+  body:"Bonjour [N],\n\n12 millions de personnes en France vivent avec un handicap qui rend leur navigation difficile sur la plupart des sites web. Pourtant, l'accessibilité numérique est non seulement une obligation légale (loi du 28 juin 2025), mais aussi une formidable opportunité d'inclusion.\n\nChez WEBO Asset Management, nous aidons les entreprises comme [E] à concevoir des expériences numériques accessibles à tous, en mettant en place [S].\n\nNous proposons un audit gratuit de 15 minutes pour identifier vos premiers leviers d'amélioration.\n\nSeriez-vous disponible pour en discuter cette semaine ?\n\nBien cordialement,\nKylian Meunier\nWEBO Asset Management"
+},
+roi:{
+  objet:"15% de marché en moins : ce que coûte un site non-conforme EAA",
+  body:"Bonjour [N],\n\nUn site non-conforme à l'European Accessibility Act ferme aujourd'hui la porte à environ 15% du marché français — soit 12 millions de clients potentiels que vos concurrents capteront avant vous.\n\nÀ cela s'ajoutent un déclassement progressif sur Google (les Core Web Vitals intègrent désormais l'accessibilité) et une exposition aux sanctions Arcom jusqu'à 250 000 €.\n\nChez WEBO Asset Management, nous accompagnons les entreprises ambitieuses comme [E] sur leur [S] avec un ROI mesurable.\n\nUn diagnostic stratégique de 15 minutes vous permettrait d'évaluer le coût d'opportunité actuel pour [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nWEBO Asset Management"
+}
+};
+
+const COLD_TPL_PRESTA={
+objet:"Partenariat WEBO — Mise en conformité EAA & accessibilité numérique",
+body:"Bonjour [N],\n\nJe me permets de vous contacter car votre profil [SPEC] correspond précisément à ce que nous recherchons chez WEBO Asset Management.\n\nSuite à la loi française du 28 juin 2025, le marché de la mise en conformité EAA (European Accessibility Act) est en pleine explosion. Nous accompagnons aujourd'hui un volume croissant d'entreprises soumises à cette obligation.\n\nNous construisons un réseau de partenaires de confiance pour intervenir sur audits, remédiations et certifications. Notre modèle : commission attractive (50% de notre marge prospecteur), missions récurrentes et accompagnement opérationnel WEBO.\n\nSeriez-vous ouvert à un échange de 15 minutes pour explorer cette collaboration ?\n\nBien cordialement,\nKylian Meunier\nWEBO Asset Management"
+};
+
+const renderTpl=(t,target,prosp)=>{
+const n=(target.nom||"").split(" ")[0]||"";
+const e=target.nom||"";
+const s=target.service||target.specialite||"mise en conformité EAA";
+const sp=target.specialite||"";
+return{
+  objet:(t.objet||"").replace(/\[N\]/g,n).replace(/\[E\]/g,e).replace(/\[S\]/g,s).replace(/\[SPEC\]/g,sp).replace(/\[P\]/g,prosp||"WEBO"),
+  body:(t.body||"").replace(/\[N\]/g,n).replace(/\[E\]/g,e).replace(/\[S\]/g,s).replace(/\[SPEC\]/g,sp).replace(/\[P\]/g,prosp||"WEBO")
+};
+};
+
+function OutreachModal({target,type,onClose,flash,aiGen,onSent,prospecteurName}){
+const isLead=type==="lead";
+const[persona,setPersona]=useState("direct");
+const[objet,setObjet]=useState("");
+const[body,setBody]=useState("");
+const[aiLoading,setAiLoading]=useState(false);
+const[aiError,setAiError]=useState("");
 const[sent,setSent]=useState(false);
-const prenom=target?.nom?target.nom.split(" ")[0]:"";
-const entreprise=target?.nom||target?.name||"";
+const[edited,setEdited]=useState(false);
+
+useEffect(()=>{
+  if(!target)return;
+  const baseTpl=isLead?COLD_TPL_LEAD[persona]:COLD_TPL_PRESTA;
+  const r=renderTpl(baseTpl,target,prospecteurName||"Kylian");
+  setObjet(r.objet);
+  setBody(r.body);
+  setEdited(false);
+  setSent(false);
+  setAiError("");
+},[persona,target,isLead,prospecteurName]);
+
 const email=target?.email||"";
-const mailObj="Accélération de votre marché : Sécuriser la trajectoire de "+entreprise;
-const mailBody="Bonjour, "+prenom+"\n\nL'accélération de votre marché impose aujourd'hui une vélocité impitoyable. À votre stade de croissance, le moindre grain de sable dans l'exécution de vos projets digitaux impacte directement votre rentabilité.\n\nChez WEBO, nous concevons des dispositifs tactiques pour garantir votre expertise autour de trois leviers de développement majeurs :\n\nL'intégration d'agents IA : (ex : Setters, téléphoniques, support client...) pour automatiser votre relation client, qualifier vos leads à la volée et absorber vos flux d'appels sans aucune friction.\n\nLa refonte et création Web : qui ne sont plus une simple option aujourd'hui, mais un véritable levier de développement.\n\nLa stratégie Réseaux Sociaux : pour capitaliser sur un canal d'acquisition extrêmement puissant, mais paradoxalement très mal exploité par la majorité des acteurs de votre secteur.\n\nL'objectif n'est pas de vous livrer une simple prestation technique, mais d'implémenter ces moteurs d'acquisition pour accélérer votre tunnel de revenus et sécuriser vos objectifs du trimestre.\n\nSeriez-vous ouvert à un diagnostic stratégique de 10 minutes pour échanger et évaluer le potentiel de ces leviers chez vous ?\n\nBien à vous,\nKylian Meunier\nDirecteur de WEBO";
-const mailto="mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent(mailObj)+"&body="+encodeURIComponent(mailBody);
-const gmailUrl="https://mail.google.com/mail/?view=cm&to="+encodeURIComponent(email)+"&su="+encodeURIComponent(mailObj)+"&body="+encodeURIComponent(mailBody);
-return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:640,maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:17}}><i className="fa-solid fa-envelope-open-text" style={{color:"var(--gold)",marginRight:6}}/>Cold Email</h3><button onClick={onClose} style={{color:"var(--text3)",fontSize:14}}><i className="fa-solid fa-xmark"/></button></div>
-<div style={{display:"flex",gap:8,marginBottom:10,padding:10,background:"var(--bg)",borderRadius:"var(--radius)",alignItems:"center"}}><div style={{width:38,height:38,borderRadius:10,background:"rgba(197,160,89,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:"var(--gold)",fontSize:16,flexShrink:0}}>{prenom?prenom[0]:"?"}</div><div style={{flex:1,minWidth:0}}><div style={{fontWeight:700,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{entreprise}</div><div style={{fontSize:11,color:"var(--text2)"}}>{email||"Pas d email"}{target?.service?" | "+target.service:""}</div></div></div>
-<div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:4}}>OBJET</div>
-<div style={{fontSize:12,fontWeight:600,marginBottom:10,padding:8,background:"var(--bg)",borderRadius:6,border:"1px solid var(--border)"}}>{mailObj}</div>
-<div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:4}}>CORPS DU MAIL</div>
-<div style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:"var(--radius)",padding:12,fontSize:12,color:"var(--text2)",lineHeight:1.8,whiteSpace:"pre-wrap",maxHeight:280,overflowY:"auto"}}>{mailBody}</div>
-<div className="sep"/>
-<div style={{display:"flex",gap:6,justifyContent:"flex-end",flexWrap:"wrap"}}>
-<button onClick={()=>{cp(mailBody,flash);setSent(true)}} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-copy"/>Copier</button>
-{email&&<a href={gmailUrl} target="_blank" onClick={()=>setSent(true)} style={{padding:"9px 16px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,#EA4335,#FBBC04,#34A853,#4285F4)",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center",gap:4}}><i className="fa-brands fa-google"/>Gmail</a>}
+const entreprise=target?.nom||target?.name||"";
+const prenom=entreprise.split(" ")[0]||"";
+
+const wordCount=body.trim().split(/\s+/).filter(Boolean).length;
+const charCount=body.length;
+const wordWarn=isLead&&(wordCount<80||wordCount>180);
+
+const handleGenAI=async()=>{
+  if(!isLead||!aiGen)return;
+  setAiLoading(true);setAiError("");
+  try{
+    const r=await aiGen(target,persona);
+    setObjet(r.objet||objet);
+    setBody(r.body||body);
+    setEdited(true);
+    flash("Mail généré par IA ✨");
+  }catch(e){
+    setAiError((e.message||"Erreur IA").slice(0,140));
+  }
+  setAiLoading(false);
+};
+
+const handleSent=async(channel)=>{
+  setSent(true);
+  if(isLead&&onSent){
+    try{await onSent(target,objet);}catch(e){}
+  }
+};
+
+const gmailUrl="https://mail.google.com/mail/?view=cm&to="+encodeURIComponent(email)+"&su="+encodeURIComponent(objet)+"&body="+encodeURIComponent(body);
+const mailtoUrl="mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent(objet)+"&body="+encodeURIComponent(body);
+
+return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:680,maxHeight:"94vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+  <h3 style={{fontFamily:"var(--serif)",fontSize:17}}>
+    <i className="fa-solid fa-envelope-open-text" style={{color:"var(--gold)",marginRight:6}}/>
+    Cold Mail {isLead?"EAA":"Partenariat"}
+    <span style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1.5,marginLeft:8,padding:"2px 6px",border:"1px solid var(--border)",borderRadius:4}}>v28</span>
+  </h3>
+  <button onClick={onClose} style={{color:"var(--text3)",fontSize:14}}><i className="fa-solid fa-xmark"/></button>
 </div>
-{sent&&<div style={{marginTop:8,display:"flex",alignItems:"center",gap:4,padding:"6px 10px",borderRadius:6,background:"rgba(8,153,129,.08)",border:"1px solid rgba(8,153,129,.2)"}}><i className="fa-solid fa-check-circle" style={{color:"var(--green)"}}/><span style={{fontSize:10,color:"var(--green)",fontWeight:600}}>Mail prepare le {td()}</span></div>}
-</div></div>}
+
+{/* Cible */}
+<div style={{display:"flex",gap:8,marginBottom:12,padding:10,background:"var(--bg)",borderRadius:"var(--radius)",alignItems:"center"}}>
+  <div style={{width:38,height:38,borderRadius:10,background:"rgba(197,160,89,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:"var(--gold)",fontSize:16,flexShrink:0}}>{prenom?prenom[0]:"?"}</div>
+  <div style={{flex:1,minWidth:0}}>
+    <div style={{fontWeight:700,fontSize:14,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{entreprise}</div>
+    <div style={{fontSize:11,color:"var(--text2)"}}>{email||"⚠ Pas d'email"}{(target?.service||target?.specialite)?" · "+(target.service||target.specialite):""}</div>
+  </div>
+  {isLead&&target.auditScore&&<div style={{padding:"4px 8px",borderRadius:6,background:target.auditScore<50?"rgba(231,76,76,.1)":"rgba(8,153,129,.1)",fontSize:11,fontWeight:700,color:target.auditScore<50?"var(--red)":"var(--green)",fontFamily:"var(--mono)"}}>{target.auditScore}/100</div>}
+</div>
+
+{/* Persona Picker (leads only) */}
+{isLead&&<>
+<div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:6}}>ANGLE D\'ATTAQUE</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:12}}>
+  {COLD_PERSONAS.map(p=><button key={p.id} onClick={()=>setPersona(p.id)} style={{padding:"10px 6px",borderRadius:"var(--radius)",border:"1px solid "+(persona===p.id?p.color:"var(--border)"),background:persona===p.id?p.color+"15":"var(--bg)",color:persona===p.id?p.color:"var(--text2)",fontSize:10,fontWeight:600,display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"all .15s"}}>
+    <i className={"fa-solid "+p.icon} style={{fontSize:14}}/>
+    <div style={{fontWeight:700}}>{p.label}</div>
+    <div style={{fontSize:8,color:"var(--text3)",fontWeight:400}}>{p.desc}</div>
+  </button>)}
+</div>
+
+{/* AI Generation Button */}
+<button onClick={handleGenAI} disabled={aiLoading} style={{width:"100%",padding:"10px 14px",borderRadius:"var(--radius)",background:aiLoading?"var(--bg3)":"linear-gradient(135deg,var(--purple),var(--gold))",color:"#fff",fontSize:12,fontWeight:700,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"center",gap:6,border:"none",opacity:aiLoading?.6:1}}>
+  <i className={"fa-solid "+(aiLoading?"fa-spinner fa-spin":"fa-wand-magic-sparkles")}/>
+  {aiLoading?"Génération en cours...":"Générer une version personnalisée avec l'IA"}
+</button>
+{aiError&&<div style={{padding:"6px 10px",borderRadius:6,background:"rgba(231,76,76,.08)",border:"1px solid rgba(231,76,76,.2)",fontSize:10,color:"var(--red)",marginBottom:8}}><i className="fa-solid fa-triangle-exclamation" style={{marginRight:4}}/>{aiError}</div>}
+</>}
+
+{/* Editor OBJET */}
+<div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:4,display:"flex",justifyContent:"space-between"}}><span>OBJET</span><span style={{fontWeight:400,color:objet.length>70?"var(--red)":"var(--text3)"}}>{objet.length} car.</span></div>
+<input value={objet} onChange={e=>{setObjet(e.target.value);setEdited(true)}} style={{width:"100%",padding:"10px 12px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:13,fontWeight:600,marginBottom:10,outline:"none",boxSizing:"border-box"}}/>
+
+{/* Editor BODY */}
+<div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,textTransform:"uppercase",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
+  <span>CORPS DU MAIL{edited&&<span style={{color:"var(--purple)",marginLeft:6}}>(édité)</span>}</span>
+  <span style={{fontWeight:400,color:wordWarn?"var(--red)":"var(--text3)"}}>{wordCount} mots · {charCount} car.</span>
+</div>
+<textarea value={body} onChange={e=>{setBody(e.target.value);setEdited(true)}} style={{width:"100%",minHeight:280,padding:12,borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",fontSize:12,lineHeight:1.7,fontFamily:"var(--sans)",outline:"none",resize:"vertical",boxSizing:"border-box"}}/>
+
+{isLead&&wordWarn&&<div style={{marginTop:4,fontSize:10,color:"var(--red)"}}><i className="fa-solid fa-circle-info" style={{marginRight:4}}/>Idéal cold mail B2B : 80-180 mots</div>}
+
+<div className="sep"/>
+
+{/* Actions */}
+<div style={{display:"flex",gap:6,justifyContent:"flex-end",flexWrap:"wrap",alignItems:"center"}}>
+  {isLead&&<div style={{fontSize:10,color:"var(--text3)",marginRight:"auto",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-circle-info"/>L\'envoi sera tracké sur la fiche</div>}
+  <button onClick={()=>{navigator.clipboard.writeText(body);handleSent("copy");flash("Copié ✓")}} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:4,background:"transparent"}}><i className="fa-solid fa-copy"/>Copier</button>
+  {email&&<>
+    <a href={mailtoUrl} onClick={()=>handleSent("mailto")} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:11,fontWeight:600,textDecoration:"none",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-envelope"/>Mail app</a>
+    <a href={gmailUrl} target="_blank" rel="noopener" onClick={()=>handleSent("gmail")} style={{padding:"9px 16px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,#EA4335,#FBBC04,#34A853,#4285F4)",color:"#fff",fontSize:11,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center",gap:4}}><i className="fa-brands fa-google"/>Gmail</a>
+  </>}
+</div>
+
+{sent&&<div style={{marginTop:10,display:"flex",alignItems:"center",gap:6,padding:"8px 12px",borderRadius:6,background:"rgba(8,153,129,.08)",border:"1px solid rgba(8,153,129,.2)"}}>
+  <i className="fa-solid fa-check-circle" style={{color:"var(--green)"}}/>
+  <span style={{fontSize:11,color:"var(--green)",fontWeight:600}}>{isLead?"Mail préparé · tracking ajouté à la fiche · statut bumpé si Identifié":"Mail préparé le "+td()}</span>
+</div>}
+
+</div></div>;
+}
 
 /* ═══ WEBHOOK BUTTON (réutilisable) ═══ */
 function WebhookBtn({label,icon,color,url,payload,flash}){
