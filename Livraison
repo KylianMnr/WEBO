@@ -578,8 +578,8 @@ const {useState,useEffect,useCallback,useMemo,useRef}=React;
    3. Remplacer les 2 lignes ci-dessous
    4. Exécuter supabase-setup.sql dans le SQL Editor
    ═══════════════════════════════════════════════════════════════════ */
-const SB_URL="https://YOUR_NEW_PROJECT.supabase.co";
-const SB_KEY="YOUR_NEW_ANON_KEY";
+const SB_URL="https://eknyxezxgjtdilsnrotb.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrbnl4ZXp4Z2p0ZGlsc25yb3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4ODg0MjMsImV4cCI6MjA5NTQ2NDQyM30.18BM58NdQ6xNzoQZx9lfMJdD8X4ZKFJV2DePcrj4gr8";
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
 
 /* ═══ AUTH ═══ */
