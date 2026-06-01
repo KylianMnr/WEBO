@@ -233,7 +233,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .lb-item{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600}
 .lb-rank{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;font-family:var(--mono)}
 /* HUB */
-.hub{padding:24px 20px;max-width:1300px;margin:0 auto}
+.hub{padding:24px 28px;max-width:1600px;margin:0 auto}
 .hub-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .hub-title{font-family:var(--serif);font-size:28px;font-weight:700;line-height:1.2;background:linear-gradient(135deg,var(--gold),#E8D5A8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hub-sub{font-size:13px;color:var(--text2);font-weight:300;margin-top:4px}
@@ -242,7 +242,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .stat-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 25px rgba(197,160,89,.08)}
 .stat-label{font-size:9px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-family:var(--mono);margin-bottom:3px}
 .stat-val{font-size:22px;font-weight:800;font-family:var(--mono);line-height:1.1}
-.hub-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.hub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .hub-card{background:linear-gradient(145deg,var(--bg2),rgba(30,36,54,.6));border:1px solid var(--border);border-radius:14px;padding:22px 20px;cursor:pointer;transition:all .35s;position:relative;overflow:hidden}
 .hub-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2),transparent);opacity:0;transition:opacity .3s}
 .hub-card:hover{border-color:rgba(197,160,89,.25);transform:translateY(-4px) scale(1.01);box-shadow:0 16px 48px rgba(0,0,0,.3),0 0 0 1px rgba(197,160,89,.1)}
@@ -619,6 +619,8 @@ const VERIFS=[{id:"none",label:"—"},{id:"pending",label:"En attente",color:"#C
 const SPECIALITES=["Intégration SAP/ERP","Intégration EDI","Consultant Supply Chain","Formation TMS","Dev Web/Mobile","Data Analyst","Account Manager","Autre"];
 const TEMPS=[{id:"froid",e:"❄️",l:"Froid"},{id:"tiede",e:"☁️",l:"Tiède"},{id:"chaud",e:"🔥",l:"Chaud"}];
 const OBJ=15000;const HOT=3000;
+/* Objectifs clients par personne (semaine / mois) — modifiables dans l'app */
+const OBJ_DEFAULTS={kylian:{week:5,month:20},gael:{week:5,month:20}};
 const PAY_ST=[{id:"non_facture",label:"Non facturé",icon:"fa-file-invoice",color:"var(--text3)"},{id:"facture",label:"Facturé",icon:"fa-file-invoice-dollar",color:"var(--blue)"},{id:"attente",label:"En attente",icon:"fa-clock",color:"var(--gold)"},{id:"encaisse",label:"Encaissé",icon:"fa-circle-check",color:"var(--green)"},{id:"litige",label:"Litige",icon:"fa-triangle-exclamation",color:"var(--red)"}];
 const RELANCE_SCHED=[{days:2,label:"J+2"},{days:5,label:"J+5"},{days:10,label:"J+10"}];
 const TPL={
@@ -705,6 +707,9 @@ const[wsTab,setWsTab]=useState("board");const[wsActiveNote,setWsActiveNote]=useS
 const aiRef=useRef(null);const pm=privacy||clientMode;
 const[rapportData,setRapportData]=useState(null);const[showRapport,setShowRapport]=useState(false);
 const[scriptLead,setScriptLead]=useState(null);
+const[objectives,setObjectives]=useState(()=>{try{return JSON.parse(localStorage.getItem("webo_objectives"))||OBJ_DEFAULTS}catch(e){return OBJ_DEFAULTS}});
+const[showObjForm,setShowObjForm]=useState(false);
+const saveObjectives=async(next)=>{setObjectives(next);try{localStorage.setItem("webo_objectives",JSON.stringify(next))}catch(e){}try{await sb.from("settings").upsert({key:"objectives",value:next})}catch(e){}flash("Objectifs mis à jour");addActivity(sess,"a modifié les objectifs","équipe","var(--gold)")};
 const flash=m=>{setToast(m);setTimeout(()=>setToast(null),2200)};
 const testAi=async()=>{setApiTestRes({state:"loading",msg:"Test en cours..."});try{const txt=await gemini("Reponds juste OK si tu recois ce message.",false);setApiTestRes({state:"ok",msg:"Connexion OK ("+aiProvider+"): "+txt.slice(0,80)})}catch(e){setApiTestRes({state:"error",msg:"ECHEC: "+(e.message||"").slice(0,200)})}};
 const pN=id=>prestas.find(x=>x.id===id)?.nom||"";
@@ -821,7 +826,8 @@ useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"}
 /* Supabase */
 useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads").select("*").order("date_created",{ascending:false});setLeads((lr.data||[]).map(db2L));try{const pr=await sb.from("prestataires").select("*");setPrestas(pr.data||[])}catch(e){}try{const ae=await sb.from("agenda_events").select("*").order("date",{ascending:true});setAgEvents(ae.data||[])}catch(e){}
 try{const wn=await sb.from("workspace_notes").select("*").order("updated_at",{ascending:false});setWsNotes(wn.data||[])}catch(e){}
-try{const wt=await sb.from("workspace_tasks").select("*").order("created_at",{ascending:false});setWsTasks(wt.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
+try{const wt=await sb.from("workspace_tasks").select("*").order("created_at",{ascending:false});setWsTasks(wt.data||[])}catch(e){}
+try{const os=await sb.from("settings").select("value").eq("key","objectives").maybeSingle();if(os.data&&os.data.value)setObjectives(os.data.value)}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
 useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE")setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE")setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
 useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem("webo_theme",theme)}catch(e){}},[theme]);
@@ -913,9 +919,19 @@ const HubPage=()=>{
 const me=st.byM.find(m=>m.id===effSess)||{};
 const myWeek=myL.filter(l=>(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7).length;
 const myUrg=myL.filter(isUrg).length;
-const myMoney=isA?st.margeNette:(me.prosp||0);
-const moneyLabel=isA?"Marge Nette":"Ma Commission";
-const moneyEmoji=isA?"🏆":"💸";
+/* Clients signés (Réussi) cette semaine / ce mois */
+const nowD=new Date();const startMonth=new Date(nowD.getFullYear(),nowD.getMonth(),1).getTime();
+const signedThisWeek=l=>l.status==="reussi"&&(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7;
+const signedThisMonth=l=>l.status==="reussi"&&new Date(l.dateCreated).getTime()>=startMonth;
+const myObj=objectives[effSess]||OBJ_DEFAULTS[effSess]||{week:5,month:20};
+const mySignWeek=myL.filter(signedThisWeek).length;
+const mySignMonth=myL.filter(signedThisMonth).length;
+const teamSignWeek=leads.filter(signedThisWeek).length;
+const teamSignMonth=leads.filter(signedThisMonth).length;
+const teamObjWeek=Object.values(objectives).reduce((s,o)=>s+(o.week||0),0);
+const teamObjMonth=Object.values(objectives).reduce((s,o)=>s+(o.month||0),0);
+const objWeekPct=myObj.week>0?Math.round(mySignWeek/myObj.week*100):0;
+const objMonthPct=myObj.month>0?Math.round(mySignMonth/myObj.month*100):0;
 return(
 <div className="hub">
   <div className="hub-header fu">
@@ -930,18 +946,26 @@ return(
           <Av id={effSess} sz={42}/>
           <div><div style={{fontWeight:700,fontSize:16}}>{sU?.name}</div><div style={{fontSize:11,color:"var(--text2)"}}>{sU?.role}</div></div>
         </div>
+        <button onClick={()=>setShowObjForm(true)} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-bullseye" style={{marginRight:5,color:"var(--gold)"}}/>Objectifs</button>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))",gap:10,marginBottom:14}}>
-        {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Signés",v:me.signes||0,c:"var(--green)",e:"✅"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:moneyLabel,v:E(myMoney),c:isA?"var(--gold)":"var(--blue)",e:moneyEmoji},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF",e:"📈"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].map((s,i)=>
+        {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Obj. Semaine",v:mySignWeek+" / "+myObj.week,c:objWeekPct>=100?"var(--green)":objWeekPct>=50?"var(--gold)":"var(--red)",e:"🎯"},{l:"Obj. Mois",v:mySignMonth+" / "+myObj.month,c:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",e:"📆"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Pipeline",v:E(st.tw),c:"#7C5CBF",e:"📈"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].map((s,i)=>
         <div key={i} className="fu" style={{animationDelay:i*40+"ms",textAlign:"center",padding:"10px 6px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
           <div style={{fontSize:18,marginBottom:2}}>{s.e}</div>
           <div style={{fontSize:16,fontWeight:800,fontFamily:"var(--mono)",color:s.c}}>{typeof s.v==="string"?<P$ v={s.v} p={pm}/>:s.v}</div>
           <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:.5,textTransform:"uppercase",marginTop:2}}>{s.l}</div>
         </div>)}
       </div>
-      <div style={{display:"flex",gap:8,alignItems:"center"}}>
-        <div style={{flex:1}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3}}>OBJECTIF MENSUEL — {E(OBJ)}</div><div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:st.obj>=100?"var(--green)":st.obj>=50?"var(--gold)":"var(--red)",width:Math.min(st.obj,100)+"%",transition:"width 1s ease-out"}}/></div></div>
-        <span style={{fontFamily:"var(--mono)",fontWeight:800,fontSize:18,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span>
+      {/* Barres objectifs perso + équipe */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+        <div>
+          <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>MON OBJ. MENSUEL — {mySignMonth}/{myObj.month} clients</span><span style={{color:objMonthPct>=80?"var(--green)":"var(--gold)"}}>{objMonthPct}%</span></div>
+          <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",width:Math.min(objMonthPct,100)+"%",transition:"width 1s ease-out"}}/></div>
+        </div>
+        <div>
+          <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>ÉQUIPE CE MOIS — {teamSignMonth}/{teamObjMonth} clients</span><span style={{color:(teamObjMonth&&teamSignMonth/teamObjMonth>=.8)?"var(--green)":"var(--gold)"}}>{teamObjMonth?Math.round(teamSignMonth/teamObjMonth*100):0}%</span></div>
+          <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:"linear-gradient(90deg,var(--gold),var(--blue))",width:Math.min(teamObjMonth?teamSignMonth/teamObjMonth*100:0,100)+"%",transition:"width 1s ease-out"}}/></div>
+        </div>
       </div>
     </div>
   </div>
@@ -978,12 +1002,12 @@ return(
     {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, RDV démos, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
     {icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
-    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac}} onClick={()=>setPage(c.pg)}>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}>
-        <div style={{width:44,height:44,borderRadius:12,background:c.ac+"15",border:"1px solid "+c.ac+"25",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{c.em}</div>
-        <div><h3 style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:700,margin:0}}>{c.title}</h3><p style={{fontSize:10,color:"var(--text3)",margin:0}}>{c.desc}</p></div>
+    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
+      <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
+        <div style={{width:56,height:56,borderRadius:14,background:c.ac+"15",border:"1px solid "+c.ac+"25",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>{c.em}</div>
+        <div><h3 style={{fontFamily:"var(--serif)",fontSize:19,fontWeight:700,margin:0}}>{c.title}</h3><p style={{fontSize:12,color:"var(--text3)",margin:0,marginTop:2}}>{c.desc}</p></div>
       </div>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontFamily:"var(--mono)",fontSize:13,fontWeight:700,color:c.ac}}>{c.cnt}</span><i className={"fa-solid fa-arrow-right"} style={{fontSize:10,color:"var(--text4)"}}/></div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontFamily:"var(--mono)",fontSize:16,fontWeight:700,color:c.ac}}>{c.cnt}</span><i className={"fa-solid fa-arrow-right"} style={{fontSize:12,color:"var(--text4)"}}/></div>
     </div>)}
   </div>
 
@@ -1701,6 +1725,7 @@ return (
   {outreachPresta&&<OutreachModal target={outreachPresta} type="presta" onClose={()=>setOutreachPresta(null)} flash={flash}/>}
   {outreachLead&&<OutreachModal target={outreachLead} type="lead" onClose={()=>setOutreachLead(null)} flash={flash} aiGen={aiGenColdMail} onSent={onColdMailSent} prospecteurName={mN(sess)}/>}
   {scriptLead&&<ScriptModal lead={scriptLead} onClose={()=>setScriptLead(null)} flash={flash} gemini={gemini}/>}
+  {showObjForm&&<ObjModal objectives={objectives} onSave={saveObjectives} onClose={()=>setShowObjForm(false)} TEAM={TEAM} realAdmin={realAdmin}/>}
   <button onClick={()=>setPage("ia")} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
@@ -1877,15 +1902,62 @@ const[st,setSt]=useState("idle");
 const fire=async()=>{setSt("loading");try{await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});setSt("done");flash(label+" — Envoyé ✓");setTimeout(()=>setSt("idle"),3000)}catch(e){setSt("idle");flash("Erreur webhook")}};
 return <button onClick={fire} disabled={st==="loading"} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid "+(st==="done"?"var(--green)":color),color:st==="done"?"var(--green)":color,fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:4,transition:"all .2s",opacity:st==="loading"?.5:1}}><i className={"fa-solid "+(st==="loading"?"fa-spinner fa-spin":st==="done"?"fa-check":icon)}/>{st==="loading"?"Envoi...":st==="done"?"Envoyé !":label}</button>}
 
+/* ═══ OBJECTIFS MODAL ═══ */
+function ObjModal({objectives,onSave,onClose,TEAM,realAdmin}){
+  const[obj,setObj]=useState(()=>JSON.parse(JSON.stringify(objectives)));
+  const members=TEAM.filter(m=>["kylian","gael"].includes(m.id));
+  const setV=(id,k,v)=>setObj(p=>({...p,[id]:{...(p[id]||{week:0,month:0}),[k]:Math.max(0,parseInt(v)||0)}}));
+  const totW=members.reduce((s,m)=>s+(obj[m.id]?.week||0),0);
+  const totM=members.reduce((s,m)=>s+(obj[m.id]?.month||0),0);
+  return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:480}} onClick={e=>e.stopPropagation()}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+      <h3 style={{fontFamily:"var(--serif)",fontSize:17,display:"flex",alignItems:"center",gap:6}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs clients</h3>
+      <button onClick={onClose} style={{color:"var(--text3)",fontSize:14}}><i className="fa-solid fa-xmark"/></button>
+    </div>
+    <p style={{fontSize:11,color:"var(--text3)",marginBottom:14}}>Nombre de clients signés visés par personne. Le total équipe est calculé automatiquement.</p>
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      {members.map(m=><div key={m.id} style={{padding:12,background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)",borderLeft:"3px solid "+m.color}}>
+        <div style={{fontWeight:700,fontSize:13,marginBottom:8,color:m.color}}>{m.name}</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div><label style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",textTransform:"uppercase"}}>Clients / semaine</label><input type="number" min="0" value={obj[m.id]?.week||0} onChange={e=>setV(m.id,"week",e.target.value)} style={{width:"100%",marginTop:4,padding:"8px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text)",fontSize:15,fontWeight:700,fontFamily:"var(--mono)",outline:"none"}}/></div>
+          <div><label style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",textTransform:"uppercase"}}>Clients / mois</label><input type="number" min="0" value={obj[m.id]?.month||0} onChange={e=>setV(m.id,"month",e.target.value)} style={{width:"100%",marginTop:4,padding:"8px 10px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text)",fontSize:15,fontWeight:700,fontFamily:"var(--mono)",outline:"none"}}/></div>
+        </div>
+      </div>)}
+      <div style={{display:"flex",justifyContent:"space-between",padding:"10px 12px",background:"rgba(197,160,89,.06)",borderRadius:10,border:"1px solid rgba(197,160,89,.15)"}}>
+        <span style={{fontSize:12,fontWeight:700,color:"var(--gold)"}}>TOTAL ÉQUIPE</span>
+        <span style={{fontSize:12,fontFamily:"var(--mono)",color:"var(--text2)"}}>{totW} / sem · {totM} / mois</span>
+      </div>
+    </div>
+    <div style={{display:"flex",gap:6,justifyContent:"flex-end",marginTop:16}}>
+      <button onClick={onClose} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
+      <button onClick={()=>{onSave(obj);onClose()}} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:12,fontWeight:700}}><i className="fa-solid fa-check" style={{marginRight:5}}/>Enregistrer</button>
+    </div>
+  </div></div>;
+}
+
 /* ═══ SCRIPT D'APPEL MODAL ═══ */
 function ScriptModal({lead,onClose,flash,gemini}){
-const[script,setScript]=useState("");const[loading,setLoading]=useState(false);const[error,setError]=useState("");
+const prenom=lead?(lead.nom||"").split(" ")[0]:"";
+const FIXED=
+"PRÉSENTATION (15 sec)\n"+
+"« Bonjour, Kylian de WEBO. Je vous appelle parce qu'on aide les entreprises de livraison comme "+(lead?lead.nom:"la vôtre")+" à arrêter de gérer leurs opérations sur Excel, papier et WhatsApp. Vous avez 2 minutes ? »\n\n"+
+"LA PLUS-VALUE\n"+
+"« On installe un outil simple, fait sur-mesure pour VOTRE façon de travailler : planning des tournées, suivi des chauffeurs et colis en temps réel, preuves de livraison, et fini les ressaisies. Concrètement : moins d'admin, moins de litiges, et une vraie visibilité sur ce qui se passe sur le terrain. »\n\n"+
+"QUESTION D'OUVERTURE\n"+
+"« Aujourd'hui, comment vous gérez le suivi de vos livraisons et les imprévus en tournée ? »\n\n"+
+"OBJECTIONS\n"+
+"• « J'ai déjà un logiciel »\n  → « Parfait, vous connaissez donc la valeur. La différence c'est qu'on adapte l'outil à VOS process au lieu de vous forcer à changer. Qu'est-ce qui vous manque sur l'actuel ? »\n\n"+
+"• « Pas le temps / pas le budget »\n  → « Justement, c'est 20 min pour voir si ça vous fait gagner des heures chaque semaine. Si ça ne colle pas, vous aurez perdu 20 min, pas plus. »\n\n"+
+"• « Envoyez-moi un mail »\n  → « Je le fais avec plaisir. Pour que ce soit utile et pas un mail de plus, dites-moi juste : c'est le suivi terrain ou l'administratif votre plus gros point de douleur ? »\n\n"+
+"CLÔTURE\n"+
+"« On cale 20 min cette semaine ? Je vous propose mardi 11h ou jeudi 14h — qu'est-ce qui vous arrange ? »";
+const[script,setScript]=useState(FIXED);const[loading,setLoading]=useState(false);const[error,setError]=useState("");const[mode,setMode]=useState("fixe");
 if(!lead)return null;
-const generate=async()=>{setLoading(true);setError("");setScript("");try{
-  const ctx="Entreprise : "+lead.nom+"\nActivité : "+lead.service+(lead.adresse?"\nLocalisation : "+lead.adresse:"")+(lead.phone?"\nTéléphone : "+lead.phone:"")+(lead.notes?"\nNotes prospecteur : "+lead.notes.slice(0,300):"")+(lead.status?"\nStatut pipeline : "+lead.status:"");
-  const prompt="Tu es coach commercial expert en prospection téléphonique B2B pour WEBO. WEBO conçoit des outils logiciels sur-mesure pour digitaliser et optimiser les OPÉRATIONS INTERNES des entreprises de livraison, transport et logistique : planification des tournées, suivi temps réel des chauffeurs et colis, preuves de livraison, gestion des litiges, tableau de bord, facturation — pour remplacer Excel, papier, appels et WhatsApp.\n\nOBJECTIF DE L'APPEL : obtenir un rendez-vous découverte de 15-20 minutes (PAS de vente immédiate, PAS de démo gratuite promise au téléphone).\n\nPROSPECT À APPELER :\n"+ctx+"\n\nRédige un SCRIPT D'APPEL À FROID en français, naturel, parlé (pas un mail lu à voix haute), structuré avec ces sections clairement titrées :\n\n1. ACCROCHE (15 sec) — présentation + raison de l'appel, personnalisée sur son métier de livraison/transport\n2. PHRASE D'IMPACT — un problème opérationnel concret qu'il vit probablement (ressaisies, tournées non optimisées, manque de visibilité, litiges)\n3. QUESTIONS DE DÉCOUVERTE (3-4 questions ouvertes pour le faire parler de ses opérations actuelles)\n4. PITCH COURT — comment WEBO résout son problème avec un outil adapté à SES opérations (2-3 phrases max)\n5. RÉPONSES AUX 3 OBJECTIONS COURANTES : « j'ai déjà un outil / un logiciel », « pas le temps / pas le budget », « envoyez-moi un mail » — donne une réponse courte et efficace pour chacune\n6. CLÔTURE — proposer 2 créneaux précis pour un appel de 15-20 min\n\nTon : confiant, humain, jamais agressif. Phrases courtes et orales. Utilise des tirets et titres en MAJUSCULES pour les sections. Pas de markdown, pas d'astérisques.";
+const generate=async()=>{setLoading(true);setError("");try{
+  const ctx="Entreprise : "+lead.nom+"\nActivité : "+lead.service+(lead.adresse?"\nLocalisation : "+lead.adresse:"")+(lead.notes?"\nNotes prospecteur : "+lead.notes.slice(0,300):"");
+  const prompt="Coach commercial pour WEBO (outils logiciels sur-mesure pour optimiser les opérations internes des entreprises de livraison/transport : tournées, suivi temps réel, preuves de livraison, litiges, fini Excel/papier). Objectif appel : décrocher un RDV de 20 min, pas vendre.\n\nPROSPECT :\n"+ctx+"\n\nRédige un script d'appel COURT et parlé en français, sections en MAJUSCULES : PRÉSENTATION (2 phrases), PLUS-VALUE (2 phrases), QUESTION D'OUVERTURE (1 question), OBJECTIONS (3 objections courantes avec réponse en 1 phrase chacune), CLÔTURE (proposer 2 créneaux). Concis, pas de markdown, pas d'astérisques. Maximum 200 mots.";
   const txt=await gemini(prompt,false);
-  setScript((txt||"").trim());
+  setScript((txt||"").trim());setMode("ia");
 }catch(e){setError((e.message||"Erreur").slice(0,120))}setLoading(false)};
 return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:600,maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
@@ -1896,29 +1968,22 @@ return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><
   <div style={{width:42,height:42,borderRadius:12,background:"rgba(197,160,89,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:"var(--gold)",fontSize:18,flexShrink:0}}>{lead.nom?lead.nom[0]:"?"}</div>
   <div style={{flex:1,minWidth:0}}>
     <div style={{fontWeight:700,fontSize:14}}>{lead.nom}</div>
-    <div style={{fontSize:11,color:"var(--text2)"}}>{lead.service}</div>
+    <div style={{fontSize:11,color:"var(--text2)"}}>{lead.service}{lead.phone?" · "+lead.phone:""}</div>
   </div>
-  </div>
+</div>
 {lead.notes&&<div style={{marginBottom:12,padding:10,background:"rgba(41,98,255,.04)",border:"1px solid rgba(41,98,255,.12)",borderRadius:8}}><div style={{fontSize:8,fontWeight:700,color:"var(--blue)",fontFamily:"var(--mono)",letterSpacing:1,marginBottom:4}}>NOTES À EXPLOITER</div><div style={{fontSize:11,color:"var(--text2)",lineHeight:1.7,whiteSpace:"pre-wrap"}}>{lead.notes.slice(0,300)}</div></div>}
-<div style={{display:"flex",gap:6,marginBottom:12}}>
-  <button onClick={generate} disabled={loading} style={{flex:1,padding:"12px 20px",borderRadius:"var(--radius)",background:loading?"var(--bg3)":"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:loading?"var(--text3)":"#fff",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s",opacity:loading?.7:1}}>
-    <i className={"fa-solid "+(loading?"fa-spinner fa-spin":"fa-wand-magic-sparkles")}/>{loading?"Génération en cours...":"Générer avec l'IA"}
-  </button>
+<div style={{display:"flex",gap:6,marginBottom:10}}>
+  <button onClick={()=>{setScript(FIXED);setMode("fixe");setError("")}} style={{flex:1,padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid "+(mode==="fixe"?"var(--gold)":"var(--border)"),background:mode==="fixe"?"rgba(197,160,89,.1)":"transparent",color:mode==="fixe"?"var(--gold)":"var(--text2)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-file-lines" style={{marginRight:5}}/>Script fixe</button>
+  <button onClick={generate} disabled={loading} style={{flex:1,padding:"9px 14px",borderRadius:"var(--radius)",border:"1px solid "+(mode==="ia"?"var(--gold)":"var(--border)"),background:loading?"var(--bg3)":(mode==="ia"?"rgba(197,160,89,.1)":"transparent"),color:mode==="ia"?"var(--gold)":"var(--text2)",fontSize:12,fontWeight:700,opacity:loading?.7:1}}><i className={"fa-solid "+(loading?"fa-spinner fa-spin":"fa-wand-magic-sparkles")} style={{marginRight:5}}/>{loading?"Génération...":"Version IA personnalisée"}</button>
 </div>
 {error&&<div style={{marginBottom:8,padding:"8px 12px",borderRadius:6,background:"rgba(231,76,76,.06)",border:"1px solid rgba(231,76,76,.15)",color:"var(--red)",fontSize:11}}><i className="fa-solid fa-triangle-exclamation" style={{marginRight:4}}/>{error}</div>}
-{loading&&<div style={{display:"flex",flexDirection:"column",alignItems:"center",padding:"30px 0",gap:8}}>
-  <div style={{width:48,height:48,borderRadius:"50%",border:"3px solid var(--bg4)",borderTopColor:"var(--gold)",animation:"pulse 1s infinite"}}/>
-  <div style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--mono)"}}>L'IA rédige votre script...</div>
-</div>}
-{script&&<div>
-  <div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>SCRIPT GÉNÉRÉ — MODIFIABLE</div>
-  <textarea value={script} onChange={e=>setScript(e.target.value)} style={{width:"100%",minHeight:200,padding:14,borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:13,lineHeight:1.8,resize:"vertical",outline:"none",fontFamily:"var(--sans)",boxSizing:"border-box"}}/>
+<div>
+  <div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>{mode==="fixe"?"SCRIPT TYPE — MODIFIABLE":"SCRIPT IA — MODIFIABLE"}</div>
+  <textarea value={script} onChange={e=>setScript(e.target.value)} style={{width:"100%",minHeight:280,padding:14,borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:13,lineHeight:1.7,resize:"vertical",outline:"none",fontFamily:"var(--sans)",boxSizing:"border-box"}}/>
   <div style={{display:"flex",gap:4,justifyContent:"flex-end",marginTop:8}}>
     <button onClick={()=>{if(navigator.clipboard)navigator.clipboard.writeText(script);flash("Script copié ✓")}} style={{padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-copy"/>Copier</button>
-    <button onClick={generate} style={{padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-rotate"/>Régénérer</button>
   </div>
-</div>}
-{!script&&!loading&&!error&&<div style={{textAlign:"center",padding:"30px 0",color:"var(--text3)"}}><i className="fa-solid fa-microphone-lines" style={{fontSize:28,display:"block",marginBottom:8,color:"rgba(197,160,89,.2)"}}/><div style={{fontSize:12}}>Cliquez sur "Générer avec l'IA" pour créer un script personnalisé basé sur les données du prospect.</div></div>}
+</div>
 </div></div>}
 
 /* ═══ LEAD FORM ═══ */
