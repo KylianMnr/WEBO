@@ -734,13 +734,14 @@ const anon=v=>{if(!clientMode||!v)return v;const s=String(v);if(s.includes("@"))
 
 /* V13.2 — Agenda calendar */
 /* V30 — Agenda events persistés sur Supabase (table agenda_events) */
-const addAgEvent=async(date,title,time,color)=>{const ev={id:uid(),date,title,time:time||"09:00",color:color||"var(--purple)",owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajoute");try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}};
+const addAgEvent=async(date,title,time,color,assignee_ids)=>{const ev={id:uid(),date,title,time:time||"09:00",color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}};
+const updAgEvent=async(id,fields)=>{setAgEvents(p=>p.map(e=>e.id===id?{...e,...fields}:e));try{await sb.from("agenda_events").update(fields).eq("id",id)}catch(e){}};
 const delAgEvent=async id=>{setAgEvents(p=>p.filter(e=>e.id!==id));try{await sb.from("agenda_events").delete().eq("id",id)}catch(e){}};
 /* ═══ ESPACE — CRUD Notes & Tâches (Supabase: workspace_notes / workspace_tasks) ═══ */
 const wsAddNote=async(title)=>{const n={id:uid(),title:title||"Nouvelle note",content:"",tags:"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsNotes(p=>[n,...p]);setWsActiveNote(n.id);flash("Note créée");addActivity(sess,"a créé une note",n.title,"var(--blue)");try{await sb.from("workspace_notes").insert(n)}catch(e){flash("Erreur sync note")}return n.id};
 const wsUpdNote=async(id,fields)=>{const upd={...fields,updated_at:new Date().toISOString()};setWsNotes(p=>p.map(n=>n.id===id?{...n,...upd}:n));try{await sb.from("workspace_notes").update(upd).eq("id",id)}catch(e){}};
 const wsDelNote=async id=>{if(!confirm("Supprimer cette note ?"))return;const n=wsNotes.find(x=>x.id===id);setWsNotes(p=>p.filter(x=>x.id!==id));if(wsActiveNote===id)setWsActiveNote(null);flash("Note supprimée");addActivity(sess,"a supprimé une note",n?.title||"","var(--red)");try{await sb.from("workspace_notes").delete().eq("id",id)}catch(e){}};
-const wsAddTask=async(t)=>{const task={id:uid(),title:t.title||"Nouvelle tâche",description:t.description||"",status:t.status||"todo",priority:t.priority||"normal",assignee_id:t.assignee_id||sess,lead_id:t.lead_id||"",due_date:t.due_date||"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsTasks(p=>[task,...p]);flash("Tâche créée");addActivity(sess,"a créé une tâche",task.title,"var(--green)");if(task.assignee_id!==sess)addNotif("fa-list-check","var(--blue)",mN(sess)+" t'a assigné: "+task.title);try{await sb.from("workspace_tasks").insert(task)}catch(e){flash("Erreur sync tâche")}};
+const wsAddTask=async(t)=>{const task={id:uid(),title:t.title||"Nouvelle tâche",description:t.description||"",status:t.status||"todo",priority:t.priority||"normal",assignee_id:t.assignee_id||sess,assignee_ids:t.assignee_ids||[t.assignee_id||sess],lead_id:t.lead_id||"",due_date:t.due_date||"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsTasks(p=>[task,...p]);flash("Tâche créée");addActivity(sess,"a créé une tâche",task.title,"var(--green)");(task.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-list-check","var(--blue)",mN(sess)+" t'a assigné: "+task.title));try{await sb.from("workspace_tasks").insert(task)}catch(e){flash("Erreur sync tâche")}};
 const wsUpdTask=async(id,fields)=>{const upd={...fields,updated_at:new Date().toISOString()};const prev=wsTasks.find(t=>t.id===id);setWsTasks(p=>p.map(t=>t.id===id?{...t,...upd}:t));if(fields.status&&prev&&fields.status!==prev.status){addActivity(sess,"a déplacé une tâche",prev.title+" → "+(WS_COLS.find(c=>c.id===fields.status)?.label||fields.status),"var(--purple)")}try{await sb.from("workspace_tasks").update(upd).eq("id",id)}catch(e){}};
 const wsDelTask=async id=>{const t=wsTasks.find(x=>x.id===id);setWsTasks(p=>p.filter(x=>x.id!==id));flash("Tâche supprimée");addActivity(sess,"a supprimé une tâche",t?.title||"","var(--red)");try{await sb.from("workspace_tasks").delete().eq("id",id)}catch(e){}};
 
@@ -772,13 +773,13 @@ const onColdMailSent=useCallback(async(lead,objet)=>{
 
 /* V28 — COLD MAIL : génération IA */
 const aiGenColdMail=useCallback(async(lead,persona)=>{
-  const ctx="Entreprise cible : "+lead.nom+"\nService proposé : "+lead.service+(lead.adresse?"\nLocalisation : "+lead.adresse:"")+(lead.notes?"\nNotes prospecteur : "+lead.notes.slice(0,300):"");
+  const ctx="Entreprise cible : "+lead.nom+"\nActivité / service : "+lead.service+(lead.adresse?"\nLocalisation : "+lead.adresse:"")+(lead.notes?"\nNotes prospecteur : "+lead.notes.slice(0,300):"");
   const personas={
-    direct:"DIRECT / PERFORMANCE : ton ferme et factuel, appuie sur la perte de marge (cycle de vente long = coût d'opportunité), les benchmarks (concurrents à 96% OTIF) et l'urgence de moderniser le SI logistique. Ton commercial musclé.",
-    pedago:"PÉDAGOGIQUE / VISION : ton conseil, vulgarise la valeur d'un TMS moderne (vs Excel/papier), prend le temps d'expliquer les enjeux supply chain et le ROI moyen secteur. Pas de pression.",
-    roi:"ROI / BUSINESS : ton entrepreneurial, chiffres immédiats — économies coût/km, hausse marge brute, conformité audit. Tu parles le langage du DAF et du Directeur Supply Chain."
+    direct:"DIRECT / TERRAIN : ton concret et factuel d'opérationnel à opérationnel. Pars d'un problème quotidien précis (tournées mal optimisées, ressaisies manuelles, manque de visibilité temps réel, litiges livraison). Pas de jargon marketing, du concret.",
+    pedago:"PÉDAGOGIQUE / CONSEIL : ton de conseiller qui comprend le métier. Explique comment un outil unifie les opérations (planning, suivi, preuves de livraison, facturation) sans jargon technique. Rassurant, pas de pression.",
+    roi:"ROI / DIRIGEANT : ton orienté résultats pour un gérant/dirigeant. Chiffres concrets — heures admin économisées par semaine, km en moins, litiges réduits, satisfaction client. Langage d'un patron de PME logistique."
   };
-  const prompt="Tu es expert en cold email B2B FR pour WEBO, agence française qui commercialise Livraison Pro, un TMS (Transport Management System) Enterprise pour les groupes du retail et de la restauration.\n\nCONTEXTE OBLIGATOIRE :\n- Livraison Pro : plateforme cloud + app mobile, modules ERP/EDI (SAP, Carrefour, Auchan, Métro), IA prédictive (OTIF, CO2, prévisions), Control Tower temps réel, IoT chaîne du froid\n- Cible : groupes français >20M€ CA avec flotte de livraison (alimentaire, retail, traiteurs, grandes surfaces)\n- Bénéfices mesurés : OTIF +4 à 6 points, CO2 −25%, coût/km −7%, conformité audit SOC 2 / ISO 27001\n- WEBO ne propose JAMAIS de démo gratuite immédiate, uniquement des rendez-vous téléphoniques découverte de 20 minutes\n\nCIBLE :\n"+ctx+"\n\nSTYLE DEMANDÉ : "+personas[persona]+"\n\nMISSION : Rédige un cold email FR percutant de 120 à 160 mots MAX, structuré ainsi :\n1) Accroche personnalisée (référence à l'entreprise, son secteur, ses flux logistiques)\n2) Diagnostic chiffré du levier d'optimisation (OTIF, CO2, coût/km, qualité service)\n3) Une phrase qui présente Livraison Pro et l'accompagnement WEBO sur [S]\n4) Appel à action clair : rendez-vous téléphonique de 20 minutes (JAMAIS de démo gratuite immédiate)\n5) Question de disponibilité cette semaine\n\nSignature OBLIGATOIRE :\nKylian Meunier\nFondateur WEBO · Livraison Pro\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet doit faire 40-70 caractères, accrocheur, sans emoji.\nLe body utilise \\n pour les retours à la ligne.";
+  const prompt="Tu es expert en cold email B2B français pour WEBO. WEBO conçoit et déploie des outils sur-mesure pour les entreprises de livraison, transport et logistique : un logiciel qui digitalise et pilote leurs OPÉRATIONS INTERNES (planification des tournées, suivi des chauffeurs et colis en temps réel, preuves de livraison, gestion des litiges, tableau de bord, facturation), pour remplacer les process manuels (Excel, papier, appels, WhatsApp).\n\nCE QUE WEBO VEND VRAIMENT (à garder en tête, ne pas tout citer) :\n- Une solution logicielle d'optimisation des opérations internes pour acteurs de la livraison/transport\n- Bénéfices concrets : moins de ressaisie et d'admin, tournées mieux optimisées, visibilité temps réel sur les livraisons, moins de litiges/colis perdus, meilleure expérience client final\n- Accompagnement humain WEBO : on adapte l'outil à LEUR façon de travailler, pas l'inverse\n- WEBO ne propose JAMAIS de démo gratuite immédiate dans le mail : l'objectif est UNIQUEMENT d'obtenir un appel découverte de 15-20 minutes\n\nCIBLE :\n"+ctx+"\n\nSTYLE DEMANDÉ : "+personas[persona]+"\n\nRÈGLES DE RÉDACTION :\n- 90 à 140 mots MAX, court et lisible sur mobile\n- Phrases courtes. Zéro buzzword creux (pas de 'synergie', 'disruptif', 'solution innovante de pointe')\n- Hyper-personnalisé sur SON métier et SES contraintes terrain réelles (déduis-les de l'activité)\n- Un seul angle/problème principal, pas une liste de features\n\nSTRUCTURE :\n1) Accroche personnalisée qui montre qu'on connaît son métier de livraison/transport\n2) Le problème opérationnel concret qu'il vit probablement (1-2 phrases)\n3) Comment WEBO résout ça avec un outil adapté à ses opérations (1 phrase claire)\n4) Appel à action simple : un appel de 15-20 min cette semaine (JAMAIS de démo gratuite immédiate)\n\nSignature OBLIGATOIRE :\nKylian Meunier\nFondateur WEBO\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet : 35-60 caractères, accrocheur, orienté bénéfice opérationnel, sans emoji.\nLe body utilise \\n pour les retours à la ligne.";
   const raw=await gemini(prompt,false);
   let cleaned=raw.trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
   const m=cleaned.match(/\{[\s\S]*\}/);
@@ -831,7 +832,7 @@ const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,eff
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
 const srt=c=>{if(sortBy==="valeur")return[...c].sort((a,b)=>b.valeur-a.valeur);if(sortBy==="date")return[...c].sort((a,b)=>new Date(b.dateCreated)-new Date(a.dateCreated));return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
-const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const evts=[];myL.filter(l=>l.nextRelance===ds&&!["reussi","perdu"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myL.filter(l=>l.status==="reussi"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));agEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.time||"12:00"}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myL,leads,agEvents]);
+const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const evts=[];myL.filter(l=>l.nextRelance===ds&&!["reussi","perdu"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myL.filter(l=>l.status==="reussi"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));agEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.time||"12:00",assignee_ids:e.assignee_ids||[]}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myL,leads,agEvents]);
 
 /* Agenda: relances du jour + overdue + 3 days dormant */
 const agendaItems=useMemo(()=>{const items=[];
@@ -944,27 +945,30 @@ return(
       </div>
     </div>
   </div>
-  {/* ═══ FUNNEL + ACTIVITY ═══ */}
-  <div style={{display:"grid",gridTemplateColumns:isA?"1fr 1fr":"1fr",gap:14,marginBottom:18}}>
-    <div className="chart-card">
-      <div className="chart-hd"><span><i className="fa-solid fa-filter" style={{color:"var(--gold)",marginRight:6}}/>Funnel</span><span style={{color:"var(--text3)"}}>{st.total} leads</span></div>
+  {/* ═══ FUNNEL (clic → Pipeline) + AGENDA DU JOUR (clic → Agenda) ═══ */}
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:18}}>
+    <div className="chart-card" onClick={()=>setPage("pipeline")} style={{cursor:"pointer"}} title="Ouvrir le Pipeline">
+      <div className="chart-hd"><span><i className="fa-solid fa-filter" style={{color:"var(--gold)",marginRight:6}}/>Funnel</span><span style={{color:"var(--text3)"}}>{st.total} leads <i className="fa-solid fa-arrow-right" style={{fontSize:9,marginLeft:4}}/></span></div>
       <div style={{padding:"4px 0"}}>{COLS.filter(c=>!["perdu","pas_potentiel"].includes(c.id)).map((col,i)=>{const cnt=myL.filter(l=>l.status===col.id).length;const mx=Math.max(...COLS.map(c=>myL.filter(l=>l.status===c.id).length),1);const pct=Math.round(cnt/mx*100);const val=myL.filter(l=>l.status===col.id).reduce((s,l)=>s+l.valeur,0);
-      return <div key={col.id} className="funnel-step">
+      return <div key={col.id} className="funnel-step" onClick={e=>{e.stopPropagation();setPipelineMode("prospection");setPView("kanban");setPage("pipeline")}} style={{cursor:"pointer"}}>
         <div style={{width:80,fontSize:9,fontWeight:600,color:col.accent,flexShrink:0}}><i className={"fa-solid "+col.icon} style={{marginRight:4,fontSize:8}}/>{col.label}</div>
         <div style={{flex:1}}><div className="funnel-bar" style={{width:Math.max(pct,8)+"%",background:"linear-gradient(90deg,"+col.accent+"CC,"+col.accent+"55)"}}>{cnt>0?cnt:""}</div></div>
         <div style={{width:70,textAlign:"right",fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}><P$ v={E(val)} p={pm}/></div>
       </div>})}</div>
     </div>
-    {isA&&<div className="chart-card">
-      <div className="chart-hd"><span><i className="fa-solid fa-bolt" style={{color:"var(--gold)",marginRight:6}}/>Activité</span><span style={{color:"var(--text3)"}}>{actFeed.length}</span></div>
-      <div className="feed">
-        {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}>Actions ici</div>:
-        actFeed.slice(0,15).map((a,i)=><div key={a.id} className="feed-item" style={{animationDelay:i*30+"ms"}}>
-          <div className="feed-dot" style={{background:a.color||"var(--gold)"}}/>
-          <div style={{flex:1}}><div style={{fontSize:12,color:"var(--text2)",lineHeight:1.5}}><strong style={{color:mC(a.who)}}>{mN(a.who)}</strong> {a.action} <strong style={{color:"var(--text)"}}>{a.target}</strong></div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{fA(hA(a.time))}</div></div>
-        </div>)}
+    {/* AGENDA DU JOUR */}
+    <div className="chart-card" onClick={()=>setPage("agenda")} style={{cursor:"pointer"}} title="Ouvrir l'Agenda">
+      <div className="chart-hd"><span><i className="fa-solid fa-calendar-day" style={{color:"var(--gold)",marginRight:6}}/>Agenda — Aujourd'hui</span><span style={{color:"var(--text3)"}}>{td()} <i className="fa-solid fa-arrow-right" style={{fontSize:9,marginLeft:4}}/></span></div>
+      <div style={{padding:"8px 0",maxHeight:200,overflowY:"auto"}}>
+        {(()=>{const items=[...agendaItems.filter(x=>x.type==="relance").slice(0,5).map(x=>({lb:x.label,cl:x.urgency==="bordeaux"?"var(--red)":"var(--gold)",tag:"RELANCE"})),...agEvents.filter(e=>e.date===td()).map(e=>({lb:e.title,cl:e.color||"var(--purple)",tag:(e.time||"")+(e.assignee_ids?.length?" · "+e.assignee_ids.map(a=>mN(a).split(" ")[0]).join(", "):"")}))];
+        if(items.length===0)return <div style={{padding:24,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-mug-hot" style={{marginRight:5}}/>Rien de prévu aujourd'hui</div>;
+        return items.slice(0,8).map((it,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 4px",borderBottom:"1px solid var(--border)"}}>
+          <div style={{width:7,height:7,borderRadius:"50%",background:it.cl,flexShrink:0}}/>
+          <div style={{flex:1,fontSize:12,color:"var(--text2)"}}>{it.lb}</div>
+          <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",textTransform:"uppercase"}}>{it.tag}</div>
+        </div>)})()}
       </div>
-    </div>}
+    </div>
   </div>
 
   {/* ═══ MODULES ═══ */}
@@ -982,15 +986,26 @@ return(
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontFamily:"var(--mono)",fontSize:13,fontWeight:700,color:c.ac}}>{c.cnt}</span><i className={"fa-solid fa-arrow-right"} style={{fontSize:10,color:"var(--text4)"}}/></div>
     </div>)}
   </div>
+
+  {/* ═══ ACTIVITÉ (en bas de page) ═══ */}
+  {isA&&<div className="chart-card" style={{marginTop:18}}>
+    <div className="chart-hd"><span><i className="fa-solid fa-bolt" style={{color:"var(--gold)",marginRight:6}}/>Activité récente</span><span style={{color:"var(--text3)"}}>{actFeed.length}</span></div>
+    <div className="feed">
+      {actFeed.length===0?<div style={{padding:30,textAlign:"center",color:"var(--text3)",fontSize:12}}>Les actions de l'équipe s'afficheront ici</div>:
+      actFeed.slice(0,15).map((a,i)=><div key={a.id} className="feed-item" style={{animationDelay:i*30+"ms"}}>
+        <div className="feed-dot" style={{background:a.color||"var(--gold)"}}/>
+        <div style={{flex:1}}><div style={{fontSize:12,color:"var(--text2)",lineHeight:1.5}}><strong style={{color:mC(a.who)}}>{mN(a.who)}</strong> {a.action} <strong style={{color:"var(--text)"}}>{a.target}</strong></div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>{fA(hA(a.time))}</div></div>
+      </div>)}
+    </div>
+  </div>}
 </div>)};
 
 /* ═══ ESPACE — Workspace collaboratif (type Notion) ═══ */
 const Espace=()=>{
-const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
 const note=wsNotes.find(n=>n.id===wsActiveNote);
-const tasksFiltered=useMemo(()=>{let t=wsTasks;if(wsTaskFilter==="mine")t=t.filter(x=>x.assignee_id===sess);else if(wsTaskFilter==="open")t=t.filter(x=>x.status!=="done");return t},[wsTasks,wsTaskFilter,sess]);
+const tasksFiltered=useMemo(()=>{let t=wsTasks;if(wsTaskFilter==="mine")t=t.filter(x=>(x.assignee_ids||[x.assignee_id]).includes(sess));else if(wsTaskFilter==="open")t=t.filter(x=>x.status!=="done");return t},[wsTasks,wsTaskFilter,sess]);
 const onTaskDrop=(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id)wsUpdTask(id,{status:col});setDragOver(null)};
-const stats={total:wsTasks.length,open:wsTasks.filter(t=>t.status!=="done").length,mine:wsTasks.filter(t=>t.assignee_id===sess&&t.status!=="done").length,notes:wsNotes.length};
+const stats={total:wsTasks.length,open:wsTasks.filter(t=>t.status!=="done").length,mine:wsTasks.filter(t=>(t.assignee_ids||[t.assignee_id]).includes(sess)&&t.status!=="done").length,notes:wsNotes.length};
 return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,gap:12}}>
   {/* HEADER */}
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
@@ -1012,7 +1027,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
   {/* ═══ BOARD (Kanban tâches) ═══ */}
   {wsTab==="board"&&<div style={{display:"flex",flexDirection:"column",gap:10,flex:1,minHeight:0}}>
     <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-      <button onClick={()=>wsAddTask({assignee_id:sess})} style={{padding:"8px 14px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-plus" style={{marginRight:5}}/>Nouvelle tâche</button>
+      <button onClick={()=>wsAddTask({assignee_ids:[sess]})} style={{padding:"8px 14px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-plus" style={{marginRight:5}}/>Nouvelle tâche</button>
       <div style={{display:"flex",gap:4,marginLeft:6}}>
         {[{id:"all",l:"Toutes"},{id:"open",l:"Ouvertes"},{id:"mine",l:"Les miennes"}].map(f=><button key={f.id} onClick={()=>setWsTaskFilter(f.id)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid "+(wsTaskFilter===f.id?"var(--gold)":"var(--border)"),background:wsTaskFilter===f.id?"rgba(197,160,89,.1)":"transparent",color:wsTaskFilter===f.id?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600}}>{f.l}</button>)}
       </div>
@@ -1025,21 +1040,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
           <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)",background:"var(--bg)",borderRadius:8,padding:"1px 7px"}}>{colTasks.length}</span>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:6,overflowY:"auto"}}>
-          {colTasks.map(t=>{const prio=WS_PRIO.find(p=>p.id===t.priority);const asg=TEAM.find(m=>m.id===t.assignee_id);const lead=t.lead_id?leads.find(l=>l.id===t.lead_id):null;return(
-          <div key={t.id} className="kc" draggable onDragStart={e=>e.dataTransfer.setData("text/plain",t.id)} style={{borderRadius:8,padding:9,borderLeft:"3px solid "+(prio?.c||"var(--border)"),cursor:"grab"}}>
-            <div style={{display:"flex",justifyContent:"space-between",gap:6,alignItems:"flex-start"}}>
-              <input value={t.title} onChange={e=>wsUpdTask(t.id,{title:e.target.value})} style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:12,fontWeight:600,outline:"none",padding:0}}/>
-              <button onClick={()=>wsDelTask(t.id)} style={{color:"var(--text4)",fontSize:11,flexShrink:0}} title="Supprimer"><i className="fa-solid fa-xmark"/></button>
-            </div>
-            <textarea value={t.description||""} onChange={e=>wsUpdTask(t.id,{description:e.target.value})} placeholder="Détails…" rows={t.description?2:1} style={{width:"100%",background:"transparent",border:"none",color:"var(--text2)",fontSize:10,outline:"none",resize:"none",marginTop:4,fontFamily:"var(--sans)"}}/>
-            <div style={{display:"flex",alignItems:"center",gap:5,marginTop:6,flexWrap:"wrap"}}>
-              <select value={t.assignee_id} onChange={e=>wsUpdTask(t.id,{assignee_id:e.target.value})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:asg?.color||"var(--text2)",fontSize:9,fontWeight:700,padding:"2px 4px"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name.split(" ")[0]}</option>)}</select>
-              <select value={t.priority} onChange={e=>wsUpdTask(t.id,{priority:e.target.value})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:prio?.c,fontSize:9,fontWeight:700,padding:"2px 4px"}}>{WS_PRIO.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select>
-              <input type="date" value={t.due_date||""} onChange={e=>wsUpdTask(t.id,{due_date:e.target.value})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:t.due_date&&t.due_date<td()&&t.status!=="done"?"var(--red)":"var(--text3)",fontSize:9,padding:"2px 4px",fontFamily:"var(--mono)"}}/>
-            </div>
-            {lead&&<div onClick={()=>{setSelLead(lead);setPage("pipeline")}} style={{marginTop:6,fontSize:9,color:"var(--blue)",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-link"/>{lead.nom}</div>}
-            <select value={t.lead_id||""} onChange={e=>wsUpdTask(t.id,{lead_id:e.target.value})} style={{width:"100%",marginTop:5,background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:"var(--text3)",fontSize:9,padding:"2px 4px"}}><option value="">— Lier à un lead —</option>{myL.map(l=><option key={l.id} value={l.id}>{l.nom}</option>)}</select>
-          </div>)})}
+          {colTasks.map(t=><TaskCard key={t.id} t={t} onSave={wsUpdTask} onDel={wsDelTask} TEAM={TEAM} myL={myL} leads={leads} setSelLead={setSelLead} setPage={setPage} td={td}/>)}
           {colTasks.length===0&&<div style={{padding:14,textAlign:"center",color:"var(--text4)",fontSize:10}}>Déposez une tâche ici</div>}
         </div>
       </div>)})}
@@ -1065,25 +1066,72 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
       </div>
     </div>
     {/* Éditeur note */}
-    <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0}}>
-      {note?<>
-        <div className="card-h" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-          <input value={note.title} onChange={e=>wsUpdNote(note.id,{title:e.target.value})} placeholder="Titre de la note" style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:16,fontWeight:700,fontFamily:"var(--serif)",outline:"none"}}/>
-          <button onClick={()=>wsDelNote(note.id)} style={{color:"var(--red)",fontSize:13}} title="Supprimer"><i className="fa-solid fa-trash"/></button>
-        </div>
-        <div style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
-          <input value={note.tags||""} onChange={e=>wsUpdNote(note.id,{tags:e.target.value})} placeholder="Tags séparés par des virgules (ex: livraison, dev, urgent)" style={{width:"100%",background:"transparent",border:"none",color:"var(--text2)",fontSize:11,outline:"none",fontFamily:"var(--mono)"}}/>
-        </div>
-        <textarea value={note.content||""} onChange={e=>wsUpdNote(note.id,{content:e.target.value})} placeholder="Écrivez ici… (compte-rendu, specs, idées, doc partagée avec Gael)" style={{flex:1,width:"100%",background:"transparent",border:"none",color:"var(--text)",fontSize:14,lineHeight:1.7,outline:"none",resize:"none",padding:"14px",fontFamily:"var(--sans)"}}/>
-        <div style={{padding:"6px 14px",borderTop:"1px solid var(--border)",fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",display:"flex",justifyContent:"space-between"}}><span>{(note.content||"").length} caractères</span><span><i className="fa-solid fa-cloud" style={{marginRight:4,color:"var(--green)"}}/>Synchronisé en temps réel</span></div>
-      </>:<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:10,color:"var(--text3)"}}>
+    {note?<NoteEditor key={note.id} note={note} onSave={wsUpdNote} onDel={wsDelNote}/>:
+      <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0,alignItems:"center",justifyContent:"center",gap:10,color:"var(--text3)"}}>
         <i className="fa-solid fa-note-sticky" style={{fontSize:38,opacity:.3}}/>
         <div style={{fontSize:13}}>Sélectionnez une note ou créez-en une</div>
         <button onClick={()=>wsAddNote()} style={{padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:12,fontWeight:600}}><i className="fa-solid fa-plus" style={{marginRight:5}}/>Nouvelle note</button>
       </div>}
-    </div>
   </div>}
 </div>};
+
+/* ═══ TaskCard — état local, sauvegarde au blur (plus de perte de focus) ═══ */
+function TaskCard({t,onSave,onDel,TEAM,myL,leads,setSelLead,setPage,td}){
+  const[title,setTitle]=useState(t.title);
+  const[desc,setDesc]=useState(t.description||"");
+  const[dirty,setDirty]=useState(false);
+  useEffect(()=>{setTitle(t.title);setDesc(t.description||"")},[t.id]);
+  const prio=WS_PRIO.find(p=>p.id===t.priority);
+  const assignees=t.assignee_ids||(t.assignee_id?[t.assignee_id]:[]);
+  const lead=t.lead_id?leads.find(l=>l.id===t.lead_id):null;
+  const toggleAssignee=(mid)=>{let next=assignees.includes(mid)?assignees.filter(a=>a!==mid):[...assignees,mid];if(next.length===0)next=[mid];onSave(t.id,{assignee_ids:next,assignee_id:next[0]})};
+  const saveText=()=>{if(dirty){onSave(t.id,{title:title.trim()||"Sans titre",description:desc});setDirty(false)}};
+  return(
+  <div className="kc" draggable onDragStart={e=>e.dataTransfer.setData("text/plain",t.id)} style={{borderRadius:8,padding:9,borderLeft:"3px solid "+(prio?.c||"var(--border)"),cursor:"grab"}}>
+    <div style={{display:"flex",justifyContent:"space-between",gap:6,alignItems:"flex-start"}}>
+      <input value={title} onChange={e=>{setTitle(e.target.value);setDirty(true)}} onBlur={saveText} style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:12,fontWeight:600,outline:"none",padding:0}}/>
+      <button onClick={()=>onDel(t.id)} style={{color:"var(--text4)",fontSize:11,flexShrink:0}} title="Supprimer"><i className="fa-solid fa-xmark"/></button>
+    </div>
+    <textarea value={desc} onChange={e=>{setDesc(e.target.value);setDirty(true)}} onBlur={saveText} placeholder="Détails… (écrivez librement, sauvegarde auto en quittant le champ)" rows={3} style={{width:"100%",background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:"var(--text2)",fontSize:11,outline:"none",resize:"vertical",marginTop:5,padding:"6px 8px",fontFamily:"var(--sans)",lineHeight:1.5}}/>
+    {/* Assignés multiples */}
+    <div style={{display:"flex",alignItems:"center",gap:4,marginTop:7,flexWrap:"wrap"}}>
+      <span style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",textTransform:"uppercase"}}>Pour :</span>
+      {TEAM.filter(m=>["kylian","gael"].includes(m.id)).map(m=>{const on=assignees.includes(m.id);return(
+        <button key={m.id} onClick={()=>toggleAssignee(m.id)} style={{display:"flex",alignItems:"center",gap:3,padding:"2px 8px",borderRadius:12,fontSize:9,fontWeight:700,border:"1px solid "+(on?m.color:"var(--border)"),background:on?m.color+"22":"transparent",color:on?m.color:"var(--text3)",cursor:"pointer"}}>
+          {on&&<i className="fa-solid fa-check" style={{fontSize:7}}/>}{m.name.split(" ")[0]}
+        </button>)})}
+    </div>
+    <div style={{display:"flex",alignItems:"center",gap:5,marginTop:6,flexWrap:"wrap"}}>
+      <select value={t.priority} onChange={e=>onSave(t.id,{priority:e.target.value})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:prio?.c,fontSize:9,fontWeight:700,padding:"2px 4px"}}>{WS_PRIO.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select>
+      <input type="date" value={t.due_date||""} onChange={e=>onSave(t.id,{due_date:e.target.value})} style={{background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:t.due_date&&t.due_date<td()&&t.status!=="done"?"var(--red)":"var(--text3)",fontSize:9,padding:"2px 4px",fontFamily:"var(--mono)"}}/>
+    </div>
+    {lead&&<div onClick={()=>{setSelLead(lead);setPage("pipeline")}} style={{marginTop:6,fontSize:9,color:"var(--blue)",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-link"/>{lead.nom}</div>}
+    <select value={t.lead_id||""} onChange={e=>onSave(t.id,{lead_id:e.target.value})} style={{width:"100%",marginTop:5,background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:"var(--text3)",fontSize:9,padding:"2px 4px"}}><option value="">— Lier à un lead —</option>{myL.map(l=><option key={l.id} value={l.id}>{l.nom}</option>)}</select>
+  </div>);
+}
+
+/* ═══ NoteEditor — état local, sauvegarde au blur ═══ */
+function NoteEditor({note,onSave,onDel}){
+  const[title,setTitle]=useState(note.title);
+  const[tags,setTags]=useState(note.tags||"");
+  const[content,setContent]=useState(note.content||"");
+  const[saved,setSaved]=useState(true);
+  useEffect(()=>{setTitle(note.title);setTags(note.tags||"");setContent(note.content||"");setSaved(true)},[note.id]);
+  const save=(fields)=>{onSave(note.id,fields);setSaved(true)};
+  return(
+  <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0}}>
+    <div className="card-h" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+      <input value={title} onChange={e=>{setTitle(e.target.value);setSaved(false)}} onBlur={()=>save({title:title})} placeholder="Titre de la note" style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:16,fontWeight:700,fontFamily:"var(--serif)",outline:"none"}}/>
+      <button onClick={()=>{save({title,tags,content})}} style={{padding:"5px 12px",borderRadius:6,background:saved?"transparent":"var(--green)",color:saved?"var(--text3)":"#fff",fontSize:10,fontWeight:700,border:"1px solid "+(saved?"var(--border)":"var(--green)")}}><i className={"fa-solid "+(saved?"fa-check":"fa-floppy-disk")} style={{marginRight:4}}/>{saved?"Enregistré":"Enregistrer"}</button>
+      <button onClick={()=>onDel(note.id)} style={{color:"var(--red)",fontSize:13}} title="Supprimer"><i className="fa-solid fa-trash"/></button>
+    </div>
+    <div style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
+      <input value={tags} onChange={e=>{setTags(e.target.value);setSaved(false)}} onBlur={()=>save({tags})} placeholder="Tags séparés par des virgules (ex: livraison, dev, urgent)" style={{width:"100%",background:"transparent",border:"none",color:"var(--text2)",fontSize:11,outline:"none",fontFamily:"var(--mono)"}}/>
+    </div>
+    <textarea value={content} onChange={e=>{setContent(e.target.value);setSaved(false)}} onBlur={()=>save({content})} placeholder="Écrivez ici… (compte-rendu, specs, idées, doc partagée avec Gael). Le texte est sauvegardé quand vous cliquez ailleurs ou sur Enregistrer." style={{flex:1,width:"100%",background:"transparent",border:"none",color:"var(--text)",fontSize:14,lineHeight:1.7,outline:"none",resize:"none",padding:"14px",fontFamily:"var(--sans)"}}/>
+    <div style={{padding:"6px 14px",borderTop:"1px solid var(--border)",fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",display:"flex",justifyContent:"space-between"}}><span>{content.length} caractères</span><span style={{color:saved?"var(--green)":"var(--gold)"}}><i className={"fa-solid "+(saved?"fa-cloud":"fa-pen")} style={{marginRight:4}}/>{saved?"Synchronisé":"Modifications non enregistrées…"}</span></div>
+  </div>);
+}
 
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
@@ -1320,10 +1368,10 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
       </div>)}
     </div></div></div></div>
   </div>}
-  {showAgForm&&<DayPanel date={showAgForm} evts={agDays.find(d=>d.ds===showAgForm)?.evts||[]} onClose={()=>setShowAgForm(null)} onAddEvent={(t,time,col)=>addAgEvent(showAgForm,t,time,col)} onDelEvent={delAgEvent} onLeadClick={l=>{setShowAgForm(null);setTimeout(()=>setSelLead(l),100)}} onMoveLead={(leadId,newDate)=>{upd(leadId,{nextRelance:newDate});flash("Relance deplacee")}} leads={myL} prestas={prestas} sess={sess}/>}
+  {showAgForm&&<DayPanel date={showAgForm} evts={agDays.find(d=>d.ds===showAgForm)?.evts||[]} onClose={()=>setShowAgForm(null)} onAddEvent={(t,time,col,assignees)=>addAgEvent(showAgForm,t,time,col,assignees)} onDelEvent={delAgEvent} onLeadClick={l=>{setShowAgForm(null);setTimeout(()=>setSelLead(l),100)}} onMoveLead={(leadId,newDate)=>{upd(leadId,{nextRelance:newDate});flash("Relance deplacee")}} leads={myL} prestas={prestas} sess={sess}/>}
 </div>};
 function DayPanel({date,evts,onClose,onAddEvent,onDelEvent,onLeadClick,onMoveLead,leads,prestas,sess}){
-const[showNew,setShowNew]=useState(false);const[nt,setNt]=useState("");const[ntime,setNtime]=useState("09:00");const[ncol,setNcol]=useState("var(--purple)");const[nFor,setNFor]=useState("");
+const[showNew,setShowNew]=useState(false);const[nt,setNt]=useState("");const[ntime,setNtime]=useState("09:00");const[ncol,setNcol]=useState("var(--purple)");const[nAssignees,setNAssignees]=useState([sess]);
 const[showAddLead,setShowAddLead]=useState(false);const[leadSearch,setLeadSearch]=useState("");
 const IS2={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
 const dt=new Date(date+"T12:00:00");
@@ -1363,7 +1411,7 @@ return <div className="day-panel">
           <div className="day-ev-dot" style={{background:ev.cl||"var(--gold)"}}/>
           <div className="day-ev-body">
             <div className="day-ev-title">{ev.tp==="relance"?"📅 ":ev.tp==="signe"?"✓ ":ev.tp==="paiement"?"💳 ":"📌 "}{ev.lb}</div>
-            <div className="day-ev-meta">{ev.time}{ev.lead?" | "+ev.lead.service+" | "+(COLS.find(c=>c.id===ev.lead.status)?.label||""):""}</div>
+            <div className="day-ev-meta">{ev.time}{ev.lead?" | "+ev.lead.service+" | "+(COLS.find(c=>c.id===ev.lead.status)?.label||""):""}{ev.assignee_ids&&ev.assignee_ids.length?" | "+ev.assignee_ids.map(a=>mN(a).split(" ")[0]).join(" + "):""}</div>
           </div>
           <div className="day-ev-actions">
             {ev.lead&&<button className="day-act-btn" onClick={()=>onLeadClick(ev.lead)}>Voir</button>}
@@ -1379,14 +1427,21 @@ return <div className="day-panel">
   {showNew&&<div className="day-new-form">
     <div style={{fontSize:10,fontWeight:600,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:8}}>NOUVEL EVENT</div>
     <div className="ff"><label>Titre</label><input style={IS2} value={nt} onChange={e=>setNt(e.target.value)} placeholder="Call client, Deadline, RDV..." autoFocus/></div>
-    <div className="ff"><label>Pour</label><select style={IS2} value={nFor||""} onChange={e=>setNFor(e.target.value)}><option value="">Moi</option>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name.split(" ")[0]}</option>)}</select></div>
+    <div className="ff"><label>Pour qui ? (sélection multiple)</label>
+      <div style={{display:"flex",gap:6,marginTop:4,flexWrap:"wrap"}}>
+        {TEAM.filter(m=>["kylian","gael"].includes(m.id)).map(m=>{const on=nAssignees.includes(m.id);return(
+          <button key={m.id} onClick={()=>setNAssignees(p=>{const nx=on?p.filter(a=>a!==m.id):[...p,m.id];return nx.length?nx:[m.id]})} style={{display:"flex",alignItems:"center",gap:4,padding:"6px 12px",borderRadius:14,fontSize:11,fontWeight:700,border:"1px solid "+(on?m.color:"var(--border)"),background:on?m.color+"22":"transparent",color:on?m.color:"var(--text3)",cursor:"pointer"}}>
+            {on&&<i className="fa-solid fa-check" style={{fontSize:8}}/>}{m.name.split(" ")[0]}
+          </button>)})}
+      </div>
+    </div>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
       <div className="ff"><label>Heure</label><input style={IS2} type="time" value={ntime} onChange={e=>setNtime(e.target.value)}/></div>
       <div className="ff"><label>Couleur</label><div style={{display:"flex",gap:4,marginTop:4}}>{["var(--purple)","var(--gold)","var(--red)","var(--green)","var(--blue)"].map(c=><button key={c} onClick={()=>setNcol(c)} style={{width:22,height:22,borderRadius:6,background:c,border:ncol===c?"2px solid var(--text)":"2px solid transparent"}}/>)}</div></div>
     </div>
     <div style={{display:"flex",gap:4,justifyContent:"flex-end",marginTop:8}}>
       <button onClick={()=>setShowNew(false)} style={{padding:"8px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Annuler</button>
-      <button onClick={()=>{if(nt.trim()){onAddEvent(nt.trim(),ntime,ncol);setNt("");setNtime("09:00");setShowNew(false)}}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}>Ajouter</button>
+      <button onClick={()=>{if(nt.trim()){onAddEvent(nt.trim(),ntime,ncol,nAssignees);setNt("");setNtime("09:00");setNAssignees([sess]);setShowNew(false)}}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}>Ajouter</button>
     </div>
   </div>}
 </div>}
@@ -1645,7 +1700,7 @@ return (
   {showRapport&&rapportData&&<div className="overlay" onClick={()=>setShowRapport(false)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:500}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}>Rapport Hebdo</h3><button onClick={()=>setShowRapport(false)} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:10}}>{[{l:"Leads sem.",v:rapportData.wL,c:"var(--blue)"},{l:"Signes sem.",v:rapportData.wS,c:"var(--green)"},{l:"CA sem.",v:E(rapportData.wCA),c:"var(--green)"},{l:"Pipeline",v:rapportData.pipe,c:"var(--gold)"},{l:"Encaisse",v:E(rapportData.enc),c:"var(--green)"},{l:"Urgents",v:rapportData.urg,c:"var(--red)"}].map((s,i)=><div key={i} style={{background:"var(--bg)",borderRadius:6,padding:6,textAlign:"center"}}><div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:15,fontWeight:700,fontFamily:"var(--mono)",color:s.c}}>{s.v}</div></div>)}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--gold)"}}>Top:</strong> {rapportData.topPerf}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--green)"}}>Cash:</strong> {E(rapportData.enc)} / {E(rapportData.theo)} ({rapportData.theo>0?Math.round(rapportData.enc/rapportData.theo*100):0}%)</div>{rapportData.stale>0&&<div style={{fontSize:12,color:"var(--red)"}}>Dormants: {rapportData.stale}</div>}<div className="sep"/><div style={{display:"flex",gap:4,justifyContent:"flex-end"}}><button onClick={()=>{cp("RAPPORT WEBO "+rapportData.date+": "+rapportData.wL+" leads, "+rapportData.wS+" signes, Pipeline "+rapportData.pipe+", Cash "+E(rapportData.enc)+"/"+E(rapportData.theo),flash)}} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Copier</button><button onClick={()=>{askAI("Rapport hebdo: "+rapportData.wL+" leads, "+rapportData.wS+" signes, "+rapportData.stale+" dormants, cash "+E(rapportData.enc)+"/"+E(rapportData.theo)+". 3 actions.");setShowRapport(false);setPage("ia")}} style={{padding:"7px 12px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}>IA</button></div></div></div>}
   {outreachPresta&&<OutreachModal target={outreachPresta} type="presta" onClose={()=>setOutreachPresta(null)} flash={flash}/>}
   {outreachLead&&<OutreachModal target={outreachLead} type="lead" onClose={()=>setOutreachLead(null)} flash={flash} aiGen={aiGenColdMail} onSent={onColdMailSent} prospecteurName={mN(sess)}/>}
-  {scriptLead&&<ScriptModal lead={scriptLead} onClose={()=>setScriptLead(null)} flash={flash}/>}
+  {scriptLead&&<ScriptModal lead={scriptLead} onClose={()=>setScriptLead(null)} flash={flash} gemini={gemini}/>}
   <button onClick={()=>setPage("ia")} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
@@ -1823,10 +1878,15 @@ const fire=async()=>{setSt("loading");try{await fetch(url,{method:"POST",headers
 return <button onClick={fire} disabled={st==="loading"} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid "+(st==="done"?"var(--green)":color),color:st==="done"?"var(--green)":color,fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:4,transition:"all .2s",opacity:st==="loading"?.5:1}}><i className={"fa-solid "+(st==="loading"?"fa-spinner fa-spin":st==="done"?"fa-check":icon)}/>{st==="loading"?"Envoi...":st==="done"?"Envoyé !":label}</button>}
 
 /* ═══ SCRIPT D'APPEL MODAL ═══ */
-function ScriptModal({lead,onClose,flash}){
+function ScriptModal({lead,onClose,flash,gemini}){
 const[script,setScript]=useState("");const[loading,setLoading]=useState(false);const[error,setError]=useState("");
 if(!lead)return null;
-const generate=async()=>{setLoading(true);setError("");setScript("");try{const r=await fetch("https://hook.eu1.make.com/WEBHOOK_IA_PLACEHOLDER",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({entreprise:lead.nom,contact:lead.phone||lead.email||"",email:lead.email||"",service:lead.service,audit_score:lead.auditScore,audit_erreurs:lead.auditErreurs,linkedin_step:lead.linkedinStep,valeur:lead.valeur,status:lead.status})});if(!r.ok)throw new Error("Erreur "+r.status);const txt=await r.text();setScript(txt)}catch(e){setError((e.message||"Erreur").slice(0,120))}setLoading(false)};
+const generate=async()=>{setLoading(true);setError("");setScript("");try{
+  const ctx="Entreprise : "+lead.nom+"\nActivité : "+lead.service+(lead.adresse?"\nLocalisation : "+lead.adresse:"")+(lead.phone?"\nTéléphone : "+lead.phone:"")+(lead.notes?"\nNotes prospecteur : "+lead.notes.slice(0,300):"")+(lead.status?"\nStatut pipeline : "+lead.status:"");
+  const prompt="Tu es coach commercial expert en prospection téléphonique B2B pour WEBO. WEBO conçoit des outils logiciels sur-mesure pour digitaliser et optimiser les OPÉRATIONS INTERNES des entreprises de livraison, transport et logistique : planification des tournées, suivi temps réel des chauffeurs et colis, preuves de livraison, gestion des litiges, tableau de bord, facturation — pour remplacer Excel, papier, appels et WhatsApp.\n\nOBJECTIF DE L'APPEL : obtenir un rendez-vous découverte de 15-20 minutes (PAS de vente immédiate, PAS de démo gratuite promise au téléphone).\n\nPROSPECT À APPELER :\n"+ctx+"\n\nRédige un SCRIPT D'APPEL À FROID en français, naturel, parlé (pas un mail lu à voix haute), structuré avec ces sections clairement titrées :\n\n1. ACCROCHE (15 sec) — présentation + raison de l'appel, personnalisée sur son métier de livraison/transport\n2. PHRASE D'IMPACT — un problème opérationnel concret qu'il vit probablement (ressaisies, tournées non optimisées, manque de visibilité, litiges)\n3. QUESTIONS DE DÉCOUVERTE (3-4 questions ouvertes pour le faire parler de ses opérations actuelles)\n4. PITCH COURT — comment WEBO résout son problème avec un outil adapté à SES opérations (2-3 phrases max)\n5. RÉPONSES AUX 3 OBJECTIONS COURANTES : « j'ai déjà un outil / un logiciel », « pas le temps / pas le budget », « envoyez-moi un mail » — donne une réponse courte et efficace pour chacune\n6. CLÔTURE — proposer 2 créneaux précis pour un appel de 15-20 min\n\nTon : confiant, humain, jamais agressif. Phrases courtes et orales. Utilise des tirets et titres en MAJUSCULES pour les sections. Pas de markdown, pas d'astérisques.";
+  const txt=await gemini(prompt,false);
+  setScript((txt||"").trim());
+}catch(e){setError((e.message||"Erreur").slice(0,120))}setLoading(false)};
 return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:600,maxHeight:"92vh"}} onClick={e=>e.stopPropagation()}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
   <h3 style={{fontFamily:"var(--serif)",fontSize:17,display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:20}}>📞</span> Script d'Appel</h3>
