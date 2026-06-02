@@ -812,7 +812,7 @@ useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTARE
 const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");if(l._isNew){addNotif("fa-plus","var(--green)","Nouveau: "+c.nom,c.id);addActivity(sess,"a ajouté",c.nom,"var(--green)")}else{addActivity(sess,"a modifié",c.nom,"var(--blue)")}await sb.from("leads").upsert(L2db(c))},[sess]);
 const del=useCallback(async id=>{const dl=leads.find(x=>x.id===id);setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");addActivity(sess,"a supprimé",dl?.nom||"","var(--red)");await sb.from("leads").delete().eq("id",id)},[leads,sess]);
 const touch=useCallback(async(id,msg)=>{const l=leads.find(x=>x.id===id);if(!l)return;const t=(l.tentatives||0)+1;const nl=addLog(l.activityLog,msg||"Contact #"+t);setLeads(p=>p.map(x=>x.id===id?{...x,lastInteraction:new Date().toISOString(),tentatives:t,activityLog:nl}:x));await sb.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t,activity_log:nl}).eq("id",id)},[leads]);
-const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={status:"status",lastInteraction:"last_interaction",nextRelance:"next_relance",verifStatus:"verif_status",verifNote:"verif_note",activityLog:"activity_log",paymentStatus:"payment_status",linkedinUrl:"linkedin_url",linkedinCampaign:"linkedin_campaign",auditScore:"audit_score",auditPdfLink:"audit_pdf_link",auditErreurs:"audit_erreurs",linkedinStep:"linkedin_step",timeline:"timeline",cms:"cms",prodStatus:"prod_status"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});await sb.from("leads").update(db).eq("id",id)},[]);
+const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={nom:"nom",service:"service",valeur:"valeur",memberId:"member_id",status:"status",dateCreated:"date_created",lastInteraction:"last_interaction",nextRelance:"next_relance",notes:"notes",source:"source",echecReason:"echec_reason",tentatives:"tentatives",paymentProof:"payment_proof",verifStatus:"verif_status",verifNote:"verif_note",prestaId:"presta_id",email:"email",phone:"phone",adresse:"adresse",temperature:"temperature",activityLog:"activity_log",paymentLink:"payment_link",externalLink:"external_link",paymentStatus:"payment_status",linkedinUrl:"linkedin_url",linkedinCampaign:"linkedin_campaign",auditScore:"audit_score",auditPdfLink:"audit_pdf_link",auditErreurs:"audit_erreurs",linkedinStep:"linkedin_step",timeline:"timeline",cms:"cms",prodStatus:"prod_status"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});if(Object.keys(db).length)await sb.from("leads").update(db).eq("id",id)},[]);
 const updV=useCallback(async(id,vs,vn)=>{const nl=addLog(leads.find(l=>l.id===id)?.activityLog||"","Vérif:"+vs);setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,activityLog:nl}:l));setShowVerif(null);flash("Vérif ✓");await sb.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td(),activity_log:nl}).eq("id",id)},[leads]);
 const upsP=useCallback(async p=>{const c={...p};delete c._isNew;setPrestas(pr=>pr.some(x=>x.id===c.id)?pr.map(x=>x.id===c.id?c:x):[...pr,c]);setShowPF(false);setEditP(null);flash("Presta ✓");await sb.from("prestataires").upsert(c)},[]);
 const delP=useCallback(async id=>{setPrestas(pr=>pr.filter(x=>x.id!==id));setShowPF(false);setEditP(null);flash("Supprimé");await sb.from("prestataires").delete().eq("id",id)},[]);
@@ -1639,10 +1639,32 @@ return <div className="rpanel">
           <select value={l.temperature} onChange={e=>upd(l.id,{temperature:e.target.value})} style={{width:"100%",padding:"7px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:12,fontWeight:700,outline:"none"}}>{TEMPS.map(t=><option key={t.id} value={t.id}>{t.e} {t.l}</option>)}</select>
         </div>
       </div>
-      {/* Cold call toggle + relance rapide */}
-      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-        <button onClick={()=>{const isCold=l.source==="Appel à froid";upd(l.id,{source:isCold?"Prospection terrain":"Appel à froid"});flash(isCold?"Retiré cold call":"Marqué cold call")}} style={{flex:1,padding:"7px 8px",borderRadius:6,border:"1px solid "+(l.source==="Appel à froid"?"var(--bordeaux2)":"var(--border)"),background:l.source==="Appel à froid"?"rgba(107,26,26,.12)":"transparent",color:l.source==="Appel à froid"?"#E88":"var(--text2)",fontSize:11,fontWeight:700}}><i className={"fa-solid "+(l.source==="Appel à froid"?"fa-fire":"fa-snowflake")} style={{marginRight:4}}/>{l.source==="Appel à froid"?"Cold call ✓":"Cold call ?"}</button>
-        <button onClick={()=>{touch(l.id,"Relance");upd(l.id,{nextRelance:addD(td(),2)});flash("Relancé J+2")}} style={{flex:1,padding:"7px 8px",borderRadius:6,border:"1px solid var(--green)",color:"var(--green)",fontSize:11,fontWeight:700}}><i className="fa-solid fa-check" style={{marginRight:4}}/>Relancé J+2</button>
+      {/* Type de contact (Cold call / Cold mail / etc.) */}
+      <div style={{marginBottom:8}}>
+        <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3}}>TYPE DE CONTACT</div>
+        <select value={l.source||""} onChange={e=>{upd(l.id,{source:e.target.value});flash("Contact: "+e.target.value)}} style={{width:"100%",padding:"7px 8px",borderRadius:6,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:12,fontWeight:700,outline:"none"}}>
+          <option value="Appel à froid">📞 Cold call</option>
+          <option value="Email froid">✉️ Cold mail</option>
+          <option value="LinkedIn">💼 LinkedIn</option>
+          <option value="DM Instagram">📷 DM Instagram</option>
+          <option value="Prospection terrain">🚶 Prospection terrain</option>
+          <option value="Référence">🤝 Référence</option>
+          <option value="Autre">• Autre</option>
+        </select>
+      </div>
+      {/* Relances rapides */}
+      <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3}}>RELANCE</div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+        <button onClick={()=>{touch(l.id,"Relance — répondeur");upd(l.id,{nextRelance:addD(td(),1)});flash("Répondeur → relance demain")}} style={{flex:1,minWidth:120,padding:"7px 8px",borderRadius:6,border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:700}}><i className="fa-solid fa-phone-slash" style={{marginRight:4}}/>Répondeur (J+1)</button>
+        <select value="" onChange={e=>{const n=parseInt(e.target.value);if(!n)return;touch(l.id,"Relance programmée J+"+n);upd(l.id,{nextRelance:addD(td(),n)});flash("Relance dans "+n+" jour(s)")}} style={{flex:1,minWidth:120,padding:"7px 8px",borderRadius:6,border:"1px solid var(--green)",background:"var(--bg)",color:"var(--green)",fontSize:11,fontWeight:700,outline:"none"}}>
+          <option value="">⏱️ Relancer dans…</option>
+          <option value="2">2 jours</option>
+          <option value="3">3 jours</option>
+          <option value="5">5 jours</option>
+          <option value="7">1 semaine</option>
+          <option value="14">2 semaines</option>
+          <option value="30">1 mois</option>
+        </select>
       </div>
     </div>
     <div style={{marginBottom:12}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:4}}>SCORE DE SANTÉ</div>
@@ -1730,7 +1752,7 @@ return (
     {page==="finance"&&<Finance/>}
     {page==="ia"&&iaUI}
   </div>
-  {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
+  {selLead&&<Detail l={leads.find(x=>x.id===selLead.id)||selLead} onClose={()=>setSelLead(null)}/>}
   {/* CMD */}
   {cmd&&<div className="cmd-ov" onClick={()=>setCmd(false)}><div className="cmd-box" onClick={e=>e.stopPropagation()}><input className="cmd-in" value={cmdQ} onChange={e=>setCmdQ(e.target.value)} placeholder="Commande, lead ou prestataire…" autoFocus onKeyDown={e=>{if(e.key==="Escape")setCmd(false);if(e.key==="Enter"&&cmdRes.length>0){cmdRes[0].a();setCmd(false);setCmdQ("")}}}/><div style={{maxHeight:300,overflowY:"auto"}}>{cmdRes.map((r,i)=><div key={i} className="cmd-r" onClick={()=>{r.a();setCmd(false);setCmdQ("")}}><i className={"fa-solid "+r.i} style={{width:18,textAlign:"center",color:"var(--gold)"}}/><span>{r.l}</span></div>)}</div></div></div>}
   {/* MODALS */}
