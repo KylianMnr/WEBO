@@ -705,6 +705,15 @@ const[agMonth,setAgMonth]=useState(new Date());const[agEvents,setAgEvents]=useSt
 const[wsNotes,setWsNotes]=useState([]);const[wsTasks,setWsTasks]=useState([]);
 const[wsTab,setWsTab]=useState("board");const[wsActiveNote,setWsActiveNote]=useState(null);const[wsTaskFilter,setWsTaskFilter]=useState("all");
 const aiRef=useRef(null);const pm=privacy||clientMode;
+/* ═══ Anti micro-coupures temps réel ═══ */
+const echoRef=useRef({});      // id -> timestamp de la dernière écriture locale (ignore l'écho realtime)
+const editingRef=useRef({});   // id -> true si le champ de ce record est en cours d'édition (focus)
+const dbTimers=useRef({});     // id -> timer de debounce pour grouper les écritures
+const markEcho=id=>{echoRef.current[id]=Date.now()};
+const isEcho=id=>{const t=echoRef.current[id];return t&&(Date.now()-t)<2500};
+const isEditing=id=>!!editingRef.current[id];
+const setEditing=(id,v)=>{if(v)editingRef.current[id]=true;else delete editingRef.current[id]};
+const debounceWrite=(id,fn,ms=600)=>{if(dbTimers.current[id])clearTimeout(dbTimers.current[id]);dbTimers.current[id]=setTimeout(()=>{delete dbTimers.current[id];fn()},ms)};
 const[rapportData,setRapportData]=useState(null);const[showRapport,setShowRapport]=useState(false);
 const[scriptLead,setScriptLead]=useState(null);
 const[objectives,setObjectives]=useState(()=>{try{return JSON.parse(localStorage.getItem("webo_objectives"))||OBJ_DEFAULTS}catch(e){return OBJ_DEFAULTS}});
@@ -740,14 +749,14 @@ const anon=v=>{if(!clientMode||!v)return v;const s=String(v);if(s.includes("@"))
 /* V13.2 — Agenda calendar */
 /* V30 — Agenda events persistés sur Supabase (table agenda_events) */
 const addAgEvent=async(date,title,time,color,assignee_ids,endTime,allDay)=>{const ev={id:uid(),date,title,time:allDay?"00:00":(time||"09:00"),end_time:allDay?"":(endTime||""),all_day:!!allDay,color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}};
-const updAgEvent=async(id,fields)=>{setAgEvents(p=>p.map(e=>e.id===id?{...e,...fields}:e));try{await sb.from("agenda_events").update(fields).eq("id",id)}catch(e){}};
+const updAgEvent=async(id,fields)=>{setAgEvents(p=>p.map(e=>e.id===id?{...e,...fields}:e));markEcho(id);try{await sb.from("agenda_events").update(fields).eq("id",id)}catch(e){}};
 const delAgEvent=async id=>{setAgEvents(p=>p.filter(e=>e.id!==id));try{await sb.from("agenda_events").delete().eq("id",id)}catch(e){}};
 /* ═══ ESPACE — CRUD Notes & Tâches (Supabase: workspace_notes / workspace_tasks) ═══ */
 const wsAddNote=async(title)=>{const n={id:uid(),title:title||"Nouvelle note",content:"",tags:"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsNotes(p=>[n,...p]);setWsActiveNote(n.id);flash("Note créée");addActivity(sess,"a créé une note",n.title,"var(--blue)");try{await sb.from("workspace_notes").insert(n)}catch(e){flash("Erreur sync note")}return n.id};
-const wsUpdNote=async(id,fields)=>{const upd={...fields,updated_at:new Date().toISOString()};setWsNotes(p=>p.map(n=>n.id===id?{...n,...upd}:n));try{await sb.from("workspace_notes").update(upd).eq("id",id)}catch(e){}};
+const wsUpdNote=(id,fields)=>{const upd={...fields,updated_at:new Date().toISOString()};setWsNotes(p=>p.map(n=>n.id===id?{...n,...upd}:n));markEcho(id);debounceWrite("note_"+id,()=>{markEcho(id);sb.from("workspace_notes").update(upd).eq("id",id)})};
 const wsDelNote=async id=>{if(!confirm("Supprimer cette note ?"))return;const n=wsNotes.find(x=>x.id===id);setWsNotes(p=>p.filter(x=>x.id!==id));if(wsActiveNote===id)setWsActiveNote(null);flash("Note supprimée");addActivity(sess,"a supprimé une note",n?.title||"","var(--red)");try{await sb.from("workspace_notes").delete().eq("id",id)}catch(e){}};
 const wsAddTask=async(t)=>{const task={id:uid(),title:t.title||"Nouvelle tâche",description:t.description||"",status:t.status||"todo",priority:t.priority||"normal",assignee_id:t.assignee_id||sess,assignee_ids:t.assignee_ids||[t.assignee_id||sess],lead_id:t.lead_id||"",due_date:t.due_date||"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsTasks(p=>[task,...p]);flash("Tâche créée");addActivity(sess,"a créé une tâche",task.title,"var(--green)");(task.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-list-check","var(--blue)",mN(sess)+" t'a assigné: "+task.title));try{await sb.from("workspace_tasks").insert(task)}catch(e){flash("Erreur sync tâche")}};
-const wsUpdTask=async(id,fields)=>{const upd={...fields,updated_at:new Date().toISOString()};const prev=wsTasks.find(t=>t.id===id);setWsTasks(p=>p.map(t=>t.id===id?{...t,...upd}:t));if(fields.status&&prev&&fields.status!==prev.status){addActivity(sess,"a déplacé une tâche",prev.title+" → "+(WS_COLS.find(c=>c.id===fields.status)?.label||fields.status),"var(--purple)")}try{await sb.from("workspace_tasks").update(upd).eq("id",id)}catch(e){}};
+const wsUpdTask=(id,fields)=>{const upd={...fields,updated_at:new Date().toISOString()};const prev=wsTasks.find(t=>t.id===id);setWsTasks(p=>p.map(t=>t.id===id?{...t,...upd}:t));if(fields.status&&prev&&fields.status!==prev.status){addActivity(sess,"a déplacé une tâche",prev.title+" → "+(WS_COLS.find(c=>c.id===fields.status)?.label||fields.status),"var(--purple)")}markEcho(id);debounceWrite("task_"+id,()=>{markEcho(id);sb.from("workspace_tasks").update(upd).eq("id",id)})};
 const wsDelTask=async id=>{const t=wsTasks.find(x=>x.id===id);setWsTasks(p=>p.filter(x=>x.id!==id));flash("Tâche supprimée");addActivity(sess,"a supprimé une tâche",t?.title||"","var(--red)");try{await sb.from("workspace_tasks").delete().eq("id",id)}catch(e){}};
 
 const bulkPresta=async pid=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,prestaId:pid}:x));await sb.from("leads").update({presta_id:pid}).eq("id",id)}setSelIds(new Set());flash("Assignes")};
@@ -811,8 +820,8 @@ useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTARE
 /* CRUD */
 const upsert=useCallback(async l=>{const c={...l};delete c._isNew;setLeads(p=>p.some(x=>x.id===c.id)?p.map(x=>x.id===c.id?c:x):[...p,c]);setShowForm(false);setEditId(null);flash(l._isNew?"Ajouté ✓":"Mis à jour ✓");if(l._isNew){addNotif("fa-plus","var(--green)","Nouveau: "+c.nom,c.id);addActivity(sess,"a ajouté",c.nom,"var(--green)")}else{addActivity(sess,"a modifié",c.nom,"var(--blue)")}await sb.from("leads").upsert(L2db(c))},[sess]);
 const del=useCallback(async id=>{const dl=leads.find(x=>x.id===id);setLeads(p=>p.filter(l=>l.id!==id));setShowForm(false);setEditId(null);flash("Supprimé");addActivity(sess,"a supprimé",dl?.nom||"","var(--red)");await sb.from("leads").delete().eq("id",id)},[leads,sess]);
-const touch=useCallback(async(id,msg)=>{const l=leads.find(x=>x.id===id);if(!l)return;const t=(l.tentatives||0)+1;const nl=addLog(l.activityLog,msg||"Contact #"+t);setLeads(p=>p.map(x=>x.id===id?{...x,lastInteraction:new Date().toISOString(),tentatives:t,activityLog:nl}:x));await sb.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t,activity_log:nl}).eq("id",id)},[leads]);
-const upd=useCallback(async(id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={nom:"nom",service:"service",valeur:"valeur",memberId:"member_id",status:"status",dateCreated:"date_created",lastInteraction:"last_interaction",nextRelance:"next_relance",notes:"notes",source:"source",echecReason:"echec_reason",tentatives:"tentatives",paymentProof:"payment_proof",verifStatus:"verif_status",verifNote:"verif_note",prestaId:"presta_id",email:"email",phone:"phone",adresse:"adresse",temperature:"temperature",activityLog:"activity_log",paymentLink:"payment_link",externalLink:"external_link",paymentStatus:"payment_status",linkedinUrl:"linkedin_url",linkedinCampaign:"linkedin_campaign",auditScore:"audit_score",auditPdfLink:"audit_pdf_link",auditErreurs:"audit_erreurs",linkedinStep:"linkedin_step",timeline:"timeline",cms:"cms",prodStatus:"prod_status"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});if(Object.keys(db).length)await sb.from("leads").update(db).eq("id",id)},[]);
+const touch=useCallback(async(id,msg)=>{const l=leads.find(x=>x.id===id);if(!l)return;const t=(l.tentatives||0)+1;const nl=addLog(l.activityLog,msg||"Contact #"+t);setLeads(p=>p.map(x=>x.id===id?{...x,lastInteraction:new Date().toISOString(),tentatives:t,activityLog:nl}:x));markEcho(id);await sb.from("leads").update({last_interaction:new Date().toISOString(),tentatives:t,activity_log:nl}).eq("id",id)},[leads]);
+const upd=useCallback((id,f)=>{setLeads(p=>p.map(l=>l.id===id?{...l,...f}:l));const db={};const m={nom:"nom",service:"service",valeur:"valeur",memberId:"member_id",status:"status",dateCreated:"date_created",lastInteraction:"last_interaction",nextRelance:"next_relance",notes:"notes",source:"source",echecReason:"echec_reason",tentatives:"tentatives",paymentProof:"payment_proof",verifStatus:"verif_status",verifNote:"verif_note",prestaId:"presta_id",email:"email",phone:"phone",adresse:"adresse",temperature:"temperature",activityLog:"activity_log",paymentLink:"payment_link",externalLink:"external_link",paymentStatus:"payment_status",linkedinUrl:"linkedin_url",linkedinCampaign:"linkedin_campaign",auditScore:"audit_score",auditPdfLink:"audit_pdf_link",auditErreurs:"audit_erreurs",linkedinStep:"linkedin_step",timeline:"timeline",cms:"cms",prodStatus:"prod_status"};Object.keys(f).forEach(k=>{if(m[k])db[m[k]]=f[k]});if(Object.keys(db).length){markEcho(id);debounceWrite(id,()=>{markEcho(id);sb.from("leads").update(db).eq("id",id)})}},[]);
 const updV=useCallback(async(id,vs,vn)=>{const nl=addLog(leads.find(l=>l.id===id)?.activityLog||"","Vérif:"+vs);setLeads(p=>p.map(l=>l.id===id?{...l,verifStatus:vs,verifNote:vn,activityLog:nl}:l));setShowVerif(null);flash("Vérif ✓");await sb.from("leads").update({verif_status:vs,verif_note:vn,verif_date:td(),activity_log:nl}).eq("id",id)},[leads]);
 const upsP=useCallback(async p=>{const c={...p};delete c._isNew;setPrestas(pr=>pr.some(x=>x.id===c.id)?pr.map(x=>x.id===c.id?c:x):[...pr,c]);setShowPF(false);setEditP(null);flash("Presta ✓");await sb.from("prestataires").upsert(c)},[]);
 const delP=useCallback(async id=>{setPrestas(pr=>pr.filter(x=>x.id!==id));setShowPF(false);setEditP(null);flash("Supprimé");await sb.from("prestataires").delete().eq("id",id)},[]);
@@ -828,7 +837,7 @@ useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads")
 try{const wn=await sb.from("workspace_notes").select("*").order("updated_at",{ascending:false});setWsNotes(wn.data||[])}catch(e){}
 try{const wt=await sb.from("workspace_tasks").select("*").order("created_at",{ascending:false});setWsTasks(wt.data||[])}catch(e){}
 try{const os=await sb.from("settings").select("value").eq("key","objectives").maybeSingle();if(os.data&&os.data.value)setObjectives(os.data.value)}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
-useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE")setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE")setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
+useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);if(isEcho(u.id)||isEditing(u.id))return;setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
 useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem("webo_theme",theme)}catch(e){}},[theme]);
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
@@ -1074,7 +1083,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
           <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)",background:"var(--bg)",borderRadius:8,padding:"1px 7px"}}>{colTasks.length}</span>
         </div>
         <div style={{display:"flex",flexDirection:"column",gap:6,overflowY:"auto"}}>
-          {colTasks.map(t=><TaskCard key={t.id} t={t} onSave={wsUpdTask} onDel={wsDelTask} TEAM={TEAM} myL={myL} leads={leads} setSelLead={setSelLead} setPage={setPage} td={td}/>)}
+          {colTasks.map(t=><TaskCard key={t.id} t={t} onSave={wsUpdTask} onDel={wsDelTask} TEAM={TEAM} myL={myL} leads={leads} setSelLead={setSelLead} setPage={setPage} td={td} setEditing={setEditing}/>)}
           {colTasks.length===0&&<div style={{padding:14,textAlign:"center",color:"var(--text4)",fontSize:10}}>Déposez une tâche ici</div>}
         </div>
       </div>)})}
@@ -1100,7 +1109,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
       </div>
     </div>
     {/* Éditeur note */}
-    {note?<NoteEditor key={note.id} note={note} onSave={wsUpdNote} onDel={wsDelNote}/>:
+    {note?<NoteEditor key={note.id} note={note} onSave={wsUpdNote} onDel={wsDelNote} setEditing={setEditing}/>:
       <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0,alignItems:"center",justifyContent:"center",gap:10,color:"var(--text3)"}}>
         <i className="fa-solid fa-note-sticky" style={{fontSize:38,opacity:.3}}/>
         <div style={{fontSize:13}}>Sélectionnez une note ou créez-en une</div>
@@ -1110,7 +1119,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
 </div>};
 
 /* ═══ TaskCard — état local, sauvegarde au blur (plus de perte de focus) ═══ */
-function TaskCard({t,onSave,onDel,TEAM,myL,leads,setSelLead,setPage,td}){
+function TaskCard({t,onSave,onDel,TEAM,myL,leads,setSelLead,setPage,td,setEditing}){
   const[title,setTitle]=useState(t.title);
   const[desc,setDesc]=useState(t.description||"");
   const[dirty,setDirty]=useState(false);
@@ -1119,14 +1128,15 @@ function TaskCard({t,onSave,onDel,TEAM,myL,leads,setSelLead,setPage,td}){
   const assignees=t.assignee_ids||(t.assignee_id?[t.assignee_id]:[]);
   const lead=t.lead_id?leads.find(l=>l.id===t.lead_id):null;
   const toggleAssignee=(mid)=>{let next=assignees.includes(mid)?assignees.filter(a=>a!==mid):[...assignees,mid];if(next.length===0)next=[mid];onSave(t.id,{assignee_ids:next,assignee_id:next[0]})};
-  const saveText=()=>{if(dirty){onSave(t.id,{title:title.trim()||"Sans titre",description:desc});setDirty(false)}};
+  const onFocus=()=>setEditing&&setEditing(t.id,true);
+  const saveText=()=>{setEditing&&setEditing(t.id,false);if(dirty){onSave(t.id,{title:title.trim()||"Sans titre",description:desc});setDirty(false)}};
   return(
   <div className="kc" draggable onDragStart={e=>e.dataTransfer.setData("text/plain",t.id)} style={{borderRadius:8,padding:9,borderLeft:"3px solid "+(prio?.c||"var(--border)"),cursor:"grab"}}>
     <div style={{display:"flex",justifyContent:"space-between",gap:6,alignItems:"flex-start"}}>
-      <input value={title} onChange={e=>{setTitle(e.target.value);setDirty(true)}} onBlur={saveText} style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:12,fontWeight:600,outline:"none",padding:0}}/>
+      <input value={title} onFocus={onFocus} onChange={e=>{setTitle(e.target.value);setDirty(true)}} onBlur={saveText} style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:12,fontWeight:600,outline:"none",padding:0}}/>
       <button onClick={()=>onDel(t.id)} style={{color:"var(--text4)",fontSize:11,flexShrink:0}} title="Supprimer"><i className="fa-solid fa-xmark"/></button>
     </div>
-    <textarea value={desc} onChange={e=>{setDesc(e.target.value);setDirty(true)}} onBlur={saveText} placeholder="Détails… (écrivez librement, sauvegarde auto en quittant le champ)" rows={3} style={{width:"100%",background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:"var(--text2)",fontSize:11,outline:"none",resize:"vertical",marginTop:5,padding:"6px 8px",fontFamily:"var(--sans)",lineHeight:1.5}}/>
+    <textarea value={desc} onFocus={onFocus} onChange={e=>{setDesc(e.target.value);setDirty(true)}} onBlur={saveText} placeholder="Détails… (écrivez librement, sauvegarde auto en quittant le champ)" rows={3} style={{width:"100%",background:"var(--bg)",border:"1px solid var(--border)",borderRadius:6,color:"var(--text2)",fontSize:11,outline:"none",resize:"vertical",marginTop:5,padding:"6px 8px",fontFamily:"var(--sans)",lineHeight:1.5}}/>
     {/* Assignés multiples */}
     <div style={{display:"flex",alignItems:"center",gap:4,marginTop:7,flexWrap:"wrap"}}>
       <span style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",textTransform:"uppercase"}}>Pour :</span>
@@ -1145,24 +1155,25 @@ function TaskCard({t,onSave,onDel,TEAM,myL,leads,setSelLead,setPage,td}){
 }
 
 /* ═══ NoteEditor — état local, sauvegarde au blur ═══ */
-function NoteEditor({note,onSave,onDel}){
+function NoteEditor({note,onSave,onDel,setEditing}){
   const[title,setTitle]=useState(note.title);
   const[tags,setTags]=useState(note.tags||"");
   const[content,setContent]=useState(note.content||"");
   const[saved,setSaved]=useState(true);
   useEffect(()=>{setTitle(note.title);setTags(note.tags||"");setContent(note.content||"");setSaved(true)},[note.id]);
-  const save=(fields)=>{onSave(note.id,fields);setSaved(true)};
+  const onFocus=()=>setEditing&&setEditing(note.id,true);
+  const save=(fields)=>{setEditing&&setEditing(note.id,false);onSave(note.id,fields);setSaved(true)};
   return(
   <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0}}>
     <div className="card-h" style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-      <input value={title} onChange={e=>{setTitle(e.target.value);setSaved(false)}} onBlur={()=>save({title:title})} placeholder="Titre de la note" style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:16,fontWeight:700,fontFamily:"var(--serif)",outline:"none"}}/>
+      <input value={title} onFocus={onFocus} onChange={e=>{setTitle(e.target.value);setSaved(false)}} onBlur={()=>save({title:title})} placeholder="Titre de la note" style={{flex:1,background:"transparent",border:"none",color:"var(--text)",fontSize:16,fontWeight:700,fontFamily:"var(--serif)",outline:"none"}}/>
       <button onClick={()=>{save({title,tags,content})}} style={{padding:"5px 12px",borderRadius:6,background:saved?"transparent":"var(--green)",color:saved?"var(--text3)":"#fff",fontSize:10,fontWeight:700,border:"1px solid "+(saved?"var(--border)":"var(--green)")}}><i className={"fa-solid "+(saved?"fa-check":"fa-floppy-disk")} style={{marginRight:4}}/>{saved?"Enregistré":"Enregistrer"}</button>
       <button onClick={()=>onDel(note.id)} style={{color:"var(--red)",fontSize:13}} title="Supprimer"><i className="fa-solid fa-trash"/></button>
     </div>
     <div style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
-      <input value={tags} onChange={e=>{setTags(e.target.value);setSaved(false)}} onBlur={()=>save({tags})} placeholder="Tags séparés par des virgules (ex: livraison, dev, urgent)" style={{width:"100%",background:"transparent",border:"none",color:"var(--text2)",fontSize:11,outline:"none",fontFamily:"var(--mono)"}}/>
+      <input value={tags} onFocus={onFocus} onChange={e=>{setTags(e.target.value);setSaved(false)}} onBlur={()=>save({tags})} placeholder="Tags séparés par des virgules (ex: livraison, dev, urgent)" style={{width:"100%",background:"transparent",border:"none",color:"var(--text2)",fontSize:11,outline:"none",fontFamily:"var(--mono)"}}/>
     </div>
-    <textarea value={content} onChange={e=>{setContent(e.target.value);setSaved(false)}} onBlur={()=>save({content})} placeholder="Écrivez ici… (compte-rendu, specs, idées, doc partagée avec Gael). Le texte est sauvegardé quand vous cliquez ailleurs ou sur Enregistrer." style={{flex:1,width:"100%",background:"transparent",border:"none",color:"var(--text)",fontSize:14,lineHeight:1.7,outline:"none",resize:"none",padding:"14px",fontFamily:"var(--sans)"}}/>
+    <textarea value={content} onFocus={onFocus} onChange={e=>{setContent(e.target.value);setSaved(false)}} onBlur={()=>save({content})} placeholder="Écrivez ici… (compte-rendu, specs, idées, doc partagée avec Gael). Le texte est sauvegardé quand vous cliquez ailleurs ou sur Enregistrer." style={{flex:1,width:"100%",background:"transparent",border:"none",color:"var(--text)",fontSize:14,lineHeight:1.7,outline:"none",resize:"none",padding:"14px",fontFamily:"var(--sans)"}}/>
     <div style={{padding:"6px 14px",borderTop:"1px solid var(--border)",fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",display:"flex",justifyContent:"space-between"}}><span>{content.length} caractères</span><span style={{color:saved?"var(--green)":"var(--gold)"}}><i className={"fa-solid "+(saved?"fa-cloud":"fa-pen")} style={{marginRight:4}}/>{saved?"Synchronisé":"Modifications non enregistrées…"}</span></div>
   </div>);
 }
