@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v30</title>
+<title>WEBO — Hub v31</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -18,27 +18,27 @@
 --radius:8px;--glass:rgba(17,21,32,.78);
 }
 [data-theme="light"]{
---bg:#F7F6F2;--bg2:#FFFFFF;--bg3:#FAF9F5;--bg4:#F0EEE8;--bg5:#E6E3D9;
---border:#E4E0D4;--border2:#D0CAB8;
+--bg:#F5F1E8;--bg2:#FDFAF3;--bg3:#F8F4E9;--bg4:#EFE8D8;--bg5:#E4DCC7;
+--border:#E3DAC4;--border2:#CDC3A9;
 --gold:#8B6A2E;--gold2:#A07A38;--bordeaux:#6B1A1A;--bordeaux2:#8B2828;--bordeaux-bg:#FFF0F0;
 --green:#067961;--red:#C73838;--blue:#1E54E0;--purple:#7045D0;
---text:#1A1A1F;--text2:#4A4A52;--text3:#7A7A82;--text4:#B0AB9C;
---glass:rgba(255,253,248,.88);
+--text:#2B2620;--text2:#554E42;--text3:#867C69;--text4:#B4AB95;
+--glass:rgba(252,247,237,.9);
 }
 /* ═══ LIGHT MODE — refonte v28.2 ═══ */
 [data-theme="light"] body{
-  background:#F7F6F2;
+  background:#F5F1E8;
   background-image:
     radial-gradient(circle at 15% 20%,rgba(197,160,89,.07) 0%,transparent 45%),
     radial-gradient(circle at 85% 80%,rgba(107,26,26,.04) 0%,transparent 45%);
 }
 [data-theme="light"] .topnav{
-  background:rgba(255,253,248,.92);
+  background:rgba(252,247,237,.94);
   border-bottom:1px solid rgba(139,106,46,.18);
   box-shadow:0 1px 0 rgba(0,0,0,.02),0 4px 12px rgba(139,106,46,.04);
 }
 [data-theme="light"] .logo .w{color:#8B6A2E}
-[data-theme="light"] .logo .r{color:#1A1A1F}
+[data-theme="light"] .logo .r{color:#2B2620}
 [data-theme="light"] .logo-tag{color:#8B6A2E;opacity:.7}
 [data-theme="light"] .nb{color:var(--text2)}
 [data-theme="light"] .nb:hover{background:rgba(139,106,46,.06);color:var(--text)}
@@ -46,27 +46,27 @@
 
 /* Cards — fond clair propre, ombres douces au lieu de bordures fantômes */
 [data-theme="light"] .card{
-  background:linear-gradient(160deg,#FFFFFF,#FBFAF6);
-  border:1px solid #ECE7DA;
-  box-shadow:0 1px 3px rgba(60,40,10,.04),0 1px 2px rgba(60,40,10,.02);
+  background:linear-gradient(160deg,#FDFAF3,#F7F1E2);
+  border:1px solid #E8E0CB;
+  box-shadow:0 1px 3px rgba(70,55,25,.035),0 1px 2px rgba(70,55,25,.018);
 }
 [data-theme="light"] .card:hover{
   border-color:rgba(139,106,46,.25);
-  box-shadow:0 6px 18px rgba(60,40,10,.06),0 2px 4px rgba(60,40,10,.03);
+  box-shadow:0 6px 18px rgba(70,55,25,.05),0 2px 4px rgba(70,55,25,.025);
 }
-[data-theme="light"] .card-h{border-bottom:1px solid #ECE7DA}
+[data-theme="light"] .card-h{border-bottom:1px solid #E8E0CB}
 
 [data-theme="light"] .stat-card{
-  background:linear-gradient(145deg,#FFFFFF,#FBFAF6);
-  border:1px solid #ECE7DA;
-  box-shadow:0 1px 3px rgba(60,40,10,.04);
+  background:linear-gradient(145deg,#FDFAF3,#F7F1E2);
+  border:1px solid #E8E0CB;
+  box-shadow:0 1px 3px rgba(70,55,25,.035);
 }
 [data-theme="light"] .stat-card:hover{box-shadow:0 4px 12px rgba(139,106,46,.08)}
 
 [data-theme="light"] .hub-card{
-  background:linear-gradient(145deg,#FFFFFF,rgba(251,250,246,.6));
-  border:1px solid #ECE7DA;
-  box-shadow:0 2px 8px rgba(60,40,10,.04);
+  background:linear-gradient(145deg,#FDFAF3,rgba(248,242,228,.6));
+  border:1px solid #E8E0CB;
+  box-shadow:0 2px 8px rgba(70,55,25,.035);
 }
 [data-theme="light"] .hub-card:hover{
   border-color:rgba(139,106,46,.3);
@@ -85,14 +85,14 @@
 
 /* Kanban — colonnes lisibles, cards papier */
 [data-theme="light"] .kanban-col{
-  background:linear-gradient(180deg,#F0EDE3,#F5F2E9);
-  border:1px solid #E4E0D4;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.5);
+  background:linear-gradient(180deg,#EFE8D8,#F4EEE0);
+  border:1px solid #E3DAC4;
+  box-shadow:inset 0 1px 0 rgba(253,250,243,.55);
 }
 [data-theme="light"] .kc{
-  background:linear-gradient(145deg,#FFFFFF,#FBFAF6);
-  border:1px solid #E4E0D4;
-  box-shadow:0 1px 2px rgba(60,40,10,.04);
+  background:linear-gradient(145deg,#FDFAF3,#F7F1E2);
+  border:1px solid #E3DAC4;
+  box-shadow:0 1px 2px rgba(70,55,25,.035);
 }
 [data-theme="light"] .kc:hover{
   border-color:rgba(139,106,46,.3);
@@ -102,53 +102,53 @@
 
 /* Arrows kanban */
 [data-theme="light"] .k-arrow{
-  background:rgba(255,255,255,.95);
-  border:1px solid #E4E0D4;
+  background:rgba(253,250,243,.95);
+  border:1px solid #E3DAC4;
   color:#8B6A2E;
-  box-shadow:0 2px 8px rgba(60,40,10,.08);
+  box-shadow:0 2px 8px rgba(70,55,25,.07);
 }
-[data-theme="light"] .k-arrow:hover{background:#FFFFFF;border-color:#8B6A2E}
+[data-theme="light"] .k-arrow:hover{background:#FDFAF3;border-color:#8B6A2E}
 
 /* Modal / Right panel / Notif panel */
-[data-theme="light"] .overlay-bg{background:rgba(60,40,10,.18);backdrop-filter:blur(8px)}
+[data-theme="light"] .overlay-bg{background:rgba(70,55,25,.14);backdrop-filter:blur(8px)}
 [data-theme="light"] .modal{
-  background:#FFFFFF;
-  border:1px solid #E4E0D4;
-  box-shadow:0 24px 60px rgba(60,40,10,.15),0 0 0 1px rgba(139,106,46,.06);
+  background:#FDFAF3;
+  border:1px solid #E3DAC4;
+  box-shadow:0 24px 60px rgba(70,55,25,.12),0 0 0 1px rgba(139,106,46,.06);
 }
 [data-theme="light"] .rpanel{
-  background:linear-gradient(180deg,#FFFFFF,#FBFAF6);
-  border-left:1px solid #E4E0D4;
-  box-shadow:-12px 0 32px rgba(60,40,10,.06);
+  background:linear-gradient(180deg,#FDFAF3,#F7F1E2);
+  border-left:1px solid #E3DAC4;
+  box-shadow:-12px 0 32px rgba(70,55,25,.05);
 }
 [data-theme="light"] .notif-panel{
-  background:#FFFFFF;
-  border:1px solid #E4E0D4;
-  box-shadow:0 16px 40px rgba(60,40,10,.12);
+  background:#FDFAF3;
+  border:1px solid #E3DAC4;
+  box-shadow:0 16px 40px rgba(70,55,25,.1);
 }
 [data-theme="light"] .day-panel{
-  background:#FFFFFF;
-  border-left:1px solid #E4E0D4;
-  box-shadow:-8px 0 24px rgba(60,40,10,.06);
+  background:#FDFAF3;
+  border-left:1px solid #E3DAC4;
+  box-shadow:-8px 0 24px rgba(70,55,25,.05);
 }
 
 /* Command palette */
-[data-theme="light"] .cmd-ov{background:rgba(60,40,10,.18);backdrop-filter:blur(6px)}
-[data-theme="light"] .cmd-box{background:#FFFFFF;border:1px solid #E4E0D4;box-shadow:0 24px 60px rgba(60,40,10,.18)}
+[data-theme="light"] .cmd-ov{background:rgba(70,55,25,.14);backdrop-filter:blur(6px)}
+[data-theme="light"] .cmd-box{background:#FDFAF3;border:1px solid #E3DAC4;box-shadow:0 24px 60px rgba(70,55,25,.14)}
 
 /* Chart card */
 [data-theme="light"] .chart-card{
-  background:#FFFFFF;
-  border:1px solid #ECE7DA;
-  box-shadow:0 1px 4px rgba(60,40,10,.04);
+  background:#FDFAF3;
+  border:1px solid #E8E0CB;
+  box-shadow:0 1px 4px rgba(70,55,25,.035);
 }
 
 /* Inputs */
 [data-theme="light"] select,
 [data-theme="light"] input,
 [data-theme="light"] textarea{
-  background:#FFFFFF;
-  border:1px solid #DCD6C5;
+  background:#FDFAF3;
+  border:1px solid #DAD1B9;
   color:var(--text);
 }
 [data-theme="light"] select:focus,
@@ -156,13 +156,13 @@
 [data-theme="light"] textarea:focus{border-color:#8B6A2E;box-shadow:0 0 0 3px rgba(139,106,46,.1)}
 
 /* Buttons : gold variant lisible */
-[data-theme="light"] button[style*="background:var(--gold)"]{color:#FFFFFF !important}
+[data-theme="light"] button[style*="background:var(--gold)"]{color:#FDFAF3 !important}
 
 /* Separator subtil */
 [data-theme="light"] .sep{background:linear-gradient(90deg,transparent,rgba(139,106,46,.22),transparent)}
 
 /* Timeline dots */
-[data-theme="light"] .tl-dot{border-color:#FFFFFF;box-shadow:0 0 0 1px rgba(60,40,10,.08)}
+[data-theme="light"] .tl-dot{border-color:#FDFAF3;box-shadow:0 0 0 1px rgba(70,55,25,.07)}
 
 /* Cards spéciaux : enrich, match, outreach */
 [data-theme="light"] .enrich-card{
@@ -180,16 +180,16 @@
 
 /* Bulk action bar */
 [data-theme="light"] .bulk-bar{
-  background:linear-gradient(180deg,transparent,#FFFFFF 25%);
+  background:linear-gradient(180deg,transparent,#FDFAF3 25%);
   border-top:1px solid rgba(139,106,46,.18);
-  box-shadow:0 -8px 24px rgba(60,40,10,.04);
+  box-shadow:0 -8px 24px rgba(70,55,25,.035);
 }
 
 /* Toast */
 [data-theme="light"] .ai-fab{box-shadow:0 6px 24px rgba(139,106,46,.35)}
 
 /* Scrollbar */
-[data-theme="light"] ::-webkit-scrollbar-thumb{background:#D0CAB8}
+[data-theme="light"] ::-webkit-scrollbar-thumb{background:#CDC3A9}
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:#8B6A2E}
 
 /* Sync dot */
@@ -233,7 +233,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .lb-item{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600}
 .lb-rank{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;font-family:var(--mono)}
 /* HUB */
-.hub{padding:24px 20px;max-width:1300px;margin:0 auto}
+.hub{padding:24px 28px;max-width:1680px;margin:0 auto;width:100%}
 .hub-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .hub-title{font-family:var(--serif);font-size:28px;font-weight:700;line-height:1.2;background:linear-gradient(135deg,var(--gold),#E8D5A8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hub-sub{font-size:13px;color:var(--text2);font-weight:300;margin-top:4px}
@@ -1337,7 +1337,6 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
       </div>)}
     </div></div></div></div>
   </div>}
-  {showObjForm&&<ObjModal objectives={objectives} onSave={saveObjectives} onClose={()=>setShowObjForm(false)} TEAM={TEAM} realAdmin={realAdmin}/>}
   {showAgForm&&<DayPanel date={showAgForm} evts={agDays.find(d=>d.ds===showAgForm)?.evts||[]} onClose={()=>setShowAgForm(null)} onAddEvent={(t,time,col,assg,end,allDay)=>addAgEvent(showAgForm,t,time,col,assg,end,allDay)} onDelEvent={delAgEvent} onLeadClick={l=>{setShowAgForm(null);setTimeout(()=>setSelLead(l),100)}} onMoveLead={(leadId,newDate)=>{upd(leadId,{nextRelance:newDate});flash("Relance deplacee")}} leads={myL} prestas={prestas} sess={sess}/>}
 </div>};
 function DayPanel({date,evts,onClose,onAddEvent,onDelEvent,onLeadClick,onMoveLead,leads,prestas,sess}){
@@ -1689,6 +1688,9 @@ return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>setShowNotif(false)}>
   <Nav/>
   <div className="main-scroll" style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
+    {page!=="hub"&&<div style={{padding:"10px 14px 0",flexShrink:0}}>
+      <button onClick={()=>setPage("hub")} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:12,fontWeight:600,transition:"all .15s",cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.borderColor="var(--gold)";e.currentTarget.style.color="var(--gold)"}} onMouseOut={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}><i className="fa-solid fa-arrow-left"/>Retour au Hub</button>
+    </div>}
     {page==="hub"&&<HubPage/>}
     {page==="espace"&&<Espace/>}
     {page==="pipeline"&&<Pipeline/>}
@@ -1697,6 +1699,7 @@ return (
     {page==="ia"&&iaUI}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
+  {showObjForm&&<ObjModal objectives={objectives} onSave={saveObjectives} onClose={()=>setShowObjForm(false)} TEAM={TEAM} realAdmin={realAdmin}/>}
   {/* CMD */}
   {cmd&&<div className="cmd-ov" onClick={()=>setCmd(false)}><div className="cmd-box" onClick={e=>e.stopPropagation()}><input className="cmd-in" value={cmdQ} onChange={e=>setCmdQ(e.target.value)} placeholder="Commande, lead ou prestataire…" autoFocus onKeyDown={e=>{if(e.key==="Escape")setCmd(false);if(e.key==="Enter"&&cmdRes.length>0){cmdRes[0].a();setCmd(false);setCmdQ("")}}}/><div style={{maxHeight:300,overflowY:"auto"}}>{cmdRes.map((r,i)=><div key={i} className="cmd-r" onClick={()=>{r.a();setCmd(false);setCmdQ("")}}><i className={"fa-solid "+r.i} style={{width:18,textAlign:"center",color:"var(--gold)"}}/><span>{r.l}</span></div>)}</div></div></div>}
   {/* MODALS */}
