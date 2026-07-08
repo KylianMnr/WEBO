@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v31</title>
+<title>WEBO — Hub v32</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -539,9 +539,9 @@ h2{font-size:16px!important}
 .persona-btn{padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;transition:all .2s;flex:1;text-align:center}
 .persona-btn.sel{background:rgba(197,160,89,.1);border-color:var(--gold);color:var(--gold)}
 
-.k-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:32px;height:60px;border-radius:8px;background:rgba(197,160,89,.06);border:1px solid rgba(197,160,89,.08);color:rgba(197,160,89,.25);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .3s;cursor:pointer;backdrop-filter:blur(4px)}
+.k-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:40;width:32px;height:60px;border-radius:8px;background:rgba(197,160,89,.06);border:1px solid rgba(197,160,89,.08);color:rgba(197,160,89,.25);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .3s;cursor:pointer;backdrop-filter:blur(4px)}
 .k-arrow:hover{background:rgba(197,160,89,.15);color:var(--gold);border-color:rgba(197,160,89,.25)}
-.k-arrow-l{left:2px}.k-arrow-r{right:2px}
+.k-arrow-l{left:6px}.k-arrow-r{right:6px}
 
 /* V16 smooth scroll */
 .kanban-scroll,.hub-grid,.hub-stats{-ms-overflow-style:none;scrollbar-width:none}
@@ -598,7 +598,7 @@ const COLS=[
 {id:"perdu",label:"Perdu",icon:"fa-circle-xmark",accent:"#5A6270",proba:0,urgDays:999},
 {id:"reussi",label:"Réussi → Production",icon:"fa-trophy",accent:"#089981",proba:1,urgDays:999}
 ];
-const SERVICES=["Mise en Conformité RGAA et EAA","Conformité EAA","Conformité RGAA"];
+const SERVICES=["Mise en conformité EAA"];
 /* V27 — Migration map : anciens statuts → nouveaux */
 const STATUS_MIG={"nouveau":"identifier","recherche":"identifier","contacte":"contact_std","relance1":"relance_std","qualifie":"potentiel","call":"rdv_call","proposition":"potentiel","relance2":"relance_rdv","signe":"reussi","injoignable":"perdu"};
 const CMS_OPTIONS=["—","Shopify","Magento","PrestaShop","WordPress","Custom","Autre"];
@@ -1554,6 +1554,16 @@ const Detail=({l,onClose})=>{if(!l)return null;const hs=healthScore(l);const col
 return <div className="rpanel">
   <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between"}}><div><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{l.nom}</h3>{/* ═══ LinkedIn Step Badge ═══ */}<div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>{liStep&&l.linkedinStep!=="non_contacte"&&<span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:12,fontSize:9,fontWeight:700,fontFamily:"var(--mono)",color:liStep.color,background:liStep.color+"12",border:"1px solid "+liStep.color+"25"}}><i className={"fa-solid "+liStep.icon} style={{fontSize:7}}/>{liStep.label}</span>}{l.linkedinCampaign&&<span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:12,fontSize:9,fontWeight:700,fontFamily:"var(--mono)",color:"var(--blue)",background:"rgba(41,98,255,.08)",border:"1px solid rgba(41,98,255,.15)"}}>🤖 Campagne IN</span>}</div></div><div style={{display:"flex",gap:3}}><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"3px 8px",borderRadius:4,border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-pen"/></button><button onClick={onClose} style={{color:"var(--text3)",fontSize:13}}><i className="fa-solid fa-xmark"/></button></div></div>
   <div style={{padding:"12px 16px"}}>
+    <div style={{marginBottom:12}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:4}}>SCORE DE SANTÉ</div>
+    <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:22,fontWeight:800,fontFamily:"var(--mono)",color:hCol(hs)}}>{hs}</span><div style={{flex:1}}><Prog pct={hs} color={hCol(hs)}/></div><Badge type={hs>=60?"green":hs>=40?"gold":"red"}>{hLab(hs)}</Badge></div></div>
+    <div className="sep"/>
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-phone" style={{width:14}}/> {l.phone?<a href={"tel:"+l.phone} style={{color:"var(--text2)",textDecoration:"none"}}><P$ v={l.phone} p={pm}/></a>:"—"}</div>
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-envelope" style={{width:14}}/> {l.email?<a href={"mailto:"+l.email} style={{color:"var(--text2)",textDecoration:"none"}}>{l.email}</a>:"—"}</div>
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-location-dot" style={{width:14}}/> {l.adresse?<a href={"https://maps.google.com/?q="+encodeURIComponent(l.adresse)} target="_blank" rel="noopener" style={{color:"var(--text2)",textDecoration:"none"}}>{l.adresse}</a>:"—"}</div>
+    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-user" style={{width:14}}/> <span style={{color:mC(l.memberId)}}>{mN(l.memberId)}</span> · {TEAM.find(t=>t.id===l.memberId)?.role} · {l.source}</div>
+    {l.prestaId&&<div style={{fontSize:10,color:"var(--gold)",marginBottom:3}}><i className="fa-solid fa-handshake" style={{width:14}}/> {pN(l.prestaId)}</div>}
+
+    <div className="sep"/>
     {/* ═══ ACTIONS RAPIDES ═══ */}
     <div style={{background:"linear-gradient(135deg,rgba(41,98,255,.05),rgba(197,160,89,.03))",border:"1px solid rgba(41,98,255,.12)",borderRadius:10,padding:10,marginBottom:12}}>
       <div style={{fontSize:8,fontWeight:700,color:"var(--blue)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:8}}><i className="fa-solid fa-bolt" style={{marginRight:4}}/>ACTIONS RAPIDES</div>
@@ -1597,9 +1607,6 @@ return <div className="rpanel">
         </select>
       </div>
     </div>
-    <div style={{marginBottom:12}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:4}}>SCORE DE SANTÉ</div>
-    <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:22,fontWeight:800,fontFamily:"var(--mono)",color:hCol(hs)}}>{hs}</span><div style={{flex:1}}><Prog pct={hs} color={hCol(hs)}/></div><Badge type={hs>=60?"green":hs>=40?"gold":"red"}>{hLab(hs)}</Badge></div></div>
-    <div className="sep"/>
     {/* ═══ NOTES PROMINENT BLOCK ═══ */}
     {((l.timeline&&l.timeline.length>0)||(l.notes&&l.notes.trim()))&&<div style={{background:"linear-gradient(135deg,rgba(197,160,89,.08),rgba(139,92,246,.04))",border:"1px solid rgba(197,160,89,.2)",borderRadius:10,padding:12,marginBottom:12,position:"relative"}}>
       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
@@ -1619,10 +1626,9 @@ return <div className="rpanel">
         <div style={{fontSize:12,color:"var(--text)",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{l.notes}</div>
       </div>}
     </div>}
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></div></div>
-      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><SBadge status={l.status}/>{l.prodStatus&&l.prodStatus!=="a_auditer"&&<div style={{marginTop:3,fontSize:9,color:"var(--purple)",fontFamily:"var(--mono)"}}><i className="fa-solid fa-gears" style={{marginRight:3}}/>{PROD_COLS.find(p=>p.id===l.prodStatus)?.label}</div>}</div>
-    </div>
+    {/* Quick note input */}
+    <QuickNote lead={l} onAdd={(text)=>{const entry={date:new Date().toISOString(),texte:text};const newTl=[entry,...(l.timeline||[])];upd(l.id,{timeline:newTl});flash("Note ajoutee")}}/>
+
     {/* ═══ CARTE ALERTE EAA ═══ */}
     {hasAudit&&<div style={{background:"linear-gradient(135deg,"+aBgFull+".06),"+aBgFull+".02))",border:"1px solid "+aColor+"30",borderRadius:12,padding:14,marginBottom:12,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:aColor}}/>
@@ -1635,6 +1641,10 @@ return <div className="rpanel">
       </div>
       {l.auditErreurs&&<div style={{background:aBgFull+".06)",borderRadius:8,padding:10,border:"1px solid "+aColor+"15"}}><div style={{fontSize:8,fontWeight:700,color:aColor,fontFamily:"var(--mono)",letterSpacing:1,marginBottom:5}}>ERREURS DÉTECTÉES</div><div style={{fontSize:11,color:"var(--text2)",lineHeight:1.7,whiteSpace:"pre-wrap"}}>{l.auditErreurs}</div></div>}
     </div>}
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></div></div>
+      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><SBadge status={l.status}/>{l.prodStatus&&l.prodStatus!=="a_auditer"&&<div style={{marginTop:3,fontSize:9,color:"var(--purple)",fontFamily:"var(--mono)"}}><i className="fa-solid fa-gears" style={{marginRight:3}}/>{PROD_COLS.find(p=>p.id===l.prodStatus)?.label}</div>}</div>
+    </div>
     {/* Margin breakdown */}
     <div style={{background:"rgba(197,160,89,.06)",border:"1px solid rgba(197,160,89,.12)",borderRadius:"var(--radius)",padding:10,marginBottom:12}}>
       <div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:6}}>VENTILATION FINANCIÈRE</div>
@@ -1646,14 +1656,6 @@ return <div className="rpanel">
       {cd!==null&&<div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>Cycle: {cd}j</div>}
     </div>
     <div className="sep"/>
-    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-phone" style={{width:14}}/> {l.phone?<a href={"tel:"+l.phone} style={{color:"var(--text2)",textDecoration:"none"}}><P$ v={l.phone} p={pm}/></a>:"—"}</div>
-    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-envelope" style={{width:14}}/> {l.email?<a href={"mailto:"+l.email} style={{color:"var(--text2)",textDecoration:"none"}}>{l.email}</a>:"—"}</div>
-    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-location-dot" style={{width:14}}/> {l.adresse?<a href={"https://maps.google.com/?q="+encodeURIComponent(l.adresse)} target="_blank" rel="noopener" style={{color:"var(--text2)",textDecoration:"none"}}>{l.adresse}</a>:"—"}</div>
-    <div style={{fontSize:10,color:"var(--text2)",marginBottom:3}}><i className="fa-solid fa-user" style={{width:14}}/> <span style={{color:mC(l.memberId)}}>{mN(l.memberId)}</span> · {TEAM.find(t=>t.id===l.memberId)?.role} · {l.source}</div>
-    {l.prestaId&&<div style={{fontSize:10,color:"var(--gold)",marginBottom:3}}><i className="fa-solid fa-handshake" style={{width:14}}/> {pN(l.prestaId)}</div>}
-
-    {/* Quick note input */}
-    <QuickNote lead={l} onAdd={(text)=>{const entry={date:new Date().toISOString(),texte:text};const newTl=[entry,...(l.timeline||[])];upd(l.id,{timeline:newTl});flash("Note ajoutee")}}/>
     {l.activityLog&&<div style={{marginTop:8}}><div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>HISTORIQUE</div><div className="tl" style={{maxHeight:120,overflowY:"auto"}}>{l.activityLog.split("\n").filter(Boolean).slice(0,8).map((e,i)=>{const p=e.split("—");return <div key={i} className="tl-item" style={{padding:"3px 0"}}><div className="tl-dot" style={{background:e.includes(">")||e.includes("Bulk")?"var(--blue)":e.includes("Cree")?"var(--green)":"var(--text3)"}}/><div className="tl-time">{p[0]}</div><div style={{fontSize:10,color:"var(--text2)"}}>{p.slice(1).join("—")}</div></div>})}</div></div>}
     <div className="sep"/>
     <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:8}}>
@@ -2062,7 +2064,7 @@ return <div>
 <FF l="Entreprise"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)} placeholder="Nom"/></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Téléphone"><input style={IS} value={f.phone} onChange={e=>s("phone",e.target.value)} type="tel"/></FF><FF l="Email"><input style={IS} value={f.email} onChange={e=>s("email",e.target.value)} type="email"/></FF></div>
 <FF l="Adresse"><input style={IS} value={f.adresse} onChange={e=>s("adresse",e.target.value)}/></FF>
-<div className="sep"/><div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>DETAILS MISSION</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Service"><select style={IS} value={f.service} onChange={e=>s("service",e.target.value)}>{SERVICES.map(v=><option key={v}>{v}</option>)}</select></FF><FF l="Valeur HT"><input style={IS} type="number" value={f.valeur} onChange={e=>s("valeur",e.target.value)}/></FF></div>
+<div className="sep"/><div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>DETAILS MISSION</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Service"><select style={IS} value={f.service} onChange={e=>s("service",e.target.value)}>{f.service&&!SERVICES.includes(f.service)&&<option value={f.service}>{f.service} (ancien)</option>}{SERVICES.map(v=><option key={v}>{v}</option>)}</select></FF><FF l="Valeur HT"><input style={IS} type="number" value={f.valeur} onChange={e=>s("valeur",e.target.value)}/></FF></div>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
   <FF l="Apporteur d'Affaires"><select style={IS} value={f.memberId} onChange={e=>s("memberId",e.target.value)} disabled={!realAdmin}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select></FF>
   <FF l="Source"><select style={IS} value={f.source} onChange={e=>s("source",e.target.value)}>{SOURCES.map(v=><option key={v}>{v}</option>)}</select></FF>
