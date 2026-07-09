@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v34</title>
+<title>WEBO — Hub v35</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -732,6 +732,13 @@ const isEcho=id=>{const t=echoRef.current[id];return t&&(Date.now()-t)<2500};
 const isEditing=id=>!!editingRef.current[id];
 const setEditing=(id,v)=>{if(v)editingRef.current[id]=true;else delete editingRef.current[id]};
 const debounceWrite=(id,fn,ms=600)=>{if(dbTimers.current[id])clearTimeout(dbTimers.current[id]);dbTimers.current[id]=setTimeout(()=>{delete dbTimers.current[id];fn()},ms)};
+/* ═══ MESSAGES — communication interne ═══ */
+const[chatChannels,setChatChannels]=useState([]);
+const[chatMessages,setChatMessages]=useState([]);
+const[activeChat,setActiveChat]=useState(null);
+const[chatText,setChatText]=useState("");
+const[showGroupForm,setShowGroupForm]=useState(false);
+const activeChatRef=useRef(null);useEffect(()=>{activeChatRef.current=activeChat},[activeChat]);
 /* ═══ Objectifs configurables ═══ */
 const[objectives,setObjectives]=useState(()=>{try{return JSON.parse(localStorage.getItem("webo_objectives"))||OBJ_DEFAULTS}catch(e){return OBJ_DEFAULTS}});
 const[showObjForm,setShowObjForm]=useState(false);
@@ -779,6 +786,19 @@ const bulkDelLeads=async()=>{if(!confirm("Supprimer "+selIds.size+" lead(s) ? Ce
 const toggleTSel=id=>setTSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
 const tSelAll=()=>{const ids=prestas.map(p=>p.id);setTSelIds(p=>p.size===ids.length?new Set():new Set(ids))};
 const bulkDelPrestas=async()=>{if(!confirm("Supprimer "+tSelIds.size+" prestataire(s) ? Irreversible."))return;const ids=[...tSelIds];for(const id of ids){setPrestas(p=>p.filter(x=>x.id!==id));await sb.from("prestataires").delete().eq("id",id)}setTSelIds(new Set());flash(ids.length+" supprime(s)");addActivity(sess,"a supprime",ids.length+" prestas","var(--red)")};
+
+/* ═══ MESSAGES — helpers & CRUD (Supabase: chat_channels / chat_messages) ═══ */
+const myChannels=useMemo(()=>chatChannels.filter(c=>(c.member_ids||[]).includes(sess)).sort((a,b)=>(b.last_msg_at||b.created_at||"").localeCompare(a.last_msg_at||a.created_at||"")),[chatChannels,sess]);
+const chatUnread=useCallback(ch=>{const lastRead=(ch.reads||{})[sess]||"1970";return chatMessages.filter(m=>m.channel_id===ch.id&&m.sender_id!==sess&&(m.created_at||"")>lastRead).length},[chatMessages,sess]);
+const chatUnreadTotal=useMemo(()=>myChannels.reduce((s,c)=>s+chatUnread(c),0),[myChannels,chatUnread]);
+const chanName=useCallback(ch=>{if(!ch)return"";if(ch.type==="dm"){const other=(ch.member_ids||[]).find(m=>m!==sess);return mN(other)||"Discussion"}return ch.name||"Groupe"},[sess]);
+const chanColor=useCallback(ch=>{if(!ch)return"var(--gold)";if(ch.type==="dm"){const other=(ch.member_ids||[]).find(m=>m!==sess);return mC(other)}return"var(--gold)"},[sess]);
+const markChatRead=useCallback(async ch=>{const reads={...(ch.reads||{}),[sess]:new Date().toISOString()};setChatChannels(p=>p.map(c=>c.id===ch.id?{...c,reads}:c));markEcho(ch.id);try{await sb.from("chat_channels").update({reads}).eq("id",ch.id)}catch(e){}},[sess]);
+const openDm=useCallback(async mid=>{const dmId="dm_"+[sess,mid].sort().join("_");let ch=chatChannels.find(c=>c.id===dmId);if(!ch){ch={id:dmId,type:"dm",name:"",member_ids:[sess,mid].sort(),created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>p.some(c=>c.id===dmId)?p:[...p,ch]);try{await sb.from("chat_channels").upsert(ch)}catch(e){}}
+setActiveChat(dmId);setPage("messages");markChatRead(ch)},[sess,chatChannels,markChatRead]);
+const createGroup=useCallback(async(name,memberIds)=>{const ch={id:uid(),type:"group",name:name||"Groupe",member_ids:[...new Set([sess,...memberIds])],created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>[...p,ch]);setActiveChat(ch.id);flash("Groupe créé");addActivity(sess,"a créé le groupe",ch.name,"var(--gold)");(ch.member_ids||[]).filter(m=>m!==sess).forEach(m=>addNotif("fa-comments","var(--gold)",mN(sess)+" t'a ajouté au groupe "+ch.name));try{await sb.from("chat_channels").insert(ch)}catch(e){flash("Erreur sync groupe")}},[sess]);
+const sendChat=useCallback(async()=>{const txt=chatText.trim();if(!txt||!activeChat)return;const ch=chatChannels.find(c=>c.id===activeChat);if(!ch)return;const msg={id:uid(),channel_id:activeChat,sender_id:sess,text:txt,created_at:new Date().toISOString()};setChatMessages(p=>[...p,msg]);setChatText("");markEcho(msg.id);const lm=new Date().toISOString();const reads={...(ch.reads||{}),[sess]:lm};setChatChannels(p=>p.map(c=>c.id===activeChat?{...c,last_msg_at:lm,reads}:c));markEcho(activeChat);try{await sb.from("chat_messages").insert(msg);await sb.from("chat_channels").update({last_msg_at:lm,reads}).eq("id",activeChat)}catch(e){flash("Erreur envoi")}},[chatText,activeChat,chatChannels,sess]);
+const delChatMsg=useCallback(async id=>{setChatMessages(p=>p.filter(m=>m.id!==id));try{await sb.from("chat_messages").delete().eq("id",id)}catch(e){}},[]);
 
 /* ═══ ESPACE — CRUD Notes & Tâches (Supabase: workspace_notes / workspace_tasks) ═══ */
 const wsAddNote=async(title)=>{const n={id:uid(),title:title||"Nouvelle note",content:"",tags:"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsNotes(p=>[n,...p]);setWsActiveNote(n.id);flash("Note créée");addActivity(sess,"a créé une note",n.title,"var(--blue)");try{await sb.from("workspace_notes").insert(n)}catch(e){flash("Erreur sync note")}return n.id};
@@ -856,8 +876,10 @@ useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads")
 try{const ae=await sb.from("agenda_events").select("*").order("date",{ascending:true});setAgEvents(ae.data||[])}catch(e){}
 try{const wn=await sb.from("workspace_notes").select("*").order("updated_at",{ascending:false});setWsNotes(wn.data||[])}catch(e){}
 try{const wt=await sb.from("workspace_tasks").select("*").order("created_at",{ascending:false});setWsTasks(wt.data||[])}catch(e){}
-try{const os=await sb.from("settings").select("value").eq("key","objectives").maybeSingle();if(os.data&&os.data.value)setObjectives(os.data.value)}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
-useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);if(isEcho(u.id)||isEditing(u.id))return;setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
+try{const os=await sb.from("settings").select("value").eq("key","objectives").maybeSingle();if(os.data&&os.data.value)setObjectives(os.data.value)}catch(e){}
+try{const cc=await sb.from("chat_channels").select("*");setChatChannels(cc.data||[])}catch(e){}
+try{const cm=await sb.from("chat_messages").select("*").order("created_at",{ascending:true}).limit(1000);setChatMessages(cm.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
+useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);if(isEcho(u.id)||isEditing(u.id))return;setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_channels"},p=>{if(p.eventType==="INSERT")setChatChannels(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setChatChannels(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setChatChannels(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_messages"},p=>{if(p.eventType==="INSERT"){if(isEcho(p.new.id))return;setChatMessages(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.new.sender_id!==sess&&activeChatRef.current!==p.new.channel_id)addNotif("fa-comment","var(--gold)","💬 "+mN(p.new.sender_id)+" : "+String(p.new.text||"").slice(0,60))}if(p.eventType==="DELETE")setChatMessages(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
 useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem("webo_theme",theme)}catch(e){}},[theme]);
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
@@ -897,7 +919,7 @@ const cEnc=sg.filter(l=>l.paymentStatus==="encaisse").reduce((s,l)=>s+l.valeur,0
 
 /* CMD palette */
 const cmdRes=useMemo(()=>{if(!cmdQ)return[];const q=cmdQ.toLowerCase();return[
-...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-layer-group",l:"Espace (tâches & notes)",a:()=>setPage("espace")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")}].filter(c=>c.l.toLowerCase().includes(q)),
+...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-layer-group",l:"Espace (tâches & notes)",a:()=>setPage("espace")},{i:"fa-comments",l:"Messages (comm interne)",a:()=>setPage("messages")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")}].filter(c=>c.l.toLowerCase().includes(q)),
 ...leads.filter(l=>l.nom.toLowerCase().includes(q)).slice(0,5).map(l=>({i:"fa-user",l:l.nom+" — "+l.service,a:()=>{setSelLead(l);setPage("pipeline")}}))
 ]},[cmdQ,leads]);
 
@@ -926,6 +948,7 @@ const Nav=()=>(
   <div style={{display:"flex",gap:4,alignItems:"center"}}>
     {page!=="hub"&&<button className="nb" onClick={()=>setPage("hub")}><i className="fa-solid fa-arrow-left"/> Hub</button>}
     <button className="nb" onClick={()=>setCmd(true)}><i className="fa-solid fa-magnifying-glass"/></button>
+    <div className="notif-wrap"><button className="notif-bell" onClick={()=>setPage("messages")} title="Messages"><i className="fa-solid fa-comments" style={{fontSize:13,color:page==="messages"?"var(--gold)":"var(--text2)"}}/>{chatUnreadTotal>0&&<div className="notif-dot" style={{background:"var(--red)"}}/>}</button></div>
     <div className="notif-wrap"><button className="notif-bell" onClick={e=>{e.stopPropagation();setShowNotif(p=>!p)}}><i className="fa-solid fa-bell" style={{fontSize:13,color:showNotif?"var(--gold)":"var(--text2)"}}/>{unreadN>0&&<div className="notif-dot"/>}</button>
     {showNotif&&<div className="notif-panel" onClick={e=>e.stopPropagation()}>
       <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontWeight:700,fontSize:13}}>Notifications</span>{unreadN>0&&<button onClick={markAllRead} style={{fontSize:10,color:"var(--gold)",fontWeight:600}}>Tout lu</button>}</div>
@@ -1042,6 +1065,7 @@ return(
     {icon:"fa-layer-group",title:"Espace",desc:"Tâches & notes partagées",pg:"espace",cnt:(wsTasks.filter(t=>t.status!=="done").length)+" tâches",ac:"#8B5CF6",em:"🗂️"},
     {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
+    {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
     {icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
     ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
       <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
@@ -1132,6 +1156,88 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
         <button onClick={()=>wsAddNote()} style={{padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:12,fontWeight:600}}><i className="fa-solid fa-plus" style={{marginRight:5}}/>Nouvelle note</button>
       </div>}
   </div>}
+</div>};
+
+/* ═══ MESSAGES — communication interne ═══ */
+const MessagesPage=()=>{
+const ch=myChannels.find(c=>c.id===activeChat);
+const msgs=useMemo(()=>chatMessages.filter(m=>m.channel_id===activeChat),[chatMessages,activeChat]);
+const endRef=useRef(null);
+useEffect(()=>{if(endRef.current)endRef.current.scrollIntoView({behavior:"smooth"})},[msgs.length,activeChat]);
+useEffect(()=>{if(ch&&chatUnread(ch)>0)markChatRead(ch)},[activeChat,msgs.length]);
+const others=TEAM.filter(m=>m.id!==sess);
+const fmtT=iso=>{try{const d=new Date(iso);const today=td();const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");return ds===today?hm:d.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+" "+hm}catch(e){return""}};
+return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,minHeight:0,gap:12}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+    <div style={{display:"flex",alignItems:"center",gap:10}}>
+      <h2 style={{fontFamily:"var(--serif)",fontSize:18,fontWeight:700,margin:0}}><i className="fa-solid fa-comments" style={{color:"var(--gold)",marginRight:8}}/>Messages</h2>
+      <span style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--text3)",background:"var(--bg3)",padding:"2px 8px",borderRadius:10}}>comm interne WEBO</span>
+    </div>
+    <button onClick={()=>setShowGroupForm(true)} style={{padding:"8px 14px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-users" style={{marginRight:5}}/>Nouveau groupe</button>
+  </div>
+  <div style={{display:"grid",gridTemplateColumns:"280px 1fr",gap:12,flex:1,minHeight:0}}>
+    {/* ── Sidebar conversations ── */}
+    <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0}}>
+      <div className="card-h" style={{fontWeight:700,fontSize:11,fontFamily:"var(--mono)",letterSpacing:1,color:"var(--gold)"}}>ÉQUIPE</div>
+      <div style={{padding:6,display:"flex",flexDirection:"column",gap:2}}>
+        {others.map(m=>{const dmId="dm_"+[sess,m.id].sort().join("_");const dmCh=chatChannels.find(c=>c.id===dmId);const un=dmCh?chatUnread(dmCh):0;return(
+        <div key={m.id} onClick={()=>openDm(m.id)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,cursor:"pointer",background:activeChat===dmId?"rgba(197,160,89,.1)":"transparent",border:"1px solid "+(activeChat===dmId?"var(--gold)":"transparent")}}>
+          <div style={{width:30,height:30,borderRadius:8,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:12,flexShrink:0}}>{m.name[0]}</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name}</div>
+            <div style={{fontSize:9,color:"var(--text3)"}}>{m.role}</div>
+          </div>
+          {un>0&&<div style={{minWidth:18,height:18,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px"}}>{un}</div>}
+        </div>)})}
+      </div>
+      <div className="card-h" style={{fontWeight:700,fontSize:11,fontFamily:"var(--mono)",letterSpacing:1,color:"var(--gold)",borderTop:"1px solid var(--border)"}}>GROUPES</div>
+      <div style={{padding:6,display:"flex",flexDirection:"column",gap:2,flex:1,overflowY:"auto"}}>
+        {myChannels.filter(c=>c.type==="group").length===0&&<div style={{padding:"12px 10px",fontSize:10,color:"var(--text3)",textAlign:"center"}}>Aucun groupe.<br/>Créez-en un pour la comm d'équipe.</div>}
+        {myChannels.filter(c=>c.type==="group").map(c=>{const un=chatUnread(c);return(
+        <div key={c.id} onClick={()=>{setActiveChat(c.id);markChatRead(c)}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,cursor:"pointer",background:activeChat===c.id?"rgba(197,160,89,.1)":"transparent",border:"1px solid "+(activeChat===c.id?"var(--gold)":"transparent")}}>
+          <div style={{width:30,height:30,borderRadius:8,background:"rgba(197,160,89,.15)",border:"1.5px solid rgba(197,160,89,.4)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--gold)",fontSize:12,flexShrink:0}}><i className="fa-solid fa-users"/></div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>
+            <div style={{fontSize:9,color:"var(--text3)"}}>{(c.member_ids||[]).map(m2=>mN(m2).split(" ")[0]).join(", ")}</div>
+          </div>
+          {un>0&&<div style={{minWidth:18,height:18,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px"}}>{un}</div>}
+        </div>)})}
+      </div>
+    </div>
+    {/* ── Fil de discussion ── */}
+    {ch?<div className="card" style={{display:"flex",flexDirection:"column",minHeight:0}}>
+      <div className="card-h" style={{display:"flex",alignItems:"center",gap:8}}>
+        <div style={{width:32,height:32,borderRadius:8,background:chanColor(ch)+"20",border:"1.5px solid "+chanColor(ch)+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:chanColor(ch),fontSize:13}}>{ch.type==="dm"?chanName(ch)[0]:<i className="fa-solid fa-users" style={{fontSize:12}}/>}</div>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:700,fontSize:13}}>{chanName(ch)}</div>
+          <div style={{fontSize:9,color:"var(--text3)"}}>{ch.type==="dm"?(TEAM.find(m=>m.id===(ch.member_ids||[]).find(x=>x!==sess))?.role||""):(ch.member_ids||[]).map(m2=>mN(m2).split(" ")[0]).join(" · ")}</div>
+        </div>
+        <span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text3)"}}>{msgs.length} message{msgs.length>1?"s":""}</span>
+      </div>
+      <div style={{flex:1,overflowY:"auto",padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
+        {msgs.length===0&&<div style={{margin:"auto",textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-comment-dots" style={{fontSize:32,opacity:.3,marginBottom:8,display:"block"}}/>Commencez la conversation avec {chanName(ch)}</div>}
+        {msgs.map((m,i)=>{const mine=m.sender_id===sess;const showAv=!mine&&(i===0||msgs[i-1].sender_id!==m.sender_id);return(
+        <div key={m.id} style={{display:"flex",gap:8,justifyContent:mine?"flex-end":"flex-start",alignItems:"flex-end"}}>
+          {!mine&&<div style={{width:26,height:26,borderRadius:7,flexShrink:0,background:showAv?mC(m.sender_id)+"20":"transparent",border:showAv?"1.5px solid "+mC(m.sender_id)+"50":"none",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:mC(m.sender_id),fontSize:10}}>{showAv?mN(m.sender_id)[0]:""}</div>}
+          <div className="chat-bubble" style={{maxWidth:"68%",padding:"8px 12px",borderRadius:mine?"12px 12px 3px 12px":"12px 12px 12px 3px",background:mine?"linear-gradient(135deg,rgba(197,160,89,.22),rgba(197,160,89,.12))":"var(--bg3)",border:"1px solid "+(mine?"rgba(197,160,89,.35)":"var(--border)"),position:"relative"}} onDoubleClick={()=>{if(mine&&confirm("Supprimer ce message ?"))delChatMsg(m.id)}} title={mine?"Double-clic pour supprimer":""}>
+            {!mine&&showAv&&<div style={{fontSize:9,fontWeight:700,color:mC(m.sender_id),marginBottom:2}}>{mN(m.sender_id).split(" ")[0]}</div>}
+            <div style={{fontSize:12.5,lineHeight:1.5,color:"var(--text)",whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{m.text}</div>
+            <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text4)",marginTop:3,textAlign:"right"}}>{fmtT(m.created_at)}</div>
+          </div>
+        </div>)})}
+        <div ref={endRef}/>
+      </div>
+      <div style={{padding:"10px 12px",borderTop:"1px solid var(--border)",display:"flex",gap:8}}>
+        <textarea value={chatText} onChange={e=>setChatText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat()}}} placeholder={"Message à "+chanName(ch)+"…  (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"} rows={1} style={{flex:1,padding:"10px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:12.5,outline:"none",resize:"none",fontFamily:"var(--sans)",lineHeight:1.5,maxHeight:120}}/>
+        <button onClick={sendChat} disabled={!chatText.trim()} style={{padding:"0 18px",borderRadius:10,background:chatText.trim()?"linear-gradient(135deg,var(--gold),var(--bordeaux2))":"var(--bg4)",color:chatText.trim()?"#fff":"var(--text4)",fontSize:14,border:"none",cursor:chatText.trim()?"pointer":"default"}}><i className="fa-solid fa-paper-plane"/></button>
+      </div>
+    </div>:
+    <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0,alignItems:"center",justifyContent:"center",gap:10,color:"var(--text3)"}}>
+      <i className="fa-solid fa-comments" style={{fontSize:42,opacity:.25}}/>
+      <div style={{fontSize:14,fontWeight:600,color:"var(--text2)"}}>Communication interne WEBO</div>
+      <div style={{fontSize:12,textAlign:"center",maxWidth:340}}>Sélectionnez un membre de l'équipe pour une discussion privée, ou créez un groupe pour la coordination commerciaux / techniciens.</div>
+    </div>}
+  </div>
 </div>};
 
 /* ═══ PIPELINE ═══ */
@@ -1727,6 +1833,7 @@ return (
     </div>}
     {page==="hub"&&<HubPage/>}
     {page==="espace"&&<Espace/>}
+    {page==="messages"&&<MessagesPage/>}
     {page==="pipeline"&&<Pipeline/>}
     {page==="agenda"&&<Agenda/>}
     {page==="finance"&&<Finance/>}
@@ -1734,6 +1841,7 @@ return (
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
   {showObjForm&&<ObjModal objectives={objectives} onSave={saveObjectives} onClose={()=>setShowObjForm(false)} TEAM={TEAM} realAdmin={realAdmin}/>}
+  {showGroupForm&&<GroupForm TEAM={TEAM} sess={sess} onCreate={createGroup} onClose={()=>setShowGroupForm(false)}/>}
   {/* CMD */}
   {cmd&&<div className="cmd-ov" onClick={()=>setCmd(false)}><div className="cmd-box" onClick={e=>e.stopPropagation()}><input className="cmd-in" value={cmdQ} onChange={e=>setCmdQ(e.target.value)} placeholder="Commande, lead ou prestataire…" autoFocus onKeyDown={e=>{if(e.key==="Escape")setCmd(false);if(e.key==="Enter"&&cmdRes.length>0){cmdRes[0].a();setCmd(false);setCmdQ("")}}}/><div style={{maxHeight:300,overflowY:"auto"}}>{cmdRes.map((r,i)=><div key={i} className="cmd-r" onClick={()=>{r.a();setCmd(false);setCmdQ("")}}><i className={"fa-solid "+r.i} style={{width:18,textAlign:"center",color:"var(--gold)"}}/><span>{r.l}</span></div>)}</div></div></div>}
   {/* MODALS */}
@@ -1774,6 +1882,38 @@ return (
   <button onClick={()=>setPage("ia")} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
+}
+
+/* ═══ GroupForm — création d'un groupe de discussion ═══ */
+function GroupForm({TEAM,sess,onCreate,onClose}){
+  const[name,setName]=useState("");
+  const[sel,setSel]=useState([]);
+  const others=TEAM.filter(m=>m.id!==sess);
+  return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><div className="modal" style={{maxWidth:420}} onClick={e=>e.stopPropagation()}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+      <h3 style={{fontFamily:"var(--serif)",fontSize:16}}><i className="fa-solid fa-users" style={{color:"var(--gold)",marginRight:6}}/>Nouveau groupe</h3>
+      <button onClick={onClose} style={{color:"var(--text3)",fontSize:14}}><i className="fa-solid fa-xmark"/></button>
+    </div>
+    <div style={{marginBottom:12}}>
+      <label style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",textTransform:"uppercase"}}>Nom du groupe</label>
+      <input value={name} onChange={e=>setName(e.target.value)} placeholder="Ex : Commerciaux, Techniciens, Général…" autoFocus style={{width:"100%",marginTop:4,padding:"10px 12px",borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:13,fontWeight:600,outline:"none",boxSizing:"border-box"}}/>
+    </div>
+    <div style={{marginBottom:14}}>
+      <label style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",textTransform:"uppercase"}}>Membres (vous êtes inclus d'office)</label>
+      <div style={{display:"flex",flexDirection:"column",gap:6,marginTop:6}}>
+        {others.map(m=>{const on=sel.includes(m.id);return(
+        <button key={m.id} onClick={()=>setSel(p=>on?p.filter(x=>x!==m.id):[...p,m.id])} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:10,border:"1px solid "+(on?m.color:"var(--border)"),background:on?m.color+"12":"transparent",cursor:"pointer",textAlign:"left"}}>
+          <div style={{width:28,height:28,borderRadius:7,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:11}}>{m.name[0]}</div>
+          <div style={{flex:1}}><div style={{fontSize:12,fontWeight:600,color:"var(--text)"}}>{m.name}</div><div style={{fontSize:9,color:"var(--text3)"}}>{m.role}</div></div>
+          {on&&<i className="fa-solid fa-check-circle" style={{color:m.color}}/>}
+        </button>)})}
+      </div>
+    </div>
+    <div style={{display:"flex",gap:6,justifyContent:"flex-end"}}>
+      <button onClick={onClose} style={{padding:"9px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
+      <button onClick={()=>{if(!name.trim()||sel.length===0)return;onCreate(name.trim(),sel);onClose()}} disabled={!name.trim()||sel.length===0} style={{padding:"9px 18px",borderRadius:"var(--radius)",background:(name.trim()&&sel.length>0)?"linear-gradient(135deg,var(--gold),var(--bordeaux2))":"var(--bg4)",color:(name.trim()&&sel.length>0)?"#fff":"var(--text4)",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-check" style={{marginRight:5}}/>Créer le groupe</button>
+    </div>
+  </div></div>;
 }
 
 /* ═══ TaskCard — état local, sauvegarde au blur ═══ */
