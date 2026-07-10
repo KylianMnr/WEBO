@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v37</title>
+<title>WEBO — Hub v38</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -360,11 +360,13 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 @media(max-width:640px){.msg-widget{width:calc(100vw - 32px);left:16px}.lnav{padding:4px 8px}.lnav .lnav-lb{display:none}}
 /* V37 — menus contextuels chat */
 .msg-row{position:relative}
-.msg-dots{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);font-size:10px;opacity:0;transition:opacity .15s;cursor:pointer}
+.msg-dots{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);font-size:11px;opacity:0;transition:opacity .12s;cursor:pointer;flex-shrink:0;align-self:center}
 .msg-row:hover .msg-dots,.grp-row:hover .grp-dots{opacity:1}
+.msg-dots:focus,.grp-dots:focus{opacity:1;outline:none}
 .msg-dots:hover{color:var(--gold);border-color:var(--gold)}
-.ctx-menu{position:absolute;top:calc(100% + 4px);background:var(--bg2);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:60;min-width:140px;overflow:hidden}
-[data-theme="light"] .ctx-menu{box-shadow:var(--sh-lg)}
+.ctx-menu,.ctx-menu-fixed{background:var(--bg2);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);min-width:150px;overflow:hidden}
+.ctx-menu{position:absolute;top:calc(100% + 4px);z-index:60}
+[data-theme="light"] .ctx-menu,[data-theme="light"] .ctx-menu-fixed{box-shadow:var(--sh-lg)}
 .ctx-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;font-size:11px;color:var(--text2);background:transparent;border:none;cursor:pointer;text-align:left}
 .ctx-item:hover{background:var(--bg3);color:var(--text)}
 .ctx-item i{width:14px;text-align:center;font-size:10px}
@@ -836,6 +838,7 @@ const path=sess+"/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
 try{const{error}=await sb.storage.from("chat-files").upload(path,file,{upsert:false});if(error)throw error;const{data}=sb.storage.from("chat-files").getPublicUrl(path);return{url:data.publicUrl,name:file.name,type:file.type||"application/octet-stream"}}catch(e){flash("Upload impossible — bucket chat-files manquant ? (voir SQL v36)");return null}},[sess,viewAs]);
 const delChatMsg=useCallback(async id=>{if(viewAs){flash("👁 Simulation — lecture seule");return}setChatMessages(p=>p.filter(m=>m.id!==id));try{await sb.from("chat_messages").delete().eq("id",id)}catch(e){}},[viewAs]);
 const delGroup=useCallback(async ch=>{if(viewAs){flash("👁 Simulation — lecture seule");return}if(!(realAdmin||ch.created_by===sess)){flash("Seul le créateur ou un admin peut supprimer");return}if(!confirm('Supprimer le groupe « '+ch.name+' » et tous ses messages ?'))return;setChatChannels(p=>p.filter(c=>c.id!==ch.id));setChatMessages(p=>p.filter(m=>m.channel_id!==ch.id));setActiveChat(a=>a===ch.id?null:a);flash("Groupe supprimé");addActivity(sess,"a supprimé le groupe",ch.name,"var(--red)");try{await sb.from("chat_messages").delete().eq("channel_id",ch.id);await sb.from("chat_channels").delete().eq("id",ch.id)}catch(e){}},[viewAs,realAdmin,sess]);
+const renameGroup=useCallback(async ch=>{if(viewAs){flash("👁 Simulation — lecture seule");return}const nn=prompt("Nouveau nom du groupe :",ch.name);if(nn===null)return;const name=nn.trim()||ch.name;setChatChannels(p=>p.map(c=>c.id===ch.id?{...c,name}:c));markEcho(ch.id);flash("Groupe renommé");try{await sb.from("chat_channels").update({name}).eq("id",ch.id)}catch(e){}},[viewAs]);
 
 /* ═══ ESPACE — CRUD Notes & Tâches (Supabase: workspace_notes / workspace_tasks) ═══ */
 const wsAddNote=async(title)=>{const n={id:uid(),title:title||"Nouvelle note",content:"",tags:"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsNotes(p=>[n,...p]);setWsActiveNote(n.id);flash("Note créée");addActivity(sess,"a créé une note",n.title,"var(--blue)");try{await sb.from("workspace_notes").insert(n)}catch(e){flash("Erreur sync note")}return n.id};
@@ -1012,7 +1015,7 @@ const Nav=()=>(
         </div>
         {realAdmin&&<div style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",letterSpacing:1,marginBottom:4}}>VOIR COMME</div>
-          <select value={viewAs||sess} onChange={e=>{const v=e.target.value;setViewAs(v===sess?"":v)}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,outline:"none"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select>
+          <select value={effSess} onChange={e=>{const v=e.target.value;setViewAs(v===sess?"":v);setShowYou(false);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===sess?"Retour à votre vue":"👁 Vue de "+mN(v))}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role}){m.id===sess?" — vous":""}</option>)}</select>
         </div>}
         <div style={{padding:"5px 0"}}>
           <button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>
@@ -1251,7 +1254,7 @@ return <div className="msg-widget fu">
       <div style={{width:28,height:28,borderRadius:8,background:"rgba(197,160,89,.15)",border:"1.5px solid rgba(197,160,89,.4)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--gold)",fontSize:11}}><i className="fa-solid fa-users"/></div>
       <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div></div>
       {un>0&&<div style={{minWidth:17,height:17,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{un}</div>}
-      <button className="grp-dots" onClick={e=>{e.stopPropagation();delGroup(c)}} title="Supprimer le groupe"><i className="fa-solid fa-ellipsis-vertical"/></button>
+      <GrpMenu c={c} delGroup={delGroup} renameGroup={renameGroup} canManage={realAdmin||c.created_by===effSess}/>
     </div>)})}
     {myChannels.filter(c=>c.type==="group").length===0&&<div style={{fontSize:10,color:"var(--text3)",padding:"4px 8px"}}>Aucun groupe</div>}
   </div>}
@@ -1317,7 +1320,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
             <div style={{fontSize:9,color:"var(--text3)"}}>{(c.member_ids||[]).map(m2=>mN(m2).split(" ")[0]).join(", ")}</div>
           </div>
           {un>0&&<div style={{minWidth:18,height:18,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px"}}>{un}</div>}
-          <button className="grp-dots" onClick={e=>{e.stopPropagation();delGroup(c)}} title="Supprimer le groupe"><i className="fa-solid fa-ellipsis-vertical"/></button>
+          <GrpMenu c={c} delGroup={delGroup} renameGroup={renameGroup} canManage={realAdmin||c.created_by===effSess}/>
         </div>)})}
       </div>
     </div>
@@ -2070,20 +2073,36 @@ function ChatInput({ch,compact,onSend,uploadFile,TEAM,me,viewAs,flash}){
   </div>;
 }
 
-/* ═══ MsgActions — menu ⋯ au survol d'un message ═══ */
+/* ═══ MsgActions — menu ⋯ au clic (overlay fixe, fermé par clic ailleurs) ═══ */
 function MsgActions({m,mine,onDelete,flash,align}){
-  const[open,setOpen]=useState(false);
-  const doCopy=async()=>{try{await navigator.clipboard.writeText(m.text||"")}catch(e){const ta=document.createElement("textarea");ta.value=m.text||"";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta)}flash("Copié ✓");setOpen(false)};
-  const doSelect=()=>{const el=document.getElementById("bbl-"+m.id);if(el){const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r)}setOpen(false)};
-  const doDel=()=>{if(confirm("Supprimer ce message ?"))onDelete(m.id);setOpen(false)};
-  return <div className="msg-dots-wrap" style={{position:"relative",alignSelf:"center",flexShrink:0}} onMouseLeave={()=>setOpen(false)}>
-    <button className="msg-dots" onClick={e=>{e.stopPropagation();setOpen(p=>!p)}} title="Options"><i className="fa-solid fa-ellipsis-vertical"/></button>
-    {open&&<div className="ctx-menu" style={{[align==="left"?"left":"right"]:0}}>
+  const[pos,setPos]=useState(null);
+  const openMenu=e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setPos({x:align==="right"?r.left:r.right,y:r.bottom+4})};
+  useEffect(()=>{if(!pos)return;const close=()=>setPos(null);window.addEventListener("click",close);window.addEventListener("scroll",close,true);return()=>{window.removeEventListener("click",close);window.removeEventListener("scroll",close,true)}},[pos]);
+  const doCopy=async()=>{try{await navigator.clipboard.writeText(m.text||"")}catch(e){const ta=document.createElement("textarea");ta.value=m.text||"";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta)}flash("Copié ✓");setPos(null)};
+  const doSelect=()=>{const el=document.getElementById("bbl-"+m.id);if(el){const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r)}flash("Message sélectionné");setPos(null)};
+  const doDel=()=>{setPos(null);if(confirm("Supprimer ce message ?"))onDelete(m.id)};
+  return <><button className="msg-dots" onClick={openMenu} title="Options"><i className="fa-solid fa-ellipsis-vertical"/></button>
+    {pos&&<div className="ctx-menu-fixed" style={{position:"fixed",top:pos.y,[align==="right"?"right":"left"]:align==="right"?(window.innerWidth-pos.x):pos.x,zIndex:9999}} onClick={e=>e.stopPropagation()}>
       <button className="ctx-item" onClick={doCopy}><i className="fa-solid fa-copy"/>Copier</button>
       <button className="ctx-item" onClick={doSelect}><i className="fa-solid fa-i-cursor"/>Sélectionner</button>
       {mine&&<button className="ctx-item" onClick={doDel} style={{color:"var(--red)"}}><i className="fa-solid fa-trash"/>Supprimer</button>}
     </div>}
-  </div>;
+  </>;
+}
+
+/* ═══ GrpMenu — ⋯ d'un groupe (clic, overlay fixe) ═══ */
+function GrpMenu({c,delGroup,renameGroup,canManage}){
+  const[pos,setPos]=useState(null);
+  const open=e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setPos({x:r.right,y:r.bottom+4})};
+  useEffect(()=>{if(!pos)return;const close=()=>setPos(null);window.addEventListener("click",close);window.addEventListener("scroll",close,true);return()=>{window.removeEventListener("click",close);window.removeEventListener("scroll",close,true)}},[pos]);
+  return <><button className="grp-dots" onClick={open} title="Options du groupe"><i className="fa-solid fa-ellipsis-vertical"/></button>
+    {pos&&<div className="ctx-menu-fixed" style={{position:"fixed",top:pos.y,right:window.innerWidth-pos.x,zIndex:9999}} onClick={e=>e.stopPropagation()}>
+      {canManage?<>
+        <button className="ctx-item" onClick={()=>{setPos(null);renameGroup(c)}}><i className="fa-solid fa-pen"/>Renommer</button>
+        <button className="ctx-item" onClick={()=>{setPos(null);delGroup(c)}} style={{color:"var(--red)"}}><i className="fa-solid fa-trash"/>Supprimer le groupe</button>
+      </>:<div style={{padding:"8px 12px",fontSize:10,color:"var(--text3)"}}>Seul le créateur peut gérer ce groupe</div>}
+    </div>}
+  </>;
 }
 
 /* ═══ GroupForm — création d'un groupe de discussion ═══ */
