@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v39</title>
+<title>WEBO — Hub v40</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -923,15 +923,30 @@ try{const os=await sb.from("settings").select("value").eq("key","objectives").ma
 try{const cc=await sb.from("chat_channels").select("*");setChatChannels(cc.data||[])}catch(e){}
 try{const cm=await sb.from("chat_messages").select("*").order("created_at",{ascending:true}).limit(1000);setChatMessages(cm.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
 useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);if(isEcho(u.id)||isEditing(u.id))return;setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_channels"},p=>{if(p.eventType==="INSERT")setChatChannels(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setChatChannels(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setChatChannels(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_messages"},p=>{if(p.eventType==="INSERT"){if(isEcho(p.new.id))return;setChatMessages(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.new.sender_id!==sess){const me=TEAM.find(t=>t.id===sess);const mentioned=me&&String(p.new.text||"").toLowerCase().includes("@"+me.name.split(" ")[0].toLowerCase());if(mentioned)addNotif("fa-at","var(--red)","🔔 "+mN(p.new.sender_id)+" t'a mentionné : "+String(p.new.text||"").slice(0,50));else if(activeChatRef.current!==p.new.channel_id)addNotif("fa-comment","var(--gold)","💬 "+mN(p.new.sender_id)+" : "+String(p.new.text||"").slice(0,60))}}if(p.eventType==="DELETE")setChatMessages(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")setSync("off")});
-/* ═══ Fallback polling : si le websocket ne passe pas, on recharge légèrement toutes les 8s ═══ */
-const poll=setInterval(async()=>{try{
-const lr=await sb.from("leads").select("*").order("date_created",{ascending:false});if(lr.data){const mapped=lr.data.map(db2L);setLeads(prev=>{const ids=new Set(prev.map(x=>x.id));const inc=new Set(mapped.map(x=>x.id));let changed=mapped.length!==prev.length;if(!changed){for(const m of mapped){const o=prev.find(x=>x.id===m.id);if(!o||(o.status!==m.status)||((o.timeline||"")!==(m.timeline||""))||((o.lastInteraction||"")!==(m.lastInteraction||""))||(o.memberId!==m.memberId)){changed=true;break}}}return changed?mapped.map(m=>{if(isEditing(m.id)||isEcho(m.id)){const o=prev.find(x=>x.id===m.id);return o||m}return m}):prev})}
-const cm=await sb.from("chat_messages").select("*").order("created_at",{ascending:true}).limit(1000);if(cm.data)setChatMessages(prev=>cm.data.length!==prev.length?cm.data:prev);
-const cc=await sb.from("chat_channels").select("*");if(cc.data)setChatChannels(prev=>{let changed=cc.data.length!==prev.length;if(!changed){for(const c of cc.data){const o=prev.find(x=>x.id===c.id);if(!o||JSON.stringify(o.reads||{})!==JSON.stringify(c.reads||{})||(o.last_msg_at||"")!==(c.last_msg_at||"")){changed=true;break}}}return changed?cc.data:prev});
-const wt=await sb.from("workspace_tasks").select("*").order("created_at",{ascending:false});if(wt.data)setWsTasks(prev=>{let changed=wt.data.length!==prev.length;if(!changed){for(const t of wt.data){const o=prev.find(x=>x.id===t.id);if(!o||o.status!==t.status||(o.title||"")!==(t.title||"")){changed=true;break}}}return changed?wt.data.map(t=>isEditing(t.id)?(prev.find(x=>x.id===t.id)||t):t):prev});
-const ae=await sb.from("agenda_events").select("*");if(ae.data)setAgEvents(prev=>ae.data.length!==prev.length?ae.data:prev);
-setSync(s=>s==="off"?"on":s);
-}catch(e){}},8000);
+/* ═══ Fallback polling NON DESTRUCTIF (v40) ═══
+   - saute le tour si l'utilisateur est en train de taper (focus input/textarea/select)
+   - ne remplace le state QUE si la signature du contenu a changé (sinon même référence → 0 re-render) */
+const sig=(rows,fields)=>{if(!rows)return"";let s=rows.length+"|";for(const r of rows){s+=r.id;for(const f of fields)s+=":"+(r[f]==null?"":(typeof r[f]==="object"?JSON.stringify(r[f]):r[f]));s+=";"}return s};
+const sigRef=useRef({leads:"__init__",msgs:"__init__",chans:"__init__",tasks:"__init__",events:"__init__",notes:"__init__"});
+const isTyping=()=>{const a=document.activeElement;if(!a)return false;const t=(a.tagName||"").toLowerCase();return t==="input"||t==="textarea"||t==="select"||a.isContentEditable};
+const poll=setInterval(async()=>{
+  if(isTyping())return;
+  try{
+    const lr=await sb.from("leads").select("*").order("date_created",{ascending:false});
+    if(lr.data){const ns=sig(lr.data,["status","member_id","timeline","last_interaction","next_relance","valeur","temperature","payment_status","audit_score"]);if(ns!==sigRef.current.leads){sigRef.current.leads=ns;const mapped=lr.data.map(db2L);setLeads(prev=>mapped.map(m=>{if(isEditing(m.id)||isEcho(m.id)){const o=prev.find(x=>x.id===m.id);return o||m}return m}))}}
+    const cm=await sb.from("chat_messages").select("*").order("created_at",{ascending:true}).limit(1000);
+    if(cm.data){const ns=sig(cm.data,["text","channel_id"]);if(ns!==sigRef.current.msgs){sigRef.current.msgs=ns;setChatMessages(cm.data)}}
+    const cc=await sb.from("chat_channels").select("*");
+    if(cc.data){const ns=sig(cc.data,["name","reads","last_msg_at","member_ids"]);if(ns!==sigRef.current.chans){sigRef.current.chans=ns;setChatChannels(cc.data)}}
+    const wt=await sb.from("workspace_tasks").select("*").order("created_at",{ascending:false});
+    if(wt.data){const ns=sig(wt.data,["status","title","description","assignee_ids","priority","due_date"]);if(ns!==sigRef.current.tasks){sigRef.current.tasks=ns;setWsTasks(prev=>wt.data.map(t=>isEditing(t.id)?(prev.find(x=>x.id===t.id)||t):t))}}
+    const ae=await sb.from("agenda_events").select("*");
+    if(ae.data){const ns=sig(ae.data,["date","title","time","assignee_ids"]);if(ns!==sigRef.current.events){sigRef.current.events=ns;setAgEvents(ae.data)}}
+    const wn=await sb.from("workspace_notes").select("*").order("updated_at",{ascending:false});
+    if(wn.data){const ns=sig(wn.data,["title","updated_at"]);if(ns!==sigRef.current.notes){sigRef.current.notes=ns;setWsNotes(prev=>wn.data.map(n=>isEditing(n.id)?(prev.find(x=>x.id===n.id)||n):n))}}
+    setSync(s=>s==="off"?"on":s);
+  }catch(e){}
+},10000);
 return()=>{sb.removeChannel(ch);clearInterval(poll)}},[sess]);
 useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),60000);return()=>clearInterval(t)},[]);
 useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem("webo_theme",theme)}catch(e){}},[theme]);
