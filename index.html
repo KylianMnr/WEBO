@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v36</title>
+<title>WEBO — Hub v37</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -358,6 +358,18 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 [data-theme="light"] .you-menu{box-shadow:var(--sh-lg)}
 [data-theme="light"] .msg-widget{box-shadow:0 8px 24px rgba(92,72,36,.14),0 32px 80px rgba(92,72,36,.22)}
 @media(max-width:640px){.msg-widget{width:calc(100vw - 32px);left:16px}.lnav{padding:4px 8px}.lnav .lnav-lb{display:none}}
+/* V37 — menus contextuels chat */
+.msg-row{position:relative}
+.msg-dots{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text3);font-size:10px;opacity:0;transition:opacity .15s;cursor:pointer}
+.msg-row:hover .msg-dots,.grp-row:hover .grp-dots{opacity:1}
+.msg-dots:hover{color:var(--gold);border-color:var(--gold)}
+.ctx-menu{position:absolute;top:calc(100% + 4px);background:var(--bg2);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:60;min-width:140px;overflow:hidden}
+[data-theme="light"] .ctx-menu{box-shadow:var(--sh-lg)}
+.ctx-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;font-size:11px;color:var(--text2);background:transparent;border:none;cursor:pointer;text-align:left}
+.ctx-item:hover{background:var(--bg3);color:var(--text)}
+.ctx-item i{width:14px;text-align:center;font-size:10px}
+.grp-dots{width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--text3);font-size:11px;opacity:0;transition:opacity .15s;cursor:pointer;flex-shrink:0}
+.grp-dots:hover{color:var(--red)}
 .notif-bell{position:relative;cursor:pointer;padding:7px 10px;border-radius:var(--radius);transition:all .2s}
 .notif-bell:hover{background:var(--bg3)}
 .notif-dot{position:absolute;top:3px;right:5px;width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid var(--bg2);animation:pulse 2s infinite}
@@ -755,7 +767,6 @@ const debounceWrite=(id,fn,ms=600)=>{if(dbTimers.current[id])clearTimeout(dbTime
 const[chatChannels,setChatChannels]=useState([]);
 const[chatMessages,setChatMessages]=useState([]);
 const[activeChat,setActiveChat]=useState(null);
-const[chatText,setChatText]=useState("");
 const[showGroupForm,setShowGroupForm]=useState(false);
 const[showYou,setShowYou]=useState(false);
 const[msgWidget,setMsgWidget]=useState(false);
@@ -809,22 +820,22 @@ const tSelAll=()=>{const ids=prestas.map(p=>p.id);setTSelIds(p=>p.size===ids.len
 const bulkDelPrestas=async()=>{if(!confirm("Supprimer "+tSelIds.size+" prestataire(s) ? Irreversible."))return;const ids=[...tSelIds];for(const id of ids){setPrestas(p=>p.filter(x=>x.id!==id));await sb.from("prestataires").delete().eq("id",id)}setTSelIds(new Set());flash(ids.length+" supprime(s)");addActivity(sess,"a supprime",ids.length+" prestas","var(--red)")};
 
 /* ═══ MESSAGES — helpers & CRUD (Supabase: chat_channels / chat_messages) ═══ */
-const myChannels=useMemo(()=>chatChannels.filter(c=>(c.member_ids||[]).includes(sess)).sort((a,b)=>(b.last_msg_at||b.created_at||"").localeCompare(a.last_msg_at||a.created_at||"")),[chatChannels,sess]);
-const chatUnread=useCallback(ch=>{const lastRead=(ch.reads||{})[sess]||"1970";return chatMessages.filter(m=>m.channel_id===ch.id&&m.sender_id!==sess&&(m.created_at||"")>lastRead).length},[chatMessages,sess]);
+const myChannels=useMemo(()=>chatChannels.filter(c=>(c.member_ids||[]).includes(effSess)).sort((a,b)=>(b.last_msg_at||b.created_at||"").localeCompare(a.last_msg_at||a.created_at||"")),[chatChannels,effSess]);
+const chatUnread=useCallback(ch=>{const lastRead=(ch.reads||{})[effSess]||"1970";return chatMessages.filter(m=>m.channel_id===ch.id&&m.sender_id!==effSess&&(m.created_at||"")>lastRead).length},[chatMessages,effSess]);
 const chatUnreadTotal=useMemo(()=>myChannels.reduce((s,c)=>s+chatUnread(c),0),[myChannels,chatUnread]);
-const chanName=useCallback(ch=>{if(!ch)return"";if(ch.type==="dm"){const other=(ch.member_ids||[]).find(m=>m!==sess);return mN(other)||"Discussion"}return ch.name||"Groupe"},[sess]);
-const chanColor=useCallback(ch=>{if(!ch)return"var(--gold)";if(ch.type==="dm"){const other=(ch.member_ids||[]).find(m=>m!==sess);return mC(other)}return"var(--gold)"},[sess]);
-const markChatRead=useCallback(async ch=>{const reads={...(ch.reads||{}),[sess]:new Date().toISOString()};setChatChannels(p=>p.map(c=>c.id===ch.id?{...c,reads}:c));markEcho(ch.id);try{await sb.from("chat_channels").update({reads}).eq("id",ch.id)}catch(e){}},[sess]);
-const openDm=useCallback(async(mid,navigate)=>{const dmId="dm_"+[sess,mid].sort().join("_");let ch=chatChannels.find(c=>c.id===dmId);if(!ch){ch={id:dmId,type:"dm",name:"",member_ids:[sess,mid].sort(),created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>p.some(c=>c.id===dmId)?p:[...p,ch]);try{await sb.from("chat_channels").upsert(ch)}catch(e){}}
-setActiveChat(dmId);if(navigate!==false)setPage("messages");markChatRead(ch)},[sess,chatChannels,markChatRead]);
-const createGroup=useCallback(async(name,memberIds)=>{const ch={id:uid(),type:"group",name:name||"Groupe",member_ids:[...new Set([sess,...memberIds])],created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>[...p,ch]);setActiveChat(ch.id);flash("Groupe créé");addActivity(sess,"a créé le groupe",ch.name,"var(--gold)");(ch.member_ids||[]).filter(m=>m!==sess).forEach(m=>addNotif("fa-comments","var(--gold)",mN(sess)+" t'a ajouté au groupe "+ch.name));try{await sb.from("chat_channels").insert(ch)}catch(e){flash("Erreur sync groupe")}},[sess]);
-const sendChatCore=useCallback(async(channelId,txt,extra)=>{const ch=chatChannels.find(c=>c.id===channelId);if(!ch)return;const msg={id:uid(),channel_id:channelId,sender_id:sess,text:txt||"",created_at:new Date().toISOString(),lead_id:(extra&&extra.lead_id)||"",attachment_url:(extra&&extra.attachment_url)||"",attachment_name:(extra&&extra.attachment_name)||"",attachment_type:(extra&&extra.attachment_type)||""};setChatMessages(p=>[...p,msg]);markEcho(msg.id);const lm=new Date().toISOString();const reads={...(ch.reads||{}),[sess]:lm};setChatChannels(p=>p.map(c=>c.id===channelId?{...c,last_msg_at:lm,reads}:c));markEcho(channelId);try{await sb.from("chat_messages").insert(msg);await sb.from("chat_channels").update({last_msg_at:lm,reads}).eq("id",channelId)}catch(e){flash("Erreur envoi")}},[chatChannels,sess]);
-const sendChat=useCallback(async()=>{const txt=chatText.trim();if(!txt||!activeChat)return;setChatText("");await sendChatCore(activeChat,txt)},[chatText,activeChat,sendChatCore]);
+const chanName=useCallback(ch=>{if(!ch)return"";if(ch.type==="dm"){const other=(ch.member_ids||[]).find(m=>m!==effSess);return mN(other)||"Discussion"}return ch.name||"Groupe"},[effSess]);
+const chanColor=useCallback(ch=>{if(!ch)return"var(--gold)";if(ch.type==="dm"){const other=(ch.member_ids||[]).find(m=>m!==effSess);return mC(other)}return"var(--gold)"},[effSess]);
+const markChatRead=useCallback(async ch=>{if(viewAs)return;const reads={...(ch.reads||{}),[sess]:new Date().toISOString()};setChatChannels(p=>p.map(c=>c.id===ch.id?{...c,reads}:c));markEcho(ch.id);try{await sb.from("chat_channels").update({reads}).eq("id",ch.id)}catch(e){}},[sess,viewAs]);
+const openDm=useCallback(async(mid,navigate)=>{const dmId="dm_"+[effSess,mid].sort().join("_");let ch=chatChannels.find(c=>c.id===dmId);if(!ch){if(viewAs){flash("👁 Simulation — lecture seule");return}ch={id:dmId,type:"dm",name:"",member_ids:[sess,mid].sort(),created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>p.some(c=>c.id===dmId)?p:[...p,ch]);try{await sb.from("chat_channels").upsert(ch)}catch(e){}}
+setActiveChat(dmId);if(navigate!==false)setPage("messages");if(ch)markChatRead(ch)},[sess,effSess,viewAs,chatChannels,markChatRead]);
+const createGroup=useCallback(async(name,memberIds)=>{if(viewAs){flash("👁 Simulation — lecture seule");return}const ch={id:uid(),type:"group",name:name||"Groupe",member_ids:[...new Set([sess,...memberIds])],created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>[...p,ch]);setActiveChat(ch.id);flash("Groupe créé");addActivity(sess,"a créé le groupe",ch.name,"var(--gold)");(ch.member_ids||[]).filter(m=>m!==sess).forEach(m=>addNotif("fa-comments","var(--gold)",mN(sess)+" t'a ajouté au groupe "+ch.name));try{await sb.from("chat_channels").insert(ch)}catch(e){flash("Erreur sync groupe")}},[sess,viewAs]);
+const sendChatCore=useCallback(async(channelId,txt,extra)=>{if(viewAs){flash("👁 Simulation — envoi désactivé");return}const ch=chatChannels.find(c=>c.id===channelId);if(!ch)return;const msg={id:uid(),channel_id:channelId,sender_id:sess,text:txt||"",created_at:new Date().toISOString(),lead_id:(extra&&extra.lead_id)||"",attachment_url:(extra&&extra.attachment_url)||"",attachment_name:(extra&&extra.attachment_name)||"",attachment_type:(extra&&extra.attachment_type)||""};setChatMessages(p=>[...p,msg]);markEcho(msg.id);const lm=new Date().toISOString();const reads={...(ch.reads||{}),[sess]:lm};setChatChannels(p=>p.map(c=>c.id===channelId?{...c,last_msg_at:lm,reads}:c));markEcho(channelId);try{await sb.from("chat_messages").insert(msg);await sb.from("chat_channels").update({last_msg_at:lm,reads}).eq("id",channelId)}catch(e){flash("Erreur envoi")}},[chatChannels,sess,viewAs]);
 const shareLeadToChat=useCallback(async(channelId,lead)=>{await sendChatCore(channelId,"🔗 Lead partagé",{lead_id:lead.id});flash("Lead partagé ✓");addActivity(sess,"a partagé le lead",lead.nom,"var(--blue)")},[sendChatCore,sess]);
-const uploadChatFile=useCallback(async(file)=>{if(!file)return null;if(file.size>5*1024*1024){flash("Fichier trop lourd (max 5 Mo)");return null}
+const uploadChatFile=useCallback(async(file)=>{if(viewAs){flash("👁 Simulation — envoi désactivé");return null}if(!file)return null;if(file.size>5*1024*1024){flash("Fichier trop lourd (max 5 Mo)");return null}
 const path=sess+"/"+Date.now()+"_"+file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-try{const{error}=await sb.storage.from("chat-files").upload(path,file,{upsert:false});if(error)throw error;const{data}=sb.storage.from("chat-files").getPublicUrl(path);return{url:data.publicUrl,name:file.name,type:file.type||"application/octet-stream"}}catch(e){flash("Upload impossible — bucket chat-files manquant ? (voir SQL v36)");return null}},[sess]);
-const delChatMsg=useCallback(async id=>{setChatMessages(p=>p.filter(m=>m.id!==id));try{await sb.from("chat_messages").delete().eq("id",id)}catch(e){}},[]);
+try{const{error}=await sb.storage.from("chat-files").upload(path,file,{upsert:false});if(error)throw error;const{data}=sb.storage.from("chat-files").getPublicUrl(path);return{url:data.publicUrl,name:file.name,type:file.type||"application/octet-stream"}}catch(e){flash("Upload impossible — bucket chat-files manquant ? (voir SQL v36)");return null}},[sess,viewAs]);
+const delChatMsg=useCallback(async id=>{if(viewAs){flash("👁 Simulation — lecture seule");return}setChatMessages(p=>p.filter(m=>m.id!==id));try{await sb.from("chat_messages").delete().eq("id",id)}catch(e){}},[viewAs]);
+const delGroup=useCallback(async ch=>{if(viewAs){flash("👁 Simulation — lecture seule");return}if(!(realAdmin||ch.created_by===sess)){flash("Seul le créateur ou un admin peut supprimer");return}if(!confirm('Supprimer le groupe « '+ch.name+' » et tous ses messages ?'))return;setChatChannels(p=>p.filter(c=>c.id!==ch.id));setChatMessages(p=>p.filter(m=>m.channel_id!==ch.id));setActiveChat(a=>a===ch.id?null:a);flash("Groupe supprimé");addActivity(sess,"a supprimé le groupe",ch.name,"var(--red)");try{await sb.from("chat_messages").delete().eq("channel_id",ch.id);await sb.from("chat_channels").delete().eq("id",ch.id)}catch(e){}},[viewAs,realAdmin,sess]);
 
 /* ═══ ESPACE — CRUD Notes & Tâches (Supabase: workspace_notes / workspace_tasks) ═══ */
 const wsAddNote=async(title)=>{const n={id:uid(),title:title||"Nouvelle note",content:"",tags:"",owner_id:sess,created_at:new Date().toISOString(),updated_at:new Date().toISOString()};setWsNotes(p=>[n,...p]);setWsActiveNote(n.id);flash("Note créée");addActivity(sess,"a créé une note",n.title,"var(--blue)");try{await sb.from("workspace_notes").insert(n)}catch(e){flash("Erreur sync note")}return n.id};
@@ -914,6 +925,8 @@ useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).fo
 const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess||!l.memberId),[leads,effSess,isA]);
 /* V34 — leads strictement personnels (agenda/tâches des apporteurs) */
 const myOwnL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,effSess,isA]);
+/* V37 — tâches Espace visibles pour la session effective */
+const visibleWsTasks=useMemo(()=>isA?wsTasks:wsTasks.filter(t=>(t.assignee_ids||[t.assignee_id]).includes(effSess)||t.owner_id===effSess),[wsTasks,isA,effSess]);
 /* V34 — events agenda visibles : admin = tous, apporteur = ceux où il est assigné */
 const myAgEvents=useMemo(()=>isA?agEvents:agEvents.filter(e=>(e.assignee_ids||[]).includes(effSess)),[agEvents,isA,effSess]);
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
@@ -1112,7 +1125,7 @@ return(
   {/* ═══ MODULES ═══ */}
   <div className="hub-grid">
     {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊"},
-    {icon:"fa-layer-group",title:"Espace",desc:"Tâches & notes partagées",pg:"espace",cnt:(wsTasks.filter(t=>t.status!=="done").length)+" tâches",ac:"#8B5CF6",em:"🗂️"},
+    {icon:"fa-layer-group",title:"Espace",desc:"Tâches & notes partagées",pg:"espace",cnt:(visibleWsTasks.filter(t=>t.status!=="done").length)+" tâches",ac:"#8B5CF6",em:"🗂️"},
     {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
     {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
@@ -1142,9 +1155,9 @@ return(
 /* ═══ ESPACE — Workspace collaboratif (type Notion) ═══ */
 const Espace=()=>{
 const note=wsNotes.find(n=>n.id===wsActiveNote);
-const tasksFiltered=useMemo(()=>{let t=isA?wsTasks:wsTasks.filter(x=>(x.assignee_ids||[x.assignee_id]).includes(sess)||x.owner_id===sess);if(wsTaskFilter==="mine")t=t.filter(x=>(x.assignee_ids||[x.assignee_id]).includes(sess));else if(wsTaskFilter==="open")t=t.filter(x=>x.status!=="done");return t},[wsTasks,wsTaskFilter,sess,isA]);
+const tasksFiltered=useMemo(()=>{let t=visibleWsTasks;if(wsTaskFilter==="mine")t=t.filter(x=>(x.assignee_ids||[x.assignee_id]).includes(effSess));else if(wsTaskFilter==="open")t=t.filter(x=>x.status!=="done");return t},[visibleWsTasks,wsTaskFilter,effSess]);
 const onTaskDrop=(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id)wsUpdTask(id,{status:col});setDragOver(null)};
-const stats={total:wsTasks.length,open:wsTasks.filter(t=>t.status!=="done").length,mine:wsTasks.filter(t=>(t.assignee_ids||[t.assignee_id]).includes(sess)&&t.status!=="done").length,notes:wsNotes.length};
+const stats={total:visibleWsTasks.length,open:visibleWsTasks.filter(t=>t.status!=="done").length,mine:visibleWsTasks.filter(t=>(t.assignee_ids||[t.assignee_id]).includes(effSess)&&t.status!=="done").length,notes:wsNotes.length};
 return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,gap:12}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
     <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
@@ -1163,7 +1176,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
 
   {wsTab==="board"&&<div style={{display:"flex",flexDirection:"column",gap:10,flex:1,minHeight:0}}>
     <div style={{display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
-      <button onClick={()=>wsAddTask({assignee_ids:[sess]})} style={{padding:"8px 14px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-plus" style={{marginRight:5}}/>Nouvelle tâche</button>
+      <button onClick={()=>wsAddTask({assignee_ids:[effSess]})} style={{padding:"8px 14px",borderRadius:"var(--radius)",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-plus" style={{marginRight:5}}/>Nouvelle tâche</button>
       <div style={{display:"flex",gap:4,marginLeft:6}}>
         {[{id:"all",l:"Toutes"},{id:"open",l:"Ouvertes"},{id:"mine",l:"Les miennes"}].map(f=><button key={f.id} onClick={()=>setWsTaskFilter(f.id)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid "+(wsTaskFilter===f.id?"var(--gold)":"var(--border)"),background:wsTaskFilter===f.id?"rgba(197,160,89,.1)":"transparent",color:wsTaskFilter===f.id?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600}}>{f.l}</button>)}
       </div>
@@ -1208,31 +1221,6 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
   </div>}
 </div>};
 
-/* ═══ ChatInput — saisie avec mentions @ et pièce jointe ═══ */
-const ChatInput=({ch,compact})=>{
-const[mention,setMention]=useState(null);
-const[uploading,setUploading]=useState(false);
-const fileRef=useRef(null);
-const others=TEAM.filter(m=>m.id!==sess);
-const onType=v=>{setChatText(v);const mm=v.match(/@([A-Za-zÀ-ÿ]*)$/);setMention(mm?mm[1].toLowerCase():null)};
-const applyMention=name=>{setChatText(t=>t.replace(/@([A-Za-zÀ-ÿ]*)$/,"@"+name+" "));setMention(null)};
-const suggestions=mention!==null?others.filter(m=>m.name.split(" ")[0].toLowerCase().startsWith(mention)):[];
-const onPickFile=async e=>{const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;setUploading(true);const att=await uploadChatFile(f);setUploading(false);if(att)await sendChatCore(ch.id,chatText.trim(),{attachment_url:att.url,attachment_name:att.name,attachment_type:att.type}),setChatText("")};
-return <div style={{padding:compact?"8px 10px":"10px 12px",borderTop:"1px solid var(--border)",position:"relative"}}>
-  {suggestions.length>0&&<div style={{position:"absolute",bottom:"100%",left:12,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,.3)",overflow:"hidden",zIndex:10,minWidth:180}}>
-    {suggestions.map(m=><button key={m.id} onClick={()=>applyMention(m.name.split(" ")[0])} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",width:"100%",background:"transparent",border:"none",cursor:"pointer",textAlign:"left"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
-      <div style={{width:24,height:24,borderRadius:6,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:10}}>{m.name[0]}</div>
-      <div><div style={{fontSize:11,fontWeight:600,color:"var(--text)"}}>{m.name}</div><div style={{fontSize:8,color:"var(--text3)"}}>{m.role}</div></div>
-    </button>)}
-  </div>}
-  <div style={{display:"flex",gap:6,alignItems:"flex-end"}}>
-    <input ref={fileRef} type="file" style={{display:"none"}} onChange={onPickFile}/>
-    <button onClick={()=>fileRef.current&&fileRef.current.click()} disabled={uploading} title="Joindre un fichier (max 5 Mo)" style={{width:34,height:34,borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:uploading?"var(--gold)":"var(--text3)",fontSize:13,flexShrink:0}}><i className={"fa-solid "+(uploading?"fa-spinner fa-spin":"fa-paperclip")}/></button>
-    <textarea value={chatText} onChange={e=>onType(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&suggestions.length===0){e.preventDefault();sendChat()}if(e.key==="Enter"&&suggestions.length>0){e.preventDefault();applyMention(suggestions[0].name.split(" ")[0])}}} placeholder={"Message… (@ pour mentionner)"} rows={1} style={{flex:1,padding:compact?"8px 10px":"9px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:compact?11.5:12.5,outline:"none",resize:"none",fontFamily:"var(--sans)",lineHeight:1.5,maxHeight:100}}/>
-    <button onClick={sendChat} disabled={!chatText.trim()} style={{width:34,height:34,borderRadius:8,background:chatText.trim()?"linear-gradient(135deg,var(--gold),var(--bordeaux2))":"var(--bg4)",color:chatText.trim()?"#fff":"var(--text4)",fontSize:13,border:"none",flexShrink:0,cursor:chatText.trim()?"pointer":"default"}}><i className="fa-solid fa-paper-plane"/></button>
-  </div>
-</div>};
-
 /* ═══ MESSAGES — widget flottant compact ═══ */
 const MsgWidget=()=>{
 const ch=myChannels.find(c=>c.id===activeChat);
@@ -1240,7 +1228,7 @@ const msgs=useMemo(()=>chatMessages.filter(m=>m.channel_id===activeChat),[chatMe
 const endRef=useRef(null);
 useEffect(()=>{if(endRef.current)endRef.current.scrollIntoView({behavior:"smooth"})},[msgs.length,activeChat]);
 useEffect(()=>{if(ch&&chatUnread(ch)>0)markChatRead(ch)},[activeChat,msgs.length]);
-const others=TEAM.filter(m=>m.id!==sess);
+const others=TEAM.filter(m=>m.id!==effSess);
 const fmtT=iso=>{try{const d=new Date(iso);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}catch(e){return""}};
 return <div className="msg-widget fu">
   <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8,background:"var(--bg3)"}}>
@@ -1251,7 +1239,7 @@ return <div className="msg-widget fu">
   </div>
   {!ch&&<div style={{flex:1,overflowY:"auto",padding:8,display:"flex",flexDirection:"column",gap:2}}>
     <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--gold)",letterSpacing:1,padding:"4px 8px"}}>ÉQUIPE</div>
-    {others.map(m=>{const dmId="dm_"+[sess,m.id].sort().join("_");const dmCh=chatChannels.find(c=>c.id===dmId);const un=dmCh?chatUnread(dmCh):0;return(
+    {others.map(m=>{const dmId="dm_"+[effSess,m.id].sort().join("_");const dmCh=chatChannels.find(c=>c.id===dmId);const un=dmCh?chatUnread(dmCh):0;return(
     <div key={m.id} onClick={()=>openDm(m.id,false)} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 8px",borderRadius:8,cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
       <div style={{width:28,height:28,borderRadius:8,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:11}}>{m.name[0]}</div>
       <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600}}>{m.name}</div><div style={{fontSize:9,color:"var(--text3)"}}>{m.role}</div></div>
@@ -1259,27 +1247,30 @@ return <div className="msg-widget fu">
     </div>)})}
     <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--gold)",letterSpacing:1,padding:"8px 8px 4px"}}>GROUPES</div>
     {myChannels.filter(c=>c.type==="group").map(c=>{const un=chatUnread(c);return(
-    <div key={c.id} onClick={()=>{setActiveChat(c.id);markChatRead(c)}} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 8px",borderRadius:8,cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
+    <div key={c.id} className="grp-row" onClick={()=>{setActiveChat(c.id);markChatRead(c)}} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 8px",borderRadius:8,cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
       <div style={{width:28,height:28,borderRadius:8,background:"rgba(197,160,89,.15)",border:"1.5px solid rgba(197,160,89,.4)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--gold)",fontSize:11}}><i className="fa-solid fa-users"/></div>
       <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div></div>
       {un>0&&<div style={{minWidth:17,height:17,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{un}</div>}
+      <button className="grp-dots" onClick={e=>{e.stopPropagation();delGroup(c)}} title="Supprimer le groupe"><i className="fa-solid fa-ellipsis-vertical"/></button>
     </div>)})}
     {myChannels.filter(c=>c.type==="group").length===0&&<div style={{fontSize:10,color:"var(--text3)",padding:"4px 8px"}}>Aucun groupe</div>}
   </div>}
   {ch&&<>
     <div style={{flex:1,overflowY:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:6}}>
       {msgs.length===0&&<div style={{margin:"auto",fontSize:11,color:"var(--text3)"}}>Commencez la conversation</div>}
-      {msgs.map(m=>{const mine=m.sender_id===sess;return(
-      <div key={m.id} style={{display:"flex",justifyContent:mine?"flex-end":"flex-start"}}>
-        <div style={{maxWidth:"78%",padding:"6px 10px",borderRadius:mine?"10px 10px 3px 10px":"10px 10px 10px 3px",background:mine?"linear-gradient(135deg,rgba(197,160,89,.22),rgba(197,160,89,.12))":"var(--bg3)",border:"1px solid "+(mine?"rgba(197,160,89,.35)":"var(--border)")}}>
+      {msgs.map(m=>{const mine=m.sender_id===effSess;return(
+      <div key={m.id} className="msg-row" style={{display:"flex",gap:4,justifyContent:mine?"flex-end":"flex-start",alignItems:"flex-end"}}>
+        {mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="right"/>}
+        <div id={"bbl-"+m.id} style={{maxWidth:"78%",padding:"6px 10px",borderRadius:mine?"10px 10px 3px 10px":"10px 10px 10px 3px",background:mine?"linear-gradient(135deg,rgba(197,160,89,.22),rgba(197,160,89,.12))":"var(--bg3)",border:"1px solid "+(mine?"rgba(197,160,89,.35)":"var(--border)")}}>
           {!mine&&<div style={{fontSize:8,fontWeight:700,color:mC(m.sender_id),marginBottom:1}}>{mN(m.sender_id).split(" ")[0]}</div>}
           <MsgBody m={m} leads={leads} setSelLead={setSelLead} setPage={setPage} TEAM={TEAM} compact/>
           <div style={{fontSize:7,fontFamily:"var(--mono)",color:"var(--text4)",marginTop:2,textAlign:"right"}}>{fmtT(m.created_at)}</div>
         </div>
+        {!mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="left"/>}
       </div>)})}
       <div ref={endRef}/>
     </div>
-    <ChatInput ch={ch} compact/>
+    <ChatInput ch={ch} compact onSend={(t,extra)=>sendChatCore(ch.id,t,extra)} uploadFile={uploadChatFile} TEAM={TEAM} me={effSess} viewAs={viewAs} flash={flash}/>
   </>}
 </div>};
 
@@ -1290,7 +1281,7 @@ const msgs=useMemo(()=>chatMessages.filter(m=>m.channel_id===activeChat),[chatMe
 const endRef=useRef(null);
 useEffect(()=>{if(endRef.current)endRef.current.scrollIntoView({behavior:"smooth"})},[msgs.length,activeChat]);
 useEffect(()=>{if(ch&&chatUnread(ch)>0)markChatRead(ch)},[activeChat,msgs.length]);
-const others=TEAM.filter(m=>m.id!==sess);
+const others=TEAM.filter(m=>m.id!==effSess);
 const fmtT=iso=>{try{const d=new Date(iso);const today=td();const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");return ds===today?hm:d.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit"})+" "+hm}catch(e){return""}};
 return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,minHeight:0,gap:12}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
@@ -1305,7 +1296,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
     <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0}}>
       <div className="card-h" style={{fontWeight:700,fontSize:11,fontFamily:"var(--mono)",letterSpacing:1,color:"var(--gold)"}}>ÉQUIPE</div>
       <div style={{padding:6,display:"flex",flexDirection:"column",gap:2}}>
-        {others.map(m=>{const dmId="dm_"+[sess,m.id].sort().join("_");const dmCh=chatChannels.find(c=>c.id===dmId);const un=dmCh?chatUnread(dmCh):0;return(
+        {others.map(m=>{const dmId="dm_"+[effSess,m.id].sort().join("_");const dmCh=chatChannels.find(c=>c.id===dmId);const un=dmCh?chatUnread(dmCh):0;return(
         <div key={m.id} onClick={()=>openDm(m.id)} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,cursor:"pointer",background:activeChat===dmId?"rgba(197,160,89,.1)":"transparent",border:"1px solid "+(activeChat===dmId?"var(--gold)":"transparent")}}>
           <div style={{width:30,height:30,borderRadius:8,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:12,flexShrink:0}}>{m.name[0]}</div>
           <div style={{flex:1,minWidth:0}}>
@@ -1319,13 +1310,14 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
       <div style={{padding:6,display:"flex",flexDirection:"column",gap:2,flex:1,overflowY:"auto"}}>
         {myChannels.filter(c=>c.type==="group").length===0&&<div style={{padding:"12px 10px",fontSize:10,color:"var(--text3)",textAlign:"center"}}>Aucun groupe.<br/>Créez-en un pour la comm d'équipe.</div>}
         {myChannels.filter(c=>c.type==="group").map(c=>{const un=chatUnread(c);return(
-        <div key={c.id} onClick={()=>{setActiveChat(c.id);markChatRead(c)}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,cursor:"pointer",background:activeChat===c.id?"rgba(197,160,89,.1)":"transparent",border:"1px solid "+(activeChat===c.id?"var(--gold)":"transparent")}}>
+        <div key={c.id} className="grp-row" onClick={()=>{setActiveChat(c.id);markChatRead(c)}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,cursor:"pointer",background:activeChat===c.id?"rgba(197,160,89,.1)":"transparent",border:"1px solid "+(activeChat===c.id?"var(--gold)":"transparent")}}>
           <div style={{width:30,height:30,borderRadius:8,background:"rgba(197,160,89,.15)",border:"1.5px solid rgba(197,160,89,.4)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--gold)",fontSize:12,flexShrink:0}}><i className="fa-solid fa-users"/></div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div>
             <div style={{fontSize:9,color:"var(--text3)"}}>{(c.member_ids||[]).map(m2=>mN(m2).split(" ")[0]).join(", ")}</div>
           </div>
           {un>0&&<div style={{minWidth:18,height:18,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px"}}>{un}</div>}
+          <button className="grp-dots" onClick={e=>{e.stopPropagation();delGroup(c)}} title="Supprimer le groupe"><i className="fa-solid fa-ellipsis-vertical"/></button>
         </div>)})}
       </div>
     </div>
@@ -1335,24 +1327,26 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
         <div style={{width:32,height:32,borderRadius:8,background:chanColor(ch)+"20",border:"1.5px solid "+chanColor(ch)+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:chanColor(ch),fontSize:13}}>{ch.type==="dm"?chanName(ch)[0]:<i className="fa-solid fa-users" style={{fontSize:12}}/>}</div>
         <div style={{flex:1}}>
           <div style={{fontWeight:700,fontSize:13}}>{chanName(ch)}</div>
-          <div style={{fontSize:9,color:"var(--text3)"}}>{ch.type==="dm"?(TEAM.find(m=>m.id===(ch.member_ids||[]).find(x=>x!==sess))?.role||""):(ch.member_ids||[]).map(m2=>mN(m2).split(" ")[0]).join(" · ")}</div>
+          <div style={{fontSize:9,color:"var(--text3)"}}>{ch.type==="dm"?(TEAM.find(m=>m.id===(ch.member_ids||[]).find(x=>x!==effSess))?.role||""):(ch.member_ids||[]).map(m2=>mN(m2).split(" ")[0]).join(" · ")}</div>
         </div>
         <span style={{fontSize:9,fontFamily:"var(--mono)",color:"var(--text3)"}}>{msgs.length} message{msgs.length>1?"s":""}</span>
       </div>
       <div style={{flex:1,overflowY:"auto",padding:"12px 14px",display:"flex",flexDirection:"column",gap:8}}>
         {msgs.length===0&&<div style={{margin:"auto",textAlign:"center",color:"var(--text3)"}}><i className="fa-solid fa-comment-dots" style={{fontSize:32,opacity:.3,marginBottom:8,display:"block"}}/>Commencez la conversation avec {chanName(ch)}</div>}
-        {msgs.map((m,i)=>{const mine=m.sender_id===sess;const showAv=!mine&&(i===0||msgs[i-1].sender_id!==m.sender_id);return(
-        <div key={m.id} style={{display:"flex",gap:8,justifyContent:mine?"flex-end":"flex-start",alignItems:"flex-end"}}>
+        {msgs.map((m,i)=>{const mine=m.sender_id===effSess;const showAv=!mine&&(i===0||msgs[i-1].sender_id!==m.sender_id);return(
+        <div key={m.id} className="msg-row" style={{display:"flex",gap:6,justifyContent:mine?"flex-end":"flex-start",alignItems:"flex-end"}}>
           {!mine&&<div style={{width:26,height:26,borderRadius:7,flexShrink:0,background:showAv?mC(m.sender_id)+"20":"transparent",border:showAv?"1.5px solid "+mC(m.sender_id)+"50":"none",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:mC(m.sender_id),fontSize:10}}>{showAv?mN(m.sender_id)[0]:""}</div>}
-          <div className="chat-bubble" style={{maxWidth:"68%",padding:"8px 12px",borderRadius:mine?"12px 12px 3px 12px":"12px 12px 12px 3px",background:mine?"linear-gradient(135deg,rgba(197,160,89,.22),rgba(197,160,89,.12))":"var(--bg3)",border:"1px solid "+(mine?"rgba(197,160,89,.35)":"var(--border)"),position:"relative"}} onDoubleClick={()=>{if(mine&&confirm("Supprimer ce message ?"))delChatMsg(m.id)}} title={mine?"Double-clic pour supprimer":""}>
+          {mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="right"/>}
+          <div id={"bbl-"+m.id} className="chat-bubble" style={{maxWidth:"68%",padding:"8px 12px",borderRadius:mine?"12px 12px 3px 12px":"12px 12px 12px 3px",background:mine?"linear-gradient(135deg,rgba(197,160,89,.22),rgba(197,160,89,.12))":"var(--bg3)",border:"1px solid "+(mine?"rgba(197,160,89,.35)":"var(--border)"),position:"relative"}}>
             {!mine&&showAv&&<div style={{fontSize:9,fontWeight:700,color:mC(m.sender_id),marginBottom:2}}>{mN(m.sender_id).split(" ")[0]}</div>}
             <MsgBody m={m} leads={leads} setSelLead={setSelLead} setPage={setPage} TEAM={TEAM}/>
             <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text4)",marginTop:3,textAlign:"right"}}>{fmtT(m.created_at)}</div>
           </div>
+          {!mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="left"/>}
         </div>)})}
         <div ref={endRef}/>
       </div>
-      <ChatInput ch={ch}/>
+      <ChatInput ch={ch} onSend={(t,extra)=>sendChatCore(ch.id,t,extra)} uploadFile={uploadChatFile} TEAM={TEAM} me={effSess} viewAs={viewAs} flash={flash}/>
     </div>:
     <div className="card" style={{display:"flex",flexDirection:"column",minHeight:0,alignItems:"center",justifyContent:"center",gap:10,color:"var(--text3)"}}>
       <i className="fa-solid fa-comments" style={{fontSize:42,opacity:.25}}/>
@@ -1456,10 +1450,10 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
       <button onClick={()=>{touch(l.id,"Contacté");flash(l.nom+" ✓")}} style={{padding:"7px 14px",borderRadius:"var(--radius)",border:"1px solid var(--red)",color:"var(--red)",fontSize:11,fontWeight:600}}>↻</button>
       <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"7px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/></button>
       <div style={{position:"relative"}}>
-        <select onChange={e=>{const v=e.target.value;e.target.value="";if(!v)return;if(v.startsWith("__dm_")){const mid=v.slice(5);const dmId="dm_"+[sess,mid].sort().join("_");(async()=>{let c2=chatChannels.find(x=>x.id===dmId);if(!c2){c2={id:dmId,type:"dm",name:"",member_ids:[sess,mid].sort(),created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>p.some(x=>x.id===dmId)?p:[...p,c2]);try{await sb.from("chat_channels").upsert(c2)}catch(e2){}}shareLeadToChat(dmId,l)})()}else{shareLeadToChat(v,l)}}} style={{padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",background:"var(--bg)",color:"var(--blue)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}>
+        <select onChange={e=>{const v=e.target.value;e.target.value="";if(!v)return;if(v.startsWith("__dm_")){const mid=v.slice(5);const dmId="dm_"+[effSess,mid].sort().join("_");(async()=>{let c2=chatChannels.find(x=>x.id===dmId);if(!c2){c2={id:dmId,type:"dm",name:"",member_ids:[sess,mid].sort(),created_by:sess,created_at:new Date().toISOString(),reads:{},last_msg_at:new Date().toISOString()};setChatChannels(p=>p.some(x=>x.id===dmId)?p:[...p,c2]);try{await sb.from("chat_channels").upsert(c2)}catch(e2){}}shareLeadToChat(dmId,l)})()}else{shareLeadToChat(v,l)}}} style={{padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",background:"var(--bg)",color:"var(--blue)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}>
           <option value="">💬 Partager…</option>
-          {TEAM.filter(m=>m.id!==sess).map(m=><option key={m.id} value={"__dm_"+m.id}>→ {m.name}</option>)}
-          {chatChannels.filter(c=>c.type==="group"&&(c.member_ids||[]).includes(sess)).map(c=><option key={c.id} value={c.id}>👥 {c.name}</option>)}
+          {TEAM.filter(m=>m.id!==effSess).map(m=><option key={m.id} value={"__dm_"+m.id}>→ {m.name}</option>)}
+          {chatChannels.filter(c=>c.type==="group"&&(c.member_ids||[]).includes(effSess)).map(c=><option key={c.id} value={c.id}>👥 {c.name}</option>)}
         </select>
       </div></div>
     </div>
@@ -1955,6 +1949,11 @@ return <div className="rpanel">
 
 return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>{setShowNotif(false);setShowYou(false)}}>
+  {viewAs&&<div style={{background:"linear-gradient(90deg,rgba(112,69,208,.95),rgba(112,69,208,.85))",color:"#fff",padding:"7px 16px",display:"flex",alignItems:"center",gap:10,fontSize:12,flexShrink:0,zIndex:200}}>
+    <i className="fa-solid fa-eye"/>
+    <span style={{flex:1}}>Vous voyez le CRM <b>exactement comme {sU?.name}</b> ({sU?.role}) — envois de messages et marquages lus désactivés pour ne pas altérer sa session.</span>
+    <button onClick={()=>setViewAs("")} style={{padding:"5px 14px",borderRadius:8,background:"#fff",color:"#7045D0",fontSize:11,fontWeight:800,border:"none",cursor:"pointer",flexShrink:0}}><i className="fa-solid fa-xmark" style={{marginRight:5}}/>Quitter la simulation</button>
+  </div>}
   <Nav/>
   <div className="main-scroll" style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page!=="hub"&&<div style={{padding:"10px 14px 0",flexShrink:0}}>
@@ -1970,7 +1969,7 @@ return (
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
   {showObjForm&&<ObjModal objectives={objectives} onSave={saveObjectives} onClose={()=>setShowObjForm(false)} TEAM={TEAM} realAdmin={realAdmin}/>}
-  {showGroupForm&&<GroupForm TEAM={TEAM} sess={sess} onCreate={createGroup} onClose={()=>setShowGroupForm(false)}/>}
+  {showGroupForm&&<GroupForm TEAM={TEAM} sess={effSess} onCreate={createGroup} onClose={()=>setShowGroupForm(false)}/>}
   {/* CMD */}
   {cmd&&<div className="cmd-ov" onClick={()=>setCmd(false)}><div className="cmd-box" onClick={e=>e.stopPropagation()}><input className="cmd-in" value={cmdQ} onChange={e=>setCmdQ(e.target.value)} placeholder="Commande, lead ou prestataire…" autoFocus onKeyDown={e=>{if(e.key==="Escape")setCmd(false);if(e.key==="Enter"&&cmdRes.length>0){cmdRes[0].a();setCmd(false);setCmdQ("")}}}/><div style={{maxHeight:300,overflowY:"auto"}}>{cmdRes.map((r,i)=><div key={i} className="cmd-r" onClick={()=>{r.a();setCmd(false);setCmdQ("")}}><i className={"fa-solid "+r.i} style={{width:18,textAlign:"center",color:"var(--gold)"}}/><span>{r.l}</span></div>)}</div></div></div>}
   {/* MODALS */}
@@ -2040,6 +2039,51 @@ function MsgBody({m,leads,setSelLead,setPage,TEAM,compact}){
         <i className="fa-solid fa-download" style={{fontSize:9,color:"var(--text3)",marginLeft:"auto"}}/>
       </a>)}
   </>;
+}
+
+/* ═══ ChatInput — GLOBAL, state local (fix perte de focus) ═══ */
+function ChatInput({ch,compact,onSend,uploadFile,TEAM,me,viewAs,flash}){
+  const[text,setText]=useState("");
+  const[mention,setMention]=useState(null);
+  const[uploading,setUploading]=useState(false);
+  const fileRef=useRef(null);
+  const taRef=useRef(null);
+  const others=TEAM.filter(m=>m.id!==me);
+  const onType=v=>{setText(v);const mm=v.match(/@([A-Za-zÀ-ÿ]*)$/);setMention(mm?mm[1].toLowerCase():null)};
+  const applyMention=name=>{setText(t=>t.replace(/@([A-Za-zÀ-ÿ]*)$/,"@"+name+" "));setMention(null);if(taRef.current)taRef.current.focus()};
+  const suggestions=mention!==null?others.filter(m=>m.name.split(" ")[0].toLowerCase().startsWith(mention)):[];
+  const doSend=()=>{const t=text.trim();if(!t)return;onSend(t);setText("");if(taRef.current)taRef.current.focus()};
+  const onPickFile=async e=>{const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;setUploading(true);const att=await uploadFile(f);setUploading(false);if(att){onSend(text.trim(),{attachment_url:att.url,attachment_name:att.name,attachment_type:att.type});setText("")}};
+  return <div style={{padding:compact?"8px 10px":"10px 12px",borderTop:"1px solid var(--border)",position:"relative"}}>
+    {suggestions.length>0&&<div style={{position:"absolute",bottom:"100%",left:12,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:10,boxShadow:"0 8px 24px rgba(0,0,0,.3)",overflow:"hidden",zIndex:10,minWidth:180}}>
+      {suggestions.map(m=><button key={m.id} onClick={()=>applyMention(m.name.split(" ")[0])} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 12px",width:"100%",background:"transparent",border:"none",cursor:"pointer",textAlign:"left"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
+        <div style={{width:24,height:24,borderRadius:6,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:10}}>{m.name[0]}</div>
+        <div><div style={{fontSize:11,fontWeight:600,color:"var(--text)"}}>{m.name}</div><div style={{fontSize:8,color:"var(--text3)"}}>{m.role}</div></div>
+      </button>)}
+    </div>}
+    <div style={{display:"flex",gap:6,alignItems:"flex-end"}}>
+      <input ref={fileRef} type="file" style={{display:"none"}} onChange={onPickFile}/>
+      <button onClick={()=>fileRef.current&&fileRef.current.click()} disabled={uploading||!!viewAs} title="Joindre un fichier (max 5 Mo)" style={{width:34,height:34,borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:uploading?"var(--gold)":"var(--text3)",fontSize:13,flexShrink:0,opacity:viewAs?.4:1}}><i className={"fa-solid "+(uploading?"fa-spinner fa-spin":"fa-paperclip")}/></button>
+      <textarea ref={taRef} value={text} disabled={!!viewAs} onChange={e=>onType(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&suggestions.length===0){e.preventDefault();doSend()}if(e.key==="Enter"&&suggestions.length>0){e.preventDefault();applyMention(suggestions[0].name.split(" ")[0])}}} placeholder={viewAs?"👁 Simulation — envoi désactivé":"Message… (@ pour mentionner)"} rows={1} style={{flex:1,padding:compact?"8px 10px":"9px 12px",borderRadius:10,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:compact?11.5:12.5,outline:"none",resize:"none",fontFamily:"var(--sans)",lineHeight:1.5,maxHeight:100}}/>
+      <button onClick={doSend} disabled={!text.trim()||!!viewAs} style={{width:34,height:34,borderRadius:8,background:(text.trim()&&!viewAs)?"linear-gradient(135deg,var(--gold),var(--bordeaux2))":"var(--bg4)",color:(text.trim()&&!viewAs)?"#fff":"var(--text4)",fontSize:13,border:"none",flexShrink:0,cursor:(text.trim()&&!viewAs)?"pointer":"default"}}><i className="fa-solid fa-paper-plane"/></button>
+    </div>
+  </div>;
+}
+
+/* ═══ MsgActions — menu ⋯ au survol d'un message ═══ */
+function MsgActions({m,mine,onDelete,flash,align}){
+  const[open,setOpen]=useState(false);
+  const doCopy=async()=>{try{await navigator.clipboard.writeText(m.text||"")}catch(e){const ta=document.createElement("textarea");ta.value=m.text||"";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta)}flash("Copié ✓");setOpen(false)};
+  const doSelect=()=>{const el=document.getElementById("bbl-"+m.id);if(el){const r=document.createRange();r.selectNodeContents(el);const s=window.getSelection();s.removeAllRanges();s.addRange(r)}setOpen(false)};
+  const doDel=()=>{if(confirm("Supprimer ce message ?"))onDelete(m.id);setOpen(false)};
+  return <div className="msg-dots-wrap" style={{position:"relative",alignSelf:"center",flexShrink:0}} onMouseLeave={()=>setOpen(false)}>
+    <button className="msg-dots" onClick={e=>{e.stopPropagation();setOpen(p=>!p)}} title="Options"><i className="fa-solid fa-ellipsis-vertical"/></button>
+    {open&&<div className="ctx-menu" style={{[align==="left"?"left":"right"]:0}}>
+      <button className="ctx-item" onClick={doCopy}><i className="fa-solid fa-copy"/>Copier</button>
+      <button className="ctx-item" onClick={doSelect}><i className="fa-solid fa-i-cursor"/>Sélectionner</button>
+      {mine&&<button className="ctx-item" onClick={doDel} style={{color:"var(--red)"}}><i className="fa-solid fa-trash"/>Supprimer</button>}
+    </div>}
+  </div>;
 }
 
 /* ═══ GroupForm — création d'un groupe de discussion ═══ */
