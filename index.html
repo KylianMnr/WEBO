@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v42</title>
+<title>WEBO — Hub v43</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -729,6 +729,59 @@ const WS_PRIO=[{id:"low",label:"Basse",c:"#64748b"},{id:"normal",label:"Normale"
 const OBJ_DEFAULTS={kylian:{week:5,month:20,caMonth:15000},johanna:{week:3,month:12,caMonth:8000},theo:{week:3,month:12,caMonth:6000}};
 
 /* ═══ APP ═══ */
+function MsgWidgetX(P){const{myChannels,chatMessages,activeChat,setActiveChat,chatUnread,markChatRead,effSess,sess,TEAM,openDm,chatChannels,mN,mC,MsgBody,MsgActions,leads,setSelLead,setPage,delChatMsg,flash,isMsgRead,sendChatCore,uploadChatFile,viewAs,chanName,chanColor,setMsgWidget,ChatInput,Av,msgWidget,page,td,delGroup,renameGroup,realAdmin}=P;
+
+const ch=myChannels.find(c=>c.id===activeChat);
+const msgs=useMemo(()=>chatMessages.filter(m=>m.channel_id===activeChat),[chatMessages,activeChat]);
+const endRef=useRef(null);
+useEffect(()=>{if(endRef.current)endRef.current.scrollIntoView({behavior:"smooth"})},[msgs.length,activeChat]);
+useEffect(()=>{if(ch&&chatUnread(ch)>0){const t=setTimeout(()=>markChatRead(ch),400);return()=>clearTimeout(t)}},[activeChat,msgs.length]);
+const others=TEAM.filter(m=>m.id!==effSess);
+const fmtT=iso=>{try{const d=new Date(iso);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}catch(e){return""}};
+const _vis=msgWidget&&page!=="messages";return <div className="msg-widget fu" style={{display:_vis?"flex":"none"}}>
+  <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8,background:"var(--bg3)"}}>
+    {ch&&<button onClick={()=>setActiveChat(null)} style={{color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-arrow-left"/></button>}
+    <span style={{fontWeight:700,fontSize:13,flex:1}}>{ch?chanName(ch):"Messagerie"}</span>
+    <button onClick={()=>{setPage("messages");setMsgWidget(false)}} title="Agrandir" style={{color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-expand"/></button>
+    <button onClick={()=>setMsgWidget(false)} style={{color:"var(--text3)",fontSize:13}}><i className="fa-solid fa-xmark"/></button>
+  </div>
+  {!ch&&<div style={{flex:1,overflowY:"auto",padding:8,display:"flex",flexDirection:"column",gap:2}}>
+    <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--gold)",letterSpacing:1,padding:"4px 8px"}}>ÉQUIPE</div>
+    {others.map(m=>{const dmId="dm_"+[effSess,m.id].sort().join("_");const dmCh=chatChannels.find(c=>c.id===dmId);const un=dmCh?chatUnread(dmCh):0;return(
+    <div key={m.id} onClick={()=>openDm(m.id,false)} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 8px",borderRadius:8,cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
+      <div style={{width:28,height:28,borderRadius:8,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:11}}>{m.name[0]}</div>
+      <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600}}>{m.name}</div><div style={{fontSize:9,color:"var(--text3)"}}>{m.role}</div></div>
+      {un>0&&<div style={{minWidth:17,height:17,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{un}</div>}
+    </div>)})}
+    <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--gold)",letterSpacing:1,padding:"8px 8px 4px"}}>GROUPES</div>
+    {myChannels.filter(c=>c.type==="group").map(c=>{const un=chatUnread(c);return(
+    <div key={c.id} className="grp-row" onClick={()=>{setActiveChat(c.id);markChatRead(c)}} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 8px",borderRadius:8,cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
+      <div style={{width:28,height:28,borderRadius:8,background:"rgba(197,160,89,.15)",border:"1.5px solid rgba(197,160,89,.4)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--gold)",fontSize:11}}><i className="fa-solid fa-users"/></div>
+      <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div></div>
+      {un>0&&<div style={{minWidth:17,height:17,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{un}</div>}
+      <GrpMenu c={c} delGroup={delGroup} renameGroup={renameGroup} canManage={realAdmin||c.created_by===effSess}/>
+    </div>)})}
+    {myChannels.filter(c=>c.type==="group").length===0&&<div style={{fontSize:10,color:"var(--text3)",padding:"4px 8px"}}>Aucun groupe</div>}
+  </div>}
+  {ch&&<>
+    <div style={{flex:1,overflowY:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:6}}>
+      {msgs.length===0&&<div style={{margin:"auto",fontSize:11,color:"var(--text3)"}}>Commencez la conversation</div>}
+      {msgs.map(m=>{const mine=m.sender_id===effSess;return(
+      <div key={m.id} className="msg-row" style={{display:"flex",gap:4,justifyContent:mine?"flex-end":"flex-start",alignItems:"flex-end"}}>
+        {mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="right"/>}
+        <div id={"bbl-"+m.id} style={{maxWidth:"78%",padding:"6px 10px",borderRadius:mine?"10px 10px 3px 10px":"10px 10px 10px 3px",background:mine?"linear-gradient(135deg,rgba(197,160,89,.22),rgba(197,160,89,.12))":"var(--bg3)",border:"1px solid "+(mine?"rgba(197,160,89,.35)":"var(--border)")}}>
+          {!mine&&<div style={{fontSize:8,fontWeight:700,color:mC(m.sender_id),marginBottom:1}}>{mN(m.sender_id).split(" ")[0]}</div>}
+          <MsgBody m={m} leads={leads} setSelLead={setSelLead} setPage={setPage} TEAM={TEAM} compact/>
+          <div style={{fontSize:7,fontFamily:"var(--mono)",color:"var(--text4)",marginTop:2,textAlign:"right",display:"flex",gap:3,justifyContent:"flex-end",alignItems:"center"}}>{fmtT(m.created_at)}{mine&&(isMsgRead(m,ch)?<i className="fa-solid fa-check-double" style={{color:"#34B7F1",fontSize:8}} title="Lu"/>:<i className="fa-solid fa-check" style={{color:"var(--text4)",fontSize:8}} title="Envoyé"/>)}</div>
+        </div>
+        {!mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="left"/>}
+      </div>)})}
+      <div ref={endRef}/>
+    </div>
+    <ChatInput ch={ch} compact onSend={(t,extra)=>sendChatCore(ch.id,t,extra)} uploadFile={uploadChatFile} TEAM={TEAM} me={effSess} viewAs={viewAs} flash={flash}/>
+  </>}
+</div>}
+
 function App(){
 const[sess,setSess]=useState(()=>{try{return localStorage.getItem("webo_session")||""}catch(e){return""}});
 const[logId,setLogId]=useState("");const[logPw,setLogPw]=useState("");const[logErr,setLogErr]=useState("");
@@ -1253,60 +1306,6 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
 </div>};
 
 /* ═══ MESSAGES — widget flottant compact ═══ */
-const MsgWidget=()=>{
-const visible=msgWidget&&page!=="messages";
-const ch=myChannels.find(c=>c.id===activeChat);
-const msgs=useMemo(()=>chatMessages.filter(m=>m.channel_id===activeChat),[chatMessages,activeChat]);
-const endRef=useRef(null);
-useEffect(()=>{if(visible&&endRef.current)endRef.current.scrollIntoView({behavior:"smooth"})},[msgs.length,activeChat,visible]);
-useEffect(()=>{if(visible&&ch&&chatUnread(ch)>0){const t=setTimeout(()=>markChatRead(ch),400);return()=>clearTimeout(t)}},[activeChat,msgs.length,visible]);
-const others=TEAM.filter(m=>m.id!==effSess);
-const fmtT=iso=>{try{const d=new Date(iso);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}catch(e){return""}};
-return <div className="msg-widget fu" style={{display:visible?"flex":"none"}}>
-  <div style={{padding:"10px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8,background:"var(--bg3)"}}>
-    {ch&&<button onClick={()=>setActiveChat(null)} style={{color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-arrow-left"/></button>}
-    <span style={{fontWeight:700,fontSize:13,flex:1}}>{ch?chanName(ch):"Messagerie"}</span>
-    <button onClick={()=>{setPage("messages");setMsgWidget(false)}} title="Agrandir" style={{color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-expand"/></button>
-    <button onClick={()=>setMsgWidget(false)} style={{color:"var(--text3)",fontSize:13}}><i className="fa-solid fa-xmark"/></button>
-  </div>
-  {!ch&&<div style={{flex:1,overflowY:"auto",padding:8,display:"flex",flexDirection:"column",gap:2}}>
-    <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--gold)",letterSpacing:1,padding:"4px 8px"}}>ÉQUIPE</div>
-    {others.map(m=>{const dmId="dm_"+[effSess,m.id].sort().join("_");const dmCh=chatChannels.find(c=>c.id===dmId);const un=dmCh?chatUnread(dmCh):0;return(
-    <div key={m.id} onClick={()=>openDm(m.id,false)} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 8px",borderRadius:8,cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
-      <div style={{width:28,height:28,borderRadius:8,background:m.color+"20",border:"1.5px solid "+m.color+"50",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,color:m.color,fontSize:11}}>{m.name[0]}</div>
-      <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600}}>{m.name}</div><div style={{fontSize:9,color:"var(--text3)"}}>{m.role}</div></div>
-      {un>0&&<div style={{minWidth:17,height:17,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{un}</div>}
-    </div>)})}
-    <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--gold)",letterSpacing:1,padding:"8px 8px 4px"}}>GROUPES</div>
-    {myChannels.filter(c=>c.type==="group").map(c=>{const un=chatUnread(c);return(
-    <div key={c.id} className="grp-row" onClick={()=>{setActiveChat(c.id);markChatRead(c)}} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 8px",borderRadius:8,cursor:"pointer"}} onMouseOver={e=>e.currentTarget.style.background="var(--bg3)"} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
-      <div style={{width:28,height:28,borderRadius:8,background:"rgba(197,160,89,.15)",border:"1.5px solid rgba(197,160,89,.4)",display:"flex",alignItems:"center",justifyContent:"center",color:"var(--gold)",fontSize:11}}><i className="fa-solid fa-users"/></div>
-      <div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</div></div>
-      {un>0&&<div style={{minWidth:17,height:17,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:8,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4px"}}>{un}</div>}
-      <GrpMenu c={c} delGroup={delGroup} renameGroup={renameGroup} canManage={realAdmin||c.created_by===effSess}/>
-    </div>)})}
-    {myChannels.filter(c=>c.type==="group").length===0&&<div style={{fontSize:10,color:"var(--text3)",padding:"4px 8px"}}>Aucun groupe</div>}
-  </div>}
-  {ch&&<>
-    <div style={{flex:1,overflowY:"auto",padding:"10px 12px",display:"flex",flexDirection:"column",gap:6}}>
-      {msgs.length===0&&<div style={{margin:"auto",fontSize:11,color:"var(--text3)"}}>Commencez la conversation</div>}
-      {msgs.map(m=>{const mine=m.sender_id===effSess;return(
-      <div key={m.id} className="msg-row" style={{display:"flex",gap:4,justifyContent:mine?"flex-end":"flex-start",alignItems:"flex-end"}}>
-        {mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="right"/>}
-        <div id={"bbl-"+m.id} style={{maxWidth:"78%",padding:"6px 10px",borderRadius:mine?"10px 10px 3px 10px":"10px 10px 10px 3px",background:mine?"linear-gradient(135deg,rgba(197,160,89,.22),rgba(197,160,89,.12))":"var(--bg3)",border:"1px solid "+(mine?"rgba(197,160,89,.35)":"var(--border)")}}>
-          {!mine&&<div style={{fontSize:8,fontWeight:700,color:mC(m.sender_id),marginBottom:1}}>{mN(m.sender_id).split(" ")[0]}</div>}
-          <MsgBody m={m} leads={leads} setSelLead={setSelLead} setPage={setPage} TEAM={TEAM} compact/>
-          <div style={{fontSize:7,fontFamily:"var(--mono)",color:"var(--text4)",marginTop:2,textAlign:"right",display:"flex",gap:3,justifyContent:"flex-end",alignItems:"center"}}>{fmtT(m.created_at)}{mine&&(isMsgRead(m,ch)?<i className="fa-solid fa-check-double" style={{color:"#34B7F1",fontSize:8}} title="Lu"/>:<i className="fa-solid fa-check" style={{color:"var(--text4)",fontSize:8}} title="Envoyé"/>)}</div>
-        </div>
-        {!mine&&<MsgActions m={m} mine={mine} onDelete={delChatMsg} flash={flash} align="left"/>}
-      </div>)})}
-      <div ref={endRef}/>
-    </div>
-    <ChatInput ch={ch} compact onSend={(t,extra)=>sendChatCore(ch.id,t,extra)} uploadFile={uploadChatFile} TEAM={TEAM} me={effSess} viewAs={viewAs} flash={flash}/>
-  </>}
-</div>};
-
-/* ═══ MESSAGES — communication interne ═══ */
 const MessagesPage=()=>{
 const ch=myChannels.find(c=>c.id===activeChat);
 const msgs=useMemo(()=>chatMessages.filter(m=>m.channel_id===activeChat),[chatMessages,activeChat]);
@@ -2040,7 +2039,7 @@ return (
   {outreachLead&&<OutreachModal target={outreachLead} type="lead" onClose={()=>setOutreachLead(null)} flash={flash} aiGen={aiGenColdMail} onSent={onColdMailSent} prospecteurName={mN(sess)}/>}
   {scriptLead&&<ScriptModal lead={scriptLead} onClose={()=>setScriptLead(null)} flash={flash}/>}
   {page!=="messages"&&<button className="msg-fab" onClick={()=>setMsgWidget(p=>!p)} title="Messages">{msgWidget?<i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-comment-dots"/>}{!msgWidget&&chatUnreadTotal>0&&<div style={{position:"absolute",top:-2,right:-2,minWidth:18,height:18,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px",border:"2px solid var(--bg)"}}>{chatUnreadTotal>9?"9+":chatUnreadTotal}</div>}</button>}
-  {MsgWidget()}
+  <MsgWidgetX P={{myChannels,chatMessages,activeChat,setActiveChat,chatUnread,markChatRead,effSess,sess,TEAM,openDm,chatChannels,mN,mC,MsgBody,MsgActions,leads,setSelLead,setPage,delChatMsg,flash,isMsgRead,sendChatCore,uploadChatFile,viewAs,chanName,chanColor,setMsgWidget,ChatInput,Av,msgWidget,page,td,delGroup,renameGroup,realAdmin}}/>
   <button onClick={()=>setPage("ia")} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
