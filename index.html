@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v40</title>
+<title>WEBO — Hub v40.1</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -762,6 +762,7 @@ const[wsTab,setWsTab]=useState("board");const[wsActiveNote,setWsActiveNote]=useS
 const echoRef=useRef({});
 const editingRef=useRef({});
 const dbTimers=useRef({});
+const sigRef=useRef({leads:"__init__",msgs:"__init__",chans:"__init__",tasks:"__init__",events:"__init__",notes:"__init__"});
 const markEcho=id=>{echoRef.current[id]=Date.now()};
 const isEcho=id=>{const t=echoRef.current[id];return t&&(Date.now()-t)<2500};
 const isEditing=id=>!!editingRef.current[id];
@@ -927,7 +928,6 @@ useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema
    - saute le tour si l'utilisateur est en train de taper (focus input/textarea/select)
    - ne remplace le state QUE si la signature du contenu a changé (sinon même référence → 0 re-render) */
 const sig=(rows,fields)=>{if(!rows)return"";let s=rows.length+"|";for(const r of rows){s+=r.id;for(const f of fields)s+=":"+(r[f]==null?"":(typeof r[f]==="object"?JSON.stringify(r[f]):r[f]));s+=";"}return s};
-const sigRef=useRef({leads:"__init__",msgs:"__init__",chans:"__init__",tasks:"__init__",events:"__init__",notes:"__init__"});
 const isTyping=()=>{const a=document.activeElement;if(!a)return false;const t=(a.tagName||"").toLowerCase();return t==="input"||t==="textarea"||t==="select"||a.isContentEditable};
 const poll=setInterval(async()=>{
   if(isTyping())return;
