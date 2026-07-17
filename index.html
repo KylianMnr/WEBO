@@ -647,6 +647,7 @@ const L2db=l=>({id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.
 
 /* ═══ CONSTANTS ═══ */
 const COLS=[
+{id:"site_web",label:"Formulaire site",icon:"fa-globe",accent:"#C5A059",proba:.35,urgDays:1},
 {id:"identifier",label:"Identifié",icon:"fa-crosshairs",accent:"#64748b",proba:.05,urgDays:7},
 {id:"contact_std",label:"1er Contact Standard",icon:"fa-paper-plane",accent:"#2962FF",proba:.15,urgDays:3},
 {id:"relance_std",label:"Relance Standard",icon:"fa-rotate",accent:"#f59e0b",proba:.20,urgDays:3},
@@ -661,7 +662,7 @@ const COLS=[
 ];
 const SERVICES=["Mise en conformité EAA"];
 /* V27 — Migration map : anciens statuts → nouveaux */
-const STATUS_MIG={"nouveau":"identifier","recherche":"identifier","contacte":"contact_std","relance1":"relance_std","qualifie":"potentiel","call":"rdv_call","proposition":"potentiel","relance2":"relance_rdv","signe":"reussi","injoignable":"perdu"};
+const STATUS_MIG={"nouveau":"identifier","recherche":"identifier","identifie":"site_web","contacte":"contact_std","relance1":"relance_std","qualifie":"potentiel","call":"rdv_call","proposition":"potentiel","relance2":"relance_rdv","signe":"reussi","injoignable":"perdu"};
 const CMS_OPTIONS=["—","Shopify","Magento","PrestaShop","WordPress","Custom","Autre"];
 const PROD_COLS=[{id:"a_auditer",label:"À Auditer",icon:"fa-folder-open",accent:"#64748b"},{id:"scan_auto",label:"Scan Automatique",icon:"fa-magnifying-glass-chart",accent:"#6366f1"},{id:"audit_manuel",label:"Audit Manuel en cours",icon:"fa-user-gear",accent:"#f59e0b"},{id:"rapport_genere",label:"Rapport Généré",icon:"fa-file-circle-check",accent:"#a855f7"},{id:"contre_audit",label:"Contre-audit (Remédiation)",icon:"fa-shield-halved",accent:"#089981"}];
 const SOURCES=["DM Instagram","LinkedIn","Email froid","Appel à froid","Prospection terrain","Référence","Autre"];
