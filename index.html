@@ -638,11 +638,11 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY,{realtime:{params:{eventsPer
 const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
 {id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"},
-{id:"theo",name:"Théo",role:"Apporteur d'affaires",color:"#10b981",isAdmin:false,isFondateur:false,login:"theo",email:"theo@webo.fr",pass:"Theo2026!"}];
+{id:"theo",name:"Théo",role:"Commercials",color:"#10b981",isAdmin:false,isFondateur:false,login:"theo",email:"theo@webo.fr",pass:"Theo2026!"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur}));
 
 /* ═══ DATA MAPPING ═══ */
-const db2L=r=>{let tl=[];try{tl=typeof r.timeline==="string"?JSON.parse(r.timeline||"[]"):(r.timeline||[])}catch(e){tl=[]}return{id:r.id,nom:r.nom,service:(r.service==="Web Design"||!r.service)?"Mise en conformité EAA":r.service,valeur:r.valeur,memberId:r.member_id,status:STATUS_MIG[r.status]||r.status||"identifier",dateCreated:r.date_created||"",lastInteraction:r.last_interaction||"",nextRelance:r.next_relance||"",notes:r.notes||"",source:r.source||"DM Instagram",echecReason:r.echec_reason||"—",tentatives:r.tentatives||0,paymentProof:r.payment_proof||"",verifStatus:r.verif_status||"none",verifNote:r.verif_note||"",prestaId:r.presta_id||"",email:r.email||"",phone:r.phone||"",adresse:r.adresse||"",temperature:r.temperature||"tiede",activityLog:r.activity_log||"",paymentLink:r.payment_link||"",externalLink:r.external_link||"",paymentStatus:r.payment_status||"non_facture",linkedinUrl:r.linkedin_url||"",linkedinCampaign:r.linkedin_campaign||false,auditScore:r.audit_score!=null?r.audit_score:"",auditPdfLink:r.audit_pdf_link||"",auditErreurs:r.audit_erreurs||"",linkedinStep:r.linkedin_step||"non_contacte",timeline:tl,cms:r.cms||"—",prodStatus:r.prod_status||"a_auditer"}};
+const db2L=r=>{let tl=[];try{tl=typeof r.timeline==="string"?JSON.parse(r.timeline||"[]"):(r.timeline||[])}catch(e){tl=[]}return{id:r.id,nom:r.nom,service:(r.service==="Web Design"||!r.service)?"Mise en conformité EAA":r.service,valeur:r.valeur,memberId:r.member_id,status:STATUS_MIG[r.status]||r.status||"identifier",dateCreated:r.date_created||"",lastInteraction:r.last_interaction||"",nextRelance:r.next_relance||"",notes:r.notes||"",source:r.source||"Cold Call",echecReason:r.echec_reason||"—",tentatives:r.tentatives||0,paymentProof:r.payment_proof||"",verifStatus:r.verif_status||"none",verifNote:r.verif_note||"",prestaId:r.presta_id||"",email:r.email||"",phone:r.phone||"",adresse:r.adresse||"",temperature:r.temperature||"tiede",activityLog:r.activity_log||"",paymentLink:r.payment_link||"",externalLink:r.external_link||"",paymentStatus:r.payment_status||"non_facture",linkedinUrl:r.linkedin_url||"",linkedinCampaign:r.linkedin_campaign||false,auditScore:r.audit_score!=null?r.audit_score:"",auditPdfLink:r.audit_pdf_link||"",auditErreurs:r.audit_erreurs||"",linkedinStep:r.linkedin_step||"non_contacte",timeline:tl,cms:r.cms||"—",prodStatus:r.prod_status||"a_auditer"}};
 const L2db=l=>({id:l.id,nom:l.nom,service:l.service,valeur:l.valeur,member_id:l.memberId,status:l.status,date_created:l.dateCreated,last_interaction:l.lastInteraction,next_relance:l.nextRelance,notes:l.notes,source:l.source,echec_reason:l.echecReason,tentatives:l.tentatives,payment_proof:l.paymentProof,verif_status:l.verifStatus,verif_note:l.verifNote,presta_id:l.prestaId,email:l.email,phone:l.phone,adresse:l.adresse,temperature:l.temperature,activity_log:l.activityLog,payment_link:l.paymentLink,external_link:l.externalLink,payment_status:l.paymentStatus,linkedin_url:l.linkedinUrl,linkedin_campaign:l.linkedinCampaign||false,audit_score:l.auditScore!==""?Number(l.auditScore):null,audit_pdf_link:l.auditPdfLink,audit_erreurs:l.auditErreurs,linkedin_step:l.linkedinStep,timeline:l.timeline||[],cms:l.cms||"—",prod_status:l.prodStatus||"a_auditer"});
 
 /* ═══ CONSTANTS ═══ */
@@ -665,7 +665,7 @@ const SERVICES=["Mise en conformité EAA"];
 const STATUS_MIG={"nouveau":"identifier","recherche":"identifier","identifie":"site_web","contacte":"contact_std","relance1":"relance_std","qualifie":"potentiel","call":"rdv_call","proposition":"potentiel","relance2":"relance_rdv","signe":"reussi","injoignable":"perdu"};
 const CMS_OPTIONS=["—","Shopify","Magento","PrestaShop","WordPress","Custom","Autre"];
 const PROD_COLS=[{id:"a_auditer",label:"À Auditer",icon:"fa-folder-open",accent:"#64748b"},{id:"scan_auto",label:"Scan Automatique",icon:"fa-magnifying-glass-chart",accent:"#6366f1"},{id:"audit_manuel",label:"Audit Manuel en cours",icon:"fa-user-gear",accent:"#f59e0b"},{id:"rapport_genere",label:"Rapport Généré",icon:"fa-file-circle-check",accent:"#a855f7"},{id:"contre_audit",label:"Contre-audit (Remédiation)",icon:"fa-shield-halved",accent:"#089981"}];
-const SOURCES=["DM Instagram","LinkedIn","Email froid","Appel à froid","Prospection terrain","Référence","Autre"];
+const SOURCES=["Cold Call","DM Instagram","LinkedIn","Email froid","Prospection terrain","Référence","Autre"];
 const ECHECS=["—","Prix trop élevé","Pas de besoin","Déjà équipé","Pas de budget","Concurrent choisi","Projet reporté"];
 const GHOST_MAP={"DM Instagram":"Email/Appel","LinkedIn":"DM/Appel","Email froid":"DM/LinkedIn","Appel à froid":"DM/Email","Prospection terrain":"Email/Appel","Référence":"Via ref","Autre":"DM+Email"};
 const LI_STEPS=[{id:"non_contacte",label:"Non contacté",icon:"fa-circle",color:"var(--text3)"},{id:"visite_profil",label:"Visite profil",icon:"fa-eye",color:"var(--text2)"},{id:"invitation",label:"Invitation envoyée",icon:"fa-paper-plane",color:"var(--blue)"},{id:"msg1",label:"Message 1",icon:"fa-comment",color:"var(--gold)"},{id:"msg2",label:"Message 2",icon:"fa-comments",color:"#ec4899"},{id:"repondu",label:"A répondu",icon:"fa-circle-check",color:"var(--green)"}];
@@ -699,7 +699,7 @@ const mC=id=>TEAM.find(t=>t.id===id)?.color||"#5A6270";
 const td=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const addD=(d,n)=>{const x=new Date(d+"T12:00:00");x.setDate(x.getDate()+n);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
 const cDays=(c,s)=>s==="reussi"&&c?Math.floor((Date.now()-new Date(c).getTime())/8.64e7):null;
-const isUrg=l=>{const c=COLS.find(x=>x.id===l.status);return c&&c.urgDays<999&&dA(l.lastInteraction)>=c.urgDays};
+const isUrg=l=>{if(l.status==="identifier"||l.status==="site_web")return false;const c=COLS.find(x=>x.id===l.status);return c&&c.urgDays<999&&dA(l.lastInteraction)>=c.urgDays};
 const genTpl=(l,mn)=>(TPL[l.status]||TPL.identifier).replace(/\[N\]/g,l.nom.split(" ")[0]).replace(/\[E\]/g,l.nom).replace(/\[S\]/g,l.service).replace(/\[P\]/g,mn);
 const relanceMsg=(l,mn,days)=>{return days<=2?"Bonjour "+l.nom.split(" ")[0]+", "+mn+" de WEBO. Suite a notre echange pour "+l.nom+", avez-vous avance sur "+l.service+" ?":days<=5?"Bonjour "+l.nom.split(" ")[0]+", je reviens pour "+l.nom+". Le projet "+l.service+" vous interesse toujours ?":"Bonjour "+l.nom.split(" ")[0]+", derniere relance pour "+l.nom+" — "+l.service+". Merci de confirmer."};
 const anonName=(name)=>{if(!name)return"";const parts=name.trim().split(" ");if(parts.length<=1)return name;return parts[0]+" "+parts[parts.length-1][0]+"."};
@@ -794,8 +794,8 @@ const addActivity=(who,act,tgt,col)=>{const a={id:uid(),who,action:act,target:tg
 const generateRapport=()=>{const src2=isA?leads:myL;const sg=src2.filter(l=>l.status==="reussi");const w7=src2.filter(l=>(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7);const s7=sg.filter(l=>(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7);const enc=sg.filter(l=>l.paymentStatus==="encaisse").reduce((s,l)=>s+l.valeur,0);const topM=st.byM[0];setRapportData({date:td(),wL:w7.length,wS:s7.length,wCA:s7.reduce((s,l)=>s+l.valeur,0),pipe:src2.filter(l=>!["reussi","perdu"].includes(l.status)).length,enc:enc,theo:st.ca,stale:src2.filter(l=>!["reussi","perdu"].includes(l.status)&&hA(l.lastInteraction)>=48).length,topPerf:topM?(topM.name+" ("+topM.signes+" signes)"):"—",urg:urgL.length});setShowRapport(true);flash("Rapport OK")};
 const csvEsc=v=>{const s=String(v||"");if(s.includes(",")||s.includes("\n")||s.includes('"'))return '"'+s.replace(/"/g,'""')+'"';return s};
 const doExportCSV=(rows,fn,cols)=>{const txt=cols.join(",")+"\n"+rows.map(r=>cols.map(c=>csvEsc(r[c])).join(",")).join("\n");const blob=new Blob(["\uFEFF"+txt],{type:"text/csv;charset=utf-8"});const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=fn+"-"+td()+".csv";a.click();URL.revokeObjectURL(u);flash("Export OK")};
-const exportLeads=()=>{const cols=["Entreprise","Statut","Service","Valeur","Apporteur","Source","Tel","Email","DateCreation","Relance","Prestataire","LinkedIn","EtapeIN","CampagneIN","AuditScore","AuditErreurs","AuditPDF","Notes"];const rows=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Apporteur:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,Relance:l.nextRelance,Prestataire:pN(l.prestaId),LinkedIn:l.linkedinUrl,EtapeIN:LI_STEPS.find(x=>x.id===l.linkedinStep)?.label||"",CampagneIN:l.linkedinCampaign?"Oui":"Non",AuditScore:l.auditScore,AuditErreurs:l.auditErreurs,AuditPDF:l.auditPdfLink,Notes:l.notes}));doExportCSV(rows,"webo-leads",cols)};
-const exportFinance=()=>{const cols=["Entreprise","Service","Valeur","Com20","PartChasseur","MargeNette","Apporteur","Role","Date"];const sg=leads.filter(l=>l.status==="reussi");const rows=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Com20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Apporteur:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,Date:l.dateCreated}});doExportCSV(rows,"webo-finance",cols)};
+const exportLeads=()=>{const cols=["Entreprise","Statut","Service","Valeur","Commercial","Source","Tel","Email","DateCreation","Relance","Prestataire","LinkedIn","EtapeIN","CampagneIN","AuditScore","AuditErreurs","AuditPDF","Notes"];const rows=myL.map(l=>({Entreprise:l.nom,Statut:COLS.find(c=>c.id===l.status)?.label||l.status,Service:l.service,Valeur:l.valeur,Commercial:mN(l.memberId),Source:l.source,Tel:l.phone,Email:l.email,DateCreation:l.dateCreated,Relance:l.nextRelance,Prestataire:pN(l.prestaId),LinkedIn:l.linkedinUrl,EtapeIN:LI_STEPS.find(x=>x.id===l.linkedinStep)?.label||"",CampagneIN:l.linkedinCampaign?"Oui":"Non",AuditScore:l.auditScore,AuditErreurs:l.auditErreurs,AuditPDF:l.auditPdfLink,Notes:l.notes}));doExportCSV(rows,"webo-leads",cols)};
+const exportFinance=()=>{const cols=["Entreprise","Service","Valeur","Com20","PartChasseur","MargeNette","Commercial","Role","Date"];const sg=leads.filter(l=>l.status==="reussi");const rows=sg.map(l=>{const mg=calcMargin(l.valeur,l.memberId);return{Entreprise:l.nom,Service:l.service,Valeur:l.valeur,Com20:mg.comWebo,PartChasseur:mg.comProsp,MargeNette:mg.margeNette,Commercial:mN(l.memberId),Role:TEAM.find(t=>t.id===l.memberId)?.role,Date:l.dateCreated}});doExportCSV(rows,"webo-finance",cols)};
 const toggleSel=id=>setSelIds(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
 
 const bulkStatus=async status=>{const ids=[...selIds];for(const id of ids){const l=leads.find(x=>x.id===id);if(!l)continue;const nl=addLog(l.activityLog,"Bulk>"+COLS.find(c=>c.id===status)?.label);setLeads(p=>p.map(x=>x.id===id?{...x,status,lastInteraction:new Date().toISOString(),activityLog:nl}:x));await sb.from("leads").update({status,last_interaction:new Date().toISOString(),activity_log:nl}).eq("id",id)}setSelIds(new Set());flash(ids.length+" leads OK");addActivity(sess,"bulk",ids.length+" leads")};
@@ -813,7 +813,7 @@ const anon=v=>{if(!clientMode||!v)return v;const s=String(v);if(s.includes("@"))
 /* V13.2 — Agenda calendar */
 const addAgEvent=async(date,title,time,color,assignee_ids,endTime,allDay)=>{const ev={id:uid(),date,title,time:allDay?"00:00":(time||"09:00"),end_time:allDay?"":(endTime||""),all_day:!!allDay,color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}};
 const delAgEvent=async id=>{setAgEvents(p=>p.filter(e=>e.id!==id));try{await sb.from("agenda_events").delete().eq("id",id)}catch(e){}};
-const moveAgEvent=async(id,newDate,newTime,newEnd)=>{const patch={date:newDate};if(newTime)patch.time=newTime;if(newEnd!==undefined)patch.end_time=newEnd;setAgEvents(p=>p.map(e=>e.id===id?{...e,...patch}:e));const ev=agEvents.find(e=>e.id===id);flash("Event deplace au "+newDate);if(ev)addActivity(sess,"a deplace",ev.title,"var(--purple)");try{await sb.from("agenda_events").update(patch).eq("id",id)}catch(e){flash("Erreur sync agenda")}};
+const moveAgEvent=async(id,newDate,newTime,newEnd,newTitle)=>{const patch={date:newDate};if(newTime)patch.time=newTime;if(newEnd!==undefined)patch.end_time=newEnd;if(newTitle!==undefined&&newTitle!=="")patch.title=newTitle;setAgEvents(p=>p.map(e=>e.id===id?{...e,...patch}:e));const ev=agEvents.find(e=>e.id===id);flash("Event deplace au "+newDate);if(ev)addActivity(sess,"a deplace",ev.title,"var(--purple)");try{await sb.from("agenda_events").update(patch).eq("id",id)}catch(e){flash("Erreur sync agenda")}};
 
 const bulkApporteur=async mid=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,memberId:mid}:x));markEcho(id);await sb.from("leads").update({member_id:mid}).eq("id",id)}setSelIds(new Set());flash(mid?ids.length+" prospect(s) → "+mN(mid):ids.length+" prospect(s) désattribués");if(mid&&mid!==sess)addNotif("fa-user-plus",mC(mid),mN(sess)+" a attribué "+ids.length+" prospect(s) à "+mN(mid));addActivity(sess,"a attribué "+ids.length+" prospect(s) à",mid?mN(mid):"personne",mid?mC(mid):"var(--text3)")};
 
@@ -966,7 +966,7 @@ const cEnc=sg.filter(l=>l.paymentStatus==="encaisse").reduce((s,l)=>s+l.valeur,0
 
 /* CMD palette */
 const cmdRes=useMemo(()=>{if(!cmdQ)return[];const q=cmdQ.toLowerCase();return[
-...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-layer-group",l:"Espace (tâches & notes)",a:()=>setPage("espace")},{i:"fa-comments",l:"Messages (comm interne)",a:()=>setPage("messages")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")}].filter(c=>c.l.toLowerCase().includes(q)),
+...[{i:"fa-plus",l:"Nouveau Lead",a:()=>{setPage("pipeline");setShowForm(true)}},{i:"fa-house",l:"Hub",a:()=>setPage("hub")},{i:"fa-layer-group",l:"Espace (tâches & notes)",a:()=>setPage("espace")},{i:"fa-comments",l:"Messages (comm interne)",a:()=>setPage("messages")},{i:"fa-calendar",l:"Agenda",a:()=>setPage("agenda")},{i:"fa-chart-pie",l:"Finance",a:()=>setPage("finance")},{i:"fa-screwdriver-wrench",l:"Techniciens",a:()=>setPage("talents")},{i:"fa-robot",l:"Agent IA",a:()=>setPage("ia")}].filter(c=>c.l.toLowerCase().includes(q)),
 ...leads.filter(l=>l.nom.toLowerCase().includes(q)).slice(0,5).map(l=>({i:"fa-user",l:l.nom+" — "+l.service,a:()=>{setSelLead(l);setPage("pipeline")}}))
 ]},[cmdQ,leads]);
 
@@ -1018,9 +1018,9 @@ const Nav=()=>(
           <Av id={effSess} sz={40}/>
           <div><div style={{fontWeight:700,fontSize:13,color:"var(--text)"}}>{sU?.name}</div><div style={{fontSize:10,color:"var(--text3)"}}>{sU?.role}{viewAs?" · vue simulée":""}</div></div>
         </div>
-        {realAdmin&&<div style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
+        {realAdmin&&<div onClick={e=>e.stopPropagation()} style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",letterSpacing:1,marginBottom:4}}>VOIR COMME</div>
-          <select value={effSess} onChange={e=>{const v=e.target.value;setViewAs(v===sess?"":v);setShowYou(false);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===sess?"Retour à votre vue":"👁 Vue de "+mN(v))}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role}){m.id===sess?" — vous":""}</option>)}</select>
+          <select value={effSess} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;setViewAs(v===sess?"":v);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===sess?"Retour à votre vue":"👁 Vue de "+mN(v))}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role}){m.id===sess?" — vous":""}</option>)}</select>
         </div>}
         <div style={{padding:"5px 0"}}>
           <button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>
@@ -1043,6 +1043,9 @@ const Nav=()=>(
 
 /* ═══ HUB ═══ */
 const HubPage=()=>{
+const[hubDayOff,setHubDayOff]=useState(0);
+const hubDate=(()=>{const d=new Date();d.setDate(d.getDate()+hubDayOff);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
+const hubDayLabel=hubDayOff===0?"Aujourd'hui":hubDayOff===1?"Demain":hubDayOff===-1?"Hier":new Date(hubDate).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
 const me=st.byM.find(m=>m.id===effSess)||{};
 const myWeek=myL.filter(l=>(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7).length;
 const myUrg=myL.filter(isUrg).length;
@@ -1117,9 +1120,9 @@ return(
     </div>
     {/* AGENDA DU JOUR */}
     <div className="chart-card" onClick={()=>setPage("agenda")} style={{cursor:"pointer"}} title="Ouvrir l'Agenda">
-      <div className="chart-hd"><span><i className="fa-solid fa-calendar-day" style={{color:"var(--gold)",marginRight:6}}/>Agenda — Aujourd'hui</span><span style={{color:"var(--text3)"}}>{td()} <i className="fa-solid fa-arrow-right" style={{fontSize:9,marginLeft:4}}/></span></div>
+      <div className="chart-hd"><span><i className="fa-solid fa-calendar-day" style={{color:"var(--gold)",marginRight:6}}/>Agenda — {hubDayLabel}</span><span style={{display:"flex",gap:4,alignItems:"center"}} onClick={e=>e.stopPropagation()}><button onClick={e=>{e.stopPropagation();setHubDayOff(o=>o-1)}} style={{width:22,height:22,borderRadius:6,border:"1px solid var(--border)",color:"var(--text3)",fontSize:10,display:"flex",alignItems:"center",justifyContent:"center"}} title="Jour précédent"><i className="fa-solid fa-chevron-left"/></button>{hubDayOff!==0&&<button onClick={e=>{e.stopPropagation();setHubDayOff(0)}} style={{padding:"2px 8px",borderRadius:6,border:"1px solid var(--gold)",color:"var(--gold)",fontSize:9,fontWeight:700}}>Auj.</button>}<button onClick={e=>{e.stopPropagation();setHubDayOff(o=>o+1)}} style={{width:22,height:22,borderRadius:6,border:"1px solid var(--border)",color:"var(--text3)",fontSize:10,display:"flex",alignItems:"center",justifyContent:"center"}} title="Jour suivant"><i className="fa-solid fa-chevron-right"/></button></span><span style={{color:"var(--text3)"}}>{td()} <i className="fa-solid fa-arrow-right" style={{fontSize:9,marginLeft:4}}/></span></div>
       <div style={{padding:"8px 0",maxHeight:200,overflowY:"auto"}}>
-        {(()=>{const items=[...myAgEvents.filter(e=>e.date===td()).sort((a,b)=>(a.time||"").localeCompare(b.time||"")).map(e=>({lb:e.title,cl:e.color||"var(--purple)",tag:(e.all_day?"Journée":(e.time||""))+(e.assignee_ids?.length?" · "+e.assignee_ids.map(a=>mN(a).split(" ")[0]).join(", "):"")}))];
+        {(()=>{const items=[...myAgEvents.filter(e=>e.date===hubDate).sort((a,b)=>(a.time||"").localeCompare(b.time||"")).map(e=>({lb:e.title,cl:e.color||"var(--purple)",tag:(e.all_day?"Journée":(e.time||""))+(e.assignee_ids?.length?" · "+e.assignee_ids.map(a=>mN(a).split(" ")[0]).join(", "):"")}))];
         if(items.length===0)return <div style={{padding:24,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-mug-hot" style={{marginRight:5}}/>Rien de prévu aujourd'hui</div>;
         return items.slice(0,8).map((it,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 4px",borderBottom:"1px solid var(--border)"}}>
           <div style={{width:7,height:7,borderRadius:"50%",background:it.cl,flexShrink:0}}/>
@@ -1137,7 +1140,7 @@ return(
     {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
     {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
-    {icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
+    {icon:"fa-screwdriver-wrench",title:"Techniciens",desc:"Réseau de techniciens EAA",pg:"talents",cnt:(prestas.length||0)+" techniciens",ac:"#8B5CF6",em:"🔧"},{icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
     ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
       <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
         <div style={{width:56,height:56,borderRadius:14,background:c.ac+"15",border:"1px solid "+c.ac+"25",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>{c.em}</div>
@@ -1384,7 +1387,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
       {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="all">Equipe</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)}</option>)}</select>}
       <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="default">Tri</option><option value="valeur">Valeur</option><option value="date">Date</option></select>
-      <div style={{display:"flex",alignItems:"center",gap:3,background:"var(--bg3)",borderRadius:6,padding:"3px 8px"}}><i className="fa-solid fa-search" style={{color:"var(--text4)",fontSize:9}}/><input value={pSearch} onChange={e=>{setPSearch(e.target.value);setTPage(0)}} placeholder="Rechercher..." style={{background:"transparent",border:"none",color:"var(--text)",fontSize:11,outline:"none",width:120,padding:"2px 0"}}/>{pSearch&&<button onClick={()=>setPSearch("")} style={{color:"var(--text3)",fontSize:9,lineHeight:1}}><i className="fa-solid fa-xmark"/></button>}</div>
+      <PSearchBar value={pSearch} onChange={v=>{setPSearch(v);setTPage(0)}}/>
       <select value={svcFilter} onChange={e=>{setSvcFilter(e.target.value);setTPage(0)}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:svcFilter!=="all"?"var(--gold)":"var(--border)"}}><option value="all">📁 Tous services</option>{SERVICES.map(s=><option key={s} value={s}>{s}</option>)}</select>
       <select value={noteFilter} onChange={e=>{setNoteFilter(e.target.value);setTPage(0)}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:noteFilter!=="all"?"var(--gold)":"var(--border)"}}><option value="all">📝 Notes</option><option value="with">Avec notes</option><option value="without">Sans notes</option></select>
       {pView==="table"&&<button onClick={exportLeads} style={{padding:"4px 8px",borderRadius:6,border:"1px solid var(--border)",color:"var(--text3)",fontSize:9}}><i className="fa-solid fa-file-csv"/></button>}
@@ -1474,7 +1477,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
     <span className="bulk-cnt">{selIds.size}</span>
     <div style={{height:16,width:1,background:"var(--border)"}}/>
     {COLS.filter(c=>!["perdu","pas_potentiel"].includes(c.id)).map(c=><button key={c.id} className="bulk-btn" onClick={()=>bulkStatus(c.id)} style={{color:c.accent,borderColor:c.accent+"40"}}><i className={"fa-solid "+c.icon} style={{marginRight:3,fontSize:8}}/>{c.label}</button>)}
-    <select onChange={e=>{if(e.target.value!=="__none")bulkApporteur(e.target.value==="__unassign"?"":e.target.value);e.target.value="__none"}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:"var(--gold)",color:"var(--gold)"}}><option value="__none">👤 Apporteur d'affaires...</option><option value="__unassign">— Non attribué —</option>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select>
+    <select onChange={e=>{if(e.target.value!=="__none")bulkApporteur(e.target.value==="__unassign"?"":e.target.value);e.target.value="__none"}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:"var(--gold)",color:"var(--gold)"}}><option value="__none">👤 Commercials...</option><option value="__unassign">— Non attribué —</option>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select>
     <div style={{flex:1}}/>
     <button className="bulk-btn" onClick={bulkDelLeads} style={{borderColor:"rgba(231,76,76,.4)",color:"var(--red)",fontWeight:700}}><i className="fa-solid fa-trash" style={{marginRight:3}}/>Supprimer</button>
     <button className="bulk-btn" onClick={()=>setSelIds(new Set())}><i className="fa-solid fa-xmark" style={{marginRight:3}}/>Annuler</button>
@@ -1486,7 +1489,7 @@ const Talents=()=>{
 const sorted=useMemo(()=>{let list=prestas.map(p=>{const asg=leads.filter(l=>l.prestaId===p.id);const act=asg.filter(l=>!["reussi","perdu"].includes(l.status)).length;const sgn=asg.filter(l=>l.status==="reussi").length;const ca=asg.filter(l=>l.status==="reussi").reduce((s,l)=>s+l.valeur,0);const heat=heatScore(p);return{...p,act,sgn,ca,heat,busy:act>=3,test:sgn<3,charge:Math.min(Math.round((act/4)*100),100)}});if(tFilter==="topTjm")list=list.filter(p=>p.tjm).sort((a,b)=>(Number(a.tjm)||999)-(Number(b.tjm)||999));else if(tFilter==="dispo")list=list.filter(p=>p.act===0);else if(tFilter==="relancer")list=list.filter(p=>p.sgn>0&&p.act===0);else list=list.sort((a,b)=>b.heat-a.heat);return list},[prestas,leads,tFilter]);
 return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,flexWrap:"wrap",gap:8}}>
-    <div style={{display:"flex",alignItems:"center",gap:8}}><h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Reseau de Talents</h2>{prestas.length>0&&<button onClick={tSelAll} style={{fontSize:10,color:tSelIds.size>0?"var(--gold)":"var(--text3)",fontFamily:"var(--mono)"}}>{tSelIds.size>0?tSelIds.size+" sel. — Deselect":"Tout select."}</button>}</div>
+    <div style={{display:"flex",alignItems:"center",gap:8}}><h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600}}>Réseau de Techniciens</h2>{prestas.length>0&&<button onClick={tSelAll} style={{fontSize:10,color:tSelIds.size>0?"var(--gold)":"var(--text3)",fontFamily:"var(--mono)"}}>{tSelIds.size>0?tSelIds.size+" sel. — Deselect":"Tout select."}</button>}</div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
       <div className="qf">
         <button className={"qf-btn"+(tFilter==="all"?" active":"")} onClick={()=>setTFilter("all")}>Tous ({prestas.length})</button>
@@ -1494,7 +1497,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
         <button className={"qf-btn"+(tFilter==="dispo"?" active":"")} onClick={()=>setTFilter("dispo")}><i className="fa-solid fa-circle-check" style={{marginRight:3}}/>Disponibles</button>
         <button className={"qf-btn"+(tFilter==="relancer"?" active":"")} onClick={()=>setTFilter("relancer")}><i className="fa-solid fa-rotate" style={{marginRight:3}}/>A Relancer</button>
       </div>
-      <button onClick={()=>{setEditP(null);setShowPF(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Prestataire</button>
+      <button onClick={()=>{setEditP(null);setShowPF(true)}} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}><i className="fa-solid fa-plus" style={{marginRight:3}}/>Technicien</button>
     </div>
   </div>
   {sorted.map((p,i)=>{const hc=heatCol(p.heat);const isTSel=tSelIds.has(p.id);
@@ -1611,7 +1614,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
 function DayPanel({date,evts,onClose,onAddEvent,onDelEvent,onMoveEvent,onLeadClick,onMoveLead,leads,prestas,sess}){
 const[showNew,setShowNew]=useState(false);const[nt,setNt]=useState("");const[ntime,setNtime]=useState("09:00");const[nend,setNend]=useState("10:00");const[nAllDay,setNAllDay]=useState(false);const[ncol,setNcol]=useState("var(--purple)");const[nAssignees,setNAssignees]=useState([sess]);
 const[showAddLead,setShowAddLead]=useState(false);const[leadSearch,setLeadSearch]=useState("");
-const[moveEv,setMoveEv]=useState(null);const[mvDate,setMvDate]=useState(date);const[mvTime,setMvTime]=useState("09:00");
+const[moveEv,setMoveEv]=useState(null);const[mvDate,setMvDate]=useState(date);const[mvTime,setMvTime]=useState("09:00");const[mvTitle,setMvTitle]=useState("");
 const IS2={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none"};
 const dt=new Date(date+"T12:00:00");
 const dayLabel=dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
@@ -1655,7 +1658,7 @@ return <div className="day-panel">
           <div className="day-ev-actions">
             {ev.lead&&<button className="day-act-btn" onClick={()=>onLeadClick(ev.lead)}>Voir</button>}
             {ev.lead&&<button className="day-act-btn" onClick={()=>openWA(ev.lead,mN(ev.lead.memberId))}><i className="fa-brands fa-whatsapp"/></button>}
-            {ev.tp==="custom"&&<button className="day-act-btn" onClick={()=>{setMoveEv(ev);setMvDate(date);setMvTime(ev.time||"09:00")}} style={{borderColor:"var(--gold)",color:"var(--gold)"}}><i className="fa-solid fa-calendar-day" style={{marginRight:3}}/>Décaler</button>}
+            {ev.tp==="custom"&&<button className="day-act-btn" onClick={()=>{setMoveEv(ev);setMvDate(date);setMvTime(ev.time||"09:00");setMvTitle(ev.lb||ev.title||"")}} style={{borderColor:"var(--gold)",color:"var(--gold)"}}><i className="fa-solid fa-calendar-day" style={{marginRight:3}}/>Modifier</button>}
             {ev.tp==="custom"&&<button className="day-act-btn del" onClick={()=>onDelEvent(ev.id)}>Suppr</button>}
             {ev.lead&&ev.tp==="relance"&&<button className="day-act-btn del" onClick={()=>onMoveLead(ev.lead.id,"")}>Retirer</button>}
           </div>
@@ -1671,17 +1674,17 @@ return <div className="day-panel">
       {[{l:"Demain",d:1},{l:"+2j",d:2},{l:"+3j",d:3},{l:"1 semaine",d:7},{l:"2 semaines",d:14}].map(q=>{
         const base=new Date(date+"T12:00:00");base.setDate(base.getDate()+q.d);
         const ds=base.getFullYear()+"-"+String(base.getMonth()+1).padStart(2,"0")+"-"+String(base.getDate()).padStart(2,"0");
-        return <button key={q.l} onClick={()=>{onMoveEvent(moveEv.id,ds,moveEv.time,moveEv.endTime);setMoveEv(null);onClose()}} style={{padding:"6px 12px",borderRadius:14,border:"1px solid var(--gold)",background:"rgba(197,160,89,.08)",color:"var(--gold)",fontSize:11,fontWeight:700}}>{q.l}</button>})}
+        return <button key={q.l} onClick={()=>{onMoveEvent(moveEv.id,ds,moveEv.time,moveEv.endTime,mvTitle);setMoveEv(null);onClose()}} style={{padding:"6px 12px",borderRadius:14,border:"1px solid var(--gold)",background:"rgba(197,160,89,.08)",color:"var(--gold)",fontSize:11,fontWeight:700}}>{q.l}</button>})}
     </div>
     <div className="sep"/>
     <div style={{fontSize:10,color:"var(--text3)",margin:"8px 0"}}>Ou choisir précisément</div>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-      <div className="ff"><label>Nouvelle date</label><input style={IS2} type="date" value={mvDate} onChange={e=>setMvDate(e.target.value)}/></div>
+      <div className="ff"><label>Titre</label><input style={IS2} type="text" value={mvTitle} onChange={e=>setMvTitle(e.target.value)} placeholder="Titre de l'événement"/></div><div className="ff"><label>Nouvelle date</label><input style={IS2} type="date" value={mvDate} onChange={e=>setMvDate(e.target.value)}/></div>
       <div className="ff"><label>Heure</label><input style={IS2} type="time" value={mvTime} onChange={e=>setMvTime(e.target.value)}/></div>
     </div>
     <div style={{display:"flex",gap:4,justifyContent:"flex-end",marginTop:8}}>
       <button onClick={()=>setMoveEv(null)} style={{padding:"8px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Annuler</button>
-      <button onClick={()=>{if(mvDate){onMoveEvent(moveEv.id,mvDate,mvTime,moveEv.endTime);setMoveEv(null);onClose()}}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}>Décaler</button>
+      <button onClick={()=>{if(mvDate){onMoveEvent(moveEv.id,mvDate,mvTime,moveEv.endTime,mvTitle);setMoveEv(null);onClose()}}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}>Enregistrer</button>
     </div>
   </div>}
   {showNew&&<div className="day-new-form">
@@ -1756,7 +1759,7 @@ const Finance=()=>(
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Objectif Mensuel — {E(OBJ)}</span><span style={{fontFamily:"var(--mono)",fontWeight:700,color:st.obj>=80?"var(--green)":"var(--gold)"}}>{st.obj}%</span></div><div className="card-b"><div style={{height:6}}><Prog pct={st.obj} color={st.obj>=100?"var(--green)":"var(--gold)"}/></div></div></div>
   {/* Équipe — Fondateur vs Chasseurs */}
   <div className="card" style={{marginBottom:14}}><div className="card-h"><span style={{fontWeight:600}}>Performance — Fondateur vs Chasseurs</span></div><div className="card-b">
-  <table className="tbl"><thead><tr><th>Apporteur</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th>{isA&&<th>Marge WEBO</th>}{isA&&<th>Part Chasseur</th>}</tr></thead>
+  <table className="tbl"><thead><tr><th>Commercial</th><th>Rôle</th><th>Leads</th><th>Signés</th><th>Conv.</th><th>CA</th>{isA&&<th>Marge WEBO</th>}{isA&&<th>Part Chasseur</th>}</tr></thead>
   <tbody>{st.byM.map((m,i)=><tr key={m.id}>
     <td><div style={{display:"flex",alignItems:"center",gap:6}}><Av id={m.id} sz={22}/><span style={{fontWeight:600,color:m.color}}>{m.name}</span>{i===0&&<span>🏆</span>}</div></td>
     <td><Badge type={m.isFondateur?"gold":"blue"}>{m.role}</Badge></td>
@@ -1865,7 +1868,7 @@ return <div className="rpanel">
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:8}}>
         <div>
           <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3}}>APPORTEUR</div>
-          <select value={l.memberId||""} onChange={e=>{upd(l.id,{memberId:e.target.value});flash("Apporteur: "+(e.target.value?mN(e.target.value):"aucun"))}} style={{width:"100%",padding:"7px 8px",borderRadius:6,border:"1px solid "+(l.memberId?"var(--border)":"var(--gold)"),background:"var(--bg)",color:l.memberId?mC(l.memberId):"var(--text3)",fontSize:12,fontWeight:700,outline:"none"}}><option value="">— À assigner —</option>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>
+          <select value={l.memberId||""} onChange={e=>{upd(l.id,{memberId:e.target.value});flash("Commercial: "+(e.target.value?mN(e.target.value):"aucun"))}} style={{width:"100%",padding:"7px 8px",borderRadius:6,border:"1px solid "+(l.memberId?"var(--border)":"var(--gold)"),background:"var(--bg)",color:l.memberId?mC(l.memberId):"var(--text3)",fontSize:12,fontWeight:700,outline:"none"}}><option value="">— À assigner —</option>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select>
         </div>
         <div>
           <div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3}}>TEMPÉRATURE</div>
@@ -1949,31 +1952,33 @@ return <div className="rpanel">
     <div className="sep"/>
     {l.activityLog&&<div style={{marginTop:8}}><div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>HISTORIQUE</div><div className="tl" style={{maxHeight:120,overflowY:"auto"}}>{l.activityLog.split("\n").filter(Boolean).slice(0,8).map((e,i)=>{const p=e.split("—");return <div key={i} className="tl-item" style={{padding:"3px 0"}}><div className="tl-dot" style={{background:e.includes(">")||e.includes("Bulk")?"var(--blue)":e.includes("Cree")?"var(--green)":"var(--text3)"}}/><div className="tl-time">{p[0]}</div><div style={{fontSize:10,color:"var(--text2)"}}>{p.slice(1).join("—")}</div></div>})}</div></div>}
     <div className="sep"/>
-    <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:8}}>
-      <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"6px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/> WhatsApp</button>
-      <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-copy"/> Template</button>
-      <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé+2 actions.")}} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10}}><i className="fa-solid fa-robot"/> IA</button>
-      <button onClick={()=>setOutreachLead(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(107,26,26,.4)",color:"#E88",fontSize:10,display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope-open-text"/> Cold Mail EAA</button>
-      <WebhookBtn label="Générer Devis EAA" icon="fa-file-invoice-dollar" color="var(--gold)" url="https://hook.eu1.make.com/webo-devis-eaa" payload={{id:l.id,nom:l.nom,email:l.email,phone:l.phone,adresse:l.adresse,service:l.service,valeur:l.valeur,audit_score:l.auditScore,audit_erreurs:l.auditErreurs,cms:l.cms,prod_status:l.prodStatus,linkedin_url:l.linkedinUrl}} flash={flash}/>
-      <WebhookBtn label="⚠️ Alerte Arcom" icon="fa-triangle-exclamation" color="var(--red)" url="https://hook.eu1.make.com/webo-alerte-arcom" payload={{id:l.id,nom:l.nom,email:l.email,phone:l.phone,audit_score:l.auditScore,sender:"Johanna",date:new Date().toISOString()}} flash={flash}/>
-      <button className={"enrich-btn"+(enrichLoading===l.id?" loading":"")} onClick={()=>enrichLead(l)}><i className={"fa-solid "+(enrichLoading===l.id?"fa-spinner fa-spin":"fa-satellite-dish")}/> {enrichLoading===l.id?"Recherche...":"Enrichir"}</button>
-      {l.externalLink&&<a href={l.externalLink} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-arrow-up-right-from-square"/> Site</a>}
-      {l.linkedinUrl&&<a href={l.linkedinUrl} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid #0A66C2",color:"#0A66C2",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-brands fa-linkedin"/> LinkedIn</a>}
-      {l.auditPdfLink&&!hasAudit&&<a href={l.auditPdfLink} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--purple)",color:"var(--purple)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-file-pdf"/> Audit</a>}
-      {l.phone&&<a href={"tel:"+l.phone} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--green)",color:"var(--green)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-phone"/> Appeler</a>}
+    <div style={{marginTop:8}}>
+      <div style={{fontSize:8,fontWeight:700,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1.2,margin:"10px 0 5px",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-comments"/>COMMUNICATION</div>
+      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+        <button onClick={()=>openWA(l,mN(l.memberId))} className="wa" style={{padding:"6px 10px",borderRadius:"var(--radius)"}}><i className="fa-brands fa-whatsapp"/> WhatsApp</button>
+        <button onClick={()=>setOutreachLead(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(107,26,26,.4)",color:"#E88",fontSize:10,display:"flex",alignItems:"center",gap:3}}><i className="fa-solid fa-envelope-open-text"/> Cold Mail EAA</button>
+        <button onClick={()=>cp(genTpl(l,mN(l.memberId)),flash)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-copy"/> Template</button>
+        {l.phone&&<a href={"tel:"+l.phone} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--green)",color:"var(--green)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-phone"/> Appeler</a>}
+      </div>
+      <div style={{fontSize:8,fontWeight:700,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1.2,margin:"10px 0 5px",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-file-lines"/>DOCUMENTS & DEVIS</div>
+      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+        <WebhookBtn label="Générer Devis EAA" icon="fa-file-invoice-dollar" color="var(--gold)" url="https://hook.eu1.make.com/webo-devis-eaa" payload={{id:l.id,nom:l.nom,email:l.email,phone:l.phone,adresse:l.adresse,service:l.service,valeur:l.valeur,audit_score:l.auditScore,audit_erreurs:l.auditErreurs,cms:l.cms,prod_status:l.prodStatus,linkedin_url:l.linkedinUrl}} flash={flash}/>
+        <button onClick={()=>setScriptLead(l)} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-phone-volume"/>Script d'Appel</button>
+        {l.auditPdfLink&&!hasAudit&&<a href={l.auditPdfLink} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--purple)",color:"var(--purple)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-file-pdf"/> Audit</a>}
+      </div>
+      <div style={{fontSize:8,fontWeight:700,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1.2,margin:"10px 0 5px",display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-toolbox"/>OUTILS & DONNÉES</div>
+      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+        <button onClick={()=>{setPage("ia");askAI("Analyse lead "+l.nom+": "+l.service+", "+l.valeur+"€, "+col?.label+". Résumé+2 actions.")}} style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10}}><i className="fa-solid fa-robot"/> IA</button>
+        <button className={"enrich-btn"+(enrichLoading===l.id?" loading":"")} onClick={()=>enrichLead(l)}><i className={"fa-solid "+(enrichLoading===l.id?"fa-spinner fa-spin":"fa-satellite-dish")}/> {enrichLoading===l.id?"Recherche...":"Enrichir"}</button>
+        {l.externalLink&&<a href={l.externalLink} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid var(--blue)",color:"var(--blue)",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-solid fa-arrow-up-right-from-square"/> Site</a>}
+        {l.linkedinUrl&&<a href={l.linkedinUrl} target="_blank" rel="noopener" style={{padding:"6px 10px",borderRadius:"var(--radius)",border:"1px solid #0A66C2",color:"#0A66C2",fontSize:10,textDecoration:"none",display:"inline-flex",alignItems:"center",gap:3}}><i className="fa-brands fa-linkedin"/> LinkedIn</a>}
+      </div>
     </div>
     {enrichData[l.id]&&<div className="enrich-card">
       <div className="enrich-title"><i className="fa-solid fa-satellite-dish"/> DATA ENRICHMENT <span style={{fontSize:8,color:"var(--text3)",fontWeight:400}}>{enrichData[l.id].date}</span></div>
       <div className="enrich-body">{enrichData[l.id].text}</div>
     </div>}
-    {/* ═══ AUTOMATISATIONS WEBHOOKS ═══ */}
-    <div style={{marginTop:10,background:"linear-gradient(135deg,rgba(139,92,246,.04),rgba(197,160,89,.03))",border:"1px solid rgba(139,92,246,.12)",borderRadius:10,padding:12}}>
-      <div style={{fontSize:8,fontWeight:700,color:"var(--purple)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:8,display:"flex",alignItems:"center",gap:4}}><i className="fa-solid fa-bolt"/>AUTOMATISATIONS</div>
-      <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
-        <button onClick={()=>setScriptLead(l)} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:10,fontWeight:600,display:"flex",alignItems:"center",gap:4,transition:"all .15s"}}><i className="fa-solid fa-phone-volume"/>Script d'Appel</button>
-        <WebhookBtn label="Renvoyer l'Audit" icon="fa-file-pdf" color="var(--red)" url="https://hook.eu1.make.com/WEBHOOK_ACTION_PLACEHOLDER" payload={{id:l.id,nom:l.nom,email:l.email,audit_score:l.auditScore,audit_pdf_link:l.auditPdfLink}} flash={flash}/>
-      </div>
-    </div>
+
   </div>
 </div>};
 
@@ -1990,7 +1995,7 @@ return (
       <button onClick={()=>setPage("hub")} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:12,fontWeight:600,transition:"all .15s",cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.borderColor="var(--gold)";e.currentTarget.style.color="var(--gold)"}} onMouseOut={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}><i className="fa-solid fa-arrow-left"/>Retour au Hub</button>
     </div>}
     {page==="hub"&&<HubPage/>}
-    {page==="espace"&&<Espace/>}
+    {page==="espace"&&<Espace/>}{page==="talents"&&<Talents/>}
     {page==="messages"&&<MessagesPage/>}
     {page==="pipeline"&&<Pipeline/>}
     {page==="agenda"&&<Agenda/>}
@@ -2424,6 +2429,19 @@ return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><
 }
 
 /* ═══ WEBHOOK BUTTON (réutilisable) ═══ */
+function PSearchBar({value,onChange}){
+  const ref=React.useRef(null);
+  // Après chaque render : si on était en train de chercher, on rend le focus à l'input
+  React.useLayoutEffect(()=>{
+    if(window.__psFocused&&ref.current&&document.activeElement!==ref.current){
+      const el=ref.current;el.focus();
+      const pos=window.__psCaret!=null?window.__psCaret:el.value.length;
+      try{el.setSelectionRange(pos,pos)}catch(e){}
+    }
+  });
+  const handle=(v,caret)=>{window.__psCaret=caret;onChange(v)};
+  return <div style={{display:"flex",alignItems:"center",gap:3,background:"var(--bg3)",borderRadius:6,padding:"3px 8px"}}><i className="fa-solid fa-search" style={{color:"var(--text4)",fontSize:9}}/><input ref={ref} value={value} onFocus={()=>{window.__psFocused=true}} onBlur={()=>{window.__psFocused=false}} onChange={e=>handle(e.target.value,e.target.selectionStart)} placeholder="Rechercher..." style={{background:"transparent",border:"none",color:"var(--text)",fontSize:11,outline:"none",width:120,padding:"2px 0"}}/>{value&&<button onMouseDown={e=>e.preventDefault()} onClick={()=>{onChange("")}} style={{color:"var(--text3)",fontSize:9,lineHeight:1}}><i className="fa-solid fa-xmark"/></button>}</div>;
+}
 function WebhookBtn({label,icon,color,url,payload,flash}){
 const[st,setSt]=useState("idle");
 const fire=async()=>{setSt("loading");try{await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});setSt("done");flash(label+" — Envoyé ✓");setTimeout(()=>setSt("idle"),3000)}catch(e){setSt("idle");flash("Erreur webhook")}};
@@ -2495,11 +2513,11 @@ return <div>
 <FF l="Adresse"><input style={IS} value={f.adresse} onChange={e=>s("adresse",e.target.value)}/></FF>
 <div className="sep"/><div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>DETAILS MISSION</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Service"><select style={IS} value={f.service} onChange={e=>s("service",e.target.value)}>{f.service&&!SERVICES.includes(f.service)&&<option value={f.service}>{f.service} (ancien)</option>}{SERVICES.map(v=><option key={v}>{v}</option>)}</select></FF><FF l="Valeur HT"><input style={IS} type="number" value={f.valeur} onChange={e=>s("valeur",e.target.value)}/></FF></div>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-  <FF l="Apporteur d'Affaires"><select style={IS} value={f.memberId} onChange={e=>s("memberId",e.target.value)} disabled={!realAdmin}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select></FF>
+  <FF l="Commercial"><select style={IS} value={f.memberId} onChange={e=>s("memberId",e.target.value)} disabled={!realAdmin}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}</select></FF>
   <FF l="Source"><select style={IS} value={f.source} onChange={e=>s("source",e.target.value)}>{SOURCES.map(v=><option key={v}>{v}</option>)}</select></FF>
 </div>
 <div className="sep"/><div style={{fontSize:9,fontWeight:700,color:"var(--blue)",fontFamily:"var(--mono)",letterSpacing:1.5,marginBottom:6}}>PIPELINE</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}><FF l="Statut"><select style={IS} value={f.status} onChange={e=>s("status",e.target.value)}>{COLS.map(c=><option key={c.id} value={c.id}>{c.label}</option>)}</select></FF><FF l="Température"><select style={IS} value={f.temperature} onChange={e=>s("temperature",e.target.value)}>{TEMPS.map(t=><option key={t.id} value={t.id}>{t.e} {t.l}</option>)}</select></FF><FF l="Relance"><input style={IS} type="date" value={f.nextRelance} onChange={e=>s("nextRelance",e.target.value)}/></FF></div>
-<FF l="Prestataire">{sp?<div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(197,160,89,.2)",background:"rgba(197,160,89,.04)"}}><span style={{fontWeight:600}}>{sp.nom}</span><span style={{fontSize:10,color:"var(--gold)"}}>{sp.specialite}</span><button onClick={()=>s("prestaId","")} style={{marginLeft:"auto",color:"var(--red)",fontSize:10}}>✕</button></div>:<div><div style={{display:"flex",gap:4,marginBottom:3}}><input value={pQ} onChange={e=>setPQ(e.target.value)} placeholder="Chercher…" style={{...IS,flex:1,fontSize:13}}/><button onClick={()=>setShowM(p=>!p)} style={{padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-brain"/> Suggérer</button></div>
+<FF l="Technicien">{sp?<div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid rgba(197,160,89,.2)",background:"rgba(197,160,89,.04)"}}><span style={{fontWeight:600}}>{sp.nom}</span><span style={{fontSize:10,color:"var(--gold)"}}>{sp.specialite}</span><button onClick={()=>s("prestaId","")} style={{marginLeft:"auto",color:"var(--red)",fontSize:10}}>✕</button></div>:<div><div style={{display:"flex",gap:4,marginBottom:3}}><input value={pQ} onChange={e=>setPQ(e.target.value)} placeholder="Chercher…" style={{...IS,flex:1,fontSize:13}}/><button onClick={()=>setShowM(p=>!p)} style={{padding:"7px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-brain"/> Suggérer</button></div>
 {showM&&matches.map(m=><div key={m.id} className="match-card" onClick={()=>{s("prestaId",m.id);setShowM(false)}}><span style={{fontWeight:600}}>{m.nom}</span> <span style={{color:"var(--gold)",fontSize:11}}>Score:{m.score}%</span> <span style={{color:"var(--green)",fontSize:11,float:"right"}}>Sélectionner →</span></div>)}
 {!showM&&prestas.length>0&&<div style={{maxHeight:70,overflowY:"auto",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)"}}>{fp.map(p=><button key={p.id} onClick={()=>{s("prestaId",p.id);setPQ("")}} style={{display:"flex",gap:5,padding:"5px 7px",width:"100%",textAlign:"left",color:"var(--text)",fontSize:11}}><span style={{fontWeight:600}}>{p.nom}</span><span style={{color:"var(--text2)"}}>{p.specialite}</span></button>)}</div>}
 </div>}</FF>
@@ -2558,7 +2576,7 @@ return <div><div style={{display:"flex",justifyContent:"space-between",marginBot
 
 function PForm({presta,onSave,onDel,onX}){const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",boxSizing:"border-box"};
 const[f,setF]=useState(presta?{...presta}:{nom:"",specialite:SPECIALITES[0],contact:"",email:"",notes:"",portfolio:"",tjm:""});const s=(k,v)=>setF(p=>({...p,[k]:v}));
-return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{presta?"Modifier — "+presta.nom:<span><i className="fa-solid fa-user-plus" style={{color:"var(--purple)",marginRight:6}}/>Nouveau Prestataire</span>}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
+return <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{presta?"Modifier — "+presta.nom:<span><i className="fa-solid fa-user-plus" style={{color:"var(--purple)",marginRight:6}}/>Nouveau Technicien</span>}</h3><button onClick={onX} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div className="sep"/>
 <FF l="Nom"><input style={IS} value={f.nom} onChange={e=>s("nom",e.target.value)}/></FF>
 <FF l="Spécialité"><select style={IS} value={f.specialite} onChange={e=>s("specialite",e.target.value)}>{SPECIALITES.map(v=><option key={v}>{v}</option>)}</select></FF>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Téléphone"><input style={IS} value={f.contact} onChange={e=>s("contact",e.target.value)} type="tel"/></FF><FF l="Email"><input style={IS} value={f.email} onChange={e=>s("email",e.target.value)} type="email"/></FF></div>
