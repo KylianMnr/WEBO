@@ -639,7 +639,8 @@ const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
 {id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"},
 {id:"theo",name:"Théo",role:"Commercials",color:"#10b981",isAdmin:false,isFondateur:false,login:"theo",email:"theo@webo.fr",pass:"Theo2026!"}];
-const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur}));
+const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur,roleType:isAdmin?"admin":(role||"").toLowerCase().includes("techni")?"technicien":"commercial"}));
+const roleOf=id=>(TEAM.find(t=>t.id===id)||{}).roleType||"commercial";
 
 /* ═══ DATA MAPPING ═══ */
 const db2L=r=>{let tl=[];try{tl=typeof r.timeline==="string"?JSON.parse(r.timeline||"[]"):(r.timeline||[])}catch(e){tl=[]}return{id:r.id,nom:r.nom,service:(r.service==="Web Design"||!r.service)?"Mise en conformité EAA":r.service,valeur:r.valeur,memberId:r.member_id,status:STATUS_MIG[r.status]||r.status||"identifier",dateCreated:r.date_created||"",lastInteraction:r.last_interaction||"",nextRelance:r.next_relance||"",notes:r.notes||"",source:r.source||"Cold Call",echecReason:r.echec_reason||"—",tentatives:r.tentatives||0,paymentProof:r.payment_proof||"",verifStatus:r.verif_status||"none",verifNote:r.verif_note||"",prestaId:r.presta_id||"",email:r.email||"",phone:r.phone||"",adresse:r.adresse||"",temperature:r.temperature||"tiede",activityLog:r.activity_log||"",paymentLink:r.payment_link||"",externalLink:r.external_link||"",paymentStatus:r.payment_status||"non_facture",linkedinUrl:r.linkedin_url||"",linkedinCampaign:r.linkedin_campaign||false,auditScore:r.audit_score!=null?r.audit_score:"",auditPdfLink:r.audit_pdf_link||"",auditErreurs:r.audit_erreurs||"",linkedinStep:r.linkedin_step||"non_contacte",timeline:tl,cms:r.cms||"—",prodStatus:r.prod_status||"a_auditer"}};
@@ -731,7 +732,7 @@ const OBJ_DEFAULTS={kylian:{week:5,month:20,caMonth:15000},johanna:{week:3,month
 function App(){
 const[sess,setSess]=useState(()=>{try{return localStorage.getItem("webo_session")||""}catch(e){return""}});
 const[logId,setLogId]=useState("");const[logPw,setLogPw]=useState("");const[logErr,setLogErr]=useState("");
-const realAdmin=TEAM.find(t=>t.id===sess)?.isAdmin||false;const effSess=viewAs||sess;const isA=TEAM.find(t=>t.id===effSess)?.isAdmin||false;const sU=TEAM.find(t=>t.id===effSess);
+const realAdmin=TEAM.find(t=>t.id===sess)?.isAdmin||false;const effSess=viewAs||sess;const isA=TEAM.find(t=>t.id===effSess)?.isAdmin||false;const sU=TEAM.find(t=>t.id===effSess);const effRole=roleOf(effSess);const isTech=effRole==="technicien";const isCom=effRole==="commercial";
 const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");
 const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("webo_theme")||"dark"}catch(e){return"dark"}});const[proxySecret,setProxySecret]=useState(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const AI_PROXY=SB_URL+"/functions/v1/ai-proxy";
@@ -930,7 +931,7 @@ useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{loc
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
 
 /* Computed */
-const myL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess||!l.memberId),[leads,effSess,isA]);
+const myL=useMemo(()=>{if(isA)return leads;if(isTech)return leads.filter(l=>l.prestaId===effSess);return leads.filter(l=>l.memberId===effSess||!l.memberId)},[leads,effSess,isA,isTech]);
 /* V34 — leads strictement personnels (agenda/tâches des apporteurs) */
 const myOwnL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,effSess,isA]);
 /* V37 — tâches Espace visibles pour la session effective */
@@ -1135,13 +1136,13 @@ return(
 
   {/* ═══ MODULES ═══ */}
   <div className="hub-grid">
-    {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊"},
-    {icon:"fa-layer-group",title:"Espace",desc:"Tâches & notes partagées",pg:"espace",cnt:(visibleWsTasks.filter(t=>t.status!=="done").length)+" tâches",ac:"#8B5CF6",em:"🗂️"},
-    {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
-    {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
-    {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
-    {icon:"fa-screwdriver-wrench",title:"Techniciens",desc:"Réseau de techniciens EAA",pg:"talents",cnt:(prestas.length||0)+" techniciens",ac:"#8B5CF6",em:"🔧"},{icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖"},
-    ].map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
+    {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊",roles:["admin","commercial","technicien"]},
+    {icon:"fa-layer-group",title:"Espace",desc:"Tâches & notes partagées",pg:"espace",roles:["admin","commercial","technicien"],cnt:(visibleWsTasks.filter(t=>t.status!=="done").length)+" tâches",ac:"#8B5CF6",em:"🗂️"},
+    {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",roles:["admin","commercial","technicien"],cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
+    {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",roles:["admin","commercial"],cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
+    {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",roles:["admin","commercial","technicien"],cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
+    {icon:"fa-screwdriver-wrench",title:"Techniciens",desc:"Réseau de techniciens EAA",pg:"talents",cnt:(prestas.length||0)+" techniciens",ac:"#8B5CF6",em:"🔧",roles:["admin"]},{icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖",roles:["admin","commercial"]},
+    ].filter(c=>!c.roles||c.roles.includes(effRole)).map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
       <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
         <div style={{width:56,height:56,borderRadius:14,background:c.ac+"15",border:"1px solid "+c.ac+"25",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>{c.em}</div>
         <div><h3 style={{fontFamily:"var(--serif)",fontSize:19,fontWeight:700,margin:0}}>{c.title}</h3><p style={{fontSize:12,color:"var(--text3)",margin:0,marginTop:2}}>{c.desc}</p></div>
@@ -1995,11 +1996,11 @@ return (
       <button onClick={()=>setPage("hub")} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:12,fontWeight:600,transition:"all .15s",cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.borderColor="var(--gold)";e.currentTarget.style.color="var(--gold)"}} onMouseOut={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}><i className="fa-solid fa-arrow-left"/>Retour au Hub</button>
     </div>}
     {page==="hub"&&<HubPage/>}
-    {page==="espace"&&<Espace/>}{page==="talents"&&<Talents/>}
+    {page==="espace"&&<Espace/>}{page==="talents"&&isA&&<Talents/>}
     {page==="messages"&&<MessagesPage/>}
     {page==="pipeline"&&<Pipeline/>}
     {page==="agenda"&&<Agenda/>}
-    {page==="finance"&&<Finance/>}
+    {page==="finance"&&!isTech&&<Finance/>}
     {page==="ia"&&iaUI}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
