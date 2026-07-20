@@ -1020,7 +1020,7 @@ const Nav=()=>(
         </div>
         {realAdmin&&<div onClick={e=>e.stopPropagation()} style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",letterSpacing:1,marginBottom:4}}>VOIR COMME</div>
-          <select value={effSess} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;setViewAs(v===sess?"":v);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===sess?"Retour à votre vue":"👁 Vue de "+mN(v))}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role}){m.id===sess?" — vous":""}</option>)}</select>
+          <select value={effSess} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;const newViewAs=(v===sess)?"":v;setViewAs(newViewAs);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(newViewAs===""?"Retour à votre vue":"👁 Vue de "+mN(v))}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role}){m.id===sess?" — vous":""}</option>)}</select>
         </div>}
         <div style={{padding:"5px 0"}}>
           <button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>
@@ -1986,10 +1986,10 @@ return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>{setShowNotif(false);setShowYou(false)}}>
   {viewAs&&<div style={{background:"linear-gradient(90deg,rgba(112,69,208,.95),rgba(112,69,208,.85))",color:"#fff",padding:"7px 16px",display:"flex",alignItems:"center",gap:10,fontSize:12,flexShrink:0,zIndex:200}}>
     <i className="fa-solid fa-eye"/>
-    <span style={{flex:1}}>Vous voyez le CRM <b>exactement comme {sU?.name}</b> ({sU?.role}) — envois de messages et marquages lus désactivés pour ne pas altérer sa session.</span>
+    <span style={{flex:1}}>Vous voyez le CRM <b>exactement comme {(TEAM.find(t=>t.id===viewAs)||{}).name}</b> ({(TEAM.find(t=>t.id===viewAs)||{}).role}) — envois de messages et marquages lus désactivés pour ne pas altérer sa session.</span>
     <button onClick={()=>setViewAs("")} style={{padding:"5px 14px",borderRadius:8,background:"#fff",color:"#7045D0",fontSize:11,fontWeight:800,border:"none",cursor:"pointer",flexShrink:0}}><i className="fa-solid fa-xmark" style={{marginRight:5}}/>Quitter la simulation</button>
   </div>}
-  <Nav/>
+  {Nav()}
   <div className="main-scroll" style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page!=="hub"&&<div style={{padding:"10px 14px 0",flexShrink:0}}>
       <button onClick={()=>setPage("hub")} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:12,fontWeight:600,transition:"all .15s",cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.borderColor="var(--gold)";e.currentTarget.style.color="var(--gold)"}} onMouseOut={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}><i className="fa-solid fa-arrow-left"/>Retour au Hub</button>
