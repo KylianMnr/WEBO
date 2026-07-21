@@ -629,7 +629,7 @@ window.onerror=function(msg,src,line,col,err){
 };
 </script>
 <script type="text/babel">
-const {useState,useEffect,useCallback,useMemo,useRef}=React;
+const {useState,useEffect,useCallback,useMemo,useRef,useLayoutEffect}=React;
 const SB_URL="https://smgglunijtmftjchxdgy.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZ2dsdW5panRtZnRqY2h4ZGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzYyNDMsImV4cCI6MjA4ODE1MjI0M30.RM7JmWaY0z8vw4cpL1GqsZN2gCwNK-KMet2hNxMDd5A";
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{realtime:{params:{eventsPerSecond:20}}});
@@ -748,7 +748,8 @@ const aiCall=async(messages,system,search)=>{if(!proxySecret)throw new Error("Cl
 const gemini=async(prompt,search)=>aiCall([{role:"user",content:prompt}],"",search);
 const geminiChat=async(msgs,sys)=>{const clean=msgs.filter(m=>m.content&&!m.content.startsWith("Erreur"));const cMsgs=clean.map(m=>({role:m.role==="assistant"?"assistant":"user",content:m.content}));if(cMsgs.length===0)throw new Error("Aucun message");if(cMsgs[0].role!=="user")cMsgs.unshift({role:"user",content:sys||"Bonjour"});return await aiCall(cMsgs,sys||"",false);};
 const[page,_setPage]=useState("hub");
-const setPage=useCallback(p=>{_setPage(p);setTimeout(()=>{const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0},0)},[]);const[pView,setPView]=useState("kanban");const[pipelineMode,setPipelineMode]=useState("prospection");
+const scrollPosRef=useRef(0);const wantTopRef=useRef(false);
+const setPage=useCallback(p=>{wantTopRef.current=true;_setPage(p);setTimeout(()=>{const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0},0)},[]);const[pView,setPView]=useState("kanban");const[pipelineMode,setPipelineMode]=useState("prospection");
 const[tPage,setTPage]=useState(0);const[kMax,setKMax]=useState({});const[pSearch,setPSearch]=useState("");const[quickF,setQuickF]=useState("actifs");
 const[svcFilter,setSvcFilter]=useState("all");const[noteFilter,setNoteFilter]=useState("all");const[agView,setAgView]=useState("cal");
 const[showForm,setShowForm]=useState(false);const[editId,setEditId]=useState(null);
@@ -945,6 +946,8 @@ useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema
 // Traceur global d'événements reçus (pour diagnostic)
 window.__rtLog=(table,type,id)=>setRtDbg(d=>({...d,events:d.events+1,last:table+" "+type,lastAt:new Date().toLocaleTimeString()}));
 return()=>sb.removeChannel(ch)},[sess]);
+// ═══ Préservation de la position de scroll (évite le "retour en haut" lors des re-renders temps réel) ═══
+useLayoutEffect(()=>{const el=document.querySelector(".main-scroll");if(!el)return;if(wantTopRef.current){wantTopRef.current=false;scrollPosRef.current=0;return}if(scrollPosRef.current>0&&Math.abs(el.scrollTop-scrollPosRef.current)>2){el.scrollTop=scrollPosRef.current}});
 useEffect(()=>{const t=setInterval(()=>{const a=document.activeElement,tn=(a&&a.tagName||"").toLowerCase();if(tn==="textarea"||tn==="input"||(a&&a.isContentEditable))return;setNow(Date.now())},60000);return()=>clearInterval(t)},[]);
 useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem("webo_theme",theme)}catch(e){}},[theme]);
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
@@ -1041,7 +1044,7 @@ const Nav=()=>(
         </div>
         {realAdmin&&<div onClick={e=>e.stopPropagation()} style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
           <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",letterSpacing:1,marginBottom:4}}>SIMULER UNE VUE</div>
-          <select value={viewAs||""} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;setViewAs(v);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===""?"Retour à votre vue":v==="pov_commercial"?"👁 POV Commercial":"👁 POV Technicien")}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}><option value="">Votre vue (Admin)</option><option value="pov_commercial">👁 POV Commercial</option><option value="pov_technicien">👁 POV Technicien</option></select>
+          <select value={viewAs||""} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;setViewAs(v);wantTopRef.current=true;const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===""?"Retour à votre vue":v==="pov_commercial"?"👁 POV Commercial":"👁 POV Technicien")}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}><option value="">Votre vue (Admin)</option><option value="pov_commercial">👁 POV Commercial</option><option value="pov_technicien">👁 POV Technicien</option></select>
         </div>}
         <div style={{padding:"5px 0"}}>
           <button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>
@@ -2034,7 +2037,7 @@ return (
       <span style={{width:11,height:11,borderRadius:"50%",background:rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)",display:"inline-block"}}/>
     </button>}
   </div>
-  <div className="main-scroll" style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
+  <div className="main-scroll" onScroll={e=>{scrollPosRef.current=e.currentTarget.scrollTop}} style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page!=="hub"&&<div style={{padding:"10px 14px 0",flexShrink:0}}>
       <button onClick={()=>setPage("hub")} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:12,fontWeight:600,transition:"all .15s",cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.borderColor="var(--gold)";e.currentTarget.style.color="var(--gold)"}} onMouseOut={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}><i className="fa-solid fa-arrow-left"/>Retour au Hub</button>
     </div>}
