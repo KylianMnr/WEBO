@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v44</title>
+<title>WEBO — Hub v46</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -636,9 +636,9 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY,{realtime:{params:{eventsPer
 
 /* ═══ AUTH ═══ */
 const ACCTS=[
-{id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kylian",email:"kylian.andremeunier@gmail.com",pass:"Webo2024!"},
+{id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kmeunier",email:"kmeunier@webo-smart.fr",pass:"Webo2024!"},
 {id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"},
-{id:"theo",name:"Théo",role:"Commercials",color:"#10b981",isAdmin:false,isFondateur:false,login:"theo",email:"theo@webo.fr",pass:"Theo2026!"}];
+{id:"theo",name:"Théo",role:"Commercial",color:"#10b981",isAdmin:false,isFondateur:false,login:"ttheveniot",email:"ttheveniot@webo-smart.fr",pass:"Theo2026!"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur,roleType:isAdmin?"admin":(role||"").toLowerCase().includes("techni")?"technicien":"commercial"}));
 const roleOf=id=>(TEAM.find(t=>t.id===id)||{}).roleType||"commercial";
 
@@ -730,10 +730,18 @@ const OBJ_DEFAULTS={kylian:{week:5,month:20,caMonth:15000},johanna:{week:3,month
 
 /* ═══ APP ═══ */
 function App(){
-const[sess,setSess]=useState(()=>{try{return localStorage.getItem("webo_session")||""}catch(e){return""}});
-const[logId,setLogId]=useState("");const[logPw,setLogPw]=useState("");const[logErr,setLogErr]=useState("");
-const realAdmin=TEAM.find(t=>t.id===sess)?.isAdmin||false;const effSess=viewAs||sess;const isA=TEAM.find(t=>t.id===effSess)?.isAdmin||false;const sU=TEAM.find(t=>t.id===effSess);const effRole=roleOf(effSess);const isTech=effRole==="technicien";const isCom=effRole==="commercial";
-const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");
+const[sess,setSess]=useState(()=>{try{return localStorage.getItem("webo_session")||sessionStorage.getItem("webo_session")||""}catch(e){return""}});
+const[logId,setLogId]=useState("");const[logPw,setLogPw]=useState("");const[logErr,setLogErr]=useState("");const[logRemember,setLogRemember]=useState(true);
+const realAdmin=TEAM.find(t=>t.id===sess)?.isAdmin||false;
+// POV par rôle : viewAs peut valoir "pov_commercial" / "pov_technicien" (simulation d'un rôle, pas d'une personne)
+const povRole=viewAs==="pov_commercial"?"commercial":viewAs==="pov_technicien"?"technicien":"";
+const povUser=povRole?TEAM.find(t=>t.roleType===povRole):null; // personne représentative du rôle (pour filtrer les données)
+const effSess=povRole?(povUser?.id||sess):(viewAs||sess);
+const effRole=povRole||roleOf(effSess);
+const isA=povRole?false:(TEAM.find(t=>t.id===effSess)?.isAdmin||false);
+const sU=povRole?{name:povRole==="commercial"?"Commercial":"Technicien",role:povRole==="commercial"?"Vue Commercial":"Vue Technicien"}:TEAM.find(t=>t.id===effSess);
+const isTech=effRole==="technicien";const isCom=effRole==="commercial";
+const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);
 const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("webo_theme")||"dark"}catch(e){return"dark"}});const[proxySecret,setProxySecret]=useState(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const AI_PROXY=SB_URL+"/functions/v1/ai-proxy";
 const aiCall=async(messages,system,search)=>{if(!proxySecret)throw new Error("Cle d acces IA manquante. Cliquez sur la cle dans la nav.");const r=await fetch(AI_PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-webo-secret":proxySecret,"x-webo-user":(sess||"")},body:JSON.stringify({messages:messages,system:system||"",search:!!search})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Erreur IA "+r.status));return d.text||"";};
@@ -898,7 +906,7 @@ const enrichLead=async(lead)=>{if(enrichLoading)return;setEnrichLoading(lead.id)
 /* V13 — REVERSE MODE MATCHING */
 const runMatch=()=>{setMatchLoading(true);const results=prestas.map(p=>{let score=0;const reasons=[];const sp=(p.specialite||"").toLowerCase();const sv=(matchCrit.service||"").toLowerCase();const comp=(matchCrit.competence||"").toLowerCase();if(sv&&(sp.includes(sv)||sv.includes(sp))){score+=35;reasons.push("Specialite OK")}else if(sv&&(sp.includes("web")&&sv.includes("web"))||(sp.includes("vid")&&sv.includes("vid"))){score+=20;reasons.push("Specialite proche")}if(comp&&sp.includes(comp)){score+=15;reasons.push("Competence match")}const tjm=Number(p.tjm)||0;const budget=Number(matchCrit.budget)||0;if(budget>0&&tjm>0){if(tjm<=budget){score+=25;reasons.push("TJM "+tjm+" < budget "+budget)}else if(tjm<=budget*1.2){score+=10;reasons.push("TJM proche")}else{reasons.push("TJM "+tjm+" > budget")}}else if(budget===0){score+=10}const asg=leads.filter(l=>l.prestaId===p.id&&!["reussi","perdu"].includes(l.status)).length;if(asg===0){score+=15;reasons.push("100% dispo")}else if(asg<3){score+=8;reasons.push(asg+" projet(s) en cours")}else{reasons.push("Charge elevee: "+asg)}const sgn=leads.filter(l=>l.prestaId===p.id&&l.status==="reussi").length;if(sgn>=3){score+=10;reasons.push("Prouve: "+sgn+" signes")}else if(sgn>=1){score+=5;reasons.push(sgn+" signe(s)")}return{...p,score:Math.min(score,100),reasons,charge:asg,signes:sgn}}).filter(p=>p.score>0).sort((a,b)=>b.score-a.score);setMatchRes(results);setMatchLoading(false)};
 
-const doLogin=()=>{const q=logId.trim().toLowerCase();const a=ACCTS.find(x=>x.login===q||x.email===q);if(!a){setLogErr("Identifiant inconnu");return}if(logPw!==a.pass){setLogErr("Mot de passe incorrect");return}setSess(a.id);try{localStorage.setItem("webo_session",a.id)}catch(e){}};
+const doLogin=()=>{const q=logId.trim().toLowerCase();const a=ACCTS.find(x=>x.login===q||x.email===q);if(!a){setLogErr("Identifiant inconnu");return}if(logPw!==a.pass){setLogErr("Mot de passe incorrect");return}setSess(a.id);try{if(logRemember){localStorage.setItem("webo_session",a.id);sessionStorage.removeItem("webo_session")}else{sessionStorage.setItem("webo_session",a.id);localStorage.removeItem("webo_session")}}catch(e){}};
 
 useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT")return;if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setCmd(p=>!p);setCmdQ("")}if(e.key==="n"||e.key==="N"){e.preventDefault();setPage("pipeline");setShowForm(true)}if(e.key==="Escape"){setCmd(false);setSelLead(null);setShowNotif(false);setShowYou(false);setMsgWidget(false)}if(e.key==="Backspace"&&page!=="hub"){e.preventDefault();setPage("hub")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[page]);
 
@@ -918,14 +926,25 @@ const askAI=async pr=>{setAiMsgs(p=>[...p,{role:"user",content:pr}]);setAiIn("")
 useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"})},[aiMsgs,aiLoad]);
 
 /* Supabase */
-useEffect(()=>{(async()=>{setSync("loading");try{const lr=await sb.from("leads").select("*").order("date_created",{ascending:false});setLeads((lr.data||[]).map(db2L));try{const pr=await sb.from("prestataires").select("*");setPrestas(pr.data||[])}catch(e){}
-try{const ae=await sb.from("agenda_events").select("*").order("date",{ascending:true});setAgEvents(ae.data||[])}catch(e){}
-try{const wn=await sb.from("workspace_notes").select("*").order("updated_at",{ascending:false});setWsNotes(wn.data||[])}catch(e){}
-try{const wt=await sb.from("workspace_tasks").select("*").order("created_at",{ascending:false});setWsTasks(wt.data||[])}catch(e){}
-try{const os=await sb.from("settings").select("value").eq("key","objectives").maybeSingle();if(os.data&&os.data.value)setObjectives(os.data.value)}catch(e){}
-try{const cc=await sb.from("chat_channels").select("*");setChatChannels(cc.data||[])}catch(e){}
-try{const cm=await sb.from("chat_messages").select("*").order("created_at",{ascending:true}).limit(1000);setChatMessages(cm.data||[])}catch(e){}setSync(lr.error?"off":"on")}catch(e){setSync("off")}setReady(true)})()},[]);
-useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);if(isEcho(u.id)||isEditing(u.id))return;setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_channels"},p=>{if(p.eventType==="INSERT")setChatChannels(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setChatChannels(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setChatChannels(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_messages"},p=>{if(p.eventType==="INSERT"){if(isEcho(p.new.id))return;setChatMessages(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.new.sender_id!==sess){const me=TEAM.find(t=>t.id===sess);const mentioned=me&&String(p.new.text||"").toLowerCase().includes("@"+me.name.split(" ")[0].toLowerCase());if(mentioned)addNotif("fa-at","var(--red)","🔔 "+mN(p.new.sender_id)+" t'a mentionné : "+String(p.new.text||"").slice(0,50));else if(activeChatRef.current!==p.new.channel_id)addNotif("fa-comment","var(--gold)","💬 "+mN(p.new.sender_id)+" : "+String(p.new.text||"").slice(0,60))}}if(p.eventType==="DELETE")setChatMessages(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe(s=>{if(s==="SUBSCRIBED")setSync("on")});return()=>sb.removeChannel(ch)},[sess]);
+useEffect(()=>{(async()=>{setSync("loading");try{
+// 1) Priorité : les leads → on affiche l'app dès qu'ils sont là
+const lr=await sb.from("leads").select("*").order("date_created",{ascending:false});setLeads((lr.data||[]).map(db2L));
+setReady(true);setSync(lr.error?"off":"on");
+// 2) Le reste se charge EN PARALLÈLE, en arrière-plan (l'app est déjà utilisable)
+Promise.allSettled([
+  sb.from("prestataires").select("*").then(pr=>setPrestas(pr.data||[])),
+  sb.from("agenda_events").select("*").order("date",{ascending:true}).then(ae=>setAgEvents(ae.data||[])),
+  sb.from("workspace_notes").select("*").order("updated_at",{ascending:false}).then(wn=>setWsNotes(wn.data||[])),
+  sb.from("workspace_tasks").select("*").order("created_at",{ascending:false}).then(wt=>setWsTasks(wt.data||[])),
+  sb.from("settings").select("value").eq("key","objectives").maybeSingle().then(os=>{if(os.data&&os.data.value)setObjectives(os.data.value)}),
+  sb.from("chat_channels").select("*").then(cc=>setChatChannels(cc.data||[])),
+  sb.from("chat_messages").select("*").order("created_at",{ascending:false}).limit(300).then(cm=>setChatMessages((cm.data||[]).slice().reverse()))
+]);
+}catch(e){setSync("off");setReady(true)}})()},[]);
+useEffect(()=>{const ch=sb.channel("rt").on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{try{window.__rtLog&&window.__rtLog("leads",p.eventType,(p.new||p.old||{}).id)}catch(e){}if(p.eventType==="INSERT"){const n=db2L(p.new);setLeads(pr=>pr.some(l=>l.id===n.id)?pr:[...pr,n]);if(n.memberId!==sess){addNotif("fa-plus","var(--green)",mN(n.memberId)+" a ajouté "+n.nom,n.id);addActivity(n.memberId,"a ajouté",n.nom,"var(--green)")}}if(p.eventType==="UPDATE"){const u=db2L(p.new);if(isEcho(u.id)||isEditing(u.id))return;setLeads(pr=>pr.map(l=>l.id===u.id?u:l))}if(p.eventType==="DELETE")setLeads(pr=>pr.filter(l=>l.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"prestataires"},p=>{if(p.eventType==="INSERT")setPrestas(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE")setPrestas(pr=>pr.map(x=>x.id===p.new.id?p.new:x));if(p.eventType==="DELETE")setPrestas(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{if(p.eventType==="INSERT")setAgEvents(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setAgEvents(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setAgEvents(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_notes"},p=>{if(p.eventType==="INSERT")setWsNotes(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsNotes(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsNotes(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"workspace_tasks"},p=>{if(p.eventType==="INSERT"){setWsTasks(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);if(p.new.owner_id!==sess)addActivity(p.new.owner_id,"a créé une tâche",p.new.title,"var(--green)")}if(p.eventType==="UPDATE"){if(isEcho(p.new.id)||isEditing(p.new.id))return;setWsTasks(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setWsTasks(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_channels"},p=>{if(p.eventType==="INSERT")setChatChannels(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.eventType==="UPDATE"){if(isEcho(p.new.id))return;setChatChannels(pr=>pr.map(x=>x.id===p.new.id?p.new:x))}if(p.eventType==="DELETE")setChatChannels(pr=>pr.filter(x=>x.id!==p.old.id))}).on("postgres_changes",{event:"*",schema:"public",table:"chat_messages"},p=>{try{window.__rtLog&&window.__rtLog("chat",p.eventType,(p.new||p.old||{}).id)}catch(e){}if(p.eventType==="INSERT"){if(isEcho(p.new.id))return;setChatMessages(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);if(p.new.sender_id!==sess){const me=TEAM.find(t=>t.id===sess);const mentioned=me&&String(p.new.text||"").toLowerCase().includes("@"+me.name.split(" ")[0].toLowerCase());if(mentioned)addNotif("fa-at","var(--red)","🔔 "+mN(p.new.sender_id)+" t'a mentionné : "+String(p.new.text||"").slice(0,50));else if(activeChatRef.current!==p.new.channel_id)addNotif("fa-comment","var(--gold)","💬 "+mN(p.new.sender_id)+" : "+String(p.new.text||"").slice(0,60))}}if(p.eventType==="DELETE")setChatMessages(pr=>pr.filter(x=>x.id!==p.old.id))}).subscribe((s,err)=>{setRtDbg(d=>({...d,status:s}));if(s==="SUBSCRIBED")setSync("on");if(s==="CHANNEL_ERROR"||s==="TIMED_OUT"||s==="CLOSED"){setSync("off");if(err)console.error("[RT]",s,err)}});
+// Traceur global d'événements reçus (pour diagnostic)
+window.__rtLog=(table,type,id)=>setRtDbg(d=>({...d,events:d.events+1,last:table+" "+type,lastAt:new Date().toLocaleTimeString()}));
+return()=>sb.removeChannel(ch)},[sess]);
 useEffect(()=>{const t=setInterval(()=>{const a=document.activeElement,tn=(a&&a.tagName||"").toLowerCase();if(tn==="textarea"||tn==="input"||(a&&a.isContentEditable))return;setNow(Date.now())},60000);return()=>clearInterval(t)},[]);
 useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{localStorage.setItem("webo_theme",theme)}catch(e){}},[theme]);
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
@@ -939,7 +958,7 @@ const visibleWsTasks=useMemo(()=>isA?wsTasks:wsTasks.filter(t=>(t.assignee_ids||
 /* V34 — events agenda visibles : admin = tous, apporteur = ceux où il est assigné */
 const myAgEvents=useMemo(()=>isA?agEvents:agEvents.filter(e=>(e.assignee_ids||[]).includes(effSess)),[agEvents,isA,effSess]);
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
-const srt=c=>{const d=sortDir==="asc"?-1:1;if(sortBy==="valeur")return[...c].sort((a,b)=>(b.valeur-a.valeur)*d);if(sortBy==="date")return[...c].sort((a,b)=>(new Date(b.dateCreated)-new Date(a.dateCreated))*d);if(sortBy==="score")return[...c].sort((a,b)=>((Number(b.auditScore)||0)-(Number(a.auditScore)||0))*d);return c};
+const srt=c=>{const d=sortDir==="asc"?-1:1;if(sortBy==="alpha")return[...c].sort((a,b)=>(a.nom||"").localeCompare(b.nom||"","fr",{sensitivity:"base"})*(sortDir==="asc"?1:-1));if(sortBy==="valeur")return[...c].sort((a,b)=>(b.valeur-a.valeur)*d);if(sortBy==="date")return[...c].sort((a,b)=>(new Date(b.dateCreated)-new Date(a.dateCreated))*d);if(sortBy==="score")return[...c].sort((a,b)=>((Number(b.auditScore)||0)-(Number(a.auditScore)||0))*d);return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
 const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const evts=[];myOwnL.filter(l=>l.nextRelance===ds&&!["reussi","perdu"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myOwnL.filter(l=>l.status==="reussi"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));myOwnL.filter(l=>l.status==="reussi"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));myAgEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.all_day?"Journée":(e.time||"12:00"),endTime:e.end_time||"",allDay:!!e.all_day,assignee_ids:e.assignee_ids||[]}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myOwnL,myAgEvents]);
 
@@ -979,8 +998,9 @@ if(!sess)return(
   <div style={{fontSize:9,color:"var(--text3)",letterSpacing:4,textTransform:"uppercase",fontFamily:"var(--mono)",marginBottom:24}}>EAA Compliance</div>
   <div className="sep"/>
   <p style={{fontSize:13,color:"var(--text2)",margin:"12px 0 20px",fontFamily:"var(--serif)",fontStyle:"italic"}}>Votre croissance, notre expertise.</p>
-  <div style={{textAlign:"left"}}><FF l="Identifiant"><input style={IS} value={logId} onChange={e=>{setLogId(e.target.value);setLogErr("")}} placeholder="kylian ou email" onKeyDown={e=>{if(e.key==="Enter")doLogin()}}/></FF>
-  <FF l="Mot de passe"><input style={IS} type="password" value={logPw} onChange={e=>{setLogPw(e.target.value);setLogErr("")}} placeholder="••••••" onKeyDown={e=>{if(e.key==="Enter")doLogin()}}/></FF></div>
+  <div style={{textAlign:"left"}}><FF l="Identifiant"><input style={IS} value={logId} onChange={e=>{setLogId(e.target.value);setLogErr("")}} placeholder="kmeunier ou email pro" onKeyDown={e=>{if(e.key==="Enter")doLogin()}}/></FF>
+  <FF l="Mot de passe"><input style={IS} type="password" value={logPw} onChange={e=>{setLogPw(e.target.value);setLogErr("")}} placeholder="••••••" onKeyDown={e=>{if(e.key==="Enter")doLogin()}}/></FF>
+  <label style={{display:"flex",alignItems:"center",gap:8,fontSize:12,color:"var(--text2)",cursor:"pointer",margin:"2px 0 14px",userSelect:"none"}}><input type="checkbox" checked={logRemember} onChange={e=>setLogRemember(e.target.checked)} style={{width:15,height:15,accentColor:"var(--gold)",cursor:"pointer"}}/>Mémoriser ma connexion</label></div>
   {logErr&&<div style={{color:"var(--red)",fontSize:12,marginBottom:8}}>{logErr}</div>}
   <button onClick={doLogin} style={{width:"100%",padding:14,borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:14,fontWeight:700,letterSpacing:.5}}>Accéder au Terminal</button>
   <div style={{marginTop:14,fontSize:9,color:"var(--text4)",fontFamily:"var(--mono)"}}>⌘K Commandes · N Lead · ⌫ Hub</div>
@@ -1020,8 +1040,8 @@ const Nav=()=>(
           <div><div style={{fontWeight:700,fontSize:13,color:"var(--text)"}}>{sU?.name}</div><div style={{fontSize:10,color:"var(--text3)"}}>{sU?.role}{viewAs?" · vue simulée":""}</div></div>
         </div>
         {realAdmin&&<div onClick={e=>e.stopPropagation()} style={{padding:"8px 14px",borderBottom:"1px solid var(--border)"}}>
-          <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",letterSpacing:1,marginBottom:4}}>VOIR COMME</div>
-          <select value={effSess} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;const newViewAs=(v===sess)?"":v;setViewAs(newViewAs);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(newViewAs===""?"Retour à votre vue":"👁 Vue de "+mN(v))}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}>{TEAM.map(m=><option key={m.id} value={m.id}>{m.name} ({m.role}){m.id===sess?" — vous":""}</option>)}</select>
+          <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",letterSpacing:1,marginBottom:4}}>SIMULER UNE VUE</div>
+          <select value={viewAs||""} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;setViewAs(v);const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===""?"Retour à votre vue":v==="pov_commercial"?"👁 POV Commercial":"👁 POV Technicien")}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}><option value="">Votre vue (Admin)</option><option value="pov_commercial">👁 POV Commercial</option><option value="pov_technicien">👁 POV Technicien</option></select>
         </div>}
         <div style={{padding:"5px 0"}}>
           <button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>
@@ -1035,7 +1055,7 @@ const Nav=()=>(
           <button className="you-item" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓");setShowYou(false)}}><i className="fa-solid fa-cloud-arrow-down"/>Backup JSON</button>
         </div>
         <div style={{borderTop:"1px solid var(--border)",padding:"5px 0"}}>
-          <button className="you-item" onClick={()=>{setSess("");try{localStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--red)"}}><i className="fa-solid fa-power-off"/>Déconnexion</button>
+          <button className="you-item" onClick={()=>{setSess("");try{localStorage.removeItem("webo_session");sessionStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--red)"}}><i className="fa-solid fa-power-off"/>Déconnexion</button>
         </div>
       </div>}
     </div>
@@ -1387,7 +1407,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
     </div>
     <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
       {isA&&<select value={fM} onChange={e=>setFM(e.target.value)} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="all">Equipe</option>{TEAM.map(m=><option key={m.id} value={m.id}>{mN(m.id)}</option>)}</select>}
-      <select value={sortBy} onChange={e=>{setSortBy(e.target.value);if(e.target.value==="score")setSortDir("asc");else setSortDir("desc")}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="default">Tri</option><option value="score">Score d'audit</option><option value="valeur">Valeur</option><option value="date">Date</option></select>{sortBy!=="default"&&<button onClick={()=>setSortDir(d=>d==="desc"?"asc":"desc")} title={sortBy==="score"?(sortDir==="asc"?"Score croissant — sites les moins conformes d'abord (prospects urgents)":"Score décroissant — sites déjà conformes d'abord"):(sortDir==="desc"?"Décroissant":"Croissant")} style={{padding:"4px 7px",borderRadius:6,border:"1px solid var(--border)",color:"var(--gold)",fontSize:11,marginLeft:3}}><i className={"fa-solid "+(sortDir==="desc"?"fa-arrow-down-wide-short":"fa-arrow-up-short-wide")}/></button>}
+      <select value={sortBy} onChange={e=>{setSortBy(e.target.value);if(e.target.value==="score"||e.target.value==="alpha")setSortDir("asc");else setSortDir("desc")}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto"}}><option value="default">Tri</option><option value="alpha">Alphabétique (A→Z)</option><option value="score">Score d'audit</option><option value="valeur">Valeur</option><option value="date">Date</option></select>{sortBy!=="default"&&<button onClick={()=>setSortDir(d=>d==="desc"?"asc":"desc")} title={sortBy==="alpha"?(sortDir==="asc"?"A → Z":"Z → A"):sortBy==="score"?(sortDir==="asc"?"Score croissant — sites les moins conformes d'abord (prospects urgents)":"Score décroissant — sites déjà conformes d'abord"):(sortDir==="desc"?"Décroissant":"Croissant")} style={{padding:"4px 7px",borderRadius:6,border:"1px solid var(--border)",color:"var(--gold)",fontSize:11,marginLeft:3}}><i className={"fa-solid "+(sortBy==="alpha"?(sortDir==="asc"?"fa-arrow-down-a-z":"fa-arrow-down-z-a"):(sortDir==="desc"?"fa-arrow-down-wide-short":"fa-arrow-up-short-wide"))}/></button>}
       <PSearchBar value={pSearch} onChange={v=>{setPSearch(v);setTPage(0)}}/>
       <select value={svcFilter} onChange={e=>{setSvcFilter(e.target.value);setTPage(0)}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:svcFilter!=="all"?"var(--gold)":"var(--border)"}}><option value="all">📁 Tous services</option>{SERVICES.map(s=><option key={s} value={s}>{s}</option>)}</select>
       <select value={noteFilter} onChange={e=>{setNoteFilter(e.target.value);setTPage(0)}} style={{...IS,padding:"4px 8px",fontSize:10,width:"auto",borderColor:noteFilter!=="all"?"var(--gold)":"var(--border)"}}><option value="all">📝 Notes</option><option value="with">Avec notes</option><option value="without">Sans notes</option></select>
@@ -1987,10 +2007,33 @@ return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>{setShowNotif(false);setShowYou(false)}}>
   {viewAs&&<div style={{background:"linear-gradient(90deg,rgba(112,69,208,.95),rgba(112,69,208,.85))",color:"#fff",padding:"7px 16px",display:"flex",alignItems:"center",gap:10,fontSize:12,flexShrink:0,zIndex:200}}>
     <i className="fa-solid fa-eye"/>
-    <span style={{flex:1}}>Vous voyez le CRM <b>exactement comme {(TEAM.find(t=>t.id===viewAs)||{}).name}</b> ({(TEAM.find(t=>t.id===viewAs)||{}).role}) — envois de messages et marquages lus désactivés pour ne pas altérer sa session.</span>
+    <span style={{flex:1}}>Vous simulez la <b>{viewAs==="pov_commercial"?"vue Commercial":viewAs==="pov_technicien"?"vue Technicien":"vue de "+((TEAM.find(t=>t.id===viewAs)||{}).name||"")}</b> — vous voyez exactement ce que ce rôle voit. Envois de messages et marquages lus désactivés en simulation.</span>
     <button onClick={()=>setViewAs("")} style={{padding:"5px 14px",borderRadius:8,background:"#fff",color:"#7045D0",fontSize:11,fontWeight:800,border:"none",cursor:"pointer",flexShrink:0}}><i className="fa-solid fa-xmark" style={{marginRight:5}}/>Quitter la simulation</button>
   </div>}
   {Nav()}
+  {/* ═══ DIAGNOSTIC TEMPS RÉEL (badge flottant) ═══ */}
+  <div style={{position:"fixed",bottom:14,right:14,zIndex:9999,fontFamily:"var(--mono)"}}>
+    {showRtDbg?
+    <div style={{background:"var(--bg2)",border:"1px solid "+(rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)"),borderRadius:10,padding:"12px 14px",boxShadow:"0 8px 30px rgba(0,0,0,.4)",width:250,fontSize:11}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+        <b style={{color:"var(--text)",fontSize:12}}>🔌 Temps réel</b>
+        <button onClick={()=>setShowRtDbg(false)} style={{color:"var(--text3)",fontSize:14}}>✕</button>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
+        <span style={{width:9,height:9,borderRadius:"50%",background:rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)",display:"inline-block"}}/>
+        <span style={{color:"var(--text2)"}}>Statut : <b style={{color:rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)"}}>{rtDbg.status}</b></span>
+      </div>
+      <div style={{color:"var(--text2)",marginBottom:4}}>Événements reçus : <b style={{color:"var(--gold)"}}>{rtDbg.events}</b></div>
+      {rtDbg.last&&<div style={{color:"var(--text3)",fontSize:10}}>Dernier : {rtDbg.last} · {rtDbg.lastAt}</div>}
+      <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid var(--border)",fontSize:9,color:"var(--text3)",lineHeight:1.4}}>
+        {rtDbg.status==="SUBSCRIBED"?"✅ Connecté. Si le compteur reste à 0 quand un collègue modifie, le souci vient de la diffusion Supabase.":"⚠️ Non connecté au temps réel. Vérifiez la connexion / le plan Supabase."}
+      </div>
+    </div>
+    :
+    <button onClick={()=>setShowRtDbg(true)} title="Diagnostic temps réel" style={{width:36,height:36,borderRadius:"50%",background:"var(--bg2)",border:"1px solid "+(rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)"),boxShadow:"0 4px 14px rgba(0,0,0,.3)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <span style={{width:11,height:11,borderRadius:"50%",background:rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)",display:"inline-block"}}/>
+    </button>}
+  </div>
   <div className="main-scroll" style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}}>
     {page!=="hub"&&<div style={{padding:"10px 14px 0",flexShrink:0}}>
       <button onClick={()=>setPage("hub")} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:12,fontWeight:600,transition:"all .15s",cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.borderColor="var(--gold)";e.currentTarget.style.color="var(--gold)"}} onMouseOut={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}><i className="fa-solid fa-arrow-left"/>Retour au Hub</button>
