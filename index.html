@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v52.1</title>
+<title>WEBO — Hub v54</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -808,6 +808,8 @@ window.onerror=function(msg,src,line,col,err){
 </script>
 <script type="text/babel">
 const {useState,useEffect,useCallback,useMemo,useRef,useLayoutEffect}=React;
+/* v53 — statuts ou un contact a reellement eu lieu (base des relances) */
+const CONTACTED=["contact_std","relance_std","contact_siege","relance_siege","potentiel","rdv_call","relance_rdv"];
 const SB_URL="https://smgglunijtmftjchxdgy.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZ2dsdW5panRtZnRqY2h4ZGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzYyNDMsImV4cCI6MjA4ODE1MjI0M30.RM7JmWaY0z8vw4cpL1GqsZN2gCwNK-KMet2hNxMDd5A";
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{realtime:{params:{eventsPerSecond:20}}});
@@ -1148,6 +1150,8 @@ useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).fo
 const myL=useMemo(()=>{if(isA)return leads;if(isTech)return leads.filter(l=>l.prestaId===effSess);return leads.filter(l=>l.memberId===effSess||!l.memberId)},[leads,effSess,isA,isTech]);
 /* V34 — leads strictement personnels (agenda/tâches des apporteurs) */
 const myOwnL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,effSess,isA]);
+/* v54 — leads strictement personnels, y compris pour un admin (objectifs individuels) */
+const mineL=useMemo(()=>leads.filter(l=>l.memberId===effSess),[leads,effSess]);
 /* V37 — tâches Espace visibles pour la session effective */
 const visibleWsTasks=useMemo(()=>isA?wsTasks:wsTasks.filter(t=>(t.assignee_ids||[t.assignee_id]).includes(effSess)||t.owner_id===effSess),[wsTasks,isA,effSess]);
 /* V34 — events agenda visibles : admin = tous, apporteur = ceux où il est assigné */
@@ -1155,12 +1159,12 @@ const myAgEvents=useMemo(()=>isA?agEvents:agEvents.filter(e=>(e.assignee_ids||[]
 const filt=useMemo(()=>{let f=myL;if(fM!=="all")f=f.filter(l=>l.memberId===fM);return f},[myL,fM]);
 const srt=c=>{const d=sortDir==="asc"?-1:1;if(sortBy==="alpha")return[...c].sort((a,b)=>(a.nom||"").localeCompare(b.nom||"","fr",{sensitivity:"base"})*(sortDir==="asc"?1:-1));if(sortBy==="valeur")return[...c].sort((a,b)=>(b.valeur-a.valeur)*d);if(sortBy==="date")return[...c].sort((a,b)=>(new Date(b.dateCreated)-new Date(a.dateCreated))*d);if(sortBy==="score")return[...c].sort((a,b)=>((Number(b.auditScore)||0)-(Number(a.auditScore)||0))*d);return c};
 const urgL=useMemo(()=>myL.filter(isUrg).sort((a,b)=>new Date(a.lastInteraction)-new Date(b.lastInteraction)),[myL,now]);
-const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const evts=[];myOwnL.filter(l=>l.nextRelance===ds&&!["reussi","perdu"].includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myOwnL.filter(l=>l.status==="reussi"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));myOwnL.filter(l=>l.status==="reussi"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));myAgEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.all_day?"Journée":(e.time||"12:00"),endTime:e.end_time||"",allDay:!!e.all_day,assignee_ids:e.assignee_ids||[]}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myOwnL,myAgEvents]);
+const agDays=useMemo(()=>{const y=agMonth.getFullYear(),mo=agMonth.getMonth();const f1=new Date(y,mo,1);const la=new Date(y,mo+1,0);const off=(f1.getDay()+6)%7;const tot=Math.ceil((off+la.getDate())/7)*7;const days=[];for(let i=0;i<tot;i++){const d=new Date(y,mo,i-off+1);const ds=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const evts=[];myOwnL.filter(l=>l.nextRelance===ds&&CONTACTED.includes(l.status)).forEach(l=>evts.push({id:l.id,tp:"relance",lb:l.nom,cl:"var(--red)",time:"09:00",lead:l}));myOwnL.filter(l=>l.status==="reussi"&&l.dateCreated===ds).forEach(l=>evts.push({id:l.id,tp:"signe",lb:l.nom,cl:"var(--green)",time:"10:00",lead:l}));myOwnL.filter(l=>l.status==="reussi"&&!l.paymentProof&&l.dateCreated&&addD(l.dateCreated,7)===ds).forEach(l=>evts.push({id:"pay-"+l.id,tp:"paiement",lb:l.nom,cl:"var(--gold)",time:"14:00",lead:l}));myAgEvents.filter(e=>e.date===ds).forEach(e=>evts.push({id:e.id,tp:"custom",lb:e.title,cl:e.color||"var(--purple)",time:e.all_day?"Journée":(e.time||"12:00"),endTime:e.end_time||"",allDay:!!e.all_day,assignee_ids:e.assignee_ids||[]}));evts.sort((a,b)=>(a.time||"").localeCompare(b.time||""));days.push({date:d,ds,day:d.getDate(),isToday:ds===td(),isOther:d.getMonth()!==mo,evts})}return days},[agMonth,myOwnL,myAgEvents]);
 
 /* Agenda: relances du jour + overdue + 3 days dormant */
 const agendaItems=useMemo(()=>{const items=[];
-myOwnL.filter(l=>l.nextRelance&&!["reussi","perdu"].includes(l.status)&&dU(l.nextRelance)<=0).forEach(l=>items.push({type:"relance",urgency:dU(l.nextRelance)<0?"bordeaux":"gold",lead:l,time:l.nextRelance,label:"Relance "+l.nom}));
-myOwnL.filter(l=>!["reussi","perdu"].includes(l.status)&&hA(l.lastInteraction)>=72).forEach(l=>{if(!items.find(x=>x.lead.id===l.id))items.push({type:"dormant",urgency:"bordeaux",lead:l,time:l.lastInteraction,label:l.nom+" — "+Math.floor(dA(l.lastInteraction))+"j sans contact"})});
+myOwnL.filter(l=>l.nextRelance&&CONTACTED.includes(l.status)&&dU(l.nextRelance)<=0).forEach(l=>items.push({type:"relance",urgency:dU(l.nextRelance)<0?"bordeaux":"gold",lead:l,time:l.nextRelance,label:"Relance "+l.nom}));
+myOwnL.filter(l=>CONTACTED.includes(l.status)&&hA(l.lastInteraction)>=72).forEach(l=>{if(!items.find(x=>x.lead.id===l.id))items.push({type:"dormant",urgency:"bordeaux",lead:l,time:l.lastInteraction,label:l.nom+" — "+Math.floor(dA(l.lastInteraction))+"j sans contact"})});
 myOwnL.filter(l=>l.status==="reussi"&&!l.paymentProof).forEach(l=>items.push({type:"paiement",urgency:"gold",lead:l,time:l.dateCreated,label:"Preuve paiement — "+l.nom}));
 myOwnL.filter(l=>l.status==="reussi"&&dA(l.dateCreated)>=30&&l.verifStatus!=="confirmed").forEach(l=>{if(!items.find(x=>x.type==="paiement"&&x.lead.id===l.id))items.push({type:"verif",urgency:"bordeaux",lead:l,time:l.dateCreated,label:"Vérif commission — "+l.nom+" ("+Math.floor(dA(l.dateCreated))+"j)"})});
 return items.sort((a,b)=>a.urgency==="bordeaux"&&b.urgency!=="bordeaux"?-1:1)},[myOwnL,now]);
@@ -1173,7 +1177,7 @@ const st=useMemo(()=>{const src=isA?leads:myL;const sg=src.filter(l=>l.status===
 const totalMargeNette=sg.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).margeNette,0);
 const totalComProsp=sg.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).comProsp,0);
 const stale=src.filter(l=>!["reussi","perdu"].includes(l.status)&&hA(l.lastInteraction)>=48).length;
-const od=src.filter(l=>l.nextRelance&&!["reussi","perdu"].includes(l.status)&&dU(l.nextRelance)<0).length;
+const od=src.filter(l=>l.nextRelance&&CONTACTED.includes(l.status)&&dU(l.nextRelance)<0).length;
 const avgC=sg.length?Math.round(sg.reduce((s,l)=>s+(cDays(l.dateCreated,l.status)||0),0)/sg.length):0;
 const byM=TEAM.map(m=>{const ml=src.filter(l=>l.memberId===m.id);const ms=ml.filter(l=>l.status==="reussi");const mc=ms.reduce((s,l)=>s+l.valeur,0);const margins=ms.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).margeNette,0);const prosp=ms.reduce((s,l)=>s+calcMargin(l.valeur,l.memberId).comProsp,0);return{...m,total:ml.length,signes:ms.length,conv:ml.length?Math.round(ms.length/ml.length*100):0,ca:mc,marge:margins,prosp}}).sort((a,b)=>b.signes-a.signes);
 const bySrc=SOURCES.map(s=>{const sl=src.filter(l=>l.source===s);const ss=sl.filter(l=>l.status==="reussi");return{source:s,total:sl.length,signes:ss.length,rate:sl.length?Math.round(ss.length/sl.length*100):0,ca:ss.reduce((a,l)=>a+l.valeur,0)}}).filter(s=>s.total>0).sort((a,b)=>b.ca-a.ca);
@@ -1274,11 +1278,11 @@ const nowD=new Date();const startMonth=new Date(nowD.getFullYear(),nowD.getMonth
 const signedThisWeek=l=>l.status==="reussi"&&(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7;
 const signedThisMonth=l=>l.status==="reussi"&&new Date(l.dateCreated).getTime()>=startMonth;
 const myObj=objectives[effSess]||OBJ_DEFAULTS[effSess]||{week:5,month:20,caMonth:10000};
-const mySignWeek=myL.filter(signedThisWeek).length;
-const mySignMonth=myL.filter(signedThisMonth).length;
+const mySignWeek=mineL.filter(signedThisWeek).length;
+const mySignMonth=mineL.filter(signedThisMonth).length;
 const objWeekPct=myObj.week>0?Math.round(mySignWeek/myObj.week*100):0;
 const objMonthPct=myObj.month>0?Math.round(mySignMonth/myObj.month*100):0;
-const myCaMonth=myL.filter(signedThisMonth).reduce((s,l)=>s+(l.valeur||0),0);
+const myCaMonth=mineL.filter(signedThisMonth).reduce((s,l)=>s+(l.valeur||0),0);
 const teamCaMonth=leads.filter(signedThisMonth).reduce((s,l)=>s+(l.valeur||0),0);
 const myCaObj=myObj.caMonth||0;
 const teamCaObj=Object.values(objectives).reduce((s,o)=>s+(o.caMonth||0),0);
@@ -1587,9 +1591,9 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
 /* ═══ PIPELINE ═══ */
 const Pipeline=()=>{
 const PER=50;const KPER=15;
-const quickFiltered=useMemo(()=>{let base=filt;if(pipelineMode==="production"){base=base.filter(l=>l.status==="reussi")}else if(quickF==="relancer")base=base.filter(l=>!["reussi","perdu"].includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3));else if(quickF==="dormants")base=base.filter(l=>!["reussi","perdu"].includes(l.status)&&hA(l.lastInteraction)>=72);else if(quickF==="actifs")base=base.filter(l=>!["reussi","perdu"].includes(l.status));else if(quickF==="urgEaa")base=base.filter(l=>!["reussi","perdu"].includes(l.status)&&l.auditScore!==""&&l.auditScore!=null&&Number(l.auditScore)<50);else if(quickF==="aRelancer")base=base.filter(l=>!["reussi","perdu"].includes(l.status)&&l.nextRelance&&dU(l.nextRelance)<=0);else if(quickF==="seqActive")base=base.filter(l=>l.linkedinCampaign===true);if(svcFilter!=="all")base=base.filter(l=>l.service===svcFilter);if(noteFilter==="with")base=base.filter(l=>(l.notes&&l.notes.trim())||(l.timeline&&l.timeline.length>0));else if(noteFilter==="without")base=base.filter(l=>!(l.notes&&l.notes.trim())&&!(l.timeline&&l.timeline.length>0));return base},[filt,quickF,svcFilter,noteFilter,pipelineMode,now]);
+const quickFiltered=useMemo(()=>{let base=filt;if(pipelineMode==="production"){base=base.filter(l=>l.status==="reussi")}else if(quickF==="relancer")base=base.filter(l=>CONTACTED.includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3));else if(quickF==="dormants")base=base.filter(l=>!["reussi","perdu"].includes(l.status)&&hA(l.lastInteraction)>=72);else if(quickF==="actifs")base=base.filter(l=>!["reussi","perdu"].includes(l.status));else if(quickF==="urgEaa")base=base.filter(l=>!["reussi","perdu"].includes(l.status)&&l.auditScore!==""&&l.auditScore!=null&&Number(l.auditScore)<50);else if(quickF==="aRelancer")base=base.filter(l=>CONTACTED.includes(l.status)&&l.nextRelance&&dU(l.nextRelance)<=0);else if(quickF==="seqActive")base=base.filter(l=>l.linkedinCampaign===true);if(svcFilter!=="all")base=base.filter(l=>l.service===svcFilter);if(noteFilter==="with")base=base.filter(l=>(l.notes&&l.notes.trim())||(l.timeline&&l.timeline.length>0));else if(noteFilter==="without")base=base.filter(l=>!(l.notes&&l.notes.trim())&&!(l.timeline&&l.timeline.length>0));return base},[filt,quickF,svcFilter,noteFilter,pipelineMode,now]);
 const psFilt=useMemo(()=>{if(!pSearch)return quickFiltered;const q=pSearch.toLowerCase();return quickFiltered.filter(l=>l.nom.toLowerCase().includes(q)||l.service.toLowerCase().includes(q)||(l.email||"").toLowerCase().includes(q)||(l.phone||"").includes(q)||(l.notes||"").toLowerCase().includes(q))},[quickFiltered,pSearch]);
-const qCounts=useMemo(()=>{const a=filt.filter(l=>!["reussi","perdu"].includes(l.status)).length;const r=filt.filter(l=>!["reussi","perdu"].includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3)).length;const d=filt.filter(l=>!["reussi","perdu"].includes(l.status)&&hA(l.lastInteraction)>=72).length;const uEaa=filt.filter(l=>!["reussi","perdu"].includes(l.status)&&l.auditScore!==""&&l.auditScore!=null&&Number(l.auditScore)<50).length;const aRel=filt.filter(l=>!["reussi","perdu"].includes(l.status)&&l.nextRelance&&dU(l.nextRelance)<=0).length;const seqA=filt.filter(l=>l.linkedinCampaign===true).length;return{actifs:a,relancer:r,dormants:d,tous:filt.length,urgEaa:uEaa,aRelancer:aRel,seqActive:seqA}},[filt,now]);
+const qCounts=useMemo(()=>{const a=filt.filter(l=>!["reussi","perdu"].includes(l.status)).length;const r=filt.filter(l=>CONTACTED.includes(l.status)&&(dU(l.nextRelance)<=0||dA(l.lastInteraction)>=3)).length;const d=filt.filter(l=>!["reussi","perdu"].includes(l.status)&&hA(l.lastInteraction)>=72).length;const uEaa=filt.filter(l=>!["reussi","perdu"].includes(l.status)&&l.auditScore!==""&&l.auditScore!=null&&Number(l.auditScore)<50).length;const aRel=filt.filter(l=>CONTACTED.includes(l.status)&&l.nextRelance&&dU(l.nextRelance)<=0).length;const seqA=filt.filter(l=>l.linkedinCampaign===true).length;return{actifs:a,relancer:r,dormants:d,tous:filt.length,urgEaa:uEaa,aRelancer:aRel,seqActive:seqA}},[filt,now]);
 return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"column",minWidth:0,gap:10}}>
   {/* HEADER */}
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
