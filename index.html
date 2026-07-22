@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v46</title>
+<title>WEBO — Hub v48</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -327,7 +327,10 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .cmd-r{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;transition:background .1s;font-size:13px}
 .cmd-r:hover{background:var(--bg3)}
 /* RIGHT PANEL */
-.rpanel{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:90vw;background:linear-gradient(180deg,var(--bg2),var(--bg3));border-left:1px solid rgba(197,160,89,.08);z-index:200;overflow-y:auto;box-shadow:-16px 0 48px rgba(0,0,0,.35);animation:slideR .2s ease-out}
+.rpanel-ov{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .18s ease-out}
+.rpanel{position:relative;width:560px;max-width:95vw;max-height:88vh;background:linear-gradient(180deg,var(--bg2),var(--bg3));border:1px solid rgba(197,160,89,.18);border-radius:16px;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.5);animation:popIn .22s cubic-bezier(.2,.9,.3,1)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
 .rpanel::-webkit-scrollbar{width:3px}
 /* UTILS */
 .sep{height:1px;background:linear-gradient(90deg,transparent,rgba(197,160,89,.25),transparent);margin:12px 0}
@@ -441,7 +444,7 @@ select:focus,input:focus,textarea:focus{border-color:var(--gold)}
 .tbl{min-width:650px}
 
 /* PANELS */
-.rpanel{width:100vw!important;max-width:100vw!important;border-radius:0!important}
+.rpanel-ov{padding:0}.rpanel{width:100vw!important;max-width:100vw!important;max-height:100vh!important;height:100vh;border-radius:0!important}
 .notif-panel{width:92vw;right:-40px;max-height:70vh}
 .modal{width:98%;padding:16px;max-height:95vh;border-radius:12px}
 
@@ -475,7 +478,7 @@ h2{font-size:16px!important}
 .qf-btn{padding:4px 8px!important;font-size:9px!important}
 
 /* DAY PANEL */
-.day-panel{width:100vw!important;max-width:100vw!important}
+.day-panel-ov{padding:0}.day-panel{width:100vw!important;max-width:100vw!important;max-height:100vh!important;height:100vh;border-radius:0!important}
 .day-ev-actions{opacity:1!important}
 
 /* ARROWS */
@@ -527,7 +530,8 @@ h2{font-size:16px!important}
 /* V13.2 — Client mode */
 .client-blur{filter:blur(5px);user-select:none;pointer-events:none}
 /* V13.2 — Day Panel */
-.day-panel{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:95vw;background:var(--bg2);border-left:1px solid var(--border);z-index:300;overflow-y:auto;box-shadow:-10px 0 40px rgba(0,0,0,.35);animation:slideR .25s ease-out}
+.day-panel-ov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .18s ease-out}
+.day-panel{position:relative;width:560px;max-width:95vw;max-height:88vh;background:var(--bg2);border:1px solid rgba(197,160,89,.18);border-radius:16px;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.5);animation:popIn .22s cubic-bezier(.2,.9,.3,1)}
 .day-panel::-webkit-scrollbar{width:3px}
 .day-hdr{padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:5}
 .day-date{font-family:var(--serif);font-size:20px;font-weight:600}
@@ -741,7 +745,7 @@ const effRole=povRole||roleOf(effSess);
 const isA=povRole?false:(TEAM.find(t=>t.id===effSess)?.isAdmin||false);
 const sU=povRole?{name:povRole==="commercial"?"Commercial":"Technicien",role:povRole==="commercial"?"Vue Commercial":"Vue Technicien"}:TEAM.find(t=>t.id===effSess);
 const isTech=effRole==="technicien";const isCom=effRole==="commercial";
-const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);
+const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);const[aiMini,setAiMini]=useState(false);
 const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("webo_theme")||"dark"}catch(e){return"dark"}});const[proxySecret,setProxySecret]=useState(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const AI_PROXY=SB_URL+"/functions/v1/ai-proxy";
 const aiCall=async(messages,system,search)=>{if(!proxySecret)throw new Error("Cle d acces IA manquante. Cliquez sur la cle dans la nav.");const r=await fetch(AI_PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-webo-secret":proxySecret,"x-webo-user":(sess||"")},body:JSON.stringify({messages:messages,system:system||"",search:!!search})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Erreur IA "+r.status));return d.text||"";};
@@ -879,15 +883,29 @@ const onColdMailSent=useCallback(async(lead,objet)=>{
   flash("Tracking OK ✓");
 },[sess,leads]);
 
+/* AFFINAGE COLD MAIL : retravaille un mail existant selon les consignes du commercial */
+const aiRefineColdMail=useCallback(async(lead,objet,body,consignes)=>{
+  const prompt="Tu es expert en cold email B2B FR pour WEBO SMART, agence de mise en conformité accessibilité numérique (European Accessibility Act / RGAA).\n\nVoici un cold email existant destiné à l'entreprise \""+(lead.nom||"")+"\" :\n\nOBJET ACTUEL : "+objet+"\n\nCORPS ACTUEL :\n"+body+"\n\nCONSIGNES DE RÉÉCRITURE DU COMMERCIAL :\n"+consignes+"\n\nMISSION : Réécris ce mail en appliquant STRICTEMENT les consignes ci-dessus. Garde ce qui fonctionne, modifie uniquement ce que les consignes demandent.\n\nRÈGLES ABSOLUES :\n- N'invente AUCUN chiffre, AUCUN montant de sanction, AUCUNE référence légale qui ne soit pas déjà dans le mail actuel\n- Reste factuel : ne durcis jamais une affirmation juridique\n- 120 à 170 mots maximum\n- Appel à action : rendez-vous téléphonique de 15 minutes (JAMAIS d'audit gratuit)\n- Termine par la signature :\nKylian Meunier\nFondateur WEBO SMART\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet fait 40-70 caractères, sans emoji. Le body utilise \\n pour les retours à la ligne.";
+  const raw=await gemini(prompt,false);
+  let cleaned=raw.trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
+  const m=cleaned.match(/\{[\s\S]*\}/);
+  if(m)cleaned=m[0];
+  try{
+    const parsed=JSON.parse(cleaned);
+    if(!parsed.objet||!parsed.body)throw new Error("JSON incomplet");
+    return parsed;
+  }catch(e){ throw new Error("Format IA invalide : "+(cleaned.slice(0,80))); }
+},[]);
+
 /* V28 — COLD MAIL EAA : génération IA */
 const aiGenColdMail=useCallback(async(lead,persona)=>{
   const ctx="Entreprise cible : "+lead.nom+"\nService proposé : "+lead.service+(lead.adresse?"\nLocalisation : "+lead.adresse:"")+(lead.auditScore?"\nScore audit accessibilité : "+lead.auditScore+"/100":"")+(lead.auditErreurs?"\nErreurs critiques détectées : "+lead.auditErreurs:"")+(lead.cms&&lead.cms!=="—"?"\nCMS utilisé : "+lead.cms:"")+(lead.notes?"\nNotes prospecteur : "+lead.notes.slice(0,300):"");
   const personas={
-    direct:"DIRECT / SANCTIONS : ton ferme et factuel, appuie sur le risque légal (loi 28 juin 2025, EAA, RGAA, sanctions Arcom jusqu'à 250 000€), création d'urgence",
+    direct:"DIRECT / SANCTIONS : ton ferme et factuel, appuie sur le risque légal (EAA applicable depuis le 28 juin 2025, RGAA 4.1.2, amende jusqu'à 50 000 € par service non conforme, renouvelable tous les 6 mois et cumulable par canal), création d'urgence SANS exagération",
     pedago:"PÉDAGOGIQUE / SOFT : ton bienveillant, vulgarise l'enjeu accessibilité numérique, met en lumière l'opportunité d'inclusion (12M de personnes en situation de handicap en France), pas de menace",
     roi:"ROI / BUSINESS : ton entrepreneurial, parle perte de clients (15% de marché inaccessible), impact SEO Google, image de marque, conversion. Chiffres et bénéfices business."
   };
-  const prompt="Tu es expert en cold email B2B FR pour WEBO, agence de mise en conformité European Accessibility Act (EAA).\n\nCONTEXTE OBLIGATOIRE :\n- Loi française du 28 juin 2025 : sites e-commerce + services publics doivent être accessibles (norme RGAA/EAA)\n- S'applique aux entreprises >2M€ CA ou >10 salariés\n- Sanctions Arcom : jusqu'à 250 000€ par manquement\n- WEBO propose : audit accessibilité, mise en conformité, certification\n- WEBO ne propose JAMAIS d'audit gratuit, uniquement des rendez-vous téléphoniques de 15 minutes\n\nCIBLE :\n"+ctx+"\n\nSTYLE DEMANDÉ : "+personas[persona]+"\n\nMISSION : Rédige un cold email FR percutant de 120 à 160 mots MAX, structuré ainsi :\n1) Accroche personnalisée (référence à l'entreprise, son secteur ou son site)\n2) Mise en lumière du risque/opportunité spécifique EAA\n3) Une phrase qui présente l'accompagnement WEBO sur [S]\n4) Appel à action clair : rendez-vous téléphonique de 15 minutes (JAMAIS d'audit gratuit)\n5) Question de disponibilité cette semaine\n\nSignature OBLIGATOIRE :\nKylian Meunier\nFondateur WEBO\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet doit faire 40-70 caractères, accrocheur, sans emoji.\nLe body utilise \\n pour les retours à la ligne.";
+  const prompt="Tu es expert en cold email B2B FR pour WEBO, agence de mise en conformité European Accessibility Act (EAA).\n\nCONTEXTE OBLIGATOIRE — N'INVENTE AUCUN CHIFFRE NI RÉFÉRENCE LÉGALE HORS DE CETTE LISTE :\n- L'European Accessibility Act (directive UE 2019/882) s'applique aux services numériques depuis le 28 juin 2025. Transposition française : loi n°2023-171 du 9 mars 2023 (DDADUE) et décret n°2023-931 du 9 octobre 2023.\n- Périmètre : entreprises fournissant un service B2C couvert (e-commerce, banque de détail, transport de voyageurs, télécoms, médias audiovisuels, livres numériques). Sont exemptées UNIQUEMENT les structures cumulant moins de 10 salariés ET un CA (ou bilan) inférieur ou égal à 2 M€ — c'est un ET, jamais un OU.\n- Sanctions : jusqu'à 50 000 € par service non conforme, renouvelable tous les 6 mois, cumulable par canal (site, application mobile, espace client). 25 000 € pour défaut de déclaration ou déclaration mensongère. Astreintes de 3 000 €/jour plafonnées à 300 000 €. Publication du nom possible (name and shame).\n- Autorités de contrôle : DGCCRF pour la conformité effective des produits et services (e-commerce en première ligne), Arcom pour les obligations déclaratives / secteur public / grandes entreprises / médias, ARCEP pour les télécoms, ACPR pour les services bancaires. Ne JAMAIS attribuer à l'Arcom le contrôle des sites e-commerce privés.\n- Référentiel : RGAA 4.1.2, 106 critères, 13 thématiques, niveau WCAG 2.1 AA via la norme EN 301 549.\n- Les sites web et applications sont juridiquement des SERVICES : ils sont soumis depuis le 28 juin 2025, sans transition. La date de 2030 ne concerne que les contrats conclus avant juin 2025 et les produits déjà commercialisés.\n- Chiffres utilisables : 12 millions de personnes en situation de handicap en France (INSEE), 3 à 4 % des sites réellement accessibles, 94,8 % des pages d'accueil avec erreurs détectables (WebAIM Million 2025), les outils automatiques ne détectent que 30 à 40 % des barrières.\n- WEBO propose : audit RGAA complet, plan de remédiation priorisé, accompagnement jusqu'à la déclaration d'accessibilité, suivi de conformité continue.\n- WEBO ne propose JAMAIS d'audit gratuit, uniquement des rendez-vous téléphoniques de 15 minutes.\n\nCIBLE :\n"+ctx+"\n\nSTYLE DEMANDÉ : "+personas[persona]+"\n\nMISSION : Rédige un cold email FR percutant de 120 à 160 mots MAX, structuré ainsi :\n1) Accroche personnalisée (référence à l'entreprise, son secteur ou son site)\n2) Mise en lumière du risque/opportunité spécifique EAA\n3) Une phrase qui présente l'accompagnement WEBO sur [S]\n4) Appel à action clair : rendez-vous téléphonique de 15 minutes (JAMAIS d'audit gratuit)\n5) Question de disponibilité cette semaine\n\nSignature OBLIGATOIRE :\nKylian Meunier\nFondateur WEBO\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet doit faire 40-70 caractères, accrocheur, sans emoji.\nLe body utilise \\n pour les retours à la ligne.";
   const raw=await gemini(prompt,false);
   let cleaned=raw.trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
   const m=cleaned.match(/\{[\s\S]*\}/);
@@ -1645,7 +1663,7 @@ const dayLabel=dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month
 const hours=[];for(let h=7;h<=21;h++)hours.push(h);
 const evByHour={};evts.forEach(ev=>{const hr=parseInt((ev.time||"09").split(":")[0])||9;if(!evByHour[hr])evByHour[hr]=[];evByHour[hr].push(ev)});
 const filteredLeads=leads.filter(l=>{if(!leadSearch)return false;const q=leadSearch.toLowerCase();return l.nom.toLowerCase().includes(q)||l.service.toLowerCase().includes(q)}).slice(0,5);
-return <div className="day-panel">
+return <div className="day-panel-ov" onClick={onClose}><div className="day-panel" onClick={e=>e.stopPropagation()}>
   <div className="day-hdr">
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
       <div><div className="day-date">{dt.getDate()} {dt.toLocaleDateString("fr-FR",{month:"long"})}</div><div className="day-sub">{dayLabel}</div></div>
@@ -1738,7 +1756,7 @@ return <div className="day-panel">
       <button onClick={()=>{if(nt.trim()){onAddEvent(nt.trim(),ntime,ncol,nAssignees,nend,nAllDay);setNt("");setNtime("09:00");setNend("10:00");setNAllDay(false);setNAssignees([sess]);setShowNew(false)}}} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:12,fontWeight:700}}>Ajouter</button>
     </div>
   </div>}
-</div>}
+</div></div>}
 
 /* ═══ FINANCE ═══ */
 const Finance=()=>(
@@ -1869,8 +1887,8 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
 
 /* ═══ LEAD DETAIL PANEL ═══ */
 const Detail=({l,onClose})=>{if(!l)return null;const hs=healthScore(l);const col=COLS.find(c=>c.id===l.status);const mg=calcMargin(l.valeur,l.memberId);const cd=cDays(l.dateCreated,l.status);const liStep=LI_STEPS.find(x=>x.id===l.linkedinStep);const hasAudit=l.auditScore!==""&&l.auditScore!=null;const aScore=Number(l.auditScore)||0;const aColor=aScore>80?"var(--green)":aScore>50?"var(--gold)":"var(--red)";const aBg=aScore>80?"rgba(8,153,129,":"rgba(231,76,76,";const aBgMed="rgba(197,160,89,";const aBgFull=aScore>80?aBg:aScore>50?aBgMed:aBg;
-return <div className="rpanel">
-  <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between"}}><div><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{l.nom}</h3>{/* ═══ LinkedIn Step Badge ═══ */}<div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>{liStep&&l.linkedinStep!=="non_contacte"&&<span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:12,fontSize:9,fontWeight:700,fontFamily:"var(--mono)",color:liStep.color,background:liStep.color+"12",border:"1px solid "+liStep.color+"25"}}><i className={"fa-solid "+liStep.icon} style={{fontSize:7}}/>{liStep.label}</span>}{l.linkedinCampaign&&<span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:12,fontSize:9,fontWeight:700,fontFamily:"var(--mono)",color:"var(--blue)",background:"rgba(41,98,255,.08)",border:"1px solid rgba(41,98,255,.15)"}}>🤖 Campagne IN</span>}</div></div><div style={{display:"flex",gap:3}}><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"3px 8px",borderRadius:4,border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-pen"/></button><button onClick={onClose} style={{color:"var(--text3)",fontSize:13}}><i className="fa-solid fa-xmark"/></button></div></div>
+return <div className="rpanel-ov" onClick={onClose}><div className="rpanel" onClick={e=>e.stopPropagation()}>
+  <div style={{padding:"12px 16px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",position:"sticky",top:0,background:"var(--bg2)",zIndex:2}}><div><h3 style={{fontFamily:"var(--serif)",fontSize:15}}>{l.nom}</h3>{/* ═══ LinkedIn Step Badge ═══ */}<div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>{liStep&&l.linkedinStep!=="non_contacte"&&<span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:12,fontSize:9,fontWeight:700,fontFamily:"var(--mono)",color:liStep.color,background:liStep.color+"12",border:"1px solid "+liStep.color+"25"}}><i className={"fa-solid "+liStep.icon} style={{fontSize:7}}/>{liStep.label}</span>}{l.linkedinCampaign&&<span style={{display:"inline-flex",alignItems:"center",gap:3,padding:"3px 8px",borderRadius:12,fontSize:9,fontWeight:700,fontFamily:"var(--mono)",color:"var(--blue)",background:"rgba(41,98,255,.08)",border:"1px solid rgba(41,98,255,.15)"}}>🤖 Campagne IN</span>}</div></div><div style={{display:"flex",gap:3}}><button onClick={()=>{setEditId(l.id);setShowForm(true)}} style={{padding:"3px 8px",borderRadius:4,border:"1px solid var(--border)",color:"var(--text2)",fontSize:10}}><i className="fa-solid fa-pen"/></button><button onClick={onClose} style={{color:"var(--text3)",fontSize:13}}><i className="fa-solid fa-xmark"/></button></div></div>
   <div style={{padding:"12px 16px"}}>
     <div style={{marginBottom:12}}><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:4}}>SCORE DE SANTÉ</div>
     <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:22,fontWeight:800,fontFamily:"var(--mono)",color:hCol(hs)}}>{hs}</span><div style={{flex:1}}><Prog pct={hs} color={hCol(hs)}/></div><Badge type={hs>=60?"green":hs>=40?"gold":"red"}>{hLab(hs)}</Badge></div></div>
@@ -2004,7 +2022,7 @@ return <div className="rpanel">
     </div>}
 
   </div>
-</div>};
+</div></div>};
 
 return (
 <div style={{display:"flex",flexDirection:"column",height:"100dvh"}} onClick={()=>{setShowNotif(false);setShowYou(false)}}>
@@ -2015,7 +2033,7 @@ return (
   </div>}
   {Nav()}
   {/* ═══ DIAGNOSTIC TEMPS RÉEL (badge flottant) ═══ */}
-  <div style={{position:"fixed",bottom:14,right:14,zIndex:9999,fontFamily:"var(--mono)"}}>
+  <div style={{position:"fixed",bottom:14,left:14,zIndex:9999,fontFamily:"var(--mono)"}}>
     {showRtDbg?
     <div style={{background:"var(--bg2)",border:"1px solid "+(rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)"),borderRadius:10,padding:"12px 14px",boxShadow:"0 8px 30px rgba(0,0,0,.4)",width:250,fontSize:11}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
@@ -2085,11 +2103,31 @@ return (
 </div></div>}
   {showRapport&&rapportData&&<div className="overlay" onClick={()=>setShowRapport(false)}><div className="overlay-bg"/><div className="modal" style={{maxWidth:500}} onClick={e=>e.stopPropagation()}><div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><h3 style={{fontFamily:"var(--serif)",fontSize:16}}>Rapport Hebdo</h3><button onClick={()=>setShowRapport(false)} style={{color:"var(--text3)"}}><i className="fa-solid fa-xmark"/></button></div><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6,marginBottom:10}}>{[{l:"Leads sem.",v:rapportData.wL,c:"var(--blue)"},{l:"Signes sem.",v:rapportData.wS,c:"var(--green)"},{l:"CA sem.",v:E(rapportData.wCA),c:"var(--green)"},{l:"Pipeline",v:rapportData.pipe,c:"var(--gold)"},{l:"Encaisse",v:E(rapportData.enc),c:"var(--green)"},{l:"Urgents",v:rapportData.urg,c:"var(--red)"}].map((s,i)=><div key={i} style={{background:"var(--bg)",borderRadius:6,padding:6,textAlign:"center"}}><div style={{fontSize:8,color:"var(--text3)",fontFamily:"var(--mono)",letterSpacing:1,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:15,fontWeight:700,fontFamily:"var(--mono)",color:s.c}}>{s.v}</div></div>)}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--gold)"}}>Top:</strong> {rapportData.topPerf}</div><div style={{fontSize:12,marginBottom:4}}><strong style={{color:"var(--green)"}}>Cash:</strong> {E(rapportData.enc)} / {E(rapportData.theo)} ({rapportData.theo>0?Math.round(rapportData.enc/rapportData.theo*100):0}%)</div>{rapportData.stale>0&&<div style={{fontSize:12,color:"var(--red)"}}>Dormants: {rapportData.stale}</div>}<div className="sep"/><div style={{display:"flex",gap:4,justifyContent:"flex-end"}}><button onClick={()=>{cp("RAPPORT WEBO "+rapportData.date+": "+rapportData.wL+" leads, "+rapportData.wS+" signes, Pipeline "+rapportData.pipe+", Cash "+E(rapportData.enc)+"/"+E(rapportData.theo),flash)}} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Copier</button><button onClick={()=>{askAI("Rapport hebdo: "+rapportData.wL+" leads, "+rapportData.wS+" signes, "+rapportData.stale+" dormants, cash "+E(rapportData.enc)+"/"+E(rapportData.theo)+". 3 actions.");setShowRapport(false);setPage("ia")}} style={{padding:"7px 12px",borderRadius:"var(--radius)",background:"var(--gold)",color:"var(--bg)",fontSize:11,fontWeight:700}}>IA</button></div></div></div>}
   {outreachPresta&&<OutreachModal target={outreachPresta} type="presta" onClose={()=>setOutreachPresta(null)} flash={flash}/>}
-  {outreachLead&&<OutreachModal target={outreachLead} type="lead" onClose={()=>setOutreachLead(null)} flash={flash} aiGen={aiGenColdMail} onSent={onColdMailSent} prospecteurName={mN(sess)}/>}
+  {outreachLead&&<OutreachModal target={outreachLead} type="lead" onClose={()=>setOutreachLead(null)} flash={flash} aiGen={aiGenColdMail} aiRefine={aiRefineColdMail} onSent={onColdMailSent} prospecteurName={mN(sess)}/>}
   {scriptLead&&<ScriptModal lead={scriptLead} onClose={()=>setScriptLead(null)} flash={flash}/>}
   {page!=="messages"&&page!=="ia"&&<button className="msg-fab" onClick={()=>setMsgWidget(p=>!p)} title="Messages">{msgWidget?<i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-comment-dots"/>}{!msgWidget&&chatUnreadTotal>0&&<div style={{position:"absolute",top:-2,right:-2,minWidth:18,height:18,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px",border:"2px solid var(--bg)"}}>{chatUnreadTotal>9?"9+":chatUnreadTotal}</div>}</button>}
   {msgWidget&&page!=="messages"&&<MsgWidget/>}
-  {page!=="ia"&&page!=="messages"&&<button onClick={()=>setPage("ia")} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>}
+  {page!=="ia"&&page!=="messages"&&!aiMini&&<button onClick={()=>setAiMini(true)} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>}
+  {/* ═══ AGENT IA — FENÊTRE FLOTTANTE ═══ */}
+  {aiMini&&page!=="ia"&&<div className="fu" style={{position:"fixed",bottom:20,right:20,zIndex:1500,width:370,maxWidth:"calc(100vw - 40px)",height:480,maxHeight:"calc(100vh - 100px)",background:"var(--bg2)",border:"1px solid rgba(197,160,89,.3)",borderRadius:14,boxShadow:"0 16px 50px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+    <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,rgba(197,160,89,.12),transparent)"}}>
+      <span style={{width:28,height:28,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",display:"grid",placeItems:"center",fontSize:13,flexShrink:0}}><i className="fa-solid fa-robot"/></span>
+      <div style={{flex:1,minWidth:0}}><div style={{fontSize:12.5,fontWeight:700,color:"var(--text)"}}>Agent IA</div><div style={{fontSize:9.5,color:"var(--text3)"}}>Réponse rapide</div></div>
+      <button onClick={()=>{setAiMini(false);setPage("ia")}} title="Ouvrir en plein écran" style={{color:"var(--text3)",fontSize:12,padding:4}}><i className="fa-solid fa-up-right-and-down-left-from-center"/></button>
+      <button onClick={()=>setAiMini(false)} title="Fermer" style={{color:"var(--text3)",fontSize:14,padding:4}}><i className="fa-solid fa-xmark"/></button>
+    </div>
+    <div style={{padding:"7px 9px",borderBottom:"1px solid var(--border)",display:"flex",gap:4,flexWrap:"wrap"}}>
+      {[{t:"Analyse",p:"Analyse pipeline: forces, risques, 3 actions prioritaires."},{t:"Plan Hebdo",p:"Plan action semaine par apporteur d'affaires."},{t:"Relances",p:"Messages de relance personnalisés."}].map(a=>
+        <button key={a.t} onClick={()=>askAI(a.p)} style={{padding:"4px 9px",borderRadius:20,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",fontSize:10,fontWeight:600}}>{a.t}</button>)}
+    </div>
+    <div style={{flex:1,overflowY:"auto",padding:10,display:"flex",flexDirection:"column",gap:6}}>
+      {aiMsgs.length===0&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",textAlign:"center",fontSize:11.5,padding:16,lineHeight:1.6}}><div><i className="fa-solid fa-robot" style={{fontSize:22,display:"block",marginBottom:8,color:"rgba(197,160,89,.35)"}}/>Posez votre question —<br/>l'IA voit tout votre pipeline.</div></div>}
+      {aiMsgs.map((m,i)=><div key={i} style={{padding:"9px 11px",borderRadius:9,fontSize:12,lineHeight:1.65,whiteSpace:"pre-wrap",background:m.role==="user"?"rgba(197,160,89,.08)":"var(--bg3)",border:"1px solid "+(m.role==="user"?"rgba(197,160,89,.16)":"var(--border)"),marginLeft:m.role==="user"?14:0,marginRight:m.role==="assistant"?14:0}}>{m.content}</div>)}
+      {aiLoad&&<div style={{padding:8,color:"var(--text3)",fontSize:11}}><i className="fa-solid fa-spinner fa-spin"/> Analyse…</div>}
+      <div ref={aiRef}/>
+    </div>
+    <AIInputBar onSend={t=>askAI(t)} loading={aiLoad}/>
+  </div>}
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
 }
@@ -2312,29 +2350,29 @@ function ObjModal({objectives,onSave,onClose,TEAM,realAdmin}){
 
 /* ═══ COLD MAIL EAA v28 ═══ */
 const COLD_PERSONAS=[
-{id:"direct",label:"Direct / Sanctions",icon:"fa-triangle-exclamation",color:"#E74C4C",desc:"Risque légal Arcom 250k€"},
+{id:"direct",label:"Direct / Sanctions",icon:"fa-triangle-exclamation",color:"#E74C4C",desc:"Risque légal — 50k€ par service"},
 {id:"pedago",label:"Pédagogique / Soft",icon:"fa-hand-holding-heart",color:"#089981",desc:"Inclusion 12M personnes"},
 {id:"roi",label:"ROI / Business",icon:"fa-chart-line",color:"#C5A059",desc:"Perte clients + SEO"}
 ];
 
 const COLD_TPL_LEAD={
 direct:{
-  objet:"Conformité EAA — Sanctions Arcom depuis le 28 juin 2025",
-  body:"Bonjour [N],\n\nDepuis le 28 juin 2025, la loi française rend l'accessibilité numérique (RGAA/EAA) obligatoire pour tout site e-commerce ou service en ligne d'entreprise > 2M€ CA ou > 10 salariés.\n\nLes sanctions Arcom peuvent atteindre 250 000 € par manquement, et [E] entre dans le périmètre.\n\nChez WEBO, nous accompagnons les entreprises dans leur [S] : audit complet, plan de remédiation et certification.\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait de mesurer immédiatement l'exposition au risque de [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
+  objet:"Conformité EAA — votre exposition depuis le 28 juin 2025",
+  body:"Bonjour [N],\n\nDepuis le 28 juin 2025, l'European Accessibility Act rend l'accessibilité numérique obligatoire pour les services en ligne destinés au public. Seules les structures de moins de 10 salariés ET moins de 2 M€ de CA en sont exemptées — [E] entre dans le périmètre.\n\nLa DGCCRF contrôle la conformité effective, l'e-commerce en première ligne : jusqu'à 50 000 € par service non conforme, renouvelable tous les 6 mois et cumulable par canal (site, application, espace client).\n\nChez WEBO, nous accompagnons les entreprises dans leur [S] : audit RGAA complet, plan de remédiation priorisé et déclaration d'accessibilité.\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait de mesurer précisément l'exposition de [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
 },
 pedago:{
   objet:"Rendre [E] accessible aux 12 millions de Français en situation de handicap",
-  body:"Bonjour [N],\n\n12 millions de personnes en France vivent avec un handicap qui rend leur navigation difficile sur la plupart des sites web. Pourtant, l'accessibilité numérique est non seulement une obligation légale (loi du 28 juin 2025), mais aussi une formidable opportunité d'inclusion.\n\nChez WEBO, nous aidons les entreprises comme [E] à concevoir des expériences numériques accessibles à tous, en mettant en place [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'identifier vos premiers leviers d'amélioration et d'en savoir plus sur la conformité EAA.\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
+  body:"Bonjour [N],\n\n12 millions de personnes en France vivent avec un handicap qui rend leur navigation difficile sur la plupart des sites web. Pourtant, l'accessibilité numérique est non seulement une obligation légale depuis le 28 juin 2025 (European Accessibility Act), mais aussi une formidable opportunité d'inclusion.\n\nSeuls 3 à 4 % des sites sont aujourd'hui réellement accessibles.\n\nChez WEBO, nous aidons les entreprises comme [E] à concevoir des expériences numériques accessibles à tous, en mettant en place [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'identifier vos premiers leviers d'amélioration et d'en savoir plus sur la conformité EAA.\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
 },
 roi:{
   objet:"15% de marché en moins : ce que coûte un site non-conforme EAA",
-  body:"Bonjour [N],\n\nUn site non-conforme à l'European Accessibility Act ferme aujourd'hui la porte à environ 15% du marché français — soit 12 millions de clients potentiels que vos concurrents capteront avant vous.\n\nÀ cela s'ajoutent un déclassement progressif sur Google (les Core Web Vitals intègrent désormais l'accessibilité) et une exposition aux sanctions Arcom jusqu'à 250 000 €.\n\nChez WEBO, nous accompagnons les entreprises ambitieuses comme [E] sur leur [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'en savoir plus sur la conformité EAA et l'impact actuel pour [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
+  body:"Bonjour [N],\n\nUn site non-conforme à l'European Accessibility Act ferme aujourd'hui la porte à environ 15% du marché français — soit 12 millions de clients potentiels que vos concurrents capteront avant vous.\n\nÀ cela s'ajoutent un référencement naturel pénalisé — structure sémantique, textes alternatifs et hiérarchie de titres sont les fondamentaux communs à l'accessibilité et au SEO — et une exposition réglementaire pouvant atteindre 50 000 € par service non conforme, renouvelable tous les 6 mois.\n\nChez WEBO, nous accompagnons les entreprises ambitieuses comme [E] sur leur [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'en savoir plus sur la conformité EAA et l'impact actuel pour [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
 }
 };
 
 const COLD_TPL_PRESTA={
 objet:"Partenariat WEBO — Mise en conformité EAA & accessibilité numérique",
-body:"Bonjour [N],\n\nJe me permets de vous contacter car votre profil [SPEC] correspond précisément à ce que nous recherchons chez WEBO.\n\nSuite à la loi française du 28 juin 2025, le marché de la mise en conformité EAA (European Accessibility Act) est en pleine explosion. Nous accompagnons aujourd'hui un volume croissant d'entreprises soumises à cette obligation.\n\nNous construisons un réseau de partenaires de confiance pour intervenir sur audits, remédiations et certifications. Notre modèle : commission attractive (50% de notre marge prospecteur), missions récurrentes et accompagnement opérationnel WEBO.\n\nUn rendez-vous téléphonique de 15 minutes nous permettrait d'explorer cette collaboration.\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
+body:"Bonjour [N],\n\nJe me permets de vous contacter car votre profil [SPEC] correspond précisément à ce que nous recherchons chez WEBO.\n\nDepuis l'entrée en application de l'European Accessibility Act le 28 juin 2025, le marché de la mise en conformité EAA est en pleine explosion — le segment PME croît de près de 20 % par an. Nous accompagnons aujourd'hui un volume croissant d'entreprises soumises à cette obligation.\n\nNous construisons un réseau de partenaires de confiance pour intervenir sur audits, remédiations et certifications. Notre modèle : commission attractive (50% de notre marge prospecteur), missions récurrentes et accompagnement opérationnel WEBO.\n\nUn rendez-vous téléphonique de 15 minutes nous permettrait d'explorer cette collaboration.\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
 };
 
 const renderTpl=(t,target,prosp)=>{
@@ -2348,8 +2386,9 @@ return{
 };
 };
 
-function OutreachModal({target,type,onClose,flash,aiGen,onSent,prospecteurName}){
+function OutreachModal({target,type,onClose,flash,aiGen,aiRefine,onSent,prospecteurName}){
 const isLead=type==="lead";
+const[refineOpen,setRefineOpen]=useState(false);const[refineTxt,setRefineTxt]=useState("");const[refining,setRefining]=useState(false);
 const[persona,setPersona]=useState("direct");
 const[objet,setObjet]=useState("");
 const[body,setBody]=useState("");
@@ -2452,6 +2491,28 @@ return <div className="overlay" onClick={onClose}><div className="overlay-bg"/><
   <span style={{fontWeight:400,color:wordWarn?"var(--red)":"var(--text3)"}}>{wordCount} mots · {charCount} car.</span>
 </div>
 <textarea value={body} onChange={e=>{setBody(e.target.value);setEdited(true)}} style={{width:"100%",minHeight:280,padding:12,borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",fontSize:12,lineHeight:1.7,fontFamily:"var(--sans)",outline:"none",resize:"vertical",boxSizing:"border-box"}}/>
+
+{body&&aiRefine&&<div style={{marginTop:8,padding:"9px 11px",borderRadius:9,border:"1px solid rgba(197,160,89,.25)",background:"rgba(197,160,89,.04)"}}>
+  {!refineOpen?
+  <button onClick={()=>setRefineOpen(true)} style={{fontSize:11,fontWeight:600,color:"var(--gold)",display:"flex",alignItems:"center",gap:6}}><i className="fa-solid fa-wand-magic-sparkles"/>Affiner ce mail avec des consignes</button>
+  :<div>
+    <div style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1,marginBottom:6}}>✨ AFFINER — DITES CE QUE VOUS VOULEZ CHANGER</div>
+    <textarea value={refineTxt} onChange={e=>setRefineTxt(e.target.value)} placeholder={"Ex : plus court et plus direct\nEx : mentionne qu'ils ont une boutique en ligne\nEx : ton moins commercial, plus consultatif\nEx : insiste sur le délai, ils doivent agir vite"} style={{width:"100%",minHeight:70,padding:9,borderRadius:8,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:12,fontFamily:"var(--sans)",outline:"none",resize:"vertical",lineHeight:1.5}}/>
+    <div style={{display:"flex",gap:6,marginTop:7,flexWrap:"wrap"}}>
+      {["Plus court","Plus direct","Moins commercial","Plus personnalisé"].map(s=>
+        <button key={s} onClick={()=>setRefineTxt(t=>t?t+"\n"+s:s)} style={{padding:"3px 9px",borderRadius:20,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",fontSize:10,fontWeight:600}}>+ {s}</button>)}
+    </div>
+    <div style={{display:"flex",gap:6,marginTop:8}}>
+      <button disabled={refining||!refineTxt.trim()} onClick={async()=>{
+        setRefining(true);
+        try{const r=await aiRefine(target,objet,body,refineTxt.trim());setObjet(r.objet||objet);setBody(r.body||body);setEdited(true);setRefineTxt("");setRefineOpen(false);flash("Mail affiné ✨")}
+        catch(e){flash("Erreur : "+e.message)}
+        setRefining(false);
+      }} style={{padding:"7px 14px",borderRadius:8,background:(refining||!refineTxt.trim())?"var(--bg3)":"var(--gold)",color:(refining||!refineTxt.trim())?"var(--text3)":"#fff",fontSize:11.5,fontWeight:700,border:"none"}}>{refining?<><i className="fa-solid fa-spinner fa-spin"/> Réécriture…</>:<><i className="fa-solid fa-wand-magic-sparkles"/> Appliquer</>}</button>
+      <button onClick={()=>{setRefineOpen(false);setRefineTxt("")}} style={{padding:"7px 12px",borderRadius:8,border:"1px solid var(--border)",color:"var(--text3)",fontSize:11.5}}>Annuler</button>
+    </div>
+  </div>}
+</div>}
 
 {isLead&&wordWarn&&<div style={{marginTop:4,fontSize:10,color:"var(--red)"}}><i className="fa-solid fa-circle-info" style={{marginRight:4}}/>Idéal cold mail B2B : 80-180 mots</div>}
 
