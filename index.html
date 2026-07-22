@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v50</title>
+<title>WEBO — Hub v52.1</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -618,6 +618,180 @@ h2{font-size:16px!important}
   .bulk-bar{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
   .ai-fab{bottom:calc(20px + env(safe-area-inset-bottom))!important}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   v52 — FINITIONS : profondeur, verre, lumière
+   Ajouté en fin de feuille : rien n'est remplacé, tout s'affine.
+   ══════════════════════════════════════════════════════════════ */
+
+/* — Échelle d'ombres du thème sombre (le clair a déjà la sienne) — */
+:root{
+  --d-sm:0 1px 2px rgba(0,0,0,.32), 0 2px 6px rgba(0,0,0,.22);
+  --d-md:0 1px 2px rgba(0,0,0,.3), 0 6px 16px rgba(0,0,0,.28), 0 14px 34px rgba(0,0,0,.22);
+  --d-lg:0 2px 6px rgba(0,0,0,.34), 0 12px 32px rgba(0,0,0,.34), 0 32px 68px rgba(0,0,0,.3);
+  --d-xl:0 4px 12px rgba(0,0,0,.4), 0 24px 60px rgba(0,0,0,.42), 0 56px 120px rgba(0,0,0,.36);
+  /* Filet de lumière haute : l'arête qu'attrape une surface vitrée */
+  --sheen:inset 0 1px 0 rgba(255,255,255,.055);
+  --sheen-strong:inset 0 1px 0 rgba(255,255,255,.09);
+  --ease:cubic-bezier(.22,.9,.28,1);
+}
+[data-theme="light"]{
+  --sheen:inset 0 1px 0 rgba(255,255,255,.9);
+  --sheen-strong:inset 0 1px 0 rgba(255,255,255,1);
+}
+
+/* — Surfaces : profondeur au repos, élévation au survol — */
+.card,.stat-card,.chart-card,.enrich-card,.outreach-card,.match-card{
+  box-shadow:var(--sheen), var(--d-sm);
+  transition:box-shadow .28s var(--ease), border-color .28s var(--ease), transform .28s var(--ease);
+}
+.card:hover,.chart-card:hover{
+  box-shadow:var(--sheen-strong), var(--d-md);
+  border-color:var(--border2);
+}
+[data-theme="light"] .card,[data-theme="light"] .stat-card,
+[data-theme="light"] .chart-card{ box-shadow:var(--sheen), var(--sh-sm); }
+[data-theme="light"] .card:hover,[data-theme="light"] .chart-card:hover{
+  box-shadow:var(--sheen-strong), var(--sh-md);
+}
+
+/* — Tuiles du Hub : la goutte qui roule sous le doigt — */
+.hub-card{
+  box-shadow:var(--sheen), var(--d-md);
+  transition:transform .34s var(--ease), box-shadow .34s var(--ease), border-color .34s var(--ease);
+}
+.hub-card:hover{
+  transform:translateY(-3px);
+  box-shadow:var(--sheen-strong), var(--d-lg);
+}
+.hub-card:active{ transform:translateY(-1px) scale(.994); transition-duration:.09s; }
+[data-theme="light"] .hub-card{ box-shadow:var(--sheen), var(--sh-md); }
+[data-theme="light"] .hub-card:hover{ box-shadow:var(--sheen-strong), var(--sh-lg); }
+
+/* Reflet liquide : une lueur qui suit le curseur sur la tuile */
+.hub-card::after{
+  content:'';
+  position:absolute; inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:0;
+  will-change:opacity;
+  transition:opacity .4s var(--ease);
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,0%),
+    rgba(197,160,89,.16), transparent 62%);
+}
+.hub-card:hover::after{ opacity:1; }
+[data-theme="light"] .hub-card::after{
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,0%),
+    rgba(139,106,46,.13), transparent 62%);
+}
+
+/* — Cartes du Kanban : elles se soulèvent, elles ne s'allument pas — */
+.kc{
+  box-shadow:var(--sheen), var(--d-sm);
+  transition:transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s var(--ease);
+  contain:layout style;
+}
+.kc:hover{ transform:translateY(-2px); box-shadow:var(--sheen-strong), var(--d-md); }
+.kc:active{ transform:translateY(0) scale(.997); transition-duration:.08s; }
+
+/* — Modales et panneaux : la profondeur porte la hiérarchie — */
+.modal,.rpanel,.day-panel,.notif-panel,.cmd-box{
+  box-shadow:var(--sheen-strong), var(--d-xl);
+}
+[data-theme="light"] .modal,[data-theme="light"] .rpanel,
+[data-theme="light"] .day-panel,[data-theme="light"] .notif-panel{
+  box-shadow:var(--sheen-strong), 0 8px 24px rgba(92,72,36,.14),
+    0 32px 80px rgba(92,72,36,.2), 0 0 0 1px rgba(139,106,46,.05);
+}
+
+/* Voile des overlays : plus doux, moins opaque, vrai flou */
+/* Le flou des overlays est deja defini plus haut : on ne le surcharge pas. */
+
+/* — Barre de navigation : verre dépoli — */
+.topnav{
+  box-shadow:var(--sheen), 0 1px 0 var(--border), 0 6px 22px rgba(0,0,0,.24);
+}
+[data-theme="light"] .topnav{
+  box-shadow:var(--sheen-strong), 0 1px 0 rgba(227,216,190,.9), 0 6px 20px rgba(92,72,36,.07);
+}
+
+/* — Boutons flottants : la goutte tenue en suspension — */
+.ai-fab,.msg-fab{
+  box-shadow:var(--sheen-strong), 0 4px 12px rgba(0,0,0,.3), 0 12px 30px rgba(139,106,46,.3);
+  transition:transform .26s var(--ease), box-shadow .26s var(--ease);
+}
+.ai-fab:hover,.msg-fab:hover{
+  transform:translateY(-2px) scale(1.04);
+  box-shadow:var(--sheen-strong), 0 8px 20px rgba(0,0,0,.34), 0 20px 46px rgba(139,106,46,.42);
+}
+.ai-fab:active,.msg-fab:active{ transform:translateY(0) scale(.97); transition-duration:.08s; }
+
+/* — Boutons : appui physique — */
+button:not(.you-item):not(.lnav):active{ transform:scale(.978); }
+button{ transition:background .16s var(--ease), transform .1s var(--ease); }
+
+/* — Champs : anneau de focus net, sans halo baveux — */
+input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:none;
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(197,160,89,.18);
+}
+[data-theme="light"] input:focus-visible,
+[data-theme="light"] textarea:focus-visible,
+[data-theme="light"] select:focus-visible{
+  box-shadow:0 0 0 3px rgba(139,106,46,.15);
+}
+
+/* — Badges et pastilles : légèrement bombés — */
+.badge,.pill{ box-shadow:var(--sheen), 0 1px 2px rgba(0,0,0,.16); }
+[data-theme="light"] .badge,[data-theme="light"] .pill{
+  box-shadow:var(--sheen), 0 1px 2px rgba(92,72,36,.07);
+}
+
+/* — Barres de progression : creusées, remplissage bombé — */
+.prog{ box-shadow:inset 0 1px 3px rgba(0,0,0,.28); overflow:hidden; }
+.prog-fill{ box-shadow:inset 0 1px 0 rgba(255,255,255,.22); }
+[data-theme="light"] .prog{ box-shadow:inset 0 1px 3px rgba(92,72,36,.13); }
+
+/* — Avatars : galets polis — */
+.av{ box-shadow:var(--sheen), 0 2px 6px rgba(0,0,0,.26); }
+[data-theme="light"] .av{ box-shadow:var(--sheen), 0 2px 5px rgba(92,72,36,.14); }
+
+/* — Point de synchro : pulsation vivante — */
+.sync-dot.on{ box-shadow:0 0 0 0 rgba(8,153,129,.5); animation:pulseDot 2.6s ease-out infinite; }
+@keyframes pulseDot{
+  0%{ box-shadow:0 0 0 0 rgba(8,153,129,.45); }
+  70%{ box-shadow:0 0 0 7px rgba(8,153,129,0); }
+  100%{ box-shadow:0 0 0 0 rgba(8,153,129,0); }
+}
+
+/* — Lignes de tableau : surlignage discret — */
+.tbl tbody tr{ transition:background .16s var(--ease); }
+.tbl tbody tr:hover{ background:rgba(197,160,89,.045); }
+[data-theme="light"] .tbl tbody tr:hover{ background:rgba(139,106,46,.05); }
+
+/* — Défilement : barres fines et sobres — */
+*::-webkit-scrollbar{ width:9px; height:9px; }
+*::-webkit-scrollbar-track{ background:transparent; }
+*::-webkit-scrollbar-thumb{
+  background:rgba(197,160,89,.2); border-radius:20px;
+  border:2px solid transparent; background-clip:content-box;
+}
+*::-webkit-scrollbar-thumb:hover{ background:rgba(197,160,89,.36); background-clip:content-box; }
+
+/* — Rendu typographique — */
+body{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
+
+/* — Accessibilité : mouvement réduit respecté — */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important; animation-iteration-count:1!important;
+    transition-duration:.01ms!important; scroll-behavior:auto!important;
+  }
+  .hub-card:hover,.kc:hover,.ai-fab:hover,.msg-fab:hover{ transform:none; }
+}
+
 </style>
 </head>
 <body>
@@ -2564,7 +2738,7 @@ o_mail2:{phase:1,tag:"Objection",title:"Il insiste pour le mail seul",say:'Pas d
 o_deja:{phase:1,tag:"Objection",obj:true,title:"« On est déjà conformes »",say:'Excellente chose, sincèrement. Juste pour être sûr : <b>vous parlez d\'une conformité RGAA/EAA formelle, avec déclaration d\'accessibilité publiée ?</b> Beaucoup de sites « refaits récemment » passent à côté de <b>80% des critères</b> sans le savoir. Si vous êtes carrés, mon audit de 15 min vous le confirmera <b>gratuitement</b>.',tip:{k:"ok",t:"Ne contredisez pas frontalement. Distinguez « site moderne » de « site conforme » et offrez la vérif gratuite."},choices:[{label:"« Je ne suis pas sûr en fait. »",sub:"Le doute",kind:"win",to:"closing"},{label:"« On a une déclaration publiée. »",sub:"Vraiment conforme",to:"o_vraiment"},{label:"« On verra plus tard. »",sub:"Botte en touche",kind:"obj",to:"o_plustard"}]},
 o_vraiment:{phase:1,tag:"Objection",title:"Il est vraiment déjà conforme",say:'Chapeau, c\'est rare. <b>Je ne vais pas vous faire perdre de temps.</b> Deux choses : la conformité doit être <b>maintenue à chaque mise à jour du site</b> — on propose un suivi léger pour ça. Et si vous connaissez d\'autres dirigeants moins avancés, <b>une recommandation est bienvenue.</b> Je vous laisse mon contact ?',tip:{k:"ok",t:"Un « vraiment conforme » n\'est pas un échec : semez le suivi + la recommandation."},choices:[{label:"« Oui, laissez ça. »",sub:"Graine plantée",kind:"win",to:"demi"},{label:"« C\'est bon merci. »",sub:"Clôture propre",kind:"obj",to:"o_stop"}]},
 o_cquoi:{phase:1,tag:"Objection",obj:true,title:"« C\'est quoi l\'accessibilité ? »",say:'Bonne question. En clair : <b>rendre votre site utilisable par tout le monde</b>, y compris les personnes malvoyantes, malentendantes ou à mobilité réduite — près d\'<b>une personne sur cinq</b>. Concrètement : contrastes lisibles, navigation clavier, textes pour les images. Depuis 2025 c\'est <b>une obligation légale</b>, et au-delà de la loi, <b>c\'est 15% de clients potentiels en plus.</b>',tip:{k:"ok",t:"Pédagogie = confiance. Chiffre marquant (1 sur 5) + double bénéfice légal ET commercial."},choices:[{label:"« Intéressant, dites-m\'en plus. »",sub:"Curiosité",kind:"win",to:"q_situation"},{label:"« Je risque quoi ? »",sub:"Veut le risque",to:"o_concerne"},{label:"« Ça coûte combien ? »",sub:"Prix",kind:"obj",to:"o_prix"}]},
-o_concerne:{phase:1,tag:"Objection",obj:true,title:"« Ça ne me concerne pas »",say:'Peut-être, et c\'est ce qu\'on va vérifier ensemble — je ne vais pas vous inventer une obligation. Ce que je peux dire : l\'EAA vise <b>les entreprises qui vendent au public</b>, et les sanctions vont <b>jusqu\'à des mises en demeure et amendes</b>. Beaucoup se croyaient hors périmètre… à tort. <b>Le point de 15 min lève le doute une bonne fois.</b>',tip:{k:"warn",t:"Ne surjouez JAMAIS la peur. Restez factuel, positionnez le RDV comme « lever le doute »."},choices:[{label:"« Bon, autant vérifier. »",sub:"Accepte",kind:"win",to:"closing"},{label:"« Je pense pas être concerné. »",sub:"Sceptique",to:"o_sceptique"}]},
+o_concerne:{phase:1,tag:"Objection",obj:true,title:"« Ça ne me concerne pas »",say:'Peut-être, et c\'est ce qu\'on va vérifier ensemble — je ne vais pas vous inventer une obligation. Ce que je peux dire : l\'EAA vise <b>tout ce qui se vend en ligne au grand public — e-commerce, banque, transport, télécoms, médias, livres numériques</b>, et les sanctions vont <b>jusqu\'à des mises en demeure et amendes</b>. Beaucoup se croyaient hors périmètre… à tort. <b>Le point de 15 min lève le doute une bonne fois.</b>',tip:{k:"warn",t:"Ne surjouez JAMAIS la peur. Restez factuel, positionnez le RDV comme « lever le doute »."},choices:[{label:"« Bon, autant vérifier. »",sub:"Accepte",kind:"win",to:"closing"},{label:"« Je pense pas être concerné. »",sub:"Sceptique",to:"o_sceptique"}]},
 o_sceptique:{phase:1,tag:"Objection",title:"Reste sceptique sur l\'obligation",say:'Je respecte. Faisons simple : je vous envoie <b>un mini-diagnostic gratuit de votre page d\'accueil</b>, noir sur blanc. <b>Si tout est vert, vous ne me devez rien et vous êtes rassuré.</b> Sinon, on en parle. Quelle est la meilleure adresse ?',tip:{k:"ok",t:"Face au sceptique, baissez l\'engagement : diagnostic gratuit. « Si tout est vert vous ne me devez rien » est sans risque."},choices:[{label:"« Ok, envoyez ça. »",sub:"Lead récupéré",kind:"win",to:"demi"},{label:"« Non, laissez tomber. »",sub:"Refus",kind:"obj",to:"o_stop"}]},
 o_prix:{phase:1,tag:"Objection",obj:true,title:"« Ça coûte combien ? »",say:'Je préfère être honnête : <b>vous donner un prix maintenant serait du pifomètre</b>, et ce serait vous manquer de respect. Ça dépend de l\'état de votre site — un site propre coûte une fraction d\'un site à reprendre. <b>Tout l\'intérêt de l\'audit de 15 min : vous repartez avec une fourchette précise, sans engagement.</b> On cale ça ?',tip:{k:"warn",t:"Ne donnez JAMAIS un prix au téléphone à froid. Le prix se donne APRÈS l\'audit."},choices:[{label:"« Ok pour l\'audit. »",sub:"RDV décroché",kind:"win",to:"closing"},{label:"« Un ordre d\'idée au moins. »",sub:"Insiste",to:"o_fourchette"}]},
 o_fourchette:{phase:1,tag:"Objection",title:"Il insiste pour une fourchette",say:'Je comprends. Pour un ordre d\'idée : <b>nos accompagnements démarrent par des missions courtes pour un site vitrine, et montent selon la complexité.</b> Mais la fourchette précise sort de l\'audit — et il est gratuit. <b>Autant l\'avoir juste, non ?</b> <span class="fill">Jeudi</span> ou <span class="fill">vendredi</span> ?',tip:{k:"warn",t:"Si forcé, fourchette large SANS chiffre engageant, et revenez à l\'audit."},choices:[{label:"« Ok, voyons l\'audit. »",sub:"RDV décroché",kind:"win",to:"closing"},{label:"« Trop cher pour moi. »",sub:"Budget",kind:"obj",to:"o_budget"}]},
@@ -2757,6 +2931,35 @@ return <div style={{marginTop:10,padding:10,background:"rgba(197,160,89,.04)",bo
 </div>}
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+<script>
+/* v52.1 — reflet liquide : listener local, rect mis en cache, zero reflow en continu */
+(function(){
+  var cur=null,rect=null,raf=null,px=0,py=0;
+  function paint(){
+    raf=null;
+    if(!cur||!rect)return;
+    cur.style.setProperty("--mx",((px-rect.left)/rect.width*100).toFixed(1)+"%");
+    cur.style.setProperty("--my",((py-rect.top)/rect.height*100).toFixed(1)+"%");
+  }
+  function move(e){
+    px=e.clientX; py=e.clientY;
+    if(!raf)raf=requestAnimationFrame(paint);
+  }
+  function leave(){
+    if(cur)cur.removeEventListener("pointermove",move);
+    cur=null; rect=null;
+  }
+  document.addEventListener("pointerover",function(e){
+    var el=e.target.closest&&e.target.closest(".hub-card");
+    if(el===cur)return;
+    leave();
+    if(!el)return;
+    cur=el; rect=el.getBoundingClientRect();
+    el.addEventListener("pointermove",move,{passive:true});
+    el.addEventListener("pointerleave",leave,{once:true});
+  },{passive:true});
+})();
 </script>
 </body>
 </html>
