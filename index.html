@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v55</title>
+<title>WEBO — Hub v56</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -816,9 +816,9 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY,{realtime:{params:{eventsPer
 
 /* ═══ AUTH ═══ */
 const ACCTS=[
-{id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kmeunier",email:"kmeunier@webo-smart.fr",pass:"Webo2024!"},
-{id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr",pass:"Johanna2024!"},
-{id:"theo",name:"Théo",role:"Commercial",color:"#10b981",isAdmin:false,isFondateur:false,login:"ttheveniot",email:"ttheveniot@webo-smart.fr",pass:"Theo2026!"}];
+{id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kmeunier",email:"kmeunier@webo-smart.fr"},
+{id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr"},
+{id:"theo",name:"Théo",role:"Commercial",color:"#10b981",isAdmin:false,isFondateur:false,login:"ttheveniot",email:"ttheveniot@webo-smart.fr"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur,roleType:isAdmin?"admin":(role||"").toLowerCase().includes("techni")?"technicien":"commercial"}));
 const roleOf=id=>(TEAM.find(t=>t.id===id)||{}).roleType||"commercial";
 
@@ -1101,7 +1101,32 @@ const enrichLead=async(lead)=>{if(enrichLoading)return;setEnrichLoading(lead.id)
 /* V13 — REVERSE MODE MATCHING */
 const runMatch=()=>{setMatchLoading(true);const results=prestas.map(p=>{let score=0;const reasons=[];const sp=(p.specialite||"").toLowerCase();const sv=(matchCrit.service||"").toLowerCase();const comp=(matchCrit.competence||"").toLowerCase();if(sv&&(sp.includes(sv)||sv.includes(sp))){score+=35;reasons.push("Specialite OK")}else if(sv&&(sp.includes("web")&&sv.includes("web"))||(sp.includes("vid")&&sv.includes("vid"))){score+=20;reasons.push("Specialite proche")}if(comp&&sp.includes(comp)){score+=15;reasons.push("Competence match")}const tjm=Number(p.tjm)||0;const budget=Number(matchCrit.budget)||0;if(budget>0&&tjm>0){if(tjm<=budget){score+=25;reasons.push("TJM "+tjm+" < budget "+budget)}else if(tjm<=budget*1.2){score+=10;reasons.push("TJM proche")}else{reasons.push("TJM "+tjm+" > budget")}}else if(budget===0){score+=10}const asg=leads.filter(l=>l.prestaId===p.id&&!["reussi","perdu"].includes(l.status)).length;if(asg===0){score+=15;reasons.push("100% dispo")}else if(asg<3){score+=8;reasons.push(asg+" projet(s) en cours")}else{reasons.push("Charge elevee: "+asg)}const sgn=leads.filter(l=>l.prestaId===p.id&&l.status==="reussi").length;if(sgn>=3){score+=10;reasons.push("Prouve: "+sgn+" signes")}else if(sgn>=1){score+=5;reasons.push(sgn+" signe(s)")}return{...p,score:Math.min(score,100),reasons,charge:asg,signes:sgn}}).filter(p=>p.score>0).sort((a,b)=>b.score-a.score);setMatchRes(results);setMatchLoading(false)};
 
-const doLogin=()=>{const q=logId.trim().toLowerCase();const a=ACCTS.find(x=>x.login===q||x.email===q);if(!a){setLogErr("Identifiant inconnu");return}if(logPw!==a.pass){setLogErr("Mot de passe incorrect");return}setSess(a.id);try{if(logRemember){localStorage.setItem("webo_session",a.id);sessionStorage.removeItem("webo_session")}else{sessionStorage.setItem("webo_session",a.id);localStorage.removeItem("webo_session")}}catch(e){}};
+/* v56 — la session locale ne vaut rien sans session Supabase valide */
+useEffect(()=>{let alive=true;(async()=>{
+  try{
+    const{data}=await sb.auth.getSession();
+    if(!alive)return;
+    if(!data||!data.session){
+      setSess("");
+      try{localStorage.removeItem("webo_session");sessionStorage.removeItem("webo_session")}catch(e){}
+    }
+  }catch(e){}
+})();return()=>{alive=false}},[]);
+
+const doLogin=async()=>{
+  const q=logId.trim().toLowerCase();
+  const a=ACCTS.find(x=>x.login===q||x.email===q);
+  if(!a){setLogErr("Identifiant inconnu");return}
+  setLogErr("Connexion…");
+  try{
+    const{data,error}=await sb.auth.signInWithPassword({email:a.email,password:logPw});
+    if(error){setLogErr(error.message==="Invalid login credentials"?"Mot de passe incorrect":error.message);return}
+    if(!data||!data.session){setLogErr("Session non créée");return}
+    setLogErr("");
+    setSess(a.id);
+    try{if(logRemember){localStorage.setItem("webo_session",a.id);sessionStorage.removeItem("webo_session")}else{sessionStorage.setItem("webo_session",a.id);localStorage.removeItem("webo_session")}}catch(e){}
+  }catch(e){setLogErr("Erreur de connexion : "+(e.message||e))}
+};
 
 useEffect(()=>{const h=e=>{const t=e.target.tagName;if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT")return;if((e.metaKey||e.ctrlKey)&&e.key==="k"){e.preventDefault();setCmd(p=>!p);setCmdQ("")}if(e.key==="n"||e.key==="N"){e.preventDefault();setPage("pipeline");setShowForm(true)}if(e.key==="Escape"){setCmd(false);setSelLead(null);setShowNotif(false);setShowYou(false);setMsgWidget(false)}if(e.key==="Backspace"&&page!=="hub"){e.preventDefault();setPage("hub")}};window.addEventListener("keydown",h);return()=>window.removeEventListener("keydown",h)},[page]);
 
@@ -1255,7 +1280,7 @@ const Nav=()=>(
           <button className="you-item" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓");setShowYou(false)}}><i className="fa-solid fa-cloud-arrow-down"/>Backup JSON</button>
         </div>
         <div style={{borderTop:"1px solid var(--border)",padding:"5px 0"}}>
-          <button className="you-item" onClick={()=>{setSess("");try{localStorage.removeItem("webo_session");sessionStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--red)"}}><i className="fa-solid fa-power-off"/>Déconnexion</button>
+          <button className="you-item" onClick={async()=>{try{await sb.auth.signOut()}catch(e){}setSess("");try{localStorage.removeItem("webo_session");sessionStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--red)"}}><i className="fa-solid fa-power-off"/>Déconnexion</button>
         </div>
       </div>}
     </div>
