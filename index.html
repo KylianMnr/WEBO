@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v58</title>
+<title>WEBO — Hub v59</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -2870,10 +2870,10 @@ const doScan=async()=>{const url=(f.externalLink||scanUrl||"").trim();if(!url||s
 const[eaaLoad,setEaaLoad]=useState(false);const[eaaErr,setEaaErr]=useState("");const[htmlMiss,setHtmlMiss]=useState(null);
 const doEaaAudit=async()=>{const target=(f.externalLink||scanUrl||"").trim();if(!target){setEaaErr("Renseignez d abord le lien du site");return}if(eaaLoad)return;setEaaLoad(true);setEaaErr("");try{const secret=(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}})();if(!secret)throw new Error("Cle d acces IA manquante");const r=await fetch(SB_URL+"/functions/v1/eaa-audit",{method:"POST",headers:{"Content-Type":"application/json","x-webo-secret":secret},body:JSON.stringify({url:target})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Erreur audit "+r.status));s("auditScore",d.score);s("auditErreurs",(d.erreurs||[]).join("\n"));if(d.cms)s("cms",d.cms);
 /* v58 — tarification par la grille, indexée sur le nombre de pages détecté */
-const nbP=parseInt(d.pages)||0;
+const nbP=parseInt(d.pages_estimees!=null?d.pages_estimees:d.pages)||0;
 if(nbP){s("auditPages",nbP);const g=offreParPages(nbP);if(g){s("service",g.of);s("valeur",g.prix)}}
 else if(d.valeur)s("valeur",d.valeur);
-s("temperature",d.score<50?"chaud":d.score<80?"tiede":"froid");if(!f.externalLink)s("externalLink",d.url||target);if(!parseInt(d.pages))s("service","Mise en conformité EAA");
+s("temperature",d.score<50?"chaud":d.score<80?"tiede":"froid");if(!f.externalLink)s("externalLink",d.url||target);if(!nbP)s("service","Mise en conformité EAA");
 /* Pré-remplissage contact depuis le HTML (0€) — ne remplit que les champs vides */
 const c=d.contact||{};if(c.nom&&!f.nom)s("nom",c.nom);if(c.email&&!f.email)s("email",c.email);if(c.phone&&!f.phone)s("phone",c.phone);if(c.adresse&&!f.adresse)s("adresse",c.adresse);if(c.notes&&!f.notes)s("notes",c.notes);
 /* Mémoriser ce que le HTML n'a pas trouvé, pour proposer l'IA en secours */
