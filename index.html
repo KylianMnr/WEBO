@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v59</title>
+<title>WEBO — Hub v60</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -841,7 +841,7 @@ const COLS=[
 {id:"perdu",label:"Perdu",icon:"fa-circle-xmark",accent:"#5A6270",proba:0,urgDays:999},
 {id:"reussi",label:"Réussi → Production",icon:"fa-trophy",accent:"#089981",proba:1,urgDays:999}
 ];
-const SERVICES=["Mise en conformité EAA","XS","XS+","S","S+","M","M+","L","L+"];
+const SERVICES=["Mise en conformité EAA","XS","XS+","S","S+","M","M+","L","L+","DEVIS"];
 /* v58 — Grille tarifaire WEBO indexée sur le nombre de pages du site.
    prix = prix affiché HT · plancher = limite absolue (-20%) · com = commission commercial */
 const GRILLE=[
@@ -852,7 +852,8 @@ const GRILLE=[
  {of:"M",   min:21, max:35,  taille:"20 – 35 pages",jours:"~8 j.",  prix:10800, plancher:8800,  com:2000},
  {of:"M+",  min:36, max:50,  taille:"35 – 50 pages",jours:"~10 j.", prix:13500, plancher:11000, com:2500},
  {of:"L",   min:51, max:80,  taille:"50 – 80 pages",jours:"~12 j.", prix:16200, plancher:13200, com:3000},
- {of:"L+",  min:81, max:99999,taille:"> 80 pages",  jours:"~15 j.", prix:20200, plancher:16500, com:3750}
+ {of:"L+",  min:81, max:150,  taille:"80 – 150 pages",jours:"~15 j.", prix:20200, plancher:16500, com:3750},
+ {of:"DEVIS",min:151,max:99999,taille:"> 150 pages",  jours:"sur mesure",prix:0,   plancher:0,     com:0}
 ];
 const TARIFS=GRILLE.reduce((a,g)=>{a[g.of]=g.prix;return a},{});
 /* Offre recommandée : palier "+" par défaut (marge de sécurité sur la charge réelle) */
@@ -2871,7 +2872,7 @@ const[eaaLoad,setEaaLoad]=useState(false);const[eaaErr,setEaaErr]=useState("");c
 const doEaaAudit=async()=>{const target=(f.externalLink||scanUrl||"").trim();if(!target){setEaaErr("Renseignez d abord le lien du site");return}if(eaaLoad)return;setEaaLoad(true);setEaaErr("");try{const secret=(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}})();if(!secret)throw new Error("Cle d acces IA manquante");const r=await fetch(SB_URL+"/functions/v1/eaa-audit",{method:"POST",headers:{"Content-Type":"application/json","x-webo-secret":secret},body:JSON.stringify({url:target})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Erreur audit "+r.status));s("auditScore",d.score);s("auditErreurs",(d.erreurs||[]).join("\n"));if(d.cms)s("cms",d.cms);
 /* v58 — tarification par la grille, indexée sur le nombre de pages détecté */
 const nbP=parseInt(d.pages_estimees!=null?d.pages_estimees:d.pages)||0;
-if(nbP){s("auditPages",nbP);const g=offreParPages(nbP);if(g){s("service",g.of);s("valeur",g.prix)}}
+if(nbP){s("auditPages",nbP);const g=offreParPages(nbP);if(g){s("service",g.of);if(g.prix>0)s("valeur",g.prix);else s("valeur","")}}
 else if(d.valeur)s("valeur",d.valeur);
 s("temperature",d.score<50?"chaud":d.score<80?"tiede":"froid");if(!f.externalLink)s("externalLink",d.url||target);if(!nbP)s("service","Mise en conformité EAA");
 /* Pré-remplissage contact depuis le HTML (0€) — ne remplit que les champs vides */
@@ -2906,9 +2907,14 @@ return <div>
   <span style={{fontSize:10,color:"var(--text3)",lineHeight:1.4}}>Analyse réelle : 12 critères RGAA + contacts. Gratuit.</span>
 </div>
 {eaaErr&&<div style={{padding:"7px 10px",borderRadius:6,background:"rgba(231,76,76,.1)",color:"var(--red)",fontSize:11,marginBottom:8}}><i className="fa-solid fa-triangle-exclamation" style={{marginRight:5}}/>{eaaErr}</div>}
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Score EAA Réel (0-100)"><input style={IS} type="number" min="0" max="100" value={f.auditScore} onChange={e=>s("auditScore",e.target.value)} placeholder="0-100"/></FF><FF l="Pages détectées"><input style={IS} type="number" min="0" value={f.auditPages||""} onChange={e=>{const v=e.target.value;s("auditPages",v);const g=offreParPages(v);if(g){s("service",g.of);s("valeur",g.prix)}}} placeholder="ex. 24"/></FF></div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="Score EAA Réel (0-100)"><input style={IS} type="number" min="0" max="100" value={f.auditScore} onChange={e=>s("auditScore",e.target.value)} placeholder="0-100"/></FF><FF l="Pages détectées"><input style={IS} type="number" min="0" value={f.auditPages||""} onChange={e=>{const v=e.target.value;s("auditPages",v);const g=offreParPages(v);if(g){s("service",g.of);if(g.prix>0)s("valeur",g.prix)}}} placeholder="ex. 24"/></FF></div>
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}><FF l="CMS"><select style={IS} value={f.cms||"—"} onChange={e=>s("cms",e.target.value)}>{CMS_OPTIONS.map(o=><option key={o}>{o}</option>)}</select></FF><FF l="Statut Production"><select style={IS} value={f.prodStatus||"a_auditer"} onChange={e=>s("prodStatus",e.target.value)}>{PROD_COLS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select></FF></div>
-{(()=>{const g=offreParPages(f.auditPages);if(!g)return null;const P=paliersNego(g);const cur=parseFloat(f.valeur)||0;
+{(()=>{const g=offreParPages(f.auditPages);if(!g)return null;
+if(g.prix===0)return <div style={{marginBottom:10,padding:"10px 12px",borderRadius:9,border:"1px solid rgba(139,92,246,.35)",background:"rgba(139,92,246,.07)"}}>
+  <div style={{fontSize:9,fontWeight:700,color:"var(--purple)",fontFamily:"var(--mono)",letterSpacing:1.2,marginBottom:5}}>DEVIS SUR MESURE · {g.taille}</div>
+  <div style={{fontSize:11,color:"var(--text2)",lineHeight:1.5}}>{parseInt(f.auditPages).toLocaleString("fr-FR")} pages détectées : hors grille tarifaire. Chiffrez après cadrage du périmètre réel (pages types, gabarits récurrents, parcours critiques).</div>
+</div>;
+const P=paliersNego(g);const cur=parseFloat(f.valeur)||0;
 return <div style={{marginBottom:10,padding:"10px 12px",borderRadius:9,border:"1px solid rgba(197,160,89,.3)",background:"rgba(197,160,89,.05)"}}>
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:7}}>
     <span style={{fontSize:9,fontWeight:700,color:"var(--gold)",fontFamily:"var(--mono)",letterSpacing:1.2}}>OFFRE {g.of} · {g.taille} · {g.jours}</span>
