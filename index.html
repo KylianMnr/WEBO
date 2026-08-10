@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-<title>WEBO — Hub v62</title>
+<title>WEBO — Hub v63.1</title>
 <link rel="apple-mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -792,6 +792,127 @@ body{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   .hub-card:hover,.kc:hover,.ai-fab:hover,.msg-fab:hover{ transform:none; }
 }
 
+
+/* ══════════════════════════════════════════════════════════════
+   v63 — FLUID INTERFACES (Apple / Designing Fluid Interfaces WWDC)
+   Ajouté en fin de feuille. Rien n'est remplacé, tout s'affine.
+   Trois règles fondamentales qui manquaient encore :
+   1. RESPONSE      — feedback dès l'appui (:active), pas au relâchement
+   2. SPRINGS       — courbes à ressort au lieu des ease/linéaires
+   3. INTERRUPTIBLE — transitions courtes et reprises depuis l'état réel
+   ══════════════════════════════════════════════════════════════ */
+
+:root{
+  /* Springs — dérivées des recommandations Apple (damping/response) */
+  --spring:cubic-bezier(.22,1,.36,1);            /* pose douce, léger dépassement contenu */
+  --spring-soft:cubic-bezier(.34,1.56,.64,1);    /* pose avec vrai bounce (gestes/flick) */
+  --spring-snap:cubic-bezier(.16,1.08,.38,1);    /* accroche nette, quasi sans overshoot */
+  --press:120ms;                                  /* durée d'appui : instantané ressenti */
+}
+
+/* ── 1. RESPONSE : tout élément actionnable réagit à la PRESSION ──
+   Le doigt/curseur touche → l'élément répond immédiatement.
+   scale léger + descente de 1px = sensation de bouton physique. */
+.hub-card,.kc,.stat-card,.card,.chart-card,.pill,.nb,.lnav,.vt-btn,
+.qf-btn,.bulk-btn,.persona-btn,.enrich-btn,.outreach-btn,.pitch-btn,
+.you-item,.cmd-r,.notif-item,.match-result,.talent-card,.ag-day,
+.k-arrow,.day-act-btn,.ctx-item,.feed-item{
+  transition-timing-function:var(--spring);
+}
+
+/* Appui : réponse au pointer-down (:active), 120ms, courbe snap.
+   La remontée reprend la courbe spring — donc interruptible. */
+.hub-card:active{transform:translateY(0) scale(.94)!important;transition-duration:var(--press)!important;transition-timing-function:var(--spring-snap)!important}
+.kc:active{transform:scale(.93)!important;transition-duration:var(--press)!important}
+.stat-card:active,.card:active,.chart-card:active,.match-result:active,.talent-card:active{transform:scale(.96)!important;transition-duration:var(--press)!important}
+.pill:active,.nb:active,.lnav:active,.vt-btn:active,.qf-btn:active,.bulk-btn:active,
+.persona-btn:active,.enrich-btn:active,.outreach-btn:active,.pitch-btn:active,
+.day-act-btn:active,.k-arrow:active{transform:scale(.88)!important;transition-duration:var(--press)!important}
+.you-item:active,.cmd-r:active,.notif-item:active,.ctx-item:active,.feed-item:active{transform:scale(.965)!important;transition-duration:90ms!important}
+.ag-day:active{transform:scale(.97)!important;transition-duration:var(--press)!important}
+
+/* Boutons pleins (or/bordeaux) : même loi d'appui, sans casser leurs styles inline */
+button:active{transition-duration:var(--press)!important}
+
+/* ── 2. SPRINGS : les surfaces qui s'élèvent le font avec du ressort ──
+   Le hover ne « fond » plus, il pose comme un objet. */
+.hub-card:hover{transition-timing-function:var(--spring-snap)}
+.kc:hover,.stat-card:hover,.card:hover,.chart-card:hover,.match-result:hover,.talent-card:hover{transition-timing-function:var(--spring)}
+
+/* ── 3. SPRINGS sur l'entrée des surfaces flottantes ──
+   Modales, panneaux, feuilles : arrivée à ressort, pas de glisse plate. */
+
+/* Les fenêtres flottantes (agent IA, widget messages) montent au lieu d'apparaître */
+.ai-fab,.msg-fab{transition:transform .3s var(--spring-soft),box-shadow .3s var(--spring)}
+
+/* ── 4. INTERRUPTIBILITÉ : rien ne verrouille le pointeur ──
+   Pendant une animation d'entrée, l'élément reste cliquable tout de suite. */
+.modal,.rpanel,.day-panel,.notif-panel,.msg-widget,.hub-card,.kc{will-change:transform}
+
+/* ── 5. LIQUID GLASS (prudent) : les barres qui flottent VRAIMENT ──
+   On renforce le verre uniquement là où une surface passe au-dessus du
+   contenu qui défile — jamais en global (le lag v52 venait de là). */
+.topnav{backdrop-filter:blur(12px) saturate(1.35);-webkit-backdrop-filter:blur(12px) saturate(1.35)}
+.bulk-bar{backdrop-filter:blur(9px) saturate(1.25);-webkit-backdrop-filter:blur(9px) saturate(1.25)}
+
+/* ── 6. RÉGLAGES FINS TYPO (restraint Apple) ──
+   Chiffres alignés et tabulaires sur les données financières et compteurs :
+   les colonnes de montants ne « dansent » plus. */
+.stat-val,.pill-cnt,.bulk-cnt,.funnel-bar,.match-score,.dg td,.tbl td{
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"cv01" 1;
+}
+
+/* ── 7. VELOCITY / RUBBER-BANDING natif sur les zones qui défilent ──
+   Rebond élastique iOS en fin de liste, momentum tactile. */
+.kanban-scroll,.main-scroll,.feed,.rpanel,.day-panel,.modal,
+.msg-widget,.notif-panel{
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+
+/* ── 8. RESPECT DU MOUVEMENT RÉDUIT (déjà présent, on complète) ──
+   On vend de l'accessibilité : notre propre outil coupe les springs
+   au profit de simples fondus quand l'utilisateur le demande. */
+
+
+/* Transition qui couvre l'ombre : le soulevement fond au lieu de sauter */
+.hub-card,.stat-card,.chart-card,.match-result,.talent-card,.kc,.card{
+  transition:transform .34s var(--spring),box-shadow .34s var(--spring)!important;
+}
+
+/* ── 9. HOVER VISIBLE (v63.1) : les surfaces se soulevent nettement ──
+   L'effet qu'on VOIT sans cliquer : au survol la carte monte et projette
+   une ombre plus grande, comme un objet qu'on approche. */
+.hub-card:hover{transform:translateY(-6px) scale(1.015)!important;box-shadow:0 18px 40px -12px rgba(0,0,0,.55),0 0 0 1px rgba(212,175,55,.28)!important}
+.stat-card:hover,.chart-card:hover,.match-result:hover,.talent-card:hover{transform:translateY(-4px)!important;box-shadow:0 14px 32px -14px rgba(0,0,0,.5)!important}
+.kc:hover{transform:translateY(-3px) scale(1.008)!important;box-shadow:0 12px 26px -12px rgba(0,0,0,.5)!important}
+.pill:hover,.vt-btn:hover,.qf-btn:hover,.nb:hover{transform:translateY(-2px)!important}
+.lnav:hover{transform:translateX(3px)!important}
+.ai-fab:hover,.msg-fab:hover{transform:scale(1.12) rotate(-3deg)!important}
+
+/* Springs d'ouverture PLUS prononces : le depassement se voit vraiment */
+@keyframes springIn{
+  0%{opacity:0;transform:scale(.86) translateY(22px)}
+  55%{opacity:1;transform:scale(1.025) translateY(-5px)}
+  75%{transform:scale(.992) translateY(1px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+.modal{animation:springIn .42s var(--spring-soft) both}
+.rpanel,.day-panel{animation:springIn .46s var(--spring-soft) both}
+.notif-panel,.you-menu,.msg-widget,.cmd-box{animation:springIn .32s var(--spring-soft) both}
+
+@media (prefers-reduced-motion:reduce){
+  .modal,.rpanel,.day-panel,.notif-panel,.you-menu,.msg-widget,.cmd-box{
+    animation:fadeIn .12s ease both!important;
+  }
+  .hub-card:active,.kc:active,.stat-card:active,.card:active,.chart-card:active,
+  .pill:active,.nb:active,.lnav:active,.vt-btn:active,.qf-btn:active,
+  .bulk-btn:active,.ag-day:active,.match-result:active,.talent-card:active{
+    transform:none!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1083,7 +1204,7 @@ const onColdMailSent=useCallback(async(lead,objet)=>{
 
 /* AFFINAGE COLD MAIL : retravaille un mail existant selon les consignes du commercial */
 const aiRefineColdMail=useCallback(async(lead,objet,body,consignes)=>{
-  const prompt="Tu es expert en cold email B2B FR pour WEBO SMART, agence de mise en conformité accessibilité numérique (European Accessibility Act / RGAA).\n\nVoici un cold email existant destiné à l'entreprise \""+(lead.nom||"")+"\" :\n\nOBJET ACTUEL : "+objet+"\n\nCORPS ACTUEL :\n"+body+"\n\nCONSIGNES DE RÉÉCRITURE DU COMMERCIAL :\n"+consignes+"\n\nMISSION : Réécris ce mail en appliquant STRICTEMENT les consignes ci-dessus. Garde ce qui fonctionne, modifie uniquement ce que les consignes demandent.\n\nRÈGLES ABSOLUES :\n- N'invente AUCUN chiffre, AUCUN montant de sanction, AUCUNE référence légale qui ne soit pas déjà dans le mail actuel\n- Reste factuel : ne durcis jamais une affirmation juridique\n- Si le mail affirme que l'entreprise est soumise a la reglementation en raison de son chiffre d'affaires et de son nombre de salaries, CONSERVE cette formulation personnalisee : ne la remplace jamais par un enonce abstrait de seuils\n- 120 à 170 mots maximum\n- Appel à action : rendez-vous téléphonique de 15 minutes (JAMAIS d'audit gratuit)\n- Termine par la signature :\nKylian Meunier\nFondateur WEBO SMART\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet fait 40-70 caractères, sans emoji. Le body utilise \\n pour les retours à la ligne.";
+  const prompt="Tu es expert en cold email B2B FR pour WEBO SMART, agence de mise en conformité accessibilité numérique (European Accessibility Act / RGAA).\n\nVoici un cold email existant destiné à l'entreprise \""+(lead.nom||"")+"\" :\n\nOBJET ACTUEL : "+objet+"\n\nCORPS ACTUEL :\n"+body+"\n\nCONSIGNES DE RÉÉCRITURE DU COMMERCIAL :\n"+consignes+"\n\nMISSION : Réécris ce mail en appliquant STRICTEMENT les consignes ci-dessus. Garde ce qui fonctionne, modifie uniquement ce que les consignes demandent.\n\nRÈGLES ABSOLUES :\n- N'invente AUCUN chiffre, AUCUN montant de sanction, AUCUNE référence légale qui ne soit pas déjà dans le mail actuel\n- Reste factuel : ne durcis jamais une affirmation juridique\n- Si le mail affirme que l'entreprise est soumise a la reglementation, CONSERVE la formulation personnalisee (activite en ligne grand public ET seuils depasses) : ne la remplace jamais par un enonce abstrait de seuils, et n'affirme jamais l'assujettissement d'une entreprise qui ne vend pas en ligne au grand public\n- 120 à 170 mots maximum\n- Appel à action : rendez-vous téléphonique de 15 minutes (JAMAIS d'audit gratuit)\n- Termine par la signature :\nKylian Meunier\nFondateur WEBO SMART\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet fait 40-70 caractères, sans emoji. Le body utilise \\n pour les retours à la ligne.";
   const raw=await gemini(prompt,false);
   let cleaned=raw.trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
   const m=cleaned.match(/\{[\s\S]*\}/);
@@ -1103,7 +1224,7 @@ const aiGenColdMail=useCallback(async(lead,persona)=>{
     pedago:"PÉDAGOGIQUE / SOFT : ton bienveillant, vulgarise l'enjeu accessibilité numérique, met en lumière l'opportunité d'inclusion (12M de personnes en situation de handicap en France), pas de menace",
     roi:"ROI / BUSINESS : ton entrepreneurial, parle perte de clients (15% de marché inaccessible), impact SEO Google, image de marque, conversion. Chiffres et bénéfices business."
   };
-  const prompt="Tu es expert en cold email B2B FR pour WEBO, agence de mise en conformité European Accessibility Act (EAA).\n\nCONTEXTE OBLIGATOIRE — N'INVENTE AUCUN CHIFFRE NI RÉFÉRENCE LÉGALE HORS DE CETTE LISTE :\n- L'European Accessibility Act (directive UE 2019/882) s'applique aux services numériques depuis le 28 juin 2025. Transposition française : loi n°2023-171 du 9 mars 2023 (DDADUE) et décret n°2023-931 du 9 octobre 2023.\n- Périmètre : entreprises fournissant un service B2C couvert (e-commerce, banque de détail, transport de voyageurs, télécoms, médias audiovisuels, livres numériques).\n- Sanctions : l'amende atteint 50 000 € PAR SERVICE non conforme et se cumule par canal — un site, une application mobile et un espace client exposent à trois amendes distinctes, soit jusqu'à 150 000 € sur un seul contrôle. FORMULE PRÉFÉRÉE dans le mail : parler des « 150 000 € potentiels sur un seul contrôle » plutôt que du montant unitaire de 50 000 €. S'ajoutent des astreintes journalières de 3 000 €/jour plafonnées à 300 000 € tant que la non-conformité persiste, 25 000 € pour défaut de déclaration ou déclaration mensongère, et la publication du nom du contrevenant. L'amende est renouvelable à chaque contrôle, tous les 6 mois. Mentionne SYSTÉMATIQUEMENT les astreintes journalières dans le mail.\n- FORMULATION DE L'ASSUJETTISSEMENT — OBLIGATOIRE : n'écris jamais le seuil sous forme de règle générale abstraite. Écris toujours que l'entreprise ciblée EST soumise, en le justifiant par ses propres caractéristiques. Modèle à suivre : « [nom de l'entreprise] est soumise à cette réglementation : vous vendez en ligne au grand public, et votre chiffre d'affaires comme votre effectif dépassent les seuils d'exemption. » L'assujettissement se justifie TOUJOURS par l'activité ET par les seuils, jamais par les seuils seuls. SI l'entreprise ciblée ne vend manifestement pas en ligne au grand public (activité B2B, industrie, site vitrine sans paiement ni réservation), N'AFFIRME PAS qu'elle est soumise : écris que son exposition mérite d'être vérifiée. Rappel du seuil pour ton raisonnement interne uniquement : sont exemptées les seules structures cumulant moins de 10 salariés ET un CA (ou bilan) ≤ 2 M€ — c'est un ET, jamais un OU.\n- Autorités de contrôle : DGCCRF pour la conformité effective des produits et services (e-commerce en première ligne), Arcom pour les obligations déclaratives / secteur public / grandes entreprises / médias, ARCEP pour les télécoms, ACPR pour les services bancaires. Ne JAMAIS attribuer à l'Arcom le contrôle des sites e-commerce privés.\n- Référentiel : RGAA 4.1.2, 106 critères, 13 thématiques, niveau WCAG 2.1 AA via la norme EN 301 549.\n- Les sites web et applications sont juridiquement des SERVICES : ils sont soumis depuis le 28 juin 2025, sans transition. La date de 2030 ne concerne que les contrats conclus avant juin 2025 et les produits déjà commercialisés.\n- Chiffres utilisables : 12 millions de personnes en situation de handicap en France (INSEE), 3 à 4 % des sites réellement accessibles, 94,8 % des pages d'accueil avec erreurs détectables (WebAIM Million 2025), les outils automatiques ne détectent que 30 à 40 % des barrières.\n- WEBO propose : audit RGAA complet, plan de remédiation priorisé, accompagnement jusqu'à la déclaration d'accessibilité, suivi de conformité continue.\n- WEBO ne propose JAMAIS d'audit gratuit, uniquement des rendez-vous téléphoniques de 15 minutes.\n\nCIBLE :\n"+ctx+"\n\nSTYLE DEMANDÉ : "+personas[persona]+"\n\nMISSION : Rédige un cold email FR percutant de 120 à 160 mots MAX, structuré ainsi :\n1) Accroche personnalisée (référence à l'entreprise, son secteur ou son site)\n2) Mise en lumière du risque/opportunité spécifique EAA\n3) Une phrase qui présente l'accompagnement WEBO sur [S]\n4) Appel à action clair : rendez-vous téléphonique de 15 minutes (JAMAIS d'audit gratuit)\n5) Question de disponibilité cette semaine\n\nSignature OBLIGATOIRE :\nKylian Meunier\nFondateur WEBO\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet doit faire 40-70 caractères, accrocheur, sans emoji.\nLe body utilise \\n pour les retours à la ligne.";
+  const prompt="Tu es expert en cold email B2B FR pour WEBO, agence de mise en conformité European Accessibility Act (EAA).\n\nCONTEXTE OBLIGATOIRE — N'INVENTE AUCUN CHIFFRE NI RÉFÉRENCE LÉGALE HORS DE CETTE LISTE :\n- L'European Accessibility Act (directive UE 2019/882) s'applique aux services numériques depuis le 28 juin 2025. Transposition française : loi n°2023-171 du 9 mars 2023 (DDADUE) et décret n°2023-931 du 9 octobre 2023.\n- Périmètre : entreprises fournissant un service B2C couvert (e-commerce, banque de détail, transport de voyageurs, télécoms, médias audiovisuels, livres numériques).\n- Sanctions : l'amende atteint 50 000 € PAR SERVICE non conforme et se cumule par canal — un site, une application mobile et un espace client exposent à trois amendes distinctes, soit jusqu'à 150 000 € sur un seul contrôle. FORMULE PRÉFÉRÉE dans le mail : parler des « 150 000 € potentiels sur un seul contrôle » plutôt que du montant unitaire de 50 000 €. S'ajoutent des astreintes journalières de 3 000 €/jour plafonnées à 300 000 € tant que la non-conformité persiste, 25 000 € pour défaut de déclaration ou déclaration mensongère, et la publication du nom du contrevenant. L'amende est renouvelable à chaque contrôle, tous les 6 mois. Mentionne SYSTÉMATIQUEMENT les astreintes journalières dans le mail.\n- FORMULATION DE L'ASSUJETTISSEMENT — OBLIGATOIRE : l'assujettissement se justifie TOUJOURS par l'activité ET par les seuils, jamais par les seuils seuls. Modèle à suivre : « [nom de l'entreprise] est soumise à cette réglementation : vous vendez en ligne au grand public, et votre chiffre d'affaires comme votre effectif dépassent les seuils d'exemption. » SI l'entreprise ciblée ne vend manifestement PAS en ligne au grand public (activité purement B2B, industrie, site vitrine sans paiement ni réservation), N'AFFIRME PAS qu'elle est soumise : écris plutôt que son exposition mérite d'être vérifiée. Rappel du seuil pour ton raisonnement interne uniquement : sont exemptées les seules structures cumulant moins de 10 salariés ET un CA (ou bilan) ≤ 2 M€ — c'est un ET, jamais un OU.\n- Autorités de contrôle : DGCCRF pour la conformité effective des produits et services (e-commerce en première ligne), Arcom pour les obligations déclaratives / secteur public / grandes entreprises / médias, ARCEP pour les télécoms, ACPR pour les services bancaires. Ne JAMAIS attribuer à l'Arcom le contrôle des sites e-commerce privés.\n- Référentiel : RGAA 4.1.2, 106 critères, 13 thématiques, niveau WCAG 2.1 AA via la norme EN 301 549.\n- Les sites web et applications sont juridiquement des SERVICES : ils sont soumis depuis le 28 juin 2025, sans transition. La date de 2030 ne concerne que les contrats conclus avant juin 2025 et les produits déjà commercialisés.\n- Chiffres utilisables : 12 millions de personnes en situation de handicap en France (INSEE), 3 à 4 % des sites réellement accessibles, 94,8 % des pages d'accueil avec erreurs détectables (WebAIM Million 2025), les outils automatiques ne détectent que 30 à 40 % des barrières.\n- WEBO propose : audit RGAA complet, plan de remédiation priorisé, accompagnement jusqu'à la déclaration d'accessibilité, suivi de conformité continue.\n- WEBO ne propose JAMAIS d'audit gratuit, uniquement des rendez-vous téléphoniques de 15 minutes.\n\nCIBLE :\n"+ctx+"\n\nSTYLE DEMANDÉ : "+personas[persona]+"\n\nMISSION : Rédige un cold email FR percutant de 120 à 160 mots MAX, structuré ainsi :\n1) Accroche personnalisée (référence à l'entreprise, son secteur ou son site)\n2) Mise en lumière du risque/opportunité spécifique EAA\n3) Une phrase qui présente l'accompagnement WEBO sur [S]\n4) Appel à action clair : rendez-vous téléphonique de 15 minutes (JAMAIS d'audit gratuit)\n5) Question de disponibilité cette semaine\n\nSignature OBLIGATOIRE :\nKylian Meunier\nFondateur WEBO\n\nFORMAT DE RÉPONSE OBLIGATOIRE — JSON strict, AUCUN markdown, AUCUN texte avant/après :\n{\"objet\":\"...\",\"body\":\"...\"}\n\nL'objet doit faire 40-70 caractères, accrocheur, sans emoji.\nLe body utilise \\n pour les retours à la ligne.";
   const raw=await gemini(prompt,false);
   let cleaned=raw.trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
   const m=cleaned.match(/\{[\s\S]*\}/);
@@ -2604,15 +2725,15 @@ const COLD_PERSONAS=[
 const COLD_TPL_LEAD={
 direct:{
   objet:"Conformité EAA — votre exposition depuis le 28 juin 2025",
-  body:"Bonjour [N],\n\nDepuis le 28 juin 2025, l'European Accessibility Act rend l'accessibilité numérique obligatoire pour les services en ligne destinés au public. [E] est soumise à cette réglementation, puisque son chiffre d'affaires et son nombre de salariés dépassent les seuils d'exemption.\n\nLa DGCCRF contrôle la conformité effective, l'e-commerce en première ligne. Les amendes se cumulent par canal — site, application, espace client — soit jusqu'à 150 000 € potentiels sur un seul contrôle, auxquels s'ajoutent des astreintes de 3 000 € par jour tant que la non-conformité persiste.\n\nChez WEBO, nous accompagnons les entreprises dans leur [S] : audit RGAA complet, plan de remédiation priorisé et déclaration d'accessibilité.\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait de mesurer précisément l'exposition de [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
+  body:"Bonjour [N],\n\nDepuis le 28 juin 2025, l'European Accessibility Act rend l'accessibilité numérique obligatoire pour les services en ligne destinés au public. Si [E] vend en ligne au grand public et dépasse les seuils d'exemption (10 salariés, 2 M€ de CA ou de bilan), elle est directement concernée.\n\nLa DGCCRF contrôle la conformité effective, l'e-commerce en première ligne. Les amendes se cumulent par canal — site, application, espace client — soit jusqu'à 150 000 € potentiels sur un seul contrôle, auxquels s'ajoutent des astreintes de 3 000 € par jour tant que la non-conformité persiste.\n\nChez WEBO, nous accompagnons les entreprises dans leur [S] : audit RGAA complet, plan de remédiation priorisé et déclaration d'accessibilité.\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait de mesurer précisément l'exposition de [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
 },
 pedago:{
   objet:"Rendre [E] accessible aux 12 millions de Français en situation de handicap",
-  body:"Bonjour [N],\n\n12 millions de personnes en France vivent avec un handicap qui rend leur navigation difficile sur la plupart des sites web. Pourtant, l'accessibilité numérique est non seulement une obligation légale depuis le 28 juin 2025 (European Accessibility Act), mais aussi une formidable opportunité d'inclusion.\n\nSeuls 3 à 4 % des sites sont aujourd'hui réellement accessibles, et [E] est soumise à cette réglementation, puisque son chiffre d'affaires et son nombre de salariés dépassent les seuils d'exemption.\n\nChez WEBO, nous aidons les entreprises comme [E] à concevoir des expériences numériques accessibles à tous, en mettant en place [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'identifier vos premiers leviers d'amélioration et d'en savoir plus sur la conformité EAA.\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
+  body:"Bonjour [N],\n\n12 millions de personnes en France vivent avec un handicap qui rend leur navigation difficile sur la plupart des sites web. Pourtant, l'accessibilité numérique est non seulement une obligation légale depuis le 28 juin 2025 (European Accessibility Act), mais aussi une formidable opportunité d'inclusion.\n\nSeuls 3 à 4 % des sites sont aujourd'hui réellement accessibles, et si [E] vend en ligne au grand public en dépassant les seuils d'exemption (10 salariés, 2 M€), elle est directement concernée.\n\nChez WEBO, nous aidons les entreprises comme [E] à concevoir des expériences numériques accessibles à tous, en mettant en place [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'identifier vos premiers leviers d'amélioration et d'en savoir plus sur la conformité EAA.\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
 },
 roi:{
   objet:"15% de marché en moins : ce que coûte un site non-conforme EAA",
-  body:"Bonjour [N],\n\nUn site non-conforme à l'European Accessibility Act ferme aujourd'hui la porte à environ 15% du marché français — soit 12 millions de clients potentiels que vos concurrents capteront avant vous.\n\nÀ cela s'ajoutent un référencement naturel pénalisé — structure sémantique, textes alternatifs et hiérarchie de titres sont les fondamentaux communs à l'accessibilité et au SEO — et une exposition réglementaire pouvant atteindre 150 000 € sur un seul contrôle par cumul des canaux, assortie d'astreintes de 3 000 € par jour. [E] est soumise à cette réglementation, puisque son chiffre d'affaires et son nombre de salariés dépassent les seuils d'exemption.\n\nChez WEBO, nous accompagnons les entreprises ambitieuses comme [E] sur leur [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'en savoir plus sur la conformité EAA et l'impact actuel pour [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
+  body:"Bonjour [N],\n\nUn site non-conforme à l'European Accessibility Act ferme aujourd'hui la porte à environ 15% du marché français — soit 12 millions de clients potentiels que vos concurrents capteront avant vous.\n\nÀ cela s'ajoutent un référencement naturel pénalisé — structure sémantique, textes alternatifs et hiérarchie de titres sont les fondamentaux communs à l'accessibilité et au SEO — et une exposition réglementaire pouvant atteindre 150 000 € sur un seul contrôle par cumul des canaux, assortie d'astreintes de 3 000 € par jour dès lors que [E] vend en ligne au grand public et dépasse les seuils d'exemption (10 salariés, 2 M€).\n\nChez WEBO, nous accompagnons les entreprises ambitieuses comme [E] sur leur [S].\n\nUn rendez-vous téléphonique de 15 minutes vous permettrait d'en savoir plus sur la conformité EAA et l'impact actuel pour [E].\n\nÊtes-vous disponible cette semaine ?\n\nBien cordialement,\nKylian Meunier\nFondateur WEBO"
 }
 };
 
