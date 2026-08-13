@@ -1086,6 +1086,8 @@ const[notifs,setNotifs]=useState([]);const[showNotif,setShowNotif]=useState(fals
 const[selIds,setSelIds]=useState(new Set());
 const[actFeed,setActFeed]=useState([]);
 const[enrichData,setEnrichData]=useState({});const[enrichLoading,setEnrichLoading]=useState(null);
+// États de l'outil Sourcing (à insérer près des autres useState)
+const[srcRaw,setSrcRaw]=useState("");const[srcRows,setSrcRows]=useState([]);const[srcSel,setSrcSel]=useState(new Set());const[srcSort,setSrcSort]=useState("score");const[srcFilters,setSrcFilters]=useState({site:false,tel:false,mail:false,lk:false});const[agentPending,setAgentPending]=useState(null);const[agentLog,setAgentLog]=useState([]);const[agentBusy,setAgentBusy]=useState(false);const[agentShowAll,setAgentShowAll]=useState(false);
 const[matchCrit,setMatchCrit]=useState({service:"",budget:"",duree:"",competence:""});const[matchRes,setMatchRes]=useState(null);const[matchLoading,setMatchLoading]=useState(false);
 const[tFilter,setTFilter]=useState("all");const[clientMode,setClientMode]=useState(false);const[tSelIds,setTSelIds]=useState(new Set());
 const[agMonth,setAgMonth]=useState(new Date());const[agEvents,setAgEvents]=useState([]);const[showAgForm,setShowAgForm]=useState(null);
@@ -1240,6 +1242,413 @@ const aiGenColdMail=useCallback(async(lead,persona)=>{
 
 /* V13 — DATA ENRICHMENT via Claude API */
 const enrichLead=async(lead)=>{if(enrichLoading)return;setEnrichLoading(lead.id);try{const txt=await gemini("Recherche des informations sur cette entreprise/personne pour un courtier d affaires. Entreprise: "+lead.nom+". Secteur: "+lead.service+". Notes existantes: "+(lead.notes||"aucune")+". Donne-moi en francais: 1) Actu recente du secteur ou de l entreprise 2) Un angle d approche commercial percutant 3) Un sujet de conversation pour ouvrir l appel. Sois concret et actionnable, max 150 mots.",true)||"Pas de donnees";setEnrichData(p=>({...p,[lead.id]:{text:txt,date:td()}}));flash("Intel "+lead.nom+" OK");addActivity(sess,"a enrichi",lead.nom,"var(--blue)")}catch(e){setEnrichData(p=>({...p,[lead.id]:{text:"Erreur de recherche. Verifiez la connexion.",date:td()}}));flash("Erreur: "+(e.message||"").slice(0,50))}setEnrichLoading(null)};
+// ═══ LOGIQUE SOURCING ═══
+// Parseur intelligent : détecte CSV (avec séparateur) ou liste simple
+const srcParse=(raw)=>{
+  const lines=raw.split("\n").map(l=>l.trim()).filter(l=>l.length>0);
+  if(lines.length===0)return[];
+  // Détection du séparateur (tab, ; ou ,)
+  const first=lines[0];
+  let sep=null;
+  if(first.includes("\t"))sep="\t";else if(first.includes(";"))sep=";";else if(first.split(",").length>=2)sep=",";
+  // Détection d'un header (contient nom/site/tel/mail/email/linkedin/ville)
+  const headWords=["nom","site","web","tel","phone","mail","email","linkedin","ville","adresse","entreprise","société","societe","title","name","company","city","street","website"];
+  let cols=null,startIdx=0;
+  if(sep){
+    const h=first.toLowerCase().split(sep).map(s=>s.trim());
+    const isHeader=h.some(c=>headWords.some(w=>c.includes(w)));
+    if(isHeader){cols=h;startIdx=1;}
+  }
+  const findCol=(names)=>{if(!cols)return -1;return cols.findIndex(c=>names.some(n=>c.includes(n)));};
+  const iNom=findCol(["nom","entreprise","société","societe","raison","title","name","company"]);
+  const iSite=findCol(["site","web","url"]);
+  const iTel=findCol(["tel","phone","standard"]);
+  const iMail=findCol(["mail","email","courriel"]);
+  const iLk=findCol(["linkedin"]);
+  const iVille=findCol(["ville","commune","city","street","adresse"]);
+  const rows=[];
+  for(let i=startIdx;i<lines.length;i++){
+    const line=lines[i];
+    let nom="",site="",tel="",mail="",lk="",ville="";
+    if(sep){
+      const p=line.split(sep).map(s=>s.trim());
+      nom=iNom>=0?p[iNom]||"":p[0]||"";
+      site=iSite>=0?p[iSite]||"":"";
+      tel=iTel>=0?p[iTel]||"":"";
+      mail=iMail>=0?p[iMail]||"":"";
+      lk=iLk>=0?p[iLk]||"":"";
+      ville=iVille>=0?p[iVille]||"":"";
+      // Si pas de header, on tente de deviner par contenu
+      if(!cols){
+        p.forEach(v=>{
+          const vl=v.toLowerCase();
+          if(vl.includes("linkedin.com"))lk=v;
+          else if(vl.includes("@")&&vl.includes("."))mail=v;
+          else if(/^[\d\s+().]{8,}$/.test(v))tel=v;
+          else if(vl.includes("http")||vl.includes("www.")||(vl.includes(".")&&!vl.includes(" ")))site=v;
+        });
+        nom=p[0]||"";
+      }
+    }else{
+      nom=line;
+    }
+    if(!nom)continue;
+    rows.push({id:uid(),nom,site,tel,mail,lk,ville});
+  }
+  return rows;
+};
+// Scoring : complétude des canaux + bonus cible e-commerce
+const srcScore=(r)=>{
+  let s=0;
+  if(r.site)s+=25;
+  if(r.tel)s+=25;
+  if(r.mail)s+=25;
+  if(r.lk)s+=15;
+  // Bonus cible : site marchand probable
+  const site=(r.site||"").toLowerCase();
+  if(site&&(site.includes("shop")||site.includes("boutique")||site.includes("store")||site.endsWith(".fr")||site.endsWith(".com")))s+=10;
+  return Math.min(s,100);
+};
+const srcTemp=(score)=>score>=75?"chaud":score>=45?"tiede":"froid";
+// Traiter le texte collé
+const srcProcess=()=>{
+  const rows=srcParse(srcRaw);
+  if(rows.length===0){flash("Aucun lead détecté");return;}
+  const scored=rows.map(r=>({...r,score:srcScore(r)}));
+  scored.sort((a,b)=>b.score-a.score);
+  setSrcRows(scored);
+  setSrcSel(new Set(scored.map(r=>r.id))); // tout coché par défaut
+  flash(rows.length+" leads détectés");
+};
+// Charger un fichier CSV/texte
+const srcLoadFile=(e)=>{
+  const file=e.target.files&&e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    const text=ev.target.result||"";
+    setSrcRaw(text);
+    // Traiter directement
+    const rows=srcParse(text);
+    if(rows.length===0){flash("Aucun lead détecté dans le fichier");return;}
+    const scored=rows.map(r=>({...r,score:srcScore(r)}));
+    scored.sort((a,b)=>b.score-a.score);
+    setSrcRows(scored);
+    setSrcSel(new Set(scored.map(r=>r.id)));
+    flash(file.name+" : "+rows.length+" leads chargés");
+  };
+  reader.onerror=()=>flash("Erreur de lecture du fichier");
+  reader.readAsText(file);
+  e.target.value="";
+};
+// Basculer sélection d'un lead
+const srcToggle=(id)=>{setSrcSel(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});};
+const srcToggleAll=()=>{setSrcSel(p=>p.size===srcRows.length?new Set():new Set(srcRows.map(r=>r.id)));};
+// Détecter doublons (même nom ou même site)
+const srcDupes=()=>{
+  const seen={},dupes=new Set();
+  srcRows.forEach(r=>{
+    const k=(r.nom||"").toLowerCase().trim()+"|"+(r.site||"").toLowerCase().trim();
+    if(seen[k])dupes.add(r.id);else seen[k]=true;
+  });
+  return dupes;
+};
+// Envoyer les leads cochés dans le pipeline (statut "identifier")
+const srcValidate=async()=>{
+  const sel=srcRows.filter(r=>srcSel.has(r.id));
+  if(sel.length===0){flash("Aucun lead sélectionné");return;}
+  if(!confirm("Envoyer "+sel.length+" lead(s) dans le pipeline ?"))return;
+  for(const r of sel){
+    const lead={
+      id:uid(),nom:r.nom,service:"Mise en conformité EAA",valeur:0,memberId:sess,
+      status:"identifier",dateCreated:td(),lastInteraction:"",nextRelance:"",
+      notes:r.ville?("Ville: "+r.ville):"",source:"Sourcing",echecReason:"—",tentatives:0,
+      paymentProof:"",verifStatus:"none",verifNote:"",prestaId:"",
+      email:r.mail||"",phone:r.tel||"",adresse:r.ville||"",temperature:srcTemp(r.score),
+      activityLog:"",paymentLink:"",externalLink:r.site||"",paymentStatus:"non_facture",
+      linkedinUrl:r.lk||"",linkedinCampaign:false,auditScore:"",auditPages:"",
+      auditPdfLink:"",auditErreurs:"",linkedinStep:"non_contacte",timeline:[],cms:"—",
+      prodStatus:"a_auditer",_isNew:true
+    };
+    await upsert(lead);
+  }
+  flash(sel.length+" lead(s) envoyés dans le pipeline ✓");
+  // Retirer les envoyés de la liste de sourcing
+  setSrcRows(p=>p.filter(r=>!srcSel.has(r.id)));
+  setSrcSel(new Set());
+};
+// ═══ AGENT IA QUI AGIT (v2 — filtres dynamiques) ═══
+// Applique un filtre structuré sur les leads
+const agentApplyFilter=(filters)=>{
+  if(!filters||!Array.isArray(filters)||filters.length===0)return[];
+  return leads.filter(l=>{
+    return filters.every(f=>{
+      const field=f.field,op=f.op;let val=f.value;
+      let lv;
+      // Résoudre la valeur du champ
+      switch(field){
+        case"auditScore":lv=(l.auditScore===""||l.auditScore==null)?null:Number(l.auditScore);break;
+        case"valeur":lv=Number(l.valeur)||0;break;
+        case"tentatives":lv=Number(l.tentatives)||0;break;
+        case"status":lv=(l.status||"").toLowerCase();break;
+        case"temperature":lv=(l.temperature||"").toLowerCase();break;
+        case"source":lv=(l.source||"").toLowerCase();break;
+        case"cms":lv=(l.cms||"").toLowerCase();break;
+        case"adresse":lv=(l.adresse||"").toLowerCase();break;
+        case"nom":lv=(l.nom||"").toLowerCase();break;
+        case"site":lv=l.externalLink||"";break;
+        case"phone":lv=l.phone||"";break;
+        case"email":lv=l.email||"";break;
+        case"linkedin":lv=l.linkedinUrl||"";break;
+        case"lastInteraction":lv=l.lastInteraction||"";break;
+        default:lv=l[field];
+      }
+      if(typeof val==="string"&&isNaN(val)===false&&val.trim()!==""&&["auditScore","valeur","tentatives"].includes(field))val=Number(val);
+      if(typeof val==="string")val=val.toLowerCase();
+      switch(op){
+        case"eq":return lv===val||String(lv)===String(val);
+        case"ne":return lv!==val&&String(lv)!==String(val);
+        case"gt":return lv!=null&&Number(lv)>Number(val);
+        case"gte":return lv!=null&&Number(lv)>=Number(val);
+        case"lt":return lv!=null&&Number(lv)<Number(val);
+        case"lte":return lv!=null&&Number(lv)<=Number(val);
+        case"contains":return String(lv||"").includes(String(val));
+        case"empty":return !lv||lv==="";
+        case"notempty":return !!lv&&lv!=="";
+        default:return false;
+      }
+    });
+  });
+};
+// Descriptif lisible d'un filtre
+const agentFilterLabel=(filters)=>{
+  const opTxt={eq:"=",ne:"≠",gt:">",gte:"≥",lt:"<",lte:"≤",contains:"contient",empty:"vide",notempty:"non vide"};
+  const fldTxt={auditScore:"score audit",valeur:"valeur",tentatives:"tentatives",status:"statut",temperature:"température",source:"source",cms:"CMS",adresse:"adresse",nom:"nom",site:"site",phone:"téléphone",email:"email",linkedin:"LinkedIn",lastInteraction:"dernier contact"};
+  return filters.map(f=>(fldTxt[f.field]||f.field)+" "+(opTxt[f.op]||f.op)+(f.op==="empty"||f.op==="notempty"?"":" "+f.value)).join(" ET ");
+};
+// L'IA traduit la commande en action structurée (JSON)
+// Récurrence : calcul JS EXACT des dates (l'IA ne calcule jamais les dates)
+const agentRecur=(cmd)=>{
+  const c=cmd.toLowerCase();
+  const jourMap={"lundi":1,"mardi":2,"mercredi":3,"jeudi":4,"vendredi":5,"samedi":6,"dimanche":0};
+  const jours=[];for(const[nom,num]of Object.entries(jourMap)){if(c.includes(nom))jours.push(num);}
+  if(jours.length===0)return null;
+  const isRecur=c.includes("tous les")||c.includes("chaque")||c.includes("toutes les")||jours.length>=2||c.includes("mois");
+  if(!isRecur)return null;
+  const moisMap={"janvier":0,"février":1,"fevrier":1,"mars":2,"avril":3,"mai":4,"juin":5,"juillet":6,"août":7,"aout":7,"septembre":8,"octobre":9,"novembre":10,"décembre":11,"decembre":11};
+  const now=new Date();let year=now.getFullYear(),month=now.getMonth(),moisTrouve=false;
+  for(const[nom,num]of Object.entries(moisMap)){if(c.includes(nom)){month=num;moisTrouve=true;if(num<now.getMonth())year++;break;}}
+  if(c.includes("mois en cours")||c.includes("ce mois")||c.includes("du mois"))moisTrouve=true;
+  if(!moisTrouve&&!c.includes("mois"))return null;
+  let time="09:00";const mC=c.match(/(\d{1,2})\s*[:h]\s*(\d{2})/);const mH=c.match(/(\d{1,2})\s*h/);
+  if(mC)time=String(mC[1]).padStart(2,"0")+":"+mC[2];else if(mH)time=String(mH[1]).padStart(2,"0")+":00";
+  const dates=[];const daysInMonth=new Date(year,month+1,0).getDate();
+  const today0=new Date();today0.setHours(0,0,0,0);
+  for(let d=1;d<=daysInMonth;d++){const date=new Date(year,month,d);if(jours.includes(date.getDay())&&date>=today0){dates.push(year+"-"+String(month+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"));}}
+  if(dates.length===0)return null;
+  return{dates,time};
+};
+const agentPlan=async(cmd)=>{
+  const sys=`Tu es le moteur d'un agent CRM. Tu convertis une commande en langage naturel en UNE action structurée au format JSON strict, sans texte autour, sans balises markdown.
+
+Champs disponibles sur un lead : auditScore (nombre 0-100), valeur (nombre €), tentatives (nombre de contacts), status (identifier/contact_std/relance_std/potentiel/rdv_call/reussi/perdu...), temperature (chaud/tiede/froid), source (texte), cms (texte), adresse (texte), nom (texte), site/phone/email/linkedin (présence).
+
+Opérateurs : eq, ne, gt, gte, lt, lte, contains, empty (champ vide), notempty (champ rempli).
+
+Actions possibles :
+- "delete" : supprimer les leads qui matchent les filtres
+- "add_event" : ajouter UN événement agenda (fournir event:{title,date en YYYY-MM-DD,time en HH:MM})
+- "add_events" : ajouter PLUSIEURS événements d'un coup, y compris récurrents (fournir events:[{title,date,time},...]). Calcule toi-même toutes les dates concernées. Exemple : "tous les mardis, jeudis et vendredis de ce mois à 17h" -> génère un événement pour CHAQUE mardi, jeudi et vendredi du mois avec time 17:00.
+- "set_status" : changer le statut (fournir value = nouveau statut)
+- "list" : juste lister/compter les leads qui matchent
+- "none" : demande incomprise, fournir "message" pour répondre à l'utilisateur
+
+Format de sortie JSON :
+{"action":"delete|add_event|add_events|set_status|list|none","filters":[{"field":"...","op":"...","value":...}],"event":{"title":"","date":"","time":""},"events":[{"title":"","date":"","time":""}],"value":"","message":""}
+
+Exemples :
+"supprime les entreprises qui ont 100 de score audit" -> {"action":"delete","filters":[{"field":"auditScore","op":"eq","value":100}]}
+"supprime les leads sans téléphone" -> {"action":"delete","filters":[{"field":"phone","op":"empty"}]}
+"liste les leads chauds à Paris" -> {"action":"list","filters":[{"field":"temperature","op":"eq","value":"chaud"},{"field":"adresse","op":"contains","value":"paris"}]}
+"passe les leads sans site en perdu" -> {"action":"set_status","filters":[{"field":"site","op":"empty"}],"value":"perdu"}
+"ajoute un rdv demain 15h avec Jordan" -> {"action":"add_event","event":{"title":"RDV avec Jordan","date":"DATE_DEMAIN","time":"15:00"}}
+"publie un post LinkedIn tous les mardis jeudis vendredis de ce mois à 17h" -> {"action":"add_events","events":[{"title":"Publier post LinkedIn","date":"2026-08-04","time":"17:00"},{"title":"Publier post LinkedIn","date":"2026-08-06","time":"17:00"},{"title":"Publier post LinkedIn","date":"2026-08-07","time":"17:00"}, ...et ainsi de suite pour TOUS les mardis/jeudis/vendredis du mois]}
+
+Date du jour : ${td()}. Réponds UNIQUEMENT avec le JSON.`;
+  const raw=await gemini(sys+"\n\nCommande : "+cmd,false);
+  // Parser le JSON (nettoyer d'éventuelles balises)
+  let clean=(raw||"").replace(/```json/g,"").replace(/```/g,"").trim();
+  const s=clean.indexOf("{"),e=clean.lastIndexOf("}");
+  if(s>=0&&e>=0)clean=clean.slice(s,e+1);
+  return JSON.parse(clean);
+};
+// Lancer une commande agent
+const agentRun=async(cmd)=>{
+  if(!cmd||!cmd.trim())return;
+  setAgentShowAll(false);
+  // Détecter une demande de débrief/analyse
+  const cl=cmd.toLowerCase();
+  if((cl.includes("débrief")||cl.includes("debrief")||cl.includes("le point")||cl.includes("analyse mon")||cl.includes("analyse le")||cl.includes("état du pipeline")||cl.includes("etat du pipeline")||cl.includes("où j'en suis")||cl.includes("ou j'en suis")||cl.includes("bilan")||cl.includes("qui traine")||cl.includes("qui traîne")||cl.includes("ça donne quoi")||cl.includes("ca donne quoi")||cl.includes("récap")||cl.includes("recap"))&&cmd.length<70){
+    setAgentLog(p=>[...p,{role:"user",text:cmd}]);await agentBrief(false);return;
+  }
+  setAgentLog(p=>[...p,{role:"user",text:cmd}]);
+  setAgentBusy(true);
+  try{
+    // Récurrence détectée : dates calculées en JS (fiable), titre extrait par l'IA
+    const rec=agentRecur(cmd);
+    if(rec){
+      let titre="Événement";
+      try{const t=await gemini("Extrais UNIQUEMENT le titre court de l'événement à planifier dans cette phrase, sans les dates ni les jours ni l'heure. Réponds seulement le titre, rien d'autre. Phrase: "+cmd,false);if(t&&t.trim())titre=t.trim().replace(/^["'.]+|["'.]+$/g,"").slice(0,60);}catch(e){}
+      const evs=rec.dates.map(d=>({title:titre,date:d,time:rec.time}));
+      setAgentPending({action:"add_events",events:evs,label:"Ajouter "+evs.length+" événements à l'agenda ("+titre+")",preview:evs.map(e=>e.title+" — "+new Date(e.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"})+" "+e.time)});
+      setAgentLog(p=>[...p,{role:"agent",text:"J'ai calculé "+evs.length+" dates pour \""+titre+"\". Confirme ci-dessous."}]);
+      setAgentBusy(false);return;
+    }
+    const plan=await agentPlan(cmd);
+    if(plan.action==="none"){
+      setAgentLog(p=>[...p,{role:"agent",text:plan.message||"Je n'ai pas compris cette demande. Reformule en précisant l'action (supprimer, lister, changer le statut, ajouter à l'agenda) et le critère."}]);
+    }
+    else if(plan.action==="add_event"){
+      const ev={title:plan.event.title||"Rendez-vous",date:plan.event.date||td(),time:plan.event.time||"09:00"};
+      setAgentPending({action:"add_event",event:ev,label:"Ajouter à l'agenda le "+ev.date+" à "+ev.time+" : "+ev.title,preview:[ev.title+" — "+ev.date+" "+ev.time]});
+      setAgentLog(p=>[...p,{role:"agent",text:"Je vais ajouter cet événement. Confirme ci-dessous."}]);
+    }
+    else if(plan.action==="add_events"){
+      const evs=(plan.events||[]).filter(e=>e&&e.date).map(e=>({title:e.title||"Événement",date:e.date,time:e.time||"09:00"}));
+      if(evs.length===0){setAgentLog(p=>[...p,{role:"agent",text:"Je n'ai pas réussi à calculer les dates. Précise le mois et les jours."}]);}
+      else{
+        evs.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+        setAgentPending({action:"add_events",events:evs,label:"Ajouter "+evs.length+" événements à l'agenda",preview:evs.slice(0,12).map(e=>e.title+" — "+new Date(e.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"})+" "+e.time)});
+        setAgentLog(p=>[...p,{role:"agent",text:"Je vais ajouter "+evs.length+" événements. Confirme ci-dessous."}]);
+      }
+    }
+    else{
+      const matched=agentApplyFilter(plan.filters);
+      const lbl=agentFilterLabel(plan.filters||[]);
+      if(plan.action==="list"){
+        setAgentLog(p=>[...p,{role:"agent",text:matched.length+" lead(s) correspondent"+(lbl?" ("+lbl+")":"")+(matched.length?" : "+matched.map(l=>l.nom).slice(0,25).join(", ")+(matched.length>25?"...":""):".")}]);
+      }
+      else if(matched.length===0){
+        setAgentLog(p=>[...p,{role:"agent",text:"Aucun lead ne correspond"+(lbl?" ("+lbl+")":"")+". Rien à faire."}]);
+      }
+      else if(plan.action==="delete"){
+        setAgentPending({action:"del_leads",targets:matched,label:"Supprimer "+matched.length+" lead(s)"+(lbl?" ("+lbl+")":""),preview:matched.map(l=>l.nom).slice(0,15)});
+        setAgentLog(p=>[...p,{role:"agent",text:"J'ai trouvé "+matched.length+" lead(s)"+(lbl?" ("+lbl+")":"")+". Confirme la suppression ci-dessous."}]);
+      }
+      else if(plan.action==="set_status"){
+        setAgentPending({action:"set_status",targets:matched,value:plan.value,label:"Passer "+matched.length+" lead(s) en statut \""+plan.value+"\""+(lbl?" ("+lbl+")":""),preview:matched.map(l=>l.nom).slice(0,15)});
+        setAgentLog(p=>[...p,{role:"agent",text:"J'ai trouvé "+matched.length+" lead(s). Confirme le changement de statut ci-dessous."}]);
+      }
+    }
+  }catch(e){
+    setAgentLog(p=>[...p,{role:"agent",text:"Je n'ai pas réussi à interpréter la demande. Essaie d'être plus précis, par exemple : \"supprime les leads avec un score audit de 100\" ou \"liste les leads sans téléphone\". ("+(e.message||"").slice(0,60)+")"}]);
+  }
+  setAgentBusy(false);
+};
+// Exécuter l'action confirmée
+const agentConfirm=async()=>{
+  const p=agentPending;if(!p)return;
+  setAgentPending(null);setAgentBusy(true);
+  try{
+    if(p.action==="del_leads"){
+      for(const l of p.targets){await del(l.id);}
+      setAgentLog(x=>[...x,{role:"agent",text:"✓ "+p.targets.length+" lead(s) supprimé(s)."}]);
+    }
+    else if(p.action==="set_status"){
+      for(const l of p.targets){await sb.from("leads").update({status:p.value}).eq("id",l.id);setLeads(pr=>pr.map(x=>x.id===l.id?{...x,status:p.value}:x));}
+      setAgentLog(x=>[...x,{role:"agent",text:"✓ "+p.targets.length+" lead(s) passés en \""+p.value+"\"."}]);
+    }
+    else if(p.action==="add_event"){
+      await addAgEvent(p.event.date,p.event.title,p.event.time,"var(--gold)",[sess],"",false);
+      setAgentLog(x=>[...x,{role:"agent",text:"✓ Événement ajouté à l'agenda le "+p.event.date+" à "+p.event.time+"."}]);
+    }
+    else if(p.action==="add_events"){
+      for(const e of p.events){await addAgEvent(e.date,e.title,e.time,"var(--gold)",[sess],"",false);}
+      setAgentLog(x=>[...x,{role:"agent",text:"✓ "+p.events.length+" événements ajoutés à l'agenda."}]);
+    }
+  }catch(e){
+    setAgentLog(x=>[...x,{role:"agent",text:"Erreur d'exécution : "+(e.message||"").slice(0,120)}]);
+  }
+  setAgentBusy(false);
+};
+const agentCancel=()=>{setAgentPending(null);setAgentLog(p=>[...p,{role:"agent",text:"Action annulée."}]);};
+// Analyse thématique (les boutons) : envoie un prompt d'analyse, affiche la réponse (pas d'action)
+const agentAnalyse=async(titre,prompt)=>{
+  setAgentBusy(true);
+  setAgentLog(p=>[...p,{role:"user",text:titre}]);
+  try{
+    // Contexte pipeline compact
+    const now=new Date();const daysSince=(d)=>{if(!d)return null;const t=new Date(d);if(isNaN(t))return null;return Math.floor((now-t)/86400000);};
+    const closed=["perdu","reussi","pas_potentiel"];
+    const active=leads.filter(l=>!closed.includes(l.status));
+    const ctx=active.map(l=>({nom:l.nom,statut:l.status,valeur:Number(l.valeur)||0,temp:l.temperature||"",tentatives:Number(l.tentatives)||0,joursDepuisContact:daysSince(l.lastInteraction),source:l.source||""}));
+    const sys="Tu es le bras droit commercial de WEBO (conformité accessibilité EAA/RGAA), fondateur Kylian. "+prompt+" Réponds en français, direct et actionnable, sans markdown (pas de ** ni #), sans tiret cadratin, sans poser de questions : travaille avec les données fournies.\n\nPipeline (JSON): "+JSON.stringify({leadsActifs:ctx.length,valeurTotale:ctx.reduce((s,r)=>s+r.valeur,0),leads:ctx.sort((a,b)=>b.valeur-a.valeur).slice(0,40)});
+    const r=await gemini(sys,false)||"Analyse indisponible.";
+    setAgentLog(p=>[...p,{role:"agent",text:r}]);
+  }catch(e){setAgentLog(p=>[...p,{role:"agent",text:"Erreur: "+(e.message||"").slice(0,100)}]);}
+  setAgentBusy(false);
+};
+// ═══ BRAS DROIT : ANALYSE & DÉBRIEF ═══
+// Calcule l'état du pipeline localement (gratuit) puis demande un débrief à l'IA
+const agentBrief=async(fromButton)=>{
+  setAgentBusy(true);
+  if(fromButton!==false)setAgentLog(p=>[...p,{role:"user",text:"Fais-moi un débrief du CRM"}]);
+  try{
+    const now=new Date();
+    const daysSince=(d)=>{if(!d)return null;const t=new Date(d);if(isNaN(t))return null;return Math.floor((now-t)/86400000);};
+    // Statuts actifs (hors perdu/réussi/production)
+    const closed=["perdu","reussi","pas_potentiel"];
+    const active=leads.filter(l=>!closed.includes(l.status));
+    // Construire un résumé compact par lead actif
+    const rows=active.map(l=>{
+      const dLast=daysSince(l.lastInteraction);
+      const dCreated=daysSince(l.dateCreated);
+      const relanceRetard=l.nextRelance?daysSince(l.nextRelance):null; // >0 = en retard
+      return{
+        nom:l.nom,statut:l.status,valeur:Number(l.valeur)||0,temp:l.temperature||"",
+        tentatives:Number(l.tentatives)||0,
+        joursDepuisContact:dLast,joursDepuisCreation:dCreated,
+        relanceEnRetardJours:(relanceRetard!=null&&relanceRetard>0)?relanceRetard:null,
+        source:l.source||""
+      };
+    });
+    // Stats globales
+    const totalVal=rows.reduce((s,r)=>s+r.valeur,0);
+    const parStatut={};rows.forEach(r=>{parStatut[r.statut]=(parStatut[r.statut]||0)+1;});
+    const sansRelance=rows.filter(r=>r.joursDepuisContact!=null&&r.joursDepuisContact>=10).length;
+    const relancesEnRetard=rows.filter(r=>r.relanceEnRetardJours).length;
+    const summary={
+      totalLeadsActifs:rows.length,
+      valeurPipeline:totalVal,
+      repartitionStatuts:parStatut,
+      leadsSansContactDepuis10j:sansRelance,
+      relancesEnRetard:relancesEnRetard,
+      leads:rows.sort((a,b)=>b.valeur-a.valeur).slice(0,40) // top 40 par valeur pour le contexte
+    };
+    const sys=`Tu es le bras droit commercial de WEBO (agence de mise en conformité accessibilité EAA/RGAA). Tu analyses le pipeline CRM et tu fais un débrief à Kylian, le fondateur.
+
+FORMAT EXACT de ta réponse (en français, sans tiret cadratin, pas de markdown lourd) :
+
+TOP 3 DES URGENCES
+Pour chacune : le nom du dossier, le chiffre clé (valeur, jours sans contact, relance en retard), ce qui coince précisément, et ta suggestion d'action concrète.
+
+VUE D'ENSEMBLE
+Quelques chiffres clés du pipeline (nombre de dossiers actifs, valeur totale, répartition, points de friction).
+
+LE RESTE
+Les autres points d'attention, plus rapidement.
+
+Sois direct, concret, actionnable. Parle comme un vrai bras droit qui connait le business, pas comme un rapport corporate. Base-toi UNIQUEMENT sur les donnees fournies, ne demande pas d'informations supplementaires, travaille avec ce que tu as. INTERDIT : les astérisques de gras (**), les dièses de titre (#), tout symbole markdown. Ecris en texte simple avec des majuscules pour les titres de section. Pas de tiret cadratin.
+
+Données du pipeline (JSON) :
+`+JSON.stringify(summary);
+    const r=await gemini(sys,false)||"Analyse indisponible.";
+    setAgentLog(p=>[...p,{role:"agent",text:r,brief:true}]);
+  }catch(e){
+    setAgentLog(p=>[...p,{role:"agent",text:"Erreur d'analyse : "+(e.message||"").slice(0,120)}]);
+  }
+  setAgentBusy(false);
+};
 
 /* V13 — REVERSE MODE MATCHING */
 const runMatch=()=>{setMatchLoading(true);const results=prestas.map(p=>{let score=0;const reasons=[];const sp=(p.specialite||"").toLowerCase();const sv=(matchCrit.service||"").toLowerCase();const comp=(matchCrit.competence||"").toLowerCase();if(sv&&(sp.includes(sv)||sv.includes(sp))){score+=35;reasons.push("Specialite OK")}else if(sv&&(sp.includes("web")&&sv.includes("web"))||(sp.includes("vid")&&sv.includes("vid"))){score+=20;reasons.push("Specialite proche")}if(comp&&sp.includes(comp)){score+=15;reasons.push("Competence match")}const tjm=Number(p.tjm)||0;const budget=Number(matchCrit.budget)||0;if(budget>0&&tjm>0){if(tjm<=budget){score+=25;reasons.push("TJM "+tjm+" < budget "+budget)}else if(tjm<=budget*1.2){score+=10;reasons.push("TJM proche")}else{reasons.push("TJM "+tjm+" > budget")}}else if(budget===0){score+=10}const asg=leads.filter(l=>l.prestaId===p.id&&!["reussi","perdu"].includes(l.status)).length;if(asg===0){score+=15;reasons.push("100% dispo")}else if(asg<3){score+=8;reasons.push(asg+" projet(s) en cours")}else{reasons.push("Charge elevee: "+asg)}const sgn=leads.filter(l=>l.prestaId===p.id&&l.status==="reussi").length;if(sgn>=3){score+=10;reasons.push("Prouve: "+sgn+" signes")}else if(sgn>=1){score+=5;reasons.push(sgn+" signe(s)")}return{...p,score:Math.min(score,100),reasons,charge:asg,signes:sgn}}).filter(p=>p.score>0).sort((a,b)=>b.score-a.score);setMatchRes(results);setMatchLoading(false)};
@@ -1432,7 +1841,7 @@ const Nav=()=>(
 
 /* ═══ HUB ═══ */
 const HubPage=()=>{
-const[hubDayOff,setHubDayOff]=useState(0);
+const[hubDayOff,setHubDayOff]=useState(0);const[hubAgView,setHubAgView]=useState("jour");
 const hubDate=(()=>{const d=new Date();d.setDate(d.getDate()+hubDayOff);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")})();
 const hubDayLabel=hubDayOff===0?"Aujourd'hui":hubDayOff===1?"Demain":hubDayOff===-1?"Hier":new Date(hubDate).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
 const me=st.byM.find(m=>m.id===effSess)||{};
@@ -1509,13 +1918,21 @@ return(
     </div>
     {/* AGENDA DU JOUR */}
     <div className="chart-card" onClick={()=>setPage("agenda")} style={{cursor:"pointer"}} title="Ouvrir l'Agenda">
-      <div className="chart-hd"><span><i className="fa-solid fa-calendar-day" style={{color:"var(--gold)",marginRight:6}}/>Agenda — {hubDayLabel}</span><span style={{display:"flex",gap:4,alignItems:"center"}} onClick={e=>e.stopPropagation()}><button onClick={e=>{e.stopPropagation();setHubDayOff(o=>o-1)}} style={{width:22,height:22,borderRadius:6,border:"1px solid var(--border)",color:"var(--text3)",fontSize:10,display:"flex",alignItems:"center",justifyContent:"center"}} title="Jour précédent"><i className="fa-solid fa-chevron-left"/></button>{hubDayOff!==0&&<button onClick={e=>{e.stopPropagation();setHubDayOff(0)}} style={{padding:"2px 8px",borderRadius:6,border:"1px solid var(--gold)",color:"var(--gold)",fontSize:9,fontWeight:700}}>Auj.</button>}<button onClick={e=>{e.stopPropagation();setHubDayOff(o=>o+1)}} style={{width:22,height:22,borderRadius:6,border:"1px solid var(--border)",color:"var(--text3)",fontSize:10,display:"flex",alignItems:"center",justifyContent:"center"}} title="Jour suivant"><i className="fa-solid fa-chevron-right"/></button></span><span style={{color:"var(--text3)"}}>{td()} <i className="fa-solid fa-arrow-right" style={{fontSize:9,marginLeft:4}}/></span></div>
+      <div className="chart-hd"><span><i className="fa-solid fa-calendar-day" style={{color:"var(--gold)",marginRight:6}}/>Agenda — {hubAgView==="jour"?"Aujourd'hui":"Cette semaine"}</span><span style={{display:"flex",gap:4,alignItems:"center"}} onClick={e=>e.stopPropagation()}><button onClick={e=>{e.stopPropagation();setHubAgView("jour")}} style={{padding:"3px 10px",borderRadius:6,border:"1px solid "+(hubAgView==="jour"?"var(--gold)":"var(--border)"),color:hubAgView==="jour"?"var(--gold)":"var(--text3)",fontSize:10,fontWeight:700,background:hubAgView==="jour"?"rgba(197,160,89,.06)":"transparent"}}>Jour</button><button onClick={e=>{e.stopPropagation();setHubAgView("semaine")}} style={{padding:"3px 10px",borderRadius:6,border:"1px solid "+(hubAgView==="semaine"?"var(--gold)":"var(--border)"),color:hubAgView==="semaine"?"var(--gold)":"var(--text3)",fontSize:10,fontWeight:700,background:hubAgView==="semaine"?"rgba(197,160,89,.06)":"transparent"}}>Semaine</button></span><span style={{color:"var(--text3)"}}><i className="fa-solid fa-arrow-right" style={{fontSize:9,marginLeft:4}}/></span></div>
       <div style={{padding:"8px 0",maxHeight:200,overflowY:"auto"}}>
-        {(()=>{const items=[...myAgEvents.filter(e=>e.date===hubDate).sort((a,b)=>(a.time||"").localeCompare(b.time||"")).map(e=>({lb:e.title,cl:e.color||"var(--purple)",tag:(e.all_day?"Journée":(e.time||""))+(e.assignee_ids?.length?" · "+e.assignee_ids.map(a=>mN(a).split(" ")[0]).join(", "):"")}))];
-        if(items.length===0)return <div style={{padding:24,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-mug-hot" style={{marginRight:5}}/>Rien de prévu aujourd'hui</div>;
-        return items.slice(0,8).map((it,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 4px",borderBottom:"1px solid var(--border)"}}>
+        {(()=>{
+        const todayD=td();
+        const in7=(ds)=>{if(!ds)return false;const d=new Date(ds),n=new Date();const diff=(d-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/86400000;return diff>=0&&diff<7;};
+        let items=[];
+        if(hubAgView==="jour"){
+          items=myAgEvents.filter(e=>e.date===todayD).sort((a,b)=>(a.time||"").localeCompare(b.time||"")).map(e=>({lb:e.title,cl:e.color||"var(--purple)",tag:(e.all_day?"Journée":(e.time||"")),date:null}));
+        }else{
+          items=myAgEvents.filter(e=>in7(e.date)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)).map(e=>({lb:e.title,cl:e.color||"var(--purple)",tag:new Date(e.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"})+(e.all_day?"":" "+e.time),date:e.date}));
+        }
+        if(items.length===0)return <div style={{padding:24,textAlign:"center",color:"var(--text3)",fontSize:12}}><i className="fa-solid fa-mug-hot" style={{marginRight:5}}/>{hubAgView==="jour"?"Rien de prévu aujourd'hui":"Aucun rendez-vous cette semaine"}</div>;
+        return items.slice(0,10).map((it,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 4px",borderBottom:"1px solid var(--border)"}}>
           <div style={{width:7,height:7,borderRadius:"50%",background:it.cl,flexShrink:0}}/>
-          <div style={{flex:1,fontSize:12,color:"var(--text2)"}}>{it.lb}</div>
+          <div style={{flex:1,fontSize:12,color:"var(--text2)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{it.lb}</div>
           <div style={{fontSize:8,fontFamily:"var(--mono)",color:"var(--text3)",textTransform:"uppercase"}}>{it.tag}</div>
         </div>)})()}
       </div>
@@ -1530,7 +1947,8 @@ return(
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",roles:["admin","commercial"],cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
     {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",roles:["admin","commercial","technicien"],cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
     {icon:"fa-screwdriver-wrench",title:"Techniciens",desc:"Réseau de techniciens EAA",pg:"talents",cnt:(prestas.length||0)+" techniciens",ac:"#8B5CF6",em:"🔧",roles:["admin"]},{icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖",roles:["admin","commercial","technicien"]},
-    ].filter(c=>!c.roles||c.roles.includes(effRole)).map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
+    {icon:"fa-satellite-dish",title:"Sourcing",desc:"Import massif & scoring de leads",pg:"sourcing",cnt:"Admin",ac:"#C5A059",em:"📡",fondateurOnly:true},
+    ].filter(c=>(!c.roles||c.roles.includes(effRole))&&(!c.fondateurOnly||(TEAM.find(t=>t.id===sess)?.isFondateur))).map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
       <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
         <div style={{width:56,height:56,borderRadius:14,background:c.ac+"15",border:"1px solid "+c.ac+"25",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26}}>{c.em}</div>
         <div><h3 style={{fontFamily:"var(--serif)",fontSize:19,fontWeight:700,margin:0}}>{c.title}</h3><p style={{fontSize:12,color:"var(--text3)",margin:0,marginTop:2}}>{c.desc}</p></div>
@@ -1950,6 +2368,30 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
     {[{l:"Relances",v:agendaItems.filter(x=>x.type==="relance").length,c:agendaItems.filter(x=>x.type==="relance").length>0?"var(--red)":"var(--green)",i:"fa-bell"},{l:"Dormants",v:agendaItems.filter(x=>x.type==="dormant").length,c:agendaItems.filter(x=>x.type==="dormant").length>0?"var(--bordeaux2)":"var(--green)",i:"fa-moon"},{l:"Paiements",v:agendaItems.filter(x=>x.type==="paiement").length,c:agendaItems.filter(x=>x.type==="paiement").length>0?"var(--gold)":"var(--green)",i:"fa-receipt"},{l:"Custom",v:agEvents.length,c:agEvents.length>0?"var(--purple)":"var(--text3)",i:"fa-calendar-plus"}].map((s,i)=>
     <div key={i} className="stat-card fu" style={{animationDelay:i*40+"ms"}}><div className="stat-label"><i className={"fa-solid "+s.i} style={{marginRight:3}}/>{s.l}</div><div className="stat-val" style={{color:s.c,fontSize:20}}>{s.v}</div></div>)}
   </div>
+  {(()=>{
+    const todayDs=td();
+    const in7=(ds)=>{if(!ds)return false;const d=new Date(ds),n=new Date();const diff=(d-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/86400000;return diff>=0&&diff<7;};
+    const rdvToday=(agEvents||[]).filter(e=>e.date===todayDs).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+    const rdvWeek=(agEvents||[]).filter(e=>e.date!==todayDs&&in7(e.date)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+    const relances=agendaItems.filter(x=>x.type==="relance");
+    const dormants=agendaItems.filter(x=>x.type==="dormant");
+    const Item=({ic,col,txt,sub,onClick})=>(<div onClick={onClick} style={{display:"flex",alignItems:"center",gap:9,padding:"8px 10px",borderRadius:8,background:"var(--bg2)",border:"1px solid var(--border)",cursor:onClick?"pointer":"default",marginBottom:6}}><span style={{width:26,height:26,borderRadius:7,background:col+"18",color:col,display:"grid",placeItems:"center",fontSize:11,flexShrink:0}}><i className={"fa-solid "+ic}/></span><div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{txt}</div>{sub&&<div style={{fontSize:10,color:"var(--text3)"}}>{sub}</div>}</div></div>);
+    return <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+      {/* AUJOURD'HUI */}
+      <div style={{border:"1px solid var(--gold)",borderRadius:"var(--radius)",padding:14,background:"linear-gradient(135deg,rgba(197,160,89,.05),transparent)"}}>
+        <div style={{fontSize:13,fontWeight:800,marginBottom:2,display:"flex",alignItems:"center",gap:7}}><i className="fa-solid fa-sun" style={{color:"var(--gold)"}}/>Aujourd'hui</div>
+        <div style={{fontSize:10,color:"var(--text3)",marginBottom:12,textTransform:"capitalize"}}>{new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}</div>
+        {rdvToday.length===0&&<div style={{fontSize:11,color:"var(--text3)",padding:"12px 0",textAlign:"center"}}>Aucun rendez-vous aujourd'hui.</div>}
+        {rdvToday.map(e=><Item key={e.id} ic="fa-calendar-check" col="var(--purple)" txt={e.title} sub={(e.all_day?"Journée":e.time)+(e.end_time?" - "+e.end_time:"")} onClick={()=>setShowAgForm(e.date)}/>)}
+      </div>
+      {/* CETTE SEMAINE */}
+      <div style={{border:"1px solid var(--border)",borderRadius:"var(--radius)",padding:14,background:"var(--bg2)"}}>
+        <div style={{fontSize:13,fontWeight:800,marginBottom:12,display:"flex",alignItems:"center",gap:7}}><i className="fa-solid fa-calendar-week" style={{color:"var(--text2)"}}/>Cette semaine</div>
+        {rdvWeek.length===0&&<div style={{fontSize:11,color:"var(--text3)",padding:"12px 0",textAlign:"center"}}>Aucun rendez-vous planifié cette semaine.</div>}
+        {rdvWeek.map(e=><Item key={e.id} ic="fa-calendar-day" col="var(--purple)" txt={e.title} sub={new Date(e.date).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"})+(e.all_day?"":" · "+e.time)} onClick={()=>setShowAgForm(e.date)}/>)}
+      </div>
+    </div>;
+  })()}
   {agView==="cal"&&<div>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
       <button onClick={()=>setAgMonth(p=>{const d=new Date(p);d.setMonth(d.getMonth()-1);return d})} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:13}}><i className="fa-solid fa-chevron-left"/></button>
@@ -2167,22 +2609,157 @@ const Finance=()=>(
 </div>);
 
 /* ═══ IA — Inline JSX (not component function) to prevent remount/focus loss ═══ */
+const agentUI=(TEAM.find(t=>t.id===sess)?.isFondateur)?(
+  <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",border:"1px solid var(--gold)",borderRadius:"var(--radius)",background:"linear-gradient(135deg,rgba(197,160,89,.05),transparent)",overflow:"hidden"}}>
+    <div style={{padding:"12px 14px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8}}>
+      <i className="fa-solid fa-wand-magic-sparkles" style={{color:"var(--gold)"}}/>
+      <div style={{fontWeight:700,fontSize:13}}>Agent CRM</div>
+      <div style={{fontSize:10,color:"var(--text3)"}}>Donne un ordre, l'agent agit (avec confirmation)</div>
+      <div style={{flex:1}}/>
+      <button onClick={()=>agentBrief(true)} disabled={agentBusy} style={{padding:"7px 14px",borderRadius:"var(--radius)",background:"var(--gold)",color:"#1a1a1a",fontSize:11,fontWeight:700,border:"none",display:"flex",alignItems:"center",gap:6}}><i className="fa-solid fa-chart-line"/> Débrief du CRM</button>
+    </div>
+    <div style={{padding:12,flex:1,minHeight:0,display:"flex",flexDirection:"column"}}>
+      {/* Zone de contenu scrollable qui remplit l'espace */}
+      <div style={{flex:1,minHeight:0,overflowY:"auto",marginBottom:10,display:"flex",flexDirection:"column"}}>
+      {/* Exemples de commandes */}
+      {agentLog.length===0&&(
+        <div style={{marginBottom:10}}>
+          <div style={{fontSize:10,color:"var(--text3)",marginBottom:6}}>Exemples :</div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            {["Supprime les leads avec 100 de score audit","Liste les leads sans téléphone","Passe les leads sans site en perdu","Ajoute un RDV demain à 15h avec Jordan"].map(ex=>(
+              <button key={ex} onClick={()=>agentRun(ex)} style={{padding:"5px 10px",borderRadius:20,border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:10}}>{ex}</button>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* Journal de l'agent */}
+      {agentLog.length>0&&(
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {agentLog.map((m,i)=>(
+            <div key={i} style={{padding:"8px 10px",borderRadius:8,fontSize:12,lineHeight:1.6,background:m.role==="user"?"rgba(197,160,89,.08)":"var(--bg3)",border:"1px solid "+(m.role==="user"?"rgba(197,160,89,.15)":"var(--border)"),marginLeft:m.role==="user"?24:0,marginRight:m.role==="agent"?24:0}}>
+              <span style={{fontSize:9,color:"var(--text3)",display:"block",marginBottom:2}}>{m.role==="user"?"Toi":"Agent"}</span>
+              <span dangerouslySetInnerHTML={{__html:(m.text||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/^#{1,4}\s*/gm,"").replace(/^\s*[-•]\s+/gm,"· ").replace(/\n/g,"<br/>")}}/>
+            </div>
+          ))}
+        </div>
+      )}
+      {/* Encadré de confirmation d'action */}
+      {agentPending&&(
+        <div style={{padding:12,borderRadius:8,background:"rgba(231,76,76,.06)",border:"1px solid rgba(231,76,76,.3)",marginBottom:10}}>
+          <div style={{fontSize:12,fontWeight:700,color:"var(--red)",marginBottom:6}}><i className="fa-solid fa-triangle-exclamation"/> Confirmation requise</div>
+          <div style={{fontSize:12,marginBottom:8}}>{agentPending.label}</div>
+          {agentPending.preview&&agentPending.preview.length>0&&(
+            <div style={{fontSize:11,color:"var(--text3)",marginBottom:10,lineHeight:1.6}}>
+              {(agentShowAll?agentPending.preview:agentPending.preview.slice(0,5)).map((t,i)=><div key={i}>· {t}</div>)}
+              {agentPending.preview.length>5&&<button onClick={()=>setAgentShowAll(s=>!s)} style={{marginTop:4,fontSize:11,color:"var(--gold)",fontWeight:600,background:"none",border:"none",cursor:"pointer",padding:0}}>{agentShowAll?"Voir moins":"Voir plus ("+(agentPending.preview.length-5)+")"}</button>}
+              {!agentShowAll&&agentPending.targets&&agentPending.targets.length>agentPending.preview.length&&<div style={{marginTop:2}}>... et {agentPending.targets.length-agentPending.preview.length} autre(s) au total</div>}
+            </div>
+          )}
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={agentConfirm} style={{padding:"8px 16px",borderRadius:"var(--radius)",background:"var(--red)",color:"#fff",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-check"/> Confirmer</button>
+            <button onClick={agentCancel} style={{padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:12}}>Annuler</button>
+          </div>
+        </div>
+      )}
+      {/* Indicateur : l'agent réfléchit */}
+      {agentBusy&&(
+        <div style={{padding:"10px 12px",borderRadius:8,background:"var(--bg3)",border:"1px solid var(--border)",fontSize:12,color:"var(--gold)",display:"flex",alignItems:"center",gap:8,marginRight:24}}>
+          <i className="fa-solid fa-spinner fa-spin"/> L'agent réfléchit...
+        </div>
+      )}
+      </div>{/* fin zone scrollable */}
+      {/* Boutons d'analyse */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:5,marginBottom:8}}>
+        {[{i:"fa-chart-line",t:"Analyse",p:"Analyse le pipeline : forces, risques, et les 3 actions prioritaires à mener."},{i:"fa-bullseye",t:"Plan Hebdo",p:"Propose un plan d'action pour la semaine, dossier par dossier."},{i:"fa-envelope",t:"Relances",p:"Identifie les dossiers à relancer en priorité et propose un message de relance pour chacun."},{i:"fa-trophy",t:"Coaching",p:"Analyse ma performance commerciale : taux de conversion, cycle de vente, points à améliorer."},{i:"fa-crystal-ball",t:"Prévisions",p:"Estime le CA des 30 prochains jours en scénario optimiste, réaliste et pessimiste."},{i:"fa-coins",t:"Trésorerie",p:"Fais une prévision de trésorerie à 30, 60 et 90 jours selon le pipeline."},{i:"fa-brain",t:"Matching",p:"Pour les dossiers gagnés ou en production, suggère le meilleur prestataire à assigner."},{i:"fa-chart-bar",t:"Tendances",p:"Analyse l'évolution du pipeline et les tendances des 30 derniers jours."}].map(a=>(
+          <button key={a.t} onClick={()=>agentAnalyse(a.t,a.p)} disabled={agentBusy} style={{padding:8,borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",display:"flex",flexDirection:"column",alignItems:"center",gap:3,color:"var(--text2)",fontSize:10,fontWeight:600}}><i className={"fa-solid "+a.i} style={{fontSize:13,color:"var(--gold)"}}/>{a.t}</button>
+        ))}
+      </div>
+      <AgentInputBar onSend={agentRun} loading={agentBusy}/>
+    </div>
+  </div>
+):null;
+const srcVisible=srcRows.filter(r=>(!srcFilters.site||r.site)&&(!srcFilters.tel||r.tel)&&(!srcFilters.mail||r.mail)&&(!srcFilters.lk||r.lk));
+const srcVisIds=new Set(srcVisible.map(r=>r.id));
+const srcVisSelCount=srcVisible.filter(r=>srcSel.has(r.id)).length;
+const sourcingUI=(
+  <div className="page-wrap" style={{maxWidth:1100,margin:"0 auto",padding:"0 4px"}}>
+    <div className="hub-header" style={{marginBottom:18}}>
+      <div className="hub-title" style={{fontSize:22,fontWeight:800}}><i className="fa-solid fa-satellite-dish" style={{color:"var(--gold)",marginRight:10}}/>Sourcing en masse</div>
+      <div className="hub-sub" style={{color:"var(--text3)",fontSize:12,marginTop:4}}>Importez, scorez et sélectionnez vos leads avant de les envoyer dans le pipeline. Aucun crédit IA consommé.</div>
+    </div>
+
+    {srcRows.length===0?(
+      <div className="chart-card" style={{padding:20}}>
+        <div style={{fontSize:12,fontWeight:600,marginBottom:8,color:"var(--text2)"}}>Collez votre liste de leads</div>
+        <div style={{fontSize:11,color:"var(--text3)",marginBottom:10,lineHeight:1.6}}>
+          Format libre : un nom d'entreprise par ligne, ou un CSV avec colonnes (nom, site, tel, mail, linkedin, ville). Le séparateur (virgule, point-virgule, tabulation) et l'en-tête sont détectés automatiquement.
+        </div>
+        <textarea value={srcRaw} onChange={e=>setSrcRaw(e.target.value)} placeholder={"Exemple liste simple :\nBoutique Martin\nMode & Co\n\nExemple CSV :\nnom;site;tel;mail;linkedin\nBoutique Martin;boutique-martin.fr;01 23 45 67 89;contact@boutique-martin.fr;linkedin.com/company/..."} style={{width:"100%",minHeight:200,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",color:"var(--text)",fontSize:12,fontFamily:"var(--mono)",padding:12,resize:"vertical"}}/>
+        <div style={{display:"flex",gap:10,marginTop:12,alignItems:"center"}}>
+          <button onClick={srcProcess} style={{padding:"10px 20px",borderRadius:"var(--radius)",background:"var(--gold)",color:"#1a1a1a",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-wand-magic-sparkles"/> Analyser et scorer</button>
+          <label style={{padding:"10px 18px",borderRadius:"var(--radius)",border:"1px dashed var(--gold)",color:"var(--gold)",fontSize:12,fontWeight:600,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:6}}><i className="fa-solid fa-file-arrow-up"/> Charger un fichier CSV<input type="file" accept=".csv,.txt,text/csv,text/plain" onChange={srcLoadFile} style={{display:"none"}}/></label>
+          {srcRaw&&<button onClick={()=>setSrcRaw("")} style={{padding:"10px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text3)",fontSize:12}}>Effacer</button>}
+        </div>
+      </div>
+    ):(
+      <div>
+        {/* Barre d'actions */}
+        <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:12,flexWrap:"wrap"}}>
+          <div style={{fontSize:12,fontWeight:700,color:"var(--text2)"}}>{srcVisible.length}{srcVisible.length!==srcRows.length?" / "+srcRows.length:""} leads · {srcSel.size} coché{srcSel.size>1?"s":""}</div>
+          <div style={{flex:1}}/>
+          <button onClick={()=>{const allVisSel=srcVisible.length>0&&srcVisSelCount===srcVisible.length;setSrcSel(p=>{const n=new Set(p);if(allVisSel){srcVisible.forEach(r=>n.delete(r.id))}else{srcVisible.forEach(r=>n.add(r.id))}return n;});}} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}><i className="fa-solid fa-check-double"/> {srcVisible.length>0&&srcVisSelCount===srcVisible.length?"Décocher l'affichage":"Cocher l'affichage"}</button>
+          <button onClick={()=>{const d=srcDupes();if(d.size===0){flash("Aucun doublon détecté")}else{setSrcSel(p=>{const n=new Set(p);d.forEach(id=>n.delete(id));return n;});flash(d.size+" doublon(s) décoché(s)")}}} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}><i className="fa-solid fa-clone"/> Décocher doublons</button>
+          <div style={{display:"inline-flex",gap:5,alignItems:"center",padding:"3px 8px",borderRadius:"var(--radius)",background:"var(--bg2)",border:"1px solid var(--border)"}}>
+            <span style={{fontSize:10,color:"var(--text3)",marginRight:2}}>Filtrer :</span>
+            {[{k:"site",lb:"Site",ic:"fa-globe"},{k:"tel",lb:"Tel",ic:"fa-phone"},{k:"mail",lb:"Mail",ic:"fa-envelope"},{k:"lk",lb:"LinkedIn",ic:"fa-brands fa-linkedin"}].map(f=>{const on=srcFilters[f.k];return(<button key={f.k} onClick={()=>setSrcFilters(p=>({...p,[f.k]:!p[f.k]}))} style={{padding:"5px 10px",borderRadius:20,border:on?"1px solid var(--gold)":"1px solid var(--border)",background:on?"var(--gold)":"transparent",color:on?"#1a1a1a":"var(--text3)",fontSize:10,fontWeight:on?700:500,transition:"all .15s"}} title={on?"Filtre actif : n'affiche que ceux avec "+f.lb:"Cliquer pour n'afficher que ceux avec "+f.lb}><i className={(f.ic.startsWith("fa-brands")?f.ic:"fa-solid "+f.ic)}/> {f.lb}</button>);})}
+          </div>
+          <button onClick={()=>{setSrcRows([]);setSrcSel(new Set());setSrcRaw("")}} style={{padding:"7px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text3)",fontSize:11}}>Recommencer</button>
+          <button onClick={srcValidate} style={{padding:"8px 18px",borderRadius:"var(--radius)",background:"var(--green)",color:"#fff",fontSize:12,fontWeight:700,border:"none"}}><i className="fa-solid fa-paper-plane"/> Envoyer dans le pipeline ({srcSel.size})</button>
+        </div>
+        {/* Tableau */}
+        <div className="chart-card" style={{padding:0,overflow:"hidden"}}>
+          <div style={{maxHeight:"60vh",overflowY:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
+              <thead style={{position:"sticky",top:0,background:"var(--bg2)",zIndex:1}}>
+                <tr style={{textAlign:"left",color:"var(--text3)",fontSize:10,textTransform:"uppercase",letterSpacing:"0.5px"}}>
+                  <th style={{padding:"10px 8px",width:36}}></th>
+                  <th style={{padding:"10px 8px"}}>Entreprise</th>
+                  <th style={{padding:"10px 8px",width:50,textAlign:"center"}}>Site</th>
+                  <th style={{padding:"10px 8px",width:50,textAlign:"center"}}>Tel</th>
+                  <th style={{padding:"10px 8px",width:50,textAlign:"center"}}>Mail</th>
+                  <th style={{padding:"10px 8px",width:60,textAlign:"center"}}>LinkedIn</th>
+                  <th style={{padding:"10px 8px",width:80,textAlign:"center"}}>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {srcVisible.map(r=>{
+                  const on=srcSel.has(r.id);
+                  const chk=(v)=>v?<i className="fa-solid fa-check" style={{color:"var(--green)"}}/>:<i className="fa-solid fa-minus" style={{color:"var(--text3)",opacity:.4}}/>;
+                  const tc=r.score>=75?"var(--green)":r.score>=45?"var(--gold)":"var(--text3)";
+                  return(
+                    <tr key={r.id} onClick={()=>srcToggle(r.id)} style={{borderTop:"1px solid var(--border)",cursor:"pointer",opacity:on?1:0.4,background:on?"transparent":"var(--bg2)"}}>
+                      <td style={{padding:"9px 8px",textAlign:"center"}}><input type="checkbox" checked={on} onChange={()=>srcToggle(r.id)} onClick={e=>e.stopPropagation()} style={{cursor:"pointer"}}/></td>
+                      <td style={{padding:"9px 8px",fontWeight:600,color:"var(--text)"}}>{r.nom}{r.ville&&<span style={{color:"var(--text3)",fontWeight:400,fontSize:10}}> · {r.ville}</span>}</td>
+                      <td style={{padding:"9px 8px",textAlign:"center"}}>{chk(r.site)}</td>
+                      <td style={{padding:"9px 8px",textAlign:"center"}}>{chk(r.tel)}</td>
+                      <td style={{padding:"9px 8px",textAlign:"center"}}>{chk(r.mail)}</td>
+                      <td style={{padding:"9px 8px",textAlign:"center"}}>{chk(r.lk)}</td>
+                      <td style={{padding:"9px 8px",textAlign:"center"}}><span style={{display:"inline-block",minWidth:38,padding:"3px 8px",borderRadius:20,background:tc+"20",color:tc,fontWeight:700,fontSize:11}}>{r.score}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
 const iaUI=(
 <div style={{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
   <h2 style={{fontFamily:"var(--serif)",fontSize:20,fontWeight:600,marginBottom:10}}>Agent IA Stratégique</h2>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:4,marginBottom:8}}>
-    {[{i:"fa-chart-line",t:"Analyse",p:"Analyse pipeline: forces, risques, 3 actions prioritaires."},{i:"fa-bullseye",t:"Plan Hebdo",p:"Plan action semaine par apporteur d'affaires."},{i:"fa-envelope",t:"Relances",p:"Messages de relance personnalisés."},{i:"fa-trophy",t:"Coaching",p:"Compare Fondateur vs Chasseurs: conversion, cycle."},{i:"fa-crystal-ball",t:"Prévisions",p:"CA 30j: optimiste, réaliste, pessimiste."},{i:"fa-coins",t:"Trésorerie",p:"Prévision cash-flow 30-60-90j."},{i:"fa-brain",t:"Matching",p:"Meilleur prestataire par lead non assigné."},{i:"fa-chart-bar",t:"Tendances",p:"Évolution pipeline 30 derniers jours."}
-    ].map(a=><button key={a.t} onClick={()=>askAI(a.p)} style={{padding:8,borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",display:"flex",flexDirection:"column",alignItems:"center",gap:3,transition:"all .2s",color:"var(--text2)",fontSize:10,fontWeight:600}}><i className={"fa-solid "+(a.i||"fa-star")} style={{fontSize:13,color:"var(--gold)"}}/>{a.t}</button>)}
-  </div>
-  <div style={{flex:1,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:"var(--radius)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-    <div style={{flex:1,overflowY:"auto",padding:10,display:"flex",flexDirection:"column",gap:6}}>
-      {aiMsgs.length===0&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)"}}><div style={{textAlign:"center"}}><i className="fa-solid fa-robot" style={{fontSize:24,display:"block",marginBottom:6,color:"var(--gold)"}}/> Question stratégique…</div></div>}
-      {aiMsgs.map((m,i)=><div key={i} className="fu" style={{padding:"10px 12px",borderRadius:8,fontSize:13,lineHeight:1.7,whiteSpace:"pre-wrap",background:m.role==="user"?"rgba(197,160,89,.06)":"var(--bg3)",border:"1px solid "+(m.role==="user"?"rgba(197,160,89,.12)":"var(--border)"),marginLeft:m.role==="user"?16:0,marginRight:m.role==="assistant"?16:0}}>{m.content}</div>)}
-      {aiLoad&&<div style={{padding:10,color:"var(--text3)"}}><i className="fa-solid fa-spinner fa-spin"/> Analyse…</div>}
-      <div ref={aiRef}/>
-    </div>
-    <AIInputBar onSend={(t)=>askAI(t)} loading={aiLoad}/>
-  </div>
+  {agentUI}
 </div>);
 
 /* ═══ MATCHING INVERSÉ ═══ */
@@ -2408,6 +2985,7 @@ return (
     {page==="agenda"&&<Agenda/>}
     {page==="finance"&&!isTech&&<Finance/>}
     {page==="ia"&&iaUI}
+    {page==="sourcing"&&(TEAM.find(t=>t.id===sess)?.isFondateur)&&sourcingUI}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
   {showObjForm&&<ObjModal objectives={objectives} onSave={saveObjectives} onClose={()=>setShowObjForm(false)} TEAM={TEAM} realAdmin={realAdmin}/>}
@@ -2449,7 +3027,7 @@ return (
   {scriptLead&&<ScriptModal lead={scriptLead} onClose={()=>setScriptLead(null)} flash={flash}/>}
   {page!=="messages"&&page!=="ia"&&<button className="msg-fab" onClick={()=>setMsgWidget(p=>!p)} title="Messages">{msgWidget?<i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-comment-dots"/>}{!msgWidget&&chatUnreadTotal>0&&<div style={{position:"absolute",top:-2,right:-2,minWidth:18,height:18,borderRadius:9,background:"var(--red)",color:"#fff",fontSize:9,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 5px",border:"2px solid var(--bg)"}}>{chatUnreadTotal>9?"9+":chatUnreadTotal}</div>}</button>}
   {msgWidget&&page!=="messages"&&<MsgWidget/>}
-  {page!=="ia"&&page!=="messages"&&!aiMini&&<button onClick={()=>setAiMini(true)} style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>}
+  {page!=="ia"&&page!=="messages"&&!aiMini&&<button onClick={()=>setAiMini(true)} title="Agent IA" style={{position:"fixed",bottom:20,right:20,zIndex:500,width:48,height:48,borderRadius:"50%",background:"linear-gradient(135deg,var(--gold),var(--bordeaux2))",color:"#fff",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 6px 24px rgba(197,160,89,.3)",border:"none",transition:"all .3s"}} className="ai-fab"><i className="fa-solid fa-robot"/></button>}
   {/* ═══ AGENT IA — FENÊTRE FLOTTANTE ═══ */}
   {aiMini&&page!=="ia"&&<div className="fu" style={{position:"fixed",bottom:20,right:20,zIndex:1500,width:370,maxWidth:"calc(100vw - 40px)",height:480,maxHeight:"calc(100vh - 100px)",background:"var(--bg2)",border:"1px solid rgba(197,160,89,.3)",borderRadius:14,boxShadow:"0 16px 50px rgba(0,0,0,.45)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
     <div style={{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:8,background:"linear-gradient(135deg,rgba(197,160,89,.12),transparent)"}}>
@@ -2459,16 +3037,16 @@ return (
       <button onClick={()=>setAiMini(false)} title="Fermer" style={{color:"var(--text3)",fontSize:14,padding:4}}><i className="fa-solid fa-xmark"/></button>
     </div>
     <div style={{padding:"7px 9px",borderBottom:"1px solid var(--border)",display:"flex",gap:4,flexWrap:"wrap"}}>
-      {[{t:"Analyse",p:"Analyse pipeline: forces, risques, 3 actions prioritaires."},{t:"Plan Hebdo",p:"Plan action semaine par apporteur d'affaires."},{t:"Relances",p:"Messages de relance personnalisés."}].map(a=>
-        <button key={a.t} onClick={()=>askAI(a.p)} style={{padding:"4px 9px",borderRadius:20,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",fontSize:10,fontWeight:600}}>{a.t}</button>)}
+      {[{t:"Débrief",a:()=>agentBrief(true)},{t:"Analyse",a:()=>agentAnalyse("Analyse","Analyse le pipeline : forces, risques, 3 actions prioritaires.")},{t:"Relances",a:()=>agentAnalyse("Relances","Identifie les dossiers à relancer et propose un message pour chacun.")}].map(x=>
+        <button key={x.t} onClick={x.a} disabled={agentBusy} style={{padding:"4px 9px",borderRadius:20,border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text2)",fontSize:10,fontWeight:600}}>{x.t}</button>)}
     </div>
     <div style={{flex:1,overflowY:"auto",padding:10,display:"flex",flexDirection:"column",gap:6}}>
-      {aiMsgs.length===0&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",textAlign:"center",fontSize:11.5,padding:16,lineHeight:1.6}}><div><i className="fa-solid fa-robot" style={{fontSize:22,display:"block",marginBottom:8,color:"rgba(197,160,89,.35)"}}/>Posez votre question —<br/>l'IA voit tout votre pipeline.</div></div>}
-      {aiMsgs.map((m,i)=><div key={i} style={{padding:"9px 11px",borderRadius:9,fontSize:12,lineHeight:1.65,whiteSpace:"pre-wrap",background:m.role==="user"?"rgba(197,160,89,.08)":"var(--bg3)",border:"1px solid "+(m.role==="user"?"rgba(197,160,89,.16)":"var(--border)"),marginLeft:m.role==="user"?14:0,marginRight:m.role==="assistant"?14:0}}>{m.content}</div>)}
-      {aiLoad&&<div style={{padding:8,color:"var(--text3)",fontSize:11}}><i className="fa-solid fa-spinner fa-spin"/> Analyse…</div>}
-      <div ref={aiRef}/>
+      {agentLog.length===0&&<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",textAlign:"center",fontSize:11.5,padding:16,lineHeight:1.6}}><div><i className="fa-solid fa-robot" style={{fontSize:22,display:"block",marginBottom:8,color:"rgba(197,160,89,.35)"}}/>Donne un ordre ou pose ta question.<br/>L'agent voit tout ton pipeline.</div></div>}
+      {agentLog.map((m,i)=><div key={i} style={{padding:"9px 11px",borderRadius:9,fontSize:12,lineHeight:1.65,background:m.role==="user"?"rgba(197,160,89,.08)":"var(--bg3)",border:"1px solid "+(m.role==="user"?"rgba(197,160,89,.16)":"var(--border)"),marginLeft:m.role==="user"?14:0,marginRight:m.role==="agent"?14:0}}><span style={{fontSize:9,color:"var(--text3)",display:"block",marginBottom:2}}>{m.role==="user"?"Toi":"Agent"}</span><span dangerouslySetInnerHTML={{__html:(m.text||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/^#{1,4}\s*/gm,"").replace(/^\s*[-•]\s+/gm,"· ").replace(/\n/g,"<br/>")}}/></div>)}
+      {agentPending&&<div style={{padding:10,borderRadius:8,background:"rgba(231,76,76,.06)",border:"1px solid rgba(231,76,76,.3)"}}><div style={{fontSize:11,fontWeight:700,color:"var(--red)",marginBottom:6}}>Confirmation requise</div><div style={{fontSize:11,marginBottom:8}}>{agentPending.label}</div><div style={{display:"flex",gap:6}}><button onClick={agentConfirm} style={{padding:"6px 12px",borderRadius:6,background:"var(--red)",color:"#fff",fontSize:11,fontWeight:700,border:"none"}}>Confirmer</button><button onClick={agentCancel} style={{padding:"6px 12px",borderRadius:6,border:"1px solid var(--border)",color:"var(--text2)",fontSize:11}}>Annuler</button></div></div>}
+      {agentBusy&&<div style={{padding:8,color:"var(--gold)",fontSize:11}}><i className="fa-solid fa-spinner fa-spin"/> L'agent réfléchit...</div>}
     </div>
-    <AIInputBar onSend={t=>askAI(t)} loading={aiLoad}/>
+    <AgentInputBar onSend={agentRun} loading={agentBusy}/>
   </div>}
   {toast&&<div className="fu" style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:2000,background:"var(--bg2)",border:"1px solid rgba(197,160,89,.2)",borderRadius:"var(--radius)",padding:"8px 18px",color:"var(--text)",fontSize:12,boxShadow:"0 8px 30px rgba(0,0,0,.3)"}}>{toast}</div>}
 </div>);
@@ -3130,6 +3708,15 @@ return <div><div style={{display:"flex",justifyContent:"space-between",marginBot
 </div></div>}
 
 /* V26 — AI Input Bar (module-scope = stable component, no remount, no focus loss) */
+function AgentInputBar({onSend,loading}){
+const[val,setVal]=useState("");
+const send=()=>{const t=val.trim();if(t&&!loading){onSend(t);setVal("")}};
+const IS2={flex:1,padding:"10px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg)",color:"var(--text)",fontSize:14,outline:"none",fontFamily:"var(--sans)"};
+return <div style={{display:"flex",gap:4}}>
+  <input style={IS2} value={val} onChange={e=>setVal(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}} placeholder="Donne un ordre à l'agent..." />
+  <button onClick={send} disabled={loading||!val.trim()} style={{padding:"10px 16px",borderRadius:"var(--radius)",background:(loading||!val.trim())?"var(--bg3)":"var(--gold)",color:(loading||!val.trim())?"var(--text3)":"var(--bg)",fontSize:14,fontWeight:700}}>{loading?"...":"→"}</button>
+</div>}
+
 function AIInputBar({onSend,loading}){
 const[val,setVal]=useState("");
 const send=()=>{const t=val.trim();if(t&&!loading){onSend(t);setVal("")}};
