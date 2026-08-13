@@ -1185,6 +1185,19 @@ const gcalPush=async(date,title,time,endTime,allDay)=>{
     if(r.status===401){setGcalToken(null);setGcalConnected(false);flash("Session Google expirée, reconnecte-toi");}
   }catch(e){/* silencieux : ne bloque pas la création CRM */}
 };
+// Envoyer TOUS mes événements existants vers Google (rattrapage)
+const[gcalSyncing,setGcalSyncing]=useState(false);
+const gcalPushAll=async()=>{
+  if(!gcalToken){flash("Connecte d'abord Google");return;}
+  const evs=myAgEvents||[];
+  if(evs.length===0){flash("Aucun événement à envoyer");return;}
+  if(!window.confirm("Envoyer "+evs.length+" événements vers ton Google Agenda ? (à ne faire qu'une fois pour éviter les doublons)"))return;
+  setGcalSyncing(true);let ok=0;
+  for(const e of evs){
+    try{await gcalPush(e.date,e.title,e.time,e.end_time,e.all_day);ok++;}catch(err){}
+  }
+  setGcalSyncing(false);flash(ok+" événements envoyés vers Google Agenda ✓");
+};
 const addAgEvent=async(date,title,time,color,assignee_ids,endTime,allDay)=>{const ev={id:uid(),date,title,time:allDay?"00:00":(time||"09:00"),end_time:allDay?"":(endTime||""),all_day:!!allDay,color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}gcalPush(ev.date,ev.title,ev.time,ev.end_time,ev.all_day);};
 const delAgEvent=async id=>{setAgEvents(p=>p.filter(e=>e.id!==id));try{await sb.from("agenda_events").delete().eq("id",id)}catch(e){}};
 const moveAgEvent=async(id,newDate,newTime,newEnd,newTitle)=>{const patch={date:newDate};if(newTime)patch.time=newTime;if(newEnd!==undefined)patch.end_time=newEnd;if(newTitle!==undefined&&newTitle!=="")patch.title=newTitle;setAgEvents(p=>p.map(e=>e.id===id?{...e,...patch}:e));const ev=agEvents.find(e=>e.id===id);flash("Event deplace au "+newDate);if(ev)addActivity(sess,"a deplace",ev.title,"var(--purple)");try{await sb.from("agenda_events").update(patch).eq("id",id)}catch(e){flash("Erreur sync agenda")}};
@@ -2401,7 +2414,8 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
     <div style={{display:"flex",gap:4,alignItems:"center"}}>
       <button onClick={()=>setAgView("cal")} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(agView==="cal"?"var(--gold)":"var(--border)"),color:agView==="cal"?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:agView==="cal"?"rgba(197,160,89,.06)":"transparent"}}><i className="fa-solid fa-calendar-days" style={{marginRight:3}}/>Mois</button>
       <button onClick={()=>setAgView("list")} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(agView==="list"?"var(--gold)":"var(--border)"),color:agView==="list"?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:agView==="list"?"rgba(197,160,89,.06)":"transparent"}}><i className="fa-solid fa-list" style={{marginRight:3}}/>Liste</button>
-      <button onClick={gcalConnect} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(gcalConnected?"var(--green)":"var(--border)"),color:gcalConnected?"var(--green)":"var(--text2)",fontSize:11,fontWeight:600,background:gcalConnected?"rgba(8,153,129,.06)":"transparent"}} title={gcalConnected?"Google Agenda connecté — tes RDV y sont envoyés":"Connecter ton Google Agenda"}><i className={"fa-brands fa-google"} style={{marginRight:4}}/>{gcalConnected?"Agenda connecté":"Connecter Google"}</button>
+      <button onClick={gcalConnect} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(gcalConnected?"var(--green)":"var(--border)"),color:gcalConnected?"var(--green)":"var(--text2)",fontSize:11,fontWeight:600,background:gcalConnected?"rgba(8,153,129,.06)":"transparent"}} title={gcalConnected?"Google Agenda connecte":"Connecter ton Google Agenda"}><i className="fa-brands fa-google" style={{marginRight:4}}/>{gcalConnected?"Agenda connecte":"Connecter Google"}</button>
+      {gcalConnected?<button onClick={gcalPushAll} disabled={gcalSyncing} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid var(--gold)",color:"var(--gold)",fontSize:11,fontWeight:600,background:"transparent",opacity:gcalSyncing?0.5:1}} title="Envoyer tous mes evenements vers Google"><i className={gcalSyncing?"fa-solid fa-spinner fa-spin":"fa-solid fa-cloud-arrow-up"} style={{marginRight:4}}/>{gcalSyncing?"Envoi...":"Tout envoyer vers Google"}</button>:null}
     </div>
   </div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:14}}>
