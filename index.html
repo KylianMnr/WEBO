@@ -921,6 +921,8 @@ button:active{transition-duration:var(--press)!important}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://apis.google.com/js/api.js" async defer></script>
 <script>
 window.onerror=function(msg,src,line,col,err){
   var el=document.getElementById("root");
@@ -1064,7 +1066,7 @@ const effRole=povRole||roleOf(effSess);
 const isA=povRole?false:(TEAM.find(t=>t.id===effSess)?.isAdmin||false);
 const sU=povRole?{name:povRole==="commercial"?"Commercial":"Technicien",role:povRole==="commercial"?"Vue Commercial":"Vue Technicien"}:TEAM.find(t=>t.id===effSess);
 const isTech=effRole==="technicien";const isCom=effRole==="commercial";
-const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);const[aiMini,setAiMini]=useState(false);
+const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);const[aiMini,setAiMini]=useState(false);const[gcalToken,setGcalToken]=useState(null);const[gcalConnected,setGcalConnected]=useState(false);
 const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("webo_theme")||"dark"}catch(e){return"dark"}});const[proxySecret,setProxySecret]=useState(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const AI_PROXY=SB_URL+"/functions/v1/ai-proxy";
 const aiCall=async(messages,system,search)=>{if(!proxySecret)throw new Error("Cle d acces IA manquante. Cliquez sur la cle dans la nav.");const r=await fetch(AI_PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-webo-secret":proxySecret,"x-webo-user":(sess||"")},body:JSON.stringify({messages:messages,system:system||"",search:!!search})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Erreur IA "+r.status));return d.text||"";};
@@ -1146,7 +1148,44 @@ const pitchCopy=(p)=>{const prenom=(p.nom||"").split(" ")[0];const txt="WEBO - "
 const anon=v=>{if(!clientMode||!v)return v;const s=String(v);if(s.includes("@"))return s[0]+"***@***";if(/^[+0-9]/.test(s))return s.slice(0,4)+"****";const parts=s.split(" ");if(parts.length>1)return parts[0]+" "+parts[1][0]+".";return s};
 
 /* V13.2 — Agenda calendar */
-const addAgEvent=async(date,title,time,color,assignee_ids,endTime,allDay)=>{const ev={id:uid(),date,title,time:allDay?"00:00":(time||"09:00"),end_time:allDay?"":(endTime||""),all_day:!!allDay,color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}};
+// ═══ SYNCHRO GOOGLE AGENDA ═══
+const GCAL_CLIENT_ID="381544784855-l5o4ng2r20utbg27mkecrqou1qr5smhn.apps.googleusercontent.com";
+const GCAL_SCOPE="https://www.googleapis.com/auth/calendar.events";
+const gcalTokenClientRef=useRef(null);
+// Connexion : demande l'autorisation Google
+const gcalConnect=()=>{
+  if(!window.google||!window.google.accounts||!window.google.accounts.oauth2){flash("Google pas encore chargé, réessaie dans 2s");return;}
+  try{
+    const tc=window.google.accounts.oauth2.initTokenClient({
+      client_id:GCAL_CLIENT_ID,scope:GCAL_SCOPE,
+      callback:(resp)=>{
+        if(resp&&resp.access_token){setGcalToken(resp.access_token);setGcalConnected(true);try{localStorage.setItem("gcal_connected","1")}catch(e){}flash("Google Agenda connecté ✓");}
+        else{flash("Connexion Google échouée");}
+      }
+    });
+    gcalTokenClientRef.current=tc;
+    tc.requestAccessToken({prompt:gcalConnected?"":"consent"});
+  }catch(e){flash("Erreur Google: "+(e.message||"").slice(0,50));}
+};
+// Envoyer un événement vers Google Agenda
+const gcalPush=async(date,title,time,endTime,allDay)=>{
+  if(!gcalToken)return; // pas connecté, on ne fait rien
+  try{
+    let body;
+    if(allDay){
+      body={summary:title,start:{date},end:{date}};
+    }else{
+      const st=(time||"09:00");
+      const et=endTime||(String(Math.min(parseInt(st)+1,23)).padStart(2,"0")+":"+(st.split(":")[1]||"00"));
+      body={summary:title,start:{dateTime:date+"T"+st+":00",timeZone:"Europe/Paris"},end:{dateTime:date+"T"+et+":00",timeZone:"Europe/Paris"}};
+    }
+    const r=await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events",{
+      method:"POST",headers:{"Authorization":"Bearer "+gcalToken,"Content-Type":"application/json"},body:JSON.stringify(body)
+    });
+    if(r.status===401){setGcalToken(null);setGcalConnected(false);flash("Session Google expirée, reconnecte-toi");}
+  }catch(e){/* silencieux : ne bloque pas la création CRM */}
+};
+const addAgEvent=async(date,title,time,color,assignee_ids,endTime,allDay)=>{const ev={id:uid(),date,title,time:allDay?"00:00":(time||"09:00"),end_time:allDay?"":(endTime||""),all_day:!!allDay,color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}gcalPush(ev.date,ev.title,ev.time,ev.end_time,ev.all_day);};
 const delAgEvent=async id=>{setAgEvents(p=>p.filter(e=>e.id!==id));try{await sb.from("agenda_events").delete().eq("id",id)}catch(e){}};
 const moveAgEvent=async(id,newDate,newTime,newEnd,newTitle)=>{const patch={date:newDate};if(newTime)patch.time=newTime;if(newEnd!==undefined)patch.end_time=newEnd;if(newTitle!==undefined&&newTitle!=="")patch.title=newTitle;setAgEvents(p=>p.map(e=>e.id===id?{...e,...patch}:e));const ev=agEvents.find(e=>e.id===id);flash("Event deplace au "+newDate);if(ev)addActivity(sess,"a deplace",ev.title,"var(--purple)");try{await sb.from("agenda_events").update(patch).eq("id",id)}catch(e){flash("Erreur sync agenda")}};
 
@@ -1922,7 +1961,7 @@ return(
       <div style={{padding:"8px 0",maxHeight:200,overflowY:"auto"}}>
         {(()=>{
         const todayD=td();
-        const in7=(ds)=>{if(!ds)return false;const d=new Date(ds),n=new Date();const diff=(d-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/86400000;return diff>=0&&diff<7;};
+        const in7=(ds)=>{if(!ds)return false;const d=new Date(ds+"T00:00:00");const n=new Date();const dow=(n.getDay()+6)%7;const lundi=new Date(n.getFullYear(),n.getMonth(),n.getDate()-dow);const dimanche=new Date(lundi);dimanche.setDate(lundi.getDate()+6);dimanche.setHours(23,59,59,999);return d>=lundi&&d<=dimanche;};
         let items=[];
         if(hubAgView==="jour"){
           items=myAgEvents.filter(e=>e.date===todayD).sort((a,b)=>(a.time||"").localeCompare(b.time||"")).map(e=>({lb:e.title,cl:e.color||"var(--purple)",tag:(e.all_day?"Journée":(e.time||"")),date:null}));
@@ -2362,6 +2401,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
     <div style={{display:"flex",gap:4,alignItems:"center"}}>
       <button onClick={()=>setAgView("cal")} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(agView==="cal"?"var(--gold)":"var(--border)"),color:agView==="cal"?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:agView==="cal"?"rgba(197,160,89,.06)":"transparent"}}><i className="fa-solid fa-calendar-days" style={{marginRight:3}}/>Mois</button>
       <button onClick={()=>setAgView("list")} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(agView==="list"?"var(--gold)":"var(--border)"),color:agView==="list"?"var(--gold)":"var(--text2)",fontSize:11,fontWeight:600,background:agView==="list"?"rgba(197,160,89,.06)":"transparent"}}><i className="fa-solid fa-list" style={{marginRight:3}}/>Liste</button>
+      <button onClick={gcalConnect} style={{padding:"5px 10px",borderRadius:"var(--radius)",border:"1px solid "+(gcalConnected?"var(--green)":"var(--border)"),color:gcalConnected?"var(--green)":"var(--text2)",fontSize:11,fontWeight:600,background:gcalConnected?"rgba(8,153,129,.06)":"transparent"}} title={gcalConnected?"Google Agenda connecté — tes RDV y sont envoyés":"Connecter ton Google Agenda"}><i className={"fa-brands fa-google"} style={{marginRight:4}}/>{gcalConnected?"Agenda connecté":"Connecter Google"}</button>
     </div>
   </div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:8,marginBottom:14}}>
@@ -2370,7 +2410,7 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   </div>
   {(()=>{
     const todayDs=td();
-    const in7=(ds)=>{if(!ds)return false;const d=new Date(ds),n=new Date();const diff=(d-new Date(n.getFullYear(),n.getMonth(),n.getDate()))/86400000;return diff>=0&&diff<7;};
+    const in7=(ds)=>{if(!ds)return false;const d=new Date(ds+"T00:00:00");const n=new Date();const dow=(n.getDay()+6)%7;const lundi=new Date(n.getFullYear(),n.getMonth(),n.getDate()-dow);const dimanche=new Date(lundi);dimanche.setDate(lundi.getDate()+6);dimanche.setHours(23,59,59,999);return d>=lundi&&d<=dimanche;};
     const rdvToday=(agEvents||[]).filter(e=>e.date===todayDs).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
     const rdvWeek=(agEvents||[]).filter(e=>e.date!==todayDs&&in7(e.date)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
     const relances=agendaItems.filter(x=>x.type==="relance");
