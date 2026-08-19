@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas OS</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ DESIGN SYSTEM v3 — Enterprise Premium ═══ */
+:root {
+  --bg: #0B0E14; --sf1: #111520; --sf2: #171C28; --sf3: #1E2436; --sf4: #252C3D;
+  --bd: rgba(255,255,255,.06); --bdh: rgba(255,255,255,.10);
+  --t0: #fafafa; --t1: #e4e4e7; --t2: #a1a1aa; --t3: #71717a; --t4: #52525b;
+  --ac: #C5A059; --ac2: #D4AF6A; --acg: rgba(197,160,89,.15); --acs: rgba(197,160,89,.08);
+  --lx: #E74C4C; --lxs: rgba(231,76,76,.08); --lxb: rgba(231,76,76,.15);
+  --tl: #089981; --tls: rgba(8,153,129,.08); --tlb: rgba(8,153,129,.15);
+  --sy: #22d3ee; --sys: rgba(34,211,238,.08); --syb: rgba(34,211,238,.15);
+  --mk: #8B5CF6; --mks: rgba(139,92,246,.08); --mkb: rgba(139,92,246,.15);
+  --ok: #089981; --oks: rgba(8,153,129,.1); --wn: #C5A059; --wns: rgba(197,160,89,.1);
+  --er: #E74C4C; --ers: rgba(231,76,76,.1); --in: #C5A059; --ins: rgba(197,160,89,.1);
+  --r: 12px; --rl: 16px; --font: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono: 'JetBrains Mono',ui-monospace,monospace;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3); --shadow: 0 2px 8px rgba(0,0,0,.25); --shadow-lg: 0 8px 32px rgba(0,0,0,.4);
+  --topbar-h: 52px; --sidebar-w: 240px;
+}
+[data-theme="light"] {
+  --bg: #F2EDDF; --sf1: #FFFDF8; --sf2: #FAF6EB; --sf3: #EDE5D0; --sf4: #E2D8BE;
+  --bd: rgba(0,0,0,.08); --bdh: rgba(0,0,0,.14);
+  --t0: #111113; --t1: #1f2937; --t2: #6b7280; --t3: #9ca3af; --t4: #b8ac90;
+  --ac: #8B6A2E; --ac2: #A07A38; --acg: rgba(139,106,46,.12); --acs: rgba(139,106,46,.06);
+  --lx: #C73838; --lxs: rgba(199,56,56,.06); --lxb: rgba(199,56,56,.12);
+  --tl: #067961; --tls: rgba(6,121,97,.06); --tlb: rgba(6,121,97,.12);
+  --sy: #0891b2; --sys: rgba(8,145,178,.06); --syb: rgba(8,145,178,.12);
+  --mk: #7045D0; --mks: rgba(112,69,208,.06); --mkb: rgba(112,69,208,.12);
+  --ok: #067961; --oks: rgba(6,121,97,.08); --wn: #8B6A2E; --wns: rgba(139,106,46,.08);
+  --er: #C73838; --ers: rgba(199,56,56,.08); --in: #8B6A2E; --ins: rgba(139,106,46,.08);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06); --shadow: 0 2px 8px rgba(0,0,0,.08); --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: var(--bg); color: var(--t1); min-height: 100vh; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; transition: background .3s, color .3s; }
+::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--sf4); border-radius: 3px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes breathe { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
+@keyframes micPulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,.35); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* ═══ TOPBAR ═══ */
+.topbar {
+  position: fixed; top: 0; left: var(--sidebar-w); right: 0; height: var(--topbar-h);
+  background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--bd); z-index: 90; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 28px; transition: background .3s;
+}
+.breadcrumb { font-size: 13px; color: var(--t3); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span { color: var(--t1); font-weight: 600; }
+.search-bar {
+  display: flex; align-items: center; gap: 8px; padding: 7px 14px;
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 8px;
+  color: var(--t3); font-size: 13px; cursor: pointer; transition: border-color .2s; min-width: 240px;
+}
+.search-bar:hover { border-color: var(--bdh); }
+.search-bar kbd { background: var(--sf3); padding: 1px 6px; border-radius: 4px; font-size: 11px; font-family: var(--font); color: var(--t4); }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.notif-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--bd); background: var(--sf2);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: all .15s; font-size: 16px;
+}
+.notif-btn:hover { border-color: var(--bdh); background: var(--sf3); }
+.notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--er); border: 2px solid var(--bg); }
+.theme-btn {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--bd); background: var(--sf2);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; font-size: 16px;
+}
+.theme-btn:hover { border-color: var(--bdh); background: var(--sf3); }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--ac), #7c3aed);
+  display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer;
+}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: var(--sidebar-w); min-height: 100vh; background: var(--sf1); border-right: 1px solid var(--bd);
+  position: fixed; left: 0; top: 0; z-index: 100; display: flex; flex-direction: column; transition: background .3s;
+}
+.main { margin-left: var(--sidebar-w); padding-top: var(--topbar-h); }
+.main-inner { padding: 28px 32px; max-width: 1280px; animation: fadeUp .35s ease; }
+
+@media (max-width: 900px) { .sidebar { display: none; } .main { margin-left: 0; } .topbar { left: 0; } }
+
+.nav-list { display: flex; flex-direction: column; flex: 1; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+  font-size: 14px; font-weight: 500; color: var(--t3); cursor: pointer;
+  transition: all .15s; border-left: 2px solid transparent; flex: 1;
+}
+.nav-item:hover { color: var(--t1); background: var(--acs); }
+.nav-item.active { color: var(--ac2); background: var(--acs); border-left-color: var(--ac); font-weight: 600; }
+.nav-section { padding: 20px 20px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--t4); }
+.nav-icon { font-size: 18px; width: 24px; text-align: center; opacity: .85; }
+
+/* ═══ COMPONENTS ═══ */
+.btn {
+  padding: 9px 18px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px;
+  font-family: var(--font); cursor: pointer; transition: all .15s; display: inline-flex;
+  align-items: center; gap: 6px; white-space: nowrap;
+}
+.btn:hover { transform: translateY(-1px); } .btn:active { transform: translateY(0); }
+.btn-p { background: var(--ac); color: #fff; box-shadow: 0 1px 3px var(--acg); }
+.btn-p:hover { background: #5558e6; }
+.btn-ok { background: var(--ok); color: #fff; } .btn-ok:hover { background: #16a34a; }
+.btn-er { background: var(--er); color: #fff; } .btn-er:hover { background: #dc2626; }
+.btn-ghost { background: transparent; color: var(--t2); border: 1px solid var(--bd); }
+.btn-ghost:hover { background: var(--sf2); border-color: var(--bdh); color: var(--t1); }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+.btn:disabled { opacity: .3; cursor: not-allowed; transform: none !important; }
+
+.badge {
+  padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.badge-ok { background: var(--oks); color: var(--ok); } .badge-wn { background: var(--wns); color: var(--wn); }
+.badge-er { background: var(--ers); color: var(--er); } .badge-in { background: var(--ins); color: var(--in); }
+.badge-mk { background: var(--mks); color: var(--mk); }
+
+.card {
+  background: var(--sf1); border: 1px solid var(--bd); border-radius: var(--rl);
+  padding: 24px; transition: all .25s; box-shadow: var(--shadow-sm);
+}
+.card:hover { border-color: var(--bdh); box-shadow: var(--shadow); }
+
+.input {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--bd); border-radius: 8px;
+  background: var(--sf2); color: var(--t1); font-size: 14px; font-family: var(--font);
+  outline: none; transition: all .2s;
+}
+.input:focus { border-color: var(--ac); box-shadow: 0 0 0 3px var(--acg); }
+.label { display: block; font-size: 13px; font-weight: 500; color: var(--t2); margin-bottom: 6px; }
+.field { margin-bottom: 16px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.kpi {
+  background: var(--sf1); border: 1px solid var(--bd); border-radius: var(--rl);
+  padding: 24px; text-align: center; transition: all .25s; box-shadow: var(--shadow-sm);
+}
+.kpi:hover { border-color: var(--bdh); transform: translateY(-2px); box-shadow: var(--shadow); }
+.kpi-val { font-size: 28px; font-weight: 800; margin: 8px 0 4px; letter-spacing: -.5px; }
+.kpi-label { font-size: 12px; color: var(--t3); font-weight: 500; }
+
+table.data { width: 100%; border-collapse: collapse; }
+table.data th {
+  text-align: left; padding: 14px 16px; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .5px; color: var(--t4); border-bottom: 1px solid var(--bd);
+}
+table.data td { padding: 14px 16px; border-bottom: 1px solid var(--bd); font-size: 13px; }
+table.data tbody tr { transition: background .15s; }
+table.data tbody tr:hover { background: var(--acs); }
+table.data tbody tr:last-child td { border-bottom: none; }
+
+/* ═══ CHAT (Slack-style) ═══ */
+.chat-frame { display: flex; flex-direction: column; height: 520px; border-radius: var(--rl); overflow: hidden; border: 1px solid var(--bd); background: var(--bg); }
+.chat-header { padding: 16px 20px; background: var(--sf1); border-bottom: 1px solid var(--bd); display: flex; align-items: center; gap: 12px; }
+.chat-body { flex: 1; overflow-y: auto; padding: 20px; }
+.chat-input-bar { padding: 16px; background: var(--sf1); border-top: 1px solid var(--bd); display: flex; gap: 8px; align-items: center; }
+
+.msg-row { display: flex; gap: 12px; margin-bottom: 16px; animation: fadeUp .25s ease; }
+.msg-row.user { justify-content: flex-end; }
+.msg-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.msg-content { max-width: 80%; }
+.msg-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.msg-bubble {
+  padding: 12px 16px; border-radius: 12px; font-size: 13.5px; line-height: 1.55;
+  background: var(--sf2); border: 1px solid var(--bd); color: var(--t1);
+}
+.msg-row.user .msg-bubble { background: var(--ac); border-color: var(--ac); color: #fff; border-radius: 12px 12px 4px 12px; }
+
+/* ═══ TERMINAL ═══ */
+.terminal {
+  background: var(--bg); border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 16px; font-family: var(--mono); font-size: 11.5px; line-height: 1.6;
+  max-height: 200px; overflow-y: auto; transition: background .3s;
+}
+
+/* ═══ KANBAN ═══ */
+.kan-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kan-col { background: var(--sf1); border: 1px solid var(--bd); border-radius: var(--rl); padding: 16px; min-height: 240px; }
+.kan-col-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--bd); }
+.kan-card {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: var(--r);
+  padding: 14px; margin-bottom: 10px; cursor: grab; transition: all .15s;
+}
+.kan-card:hover { border-color: var(--bdh); box-shadow: var(--shadow); transform: translateY(-1px); }
+
+/* ═══ CALENDAR ═══ */
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal-head { padding: 8px; text-align: center; font-size: 11px; font-weight: 600; color: var(--t4); }
+.cal-day {
+  padding: 8px; min-height: 72px; min-width: 0; background: var(--sf1); border: 1px solid var(--bd);
+  border-radius: 8px; font-size: 12px; transition: all .12s; overflow: hidden;
+}
+.cal-day:hover { border-color: var(--bdh); } .cal-day.today { border-color: var(--ac); background: var(--acs); }
+.cal-day.empty { opacity: .15; background: transparent; border-color: transparent; }
+.cal-ev {
+  padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; max-width: 100%;
+  margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+}
+.cal-ev.formation { background: var(--oks); color: var(--ok); }
+.cal-ev.legal { background: var(--ers); color: var(--er); }
+.cal-ev.meeting { background: var(--ins); color: var(--in); }
+.cal-ev.conge { background: var(--mks); color: var(--mk); }
+
+/* ═══ MISC ═══ */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 999; display: flex; align-items: center; justify-content: center; animation: fadeIn .15s; }
+.modal { background: var(--sf1); border: 1px solid var(--bdh); border-radius: var(--rl); padding: 32px; max-width: 520px; width: 94%; max-height: 85vh; overflow-y: auto; animation: fadeUp .25s ease; box-shadow: var(--shadow-lg); }
+.artifact-panel {
+  position: fixed; top: 0; right: 0; width: 520px; max-width: 92vw; height: 100vh;
+  background: var(--sf1); border-left: 1px solid var(--bd); z-index: 1000;
+  display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0,0,0,.4); animation: slideIn .25s ease;
+}
+.alert-box { padding: 14px 18px; border-radius: var(--r); font-size: 13px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.alert-box.danger { background: var(--ers); border: 1px solid rgba(239,68,68,.15); color: var(--er); }
+.alert-box.warn { background: var(--wns); border: 1px solid rgba(234,179,8,.15); color: var(--wn); }
+.alert-box.success { background: var(--oks); border: 1px solid rgba(34,197,94,.15); color: var(--ok); }
+.alert-box.purple { background: var(--mks); border: 1px solid rgba(167,139,250,.15); color: var(--mk); }
+.progress { height: 4px; background: var(--sf3); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
+.mic-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--bd); background: var(--sf2);
+  color: var(--t3); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; flex-shrink: 0;
+}
+.mic-btn:hover { border-color: var(--er); color: var(--er); background: var(--ers); }
+.mic-btn.on { border-color: var(--er); color: var(--er); background: var(--ers); animation: micPulse 1.2s infinite; }
+.range-input { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--sf3); outline: none; cursor: pointer; }
+.range-input::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--ac); cursor: pointer; border: 2px solid var(--sf1); box-shadow: 0 1px 4px var(--acg); }
+.role-switch { display: flex; background: var(--sf2); border-radius: 8px; padding: 3px; border: 1px solid var(--bd); gap: 2px; }
+.role-opt { padding: 6px 12px; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: var(--font); cursor: pointer; transition: all .15s; background: transparent; color: var(--t3); }
+.role-opt.active { background: var(--ac); color: #fff; }
+.drop-zone {
+  border: 1px dashed var(--sf4); border-radius: var(--rl); padding: 32px; text-align: center;
+  cursor: pointer; transition: all .2s; background: transparent;
+}
+.drop-zone:hover { border-color: var(--ac); background: var(--acs); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot.green { background: var(--ok); animation: breathe 2s infinite; }
+h1.page-title { font-size: 24px; font-weight: 700; letter-spacing: -.3px; color: var(--t0); }
+.page-sub { font-size: 14px; color: var(--t3); margin-top: 2px; }
+.section-gap { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useRef}=React;
+const LS={g:(k,d)=>{try{const v=localStorage.getItem('ao3_'+k);return v?JSON.parse(v):d}catch{return d}},s:(k,v)=>{try{localStorage.setItem('ao3_'+k,JSON.stringify(v))}catch{}}};
+
+/* ═══ CONNEXION PARTAGÉE AVEC LE CRM (Supabase + proxy IA) ═══ */
+const SB_URL="https://smgglunijtmftjchxdgy.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtZ2dsdW5panRtZnRqY2h4ZGd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NzYyNDMsImV4cCI6MjA4ODE1MjI0M30.RM7JmWaY0z8vw4cpL1GqsZN2gCwNK-KMet2hNxMDd5A";
+const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY,{realtime:{params:{eventsPerSecond:10}}}):null;
+const AI_PROXY=SB_URL+"/functions/v1/ai-proxy";
+// Le secret IA est le MÊME que celui du CRM (clé "webo_proxy_secret" dans localStorage)
+const getProxySecret=()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}};
+const aiCall=async(messages,system)=>{
+  const secret=getProxySecret();
+  if(!secret)throw new Error("Clé IA manquante : configure-la d'abord dans le CRM (elle est partagée).");
+  const r=await fetch(AI_PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-webo-secret":secret,"x-webo-user":"atlas"},body:JSON.stringify({messages,system:system||"",search:false})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||("Erreur IA "+r.status));
+  return d.text||"";
+};
+// Utilitaires de date pour aligner le format Atlas (day num) sur le CRM (date ISO)
+const pad2=n=>String(n).padStart(2,'0');
+const isoDate=(y,m,d)=>y+'-'+pad2(m)+'-'+pad2(d); // m = 1..12
+const todayISO=()=>{const t=new Date();return isoDate(t.getFullYear(),t.getMonth()+1,t.getDate());};
+
+/* ═══ COMPTES WEBO (mapping identité pour la messagerie partagée CRM) ═══ */
+const ACCTS=[
+  {id:"kylian",name:"Kylian Meunier",color:"#C5A059",email:"kmeunier@webo-smart.fr"},
+  {id:"johanna",name:"Johanna",color:"#ec4899",email:"johanna@webo.fr"},
+  {id:"theo",name:"Théo",color:"#10b981",email:"ttheveniot@webo-smart.fr"}
+];
+const acctByEmail=e=>ACCTS.find(a=>a.email.toLowerCase()===String(e||'').toLowerCase());
+const mName=id=>{const a=ACCTS.find(x=>x.id===id);return a?a.name:(id||'?');};
+const mColor=id=>{const a=ACCTS.find(x=>x.id===id);return a?a.color:'var(--ac)';};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const now=()=>new Date().toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+const AG={lexia:{id:'lexia',n:'Lexia',i:'⚖️',c:'var(--lx)',bg:'#be123c'},talentis:{id:'talentis',n:'Talentis',i:'🎯',c:'var(--tl)',bg:'#059669'},syncro:{id:'syncro',n:'Syncro',i:'⚙️',c:'var(--sy)',bg:'#0891b2'}};
+
+const SENTINEL=[];
+const KAN_COLS=['sourced','entretien','offre','embauche'];
+const KAN_LBL={sourced:'Sourcé (IA)',entretien:'Entretien',offre:'Offre émise',embauche:'Embauché'};
+
+/* ═══ SCENARIOS (identical logic) ═══ */
+const SC={
+  embauche:[
+    {ag:'system',tx:'Scénario embauche activé via Make.com.',d:400},
+    {ag:'talentis',tx:"Fiche de poste Dev Web Senior générée. Benchmark salarial IDF appliqué. Critères RGAA/WCAG intégrés.",d:800,tm:[{t:'[Make.com] → scenario_embauche... OK',c:'var(--mk)'},{t:'[Claude API] Talentis → job_generator.create()',c:'var(--tl)'},{t:'  ✓ Fiche générée — 1 180 mots',c:'var(--ok)'}]},
+    {ag:'lexia',tx:"Clause **accessibilité EAA** ajoutée au contrat CDI. Sans elle, amende pouvant aller jusqu'à 5% du CA.",d:900,tm:[{t:'[Claude API] Lexia → contract_modifier.add("EAA")',c:'var(--lx)'},{t:'  ✓ Clause EAA insérée',c:'var(--ok)'}]},
+    {ag:'syncro',tx:"Fiche et contrat exportés vers le CRM. Nouveau candidat ajouté au pipeline recrutement.",d:600,tm:[{t:'[Make.com] Syncro → crm.push()',c:'var(--mk)'},{t:'  ✓ Pipeline mis à jour',c:'var(--ok)'}]},
+  ],
+  offboarding:[
+    {ag:'system',tx:'Scénario offboarding déclenché.',d:400},
+    {ag:'lexia',tx:"Solde de tout compte calculé : **4 847,32 €**.\nCertificat de travail et attestation France Travail générés conformément aux articles L1234-19 et L1234-9.",d:1000,tm:[{t:'[Make.com] → scenario_offboarding... OK',c:'var(--mk)'},{t:'[Claude API] Lexia → solde_tout_compte()',c:'var(--lx)'},{t:'  ✓ Net à verser : 4 847,32 €',c:'var(--ok)'},{t:'[Claude API] Lexia → documents_legaux()',c:'var(--lx)'},{t:'  ✓ 3 documents conformes',c:'var(--ok)'}]},
+    {ag:'syncro',tx:"Tous les accès révoqués : Google Workspace, CRM, Slack, badge bâtiment, VPN.",d:800,tm:[{t:'[Make.com] → revoke_all_access()',c:'var(--mk)'},{t:'  ✓ 5 accès révoqués',c:'var(--ok)'}]},
+    {ag:'talentis',tx:"Protocole de sortie complet. Entretien planifié le 22/04. Passation de 3 clients. Poste ouvert dans le pipeline.\n\n**Exécuté en 47 secondes** au lieu de 3 jours.",d:700,tm:[{t:'[Claude API] Talentis → exit_protocol()',c:'var(--tl)'},{t:'  ✓ 8 étapes documentées',c:'var(--ok)'}]},
+  ],
+  conflit:[
+    {ag:'system',tx:'Scénario résolution de conflit activé.',d:400},
+    {ag:'lexia',tx:"**Cadre légal** — L'employeur a une obligation de sécurité (Art. L4121-1). Un conflit non traité peut qualifier un harcèlement moral (2 ans, 30 000 € d'amende). Médiation recommandée sous 48h.",d:1200,tm:[{t:'[Claude API] Lexia → legal_scan("conflit")',c:'var(--lx)'},{t:'  ⚠ Obligation sécurité Art. L4121-1',c:'var(--wn)'}]},
+    {ag:'talentis',tx:"**Guide de médiation** généré en 5 étapes : entretien individuel, identification des faits, médiation conjointe, accord écrit, suivi J+15/J+30.",d:1400,tm:[{t:'[Claude API] Talentis → mediation_guide()',c:'var(--tl)'},{t:'  ✓ Guide complet',c:'var(--ok)'}]},
+    {ag:'syncro',tx:"Réunion de médiation planifiée le **17/04 à 14h**. Notifications envoyées aux deux parties.",d:800,tm:[{t:'[Make.com] → calendar.create("médiation")',c:'var(--mk)'},{t:'  ✓ Événement + notifications',c:'var(--ok)'}]},
+  ],
+  smartdrop_reunion:[
+    {ag:'system',tx:'Document "Transcription_Reunion_CSE.pdf" analysé.',d:400},
+    {ag:'talentis',tx:"Compte-rendu exécutif : **8 points clés**, **5 décisions**, **6 actions** à suivre.",d:1100,tm:[{t:'[Make.com] → document_parser.extract()',c:'var(--mk)'},{t:'[Claude API] Talentis → nlp_summarize()',c:'var(--tl)'},{t:'  ✓ Extraction complète',c:'var(--ok)'}]},
+    {ag:'lexia',tx:"2 alertes juridiques détectées dans les décisions du CSE.",d:700,tm:[{t:'[Claude API] Lexia → legal_scan(decisions)',c:'var(--lx)'},{t:'  ⚠ 2 points de vigilance',c:'var(--wn)'}]},
+    {ag:'syncro',tx:"Compte-rendu archivé dans le Coffre-Fort et exporté vers le CRM.",d:500,tm:[{t:'[Make.com] → crm.push("CR_CSE")',c:'var(--mk)'},{t:'  ✓ Export OK',c:'var(--ok)'}]},
+  ],
+  smartdrop_contrat:[
+    {ag:'system',tx:'Contrat "Draft_Contrat_Directeur.docx" soumis à l\'audit.',d:400},
+    {ag:'lexia',tx:"**Diagnostic par article :**\n\n🟢 Art. 1 — Engagement\n🟢 Art. 2 — Période d'essai\n🟢 Art. 3 — Rémunération\n🔴 Art. 5 — Télétravail : plafond manquant\n🔴 Art. 7 — Non-concurrence : contrepartie absente\n🔴 Art. 9 — Accessibilité EAA : clause absente\n\nVersion corrigée et sécurisée générée.",d:1600,tm:[{t:'[Make.com] → document_parser.extract()',c:'var(--mk)'},{t:'[Claude API] Lexia → contract_audit.full_scan()',c:'var(--lx)'},{t:'  ✓ 14 articles analysés',c:'var(--ok)'},{t:'  🔴 3 non-conformités détectées',c:'var(--er)'},{t:'[Claude API] Lexia → contract_fixer.apply(3)',c:'var(--lx)'},{t:'  ✓ Version sécurisée prête',c:'var(--ok)'}]},
+    {ag:'syncro',tx:"Contrat sécurisé exporté vers le CRM et sauvé dans le Coffre-Fort.",d:500,tm:[{t:'[Make.com] → crm.push("contrat_securise")',c:'var(--mk)'},{t:'  ✓ OK',c:'var(--ok)'}]},
+  ],
+  audit:[
+    {ag:'system',tx:'Audit de conformité 360° lancé.',d:400},
+    {ag:'lexia',tx:"**Exposition financière : 46 200 €**\n— RGAA/EAA : ~25 000 €\n— DSN URSSAF : 12 400 €\n— OETH : 5 600 €\n— Bonus-Malus : 3 200 €",d:1000,tm:[{t:'[Claude API] Lexia → compliance_scan()',c:'var(--lx)'},{t:'  ⚠ 3 axes critiques identifiés',c:'var(--wn)'}]},
+    {ag:'talentis',tx:"1 départ critique (Marc Rousseau — coût estimé 24 000 €). **Total à sécuriser : 70 200 €.**",d:700},
+    {ag:'syncro',tx:"Rapport complet dans l'artifact et archivé au Coffre-Fort.",d:500,tm:[{t:'[Make.com] → crm.push("audit_360")',c:'var(--mk)'},{t:'  ✓ OK',c:'var(--ok)'}]},
+  ],
+};
+
+const ARTS_DB={
+  embauche:{title:'Fiche de Poste — Dev Web Senior',content:'FICHE DE POSTE — DÉVELOPPEUR·EUSE WEB SENIOR\n\nContrat : CDI — Convention Syntec 3.1 Coeff. 170\nRémunération : 48 000 — 55 000 € brut/an\nLocalisation : Paris / Télétravail hybride\n\nMission prioritaire : Mise en conformité RGAA/EAA\nCompétences clés : React 18+, TypeScript, WCAG 2.1\n\nClause EAA ajoutée par Lexia — Directive UE 2019/882\n\nGénéré par Atlas OS × Make.com × Claude API'},
+  offboarding:{title:'Dossier Offboarding — Marc Rousseau',content:'DOSSIER OFFBOARDING COMPLET\n\nCollaborateur : Marc Rousseau — Commercial Senior\nSolde de tout compte : 4 847,32 €\n  - Indemnité CP : 1 280 €\n  - Prorata 13ème : 1 066,67 €\n  - Indemnité licenciement : 2 500,65 €\n\nDocuments : Certificat ✓ | Attestation ✓ | Reçu STC ✓\nAccès révoqués : Google ✓ CRM ✓ Slack ✓ Badge ✓ VPN ✓\nProtocole : Entretien 22/04 | Passation 3 clients\n\nExécuté en 47s — Atlas OS × Make.com'},
+  conflit:{title:'Guide de Médiation',content:'GUIDE DE MÉDIATION — RÉSOLUTION CONFLIT\n\n1. Entretien individuel (30 min chacun)\n2. Identification des faits objectifs\n3. Médiation conjointe (1h, cadre neutre)\n4. Accord écrit avec engagements\n5. Suivi J+15 et J+30\n\nCadre légal : Obligation sécurité Art. L4121-1\nMédiation planifiée : 17/04 à 14h\n\nGénéré par Atlas OS'},
+  smartdrop_reunion:{title:'CR Exécutif — CSE Avril 2026',content:'COMPTE-RENDU EXÉCUTIF — CSE AVRIL 2026\n\n8 points clés | 5 décisions | 6 actions\n\nDécisions :\n✅ Extension télétravail 3j/semaine\n✅ Budget formation +15%\n⚠️ Modification règlement → DREETS requis\n✅ Prime transport 75€/mois\n⚠️ Prime exceptionnelle → vérifier URSSAF\n\n2 alertes juridiques (Lexia)'},
+  smartdrop_contrat:{title:'Contrat Sécurisé — Directeur',content:'CONTRAT SÉCURISÉ (3 corrections Lexia)\n\n🟢 Articles 1-4, 6, 8 : Conformes\n🟢 Art. 5 : +plafond télétravail 3j/semaine\n🟢 Art. 7 : +contrepartie non-concurrence 30%\n🟢 Art. 9 : +clause accessibilité EAA\n\nPrêt pour signature.'},
+  audit:{title:'Audit Conformité 360°',content:'AUDIT 360° — AVRIL 2026\n\nExposition financière totale : 70 200 €\n  RGAA/EAA : 25 000 €\n  DSN : 12 400 €\n  OETH : 5 600 €\n  Turnover : 24 000 €\n\nPriorités :\n1. Conformité RGAA (P0)\n2. Correction DSN\n3. Rétention Marc Rousseau'},
+};
+
+function matchSC(t){const l=t.toLowerCase();
+  if(l.includes('conflit')||l.includes('crise')||l.includes('tension')||l.includes('sos'))return{k:'conflit',a:'conflit'};
+  if(l.includes('offboard')||l.includes('départ')||l.includes('licenciement')||(l.includes('marc')&&l.includes('gérez')))return{k:'offboarding',a:'offboarding'};
+  if(l.includes('embauche')||l.includes('recrut')||l.includes('fiche de poste'))return{k:'embauche',a:'embauche'};
+  if(l.includes('réunion')||l.includes('cse')||l.includes('résumé'))return{k:'smartdrop_reunion',a:'smartdrop_reunion'};
+  if(l.includes('contrat')||l.includes('draft')||l.includes('vérif'))return{k:'smartdrop_contrat',a:'smartdrop_contrat'};
+  if(l.includes('audit')||l.includes('360'))return{k:'audit',a:'audit'};
+  return null;
+}
+
+/* ═══════════════════ APP ═══════════════════ */
+/* ═══ ÉCRAN DE CONNEXION (mêmes comptes que le CRM) ═══ */
+function AtlasLogin({onDone}){
+  const[email,setEmail]=useState('');
+  const[pw,setPw]=useState('');
+  const[err,setErr]=useState('');
+  const[busy,setBusy]=useState(false);
+  const submit=async()=>{
+    if(!email.trim()||!pw){setErr('Email et mot de passe requis');return;}
+    if(!sb){setErr('Connexion Supabase indisponible');return;}
+    setBusy(true);setErr('Connexion…');
+    try{
+      const{data,error}=await sb.auth.signInWithPassword({email:email.trim(),password:pw});
+      if(error){setErr(error.message==='Invalid login credentials'?'Identifiants incorrects':error.message);setBusy(false);return;}
+      if(!data||!data.session){setErr('Session non créée');setBusy(false);return;}
+      setErr('');onDone();
+    }catch(e){setErr('Erreur : '+(e.message||e));setBusy(false);}
+  };
+  return(<div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--bg)',padding:20}}>
+    <div className="card" style={{width:'100%',maxWidth:380,padding:32}}>
+      <div style={{textAlign:'center',marginBottom:24}}>
+        <div style={{fontSize:32,marginBottom:8}}>🗂️</div>
+        <h1 style={{fontSize:22,fontWeight:800,marginBottom:4}}>Atlas OS</h1>
+        <p style={{color:'var(--t3)',fontSize:13}}>Connexion avec ton compte WEBO</p>
+      </div>
+      <input className="input" type="email" placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submit()}} style={{width:'100%',marginBottom:10}}/>
+      <input className="input" type="password" placeholder="Mot de passe" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submit()}} style={{width:'100%',marginBottom:14}}/>
+      {err&&<div style={{fontSize:13,color:err==='Connexion…'?'var(--t3)':'var(--er)',marginBottom:12}}>{err}</div>}
+      <button className="btn btn-p" onClick={submit} disabled={busy} style={{width:'100%',justifyContent:'center'}}>{busy?'…':'Se connecter'}</button>
+      <p style={{color:'var(--t4)',fontSize:11,textAlign:'center',marginTop:16}}>Mêmes identifiants que le CRM WEBO Tracker</p>
+    </div>
+  </div>);
+}
+
+/* ═══ BOT FLOTTANT (assistant IA rapide, partout dans Atlas) ═══ */
+function FloatingBot({ctx}){
+  const[open,setOpen]=useState(false);
+  const[msgs,setMsgs]=useState([{role:'assistant',content:"Bonjour Kylian. Pose-moi une question sur ton activité WEBO."}]);
+  const[inp,setInp]=useState('');
+  const[busy,setBusy]=useState(false);
+  const bodyRef=useRef(null);
+  useEffect(()=>{if(bodyRef.current)bodyRef.current.scrollTop=bodyRef.current.scrollHeight;},[msgs,busy]);
+  const send=async()=>{
+    const text=inp.trim();if(!text||busy)return;
+    setInp('');setMsgs(p=>[...p,{role:'user',content:text}]);setBusy(true);
+    if(!getProxySecret()){setMsgs(p=>[...p,{role:'assistant',content:"Clé IA manquante : configure-la dans le CRM (elle est partagée)."}]);setBusy(false);return;}
+    try{
+      const c=ctx||{};
+      const sys="Tu es l'assistant IA d'Atlas, l'OS de gestion de WEBO (agence accessibilité EAA/RGAA). Réponds en français, court, concret, orienté action. N'utilise jamais de tiret cadratin. Contexte : "+((c.leads||[]).length)+" prospects, "+((c.cands||[]).length)+" candidats, "+((c.calEv||[]).length)+" événements agenda, "+((c.expenses||[]).length)+" dépenses.";
+      const hist=msgs.slice(-6).map(m=>({role:m.role,content:m.content}));
+      const reply=await aiCall([...hist,{role:'user',content:text}],sys);
+      setMsgs(p=>[...p,{role:'assistant',content:reply}]);
+    }catch(e){setMsgs(p=>[...p,{role:'assistant',content:"Erreur : "+(e.message||'').slice(0,120)}]);}
+    setBusy(false);
+  };
+  return(<React.Fragment>
+    {open&&<div className="card" style={{position:'fixed',bottom:88,right:24,width:340,maxWidth:'calc(100vw - 48px)',height:440,zIndex:200,display:'flex',flexDirection:'column',padding:0,overflow:'hidden',boxShadow:'var(--shadow-lg)'}}>
+      <div style={{padding:'12px 16px',borderBottom:'1px solid var(--bd)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{display:'flex',alignItems:'center',gap:8}}><span style={{fontSize:16}}>🤖</span><span style={{fontWeight:600,fontSize:14}}>Assistant Atlas</span></div>
+        <button className="btn btn-ghost btn-sm" onClick={()=>setOpen(false)}>✕</button>
+      </div>
+      <div ref={bodyRef} style={{flex:1,overflow:'auto',padding:14,display:'flex',flexDirection:'column',gap:10}}>
+        {msgs.map((m,i)=>(<div key={i} style={{display:'flex',justifyContent:m.role==='user'?'flex-end':'flex-start'}}>
+          <div style={{maxWidth:'82%',padding:'8px 12px',borderRadius:12,background:m.role==='user'?'var(--ac)':'var(--sf2)',color:m.role==='user'?'#fff':'var(--t1)',fontSize:13,whiteSpace:'pre-wrap',wordBreak:'break-word'}}>{m.content}</div>
+        </div>))}
+        {busy&&<div style={{fontSize:12,color:'var(--t4)'}}>…</div>}
+      </div>
+      <div style={{display:'flex',gap:8,padding:'10px 12px',borderTop:'1px solid var(--bd)'}}>
+        <input className="input" placeholder="Ta question…" value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send()}} style={{flex:1}} disabled={busy}/>
+        <button className="btn btn-p btn-sm" onClick={send} disabled={busy||!inp.trim()}>↑</button>
+      </div>
+    </div>}
+    <button onClick={()=>setOpen(o=>!o)} title="Assistant IA" style={{position:'fixed',bottom:24,right:24,zIndex:200,width:52,height:52,borderRadius:'50%',border:'none',background:'var(--ac)',color:'#fff',fontSize:22,cursor:'pointer',boxShadow:'var(--shadow-lg)'}}>{open?'✕':'🤖'}</button>
+  </React.Fragment>);
+}
+
+/* ═══ RECHERCHE GLOBALE (champ isolé, sans perte de focus) ═══ */
+function SearchBox({leads,cands,vault,events,go}){
+  const[q,setQ]=useState('');
+  const[open,setOpen]=useState(false);
+  const boxRef=useRef(null);
+  useEffect(()=>{
+    const onClick=e=>{if(boxRef.current&&!boxRef.current.contains(e.target))setOpen(false);};
+    document.addEventListener('mousedown',onClick);
+    return()=>document.removeEventListener('mousedown',onClick);
+  },[]);
+  const ql=q.trim().toLowerCase();
+  let results=[];
+  if(ql.length>=2){
+    (leads||[]).forEach(l=>{if((l.nom||'').toLowerCase().includes(ql))results.push({type:'Prospect',label:l.nom,sub:l.status||'',view:'crm'});});
+    (cands||[]).forEach(c=>{if((c.name||'').toLowerCase().includes(ql)||(c.role||'').toLowerCase().includes(ql))results.push({type:'Candidat',label:c.name,sub:c.role||'',view:'ats'});});
+    (vault||[]).forEach(d=>{if((d.title||'').toLowerCase().includes(ql)||(d.category||'').toLowerCase().includes(ql))results.push({type:'Document',label:d.title,sub:d.category||'',view:'coffre'});});
+    (events||[]).forEach(ev=>{if((ev.title||'').toLowerCase().includes(ql))results.push({type:'Agenda',label:ev.title,sub:ev.date||'',view:'calendar'});});
+    results=results.slice(0,12);
+  }
+  const pick=r=>{setOpen(false);setQ('');if(r.view==='crm'){window.open('https://kylianmnr.github.io/WEBO/','_blank','noopener,noreferrer');}else go(r.view);};
+  return(<div ref={boxRef} style={{position:'relative',minWidth:280}}>
+    <div className="search-bar" style={{cursor:'text'}}>
+      <span style={{opacity:.5}}>🔍</span>
+      <input value={q} onChange={e=>{setQ(e.target.value);setOpen(true);}} onFocus={()=>setOpen(true)} placeholder="Rechercher un prospect, candidat, document…" style={{border:'none',background:'transparent',outline:'none',color:'var(--t1)',fontSize:13,flex:1,fontFamily:'var(--font)'}}/>
+    </div>
+    {open&&ql.length>=2&&<div className="card" style={{position:'absolute',top:'calc(100% + 6px)',left:0,right:0,zIndex:50,maxHeight:360,overflow:'auto',padding:6}}>
+      {results.length===0&&<div style={{padding:'10px 12px',color:'var(--t4)',fontSize:13}}>Aucun résultat</div>}
+      {results.map((r,i)=>(<div key={i} onClick={()=>pick(r)} style={{padding:'8px 12px',borderRadius:8,cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}} onMouseEnter={e=>e.currentTarget.style.background='var(--sf2)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
+        <div style={{minWidth:0}}><div style={{fontSize:13,fontWeight:500,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{r.label}</div>{r.sub&&<div style={{fontSize:11,color:'var(--t4)'}}>{r.sub}</div>}</div>
+        <span className="badge badge-in" style={{fontSize:10,flexShrink:0}}>{r.type}</span>
+      </div>))}
+    </div>}
+  </div>);
+}
+
+function App(){
+  const[role,setRole]=useState(LS.g('role','admin'));
+  const[view,setView]=useState(LS.g('view','dashboard'));
+  const[emps,setEmps]=useState(LS.g('emps',[]));
+  const[calEv,setCalEv]=useState([]);
+  const[leaves,setLeaves]=useState(LS.g('leaves',[]));
+  const[cands,setCands]=useState([]);
+  const[crmLeads,setCrmLeads]=useState([]);
+  const[sbReady,setSbReady]=useState(false);
+  const[authed,setAuthed]=useState(null); // null = en cours de vérification
+  const[authChecking,setAuthChecking]=useState(true);
+  const[isFondateur,setIsFondateur]=useState(false);
+  const[myId,setMyId]=useState('kylian');
+  const[chatChannels,setChatChannels]=useState([]);
+  const[chatMessages,setChatMessages]=useState([]);
+  const[vault,setVault]=useState([]);
+  const[expenses,setExpenses]=useState([]);
+  const[paidIds,setPaidIds]=useState([]); // lead_id des deals marqués encaissés
+  const[resolved,setResolved]=useState(LS.g('res',[]));
+  const[art,setArt]=useState(null);
+  const[modal,setModal]=useState(null);
+  const[showAP,setShowAP]=useState(!LS.g('ap3',false));
+  const[theme,setTheme]=useState(LS.g('theme','dark'));
+
+  useEffect(()=>{document.documentElement.setAttribute('data-theme',theme==='light'?'light':'');LS.s('theme',theme)},[theme]);
+  const toggleTheme=()=>setTheme(t=>t==='dark'?'light':'dark');
+
+  useEffect(()=>{LS.s('role',role)},[role]);useEffect(()=>{LS.s('view',view)},[view]);
+  useEffect(()=>{LS.s('emps',emps)},[emps]);
+  useEffect(()=>{LS.s('leaves',leaves)},[leaves]);
+  useEffect(()=>{LS.s('res',resolved)},[resolved]);
+
+  /* ═══ Vérification de session au démarrage (même compte que le CRM) ═══ */
+  useEffect(()=>{
+    if(!sb){setAuthChecking(false);setAuthed(false);return;}
+    let alive=true;
+    (async()=>{
+      try{
+        const{data}=await sb.auth.getSession();
+        if(!alive)return;
+        const sess=data&&data.session;
+        setAuthed(!!sess);
+        setIsFondateur(!!(sess&&sess.user&&sess.user.app_metadata&&sess.user.app_metadata.role==='fondateur'));
+        if(sess&&sess.user){const a=acctByEmail(sess.user.email);if(a)setMyId(a.id);}
+      }catch(e){if(alive)setAuthed(false);}
+      if(alive)setAuthChecking(false);
+    })();
+    const{data:sub}=sb.auth.onAuthStateChange((_e,session)=>{setAuthed(!!session);setIsFondateur(!!(session&&session.user&&session.user.app_metadata&&session.user.app_metadata.role==='fondateur'));});
+    return()=>{alive=false;try{sub&&sub.subscription&&sub.subscription.unsubscribe()}catch(e){}};
+  },[]);
+
+  /* ═══ Chargement + temps réel depuis le CRM (Supabase) ═══ */
+  useEffect(()=>{
+    if(!sb||!authed)return;
+    let alive=true;
+    (async()=>{
+      try{
+        const ae=await sb.from("agenda_events").select("*").order("date",{ascending:true});
+        if(alive)setCalEv((ae.data||[]));
+      }catch(e){}
+      try{
+        const ca=await sb.from("ats_candidates").select("*").order("created_at",{ascending:false});
+        if(alive&&!ca.error)setCands((ca.data||[]));
+      }catch(e){}
+      try{
+        const lr=await sb.from("leads").select("*");
+        if(alive&&!lr.error)setCrmLeads((lr.data||[]));
+      }catch(e){}
+      try{
+        const vd=await sb.from("vault_docs").select("*").order("created_at",{ascending:false});
+        if(alive&&!vd.error)setVault((vd.data||[]));
+      }catch(e){}
+      try{
+        const ex=await sb.from("finance_expenses").select("*").order("date",{ascending:false});
+        if(alive&&!ex.error)setExpenses((ex.data||[]));
+      }catch(e){}
+      try{
+        const fp=await sb.from("finance_paid").select("*");
+        if(alive&&!fp.error)setPaidIds((fp.data||[]).filter(r=>r.paid).map(r=>r.lead_id));
+      }catch(e){}
+      try{
+        const cc=await sb.from("chat_channels").select("*");
+        if(alive&&!cc.error)setChatChannels(cc.data||[]);
+        const cm=await sb.from("chat_messages").select("*").order("created_at",{ascending:false}).limit(300);
+        if(alive&&!cm.error)setChatMessages((cm.data||[]).slice().reverse());
+      }catch(e){}
+      if(alive)setSbReady(true);
+    })();
+    const ch=sb.channel("atlas_rt")
+      .on("postgres_changes",{event:"*",schema:"public",table:"agenda_events"},p=>{
+        if(p.eventType==="INSERT")setCalEv(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);
+        if(p.eventType==="UPDATE")setCalEv(pr=>pr.map(x=>x.id===p.new.id?p.new:x));
+        if(p.eventType==="DELETE")setCalEv(pr=>pr.filter(x=>x.id!==p.old.id));
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"ats_candidates"},p=>{
+        if(p.eventType==="INSERT")setCands(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);
+        if(p.eventType==="UPDATE")setCands(pr=>pr.map(x=>x.id===p.new.id?p.new:x));
+        if(p.eventType==="DELETE")setCands(pr=>pr.filter(x=>x.id!==p.old.id));
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"leads"},p=>{
+        if(p.eventType==="INSERT")setCrmLeads(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);
+        if(p.eventType==="UPDATE")setCrmLeads(pr=>pr.map(x=>x.id===p.new.id?p.new:x));
+        if(p.eventType==="DELETE")setCrmLeads(pr=>pr.filter(x=>x.id!==p.old.id));
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"vault_docs"},p=>{
+        if(p.eventType==="INSERT")setVault(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);
+        if(p.eventType==="UPDATE")setVault(pr=>pr.map(x=>x.id===p.new.id?p.new:x));
+        if(p.eventType==="DELETE")setVault(pr=>pr.filter(x=>x.id!==p.old.id));
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"finance_expenses"},p=>{
+        if(p.eventType==="INSERT")setExpenses(pr=>pr.some(x=>x.id===p.new.id)?pr:[p.new,...pr]);
+        if(p.eventType==="UPDATE")setExpenses(pr=>pr.map(x=>x.id===p.new.id?p.new:x));
+        if(p.eventType==="DELETE")setExpenses(pr=>pr.filter(x=>x.id!==p.old.id));
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"finance_paid"},p=>{
+        if(p.eventType==="DELETE")setPaidIds(pr=>pr.filter(id=>id!==p.old.lead_id));
+        else{const r=p.new;setPaidIds(pr=>{const has=pr.includes(r.lead_id);if(r.paid&&!has)return[...pr,r.lead_id];if(!r.paid&&has)return pr.filter(id=>id!==r.lead_id);return pr;});}
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"chat_channels"},p=>{
+        if(p.eventType==="INSERT")setChatChannels(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);
+        if(p.eventType==="UPDATE")setChatChannels(pr=>pr.map(x=>x.id===p.new.id?p.new:x));
+        if(p.eventType==="DELETE")setChatChannels(pr=>pr.filter(x=>x.id!==p.old.id));
+      })
+      .on("postgres_changes",{event:"*",schema:"public",table:"chat_messages"},p=>{
+        if(p.eventType==="INSERT")setChatMessages(pr=>pr.some(x=>x.id===p.new.id)?pr:[...pr,p.new]);
+        if(p.eventType==="DELETE")setChatMessages(pr=>pr.filter(x=>x.id!==p.old.id));
+      })
+      .subscribe();
+    return()=>{alive=false;sb.removeChannel(ch);};
+  },[authed]);
+
+  const addEmp=e=>{setEmps(p=>[...p,{...e,id:uid(),score:70,risk:'low',cpf:1500,conges:25}])};
+  const addLeave=l=>{setLeaves(p=>[...p,{...l,id:uid(),status:'pending',date:now()}])};
+  const approveLeave=(id,ok)=>{setLeaves(p=>p.map(l=>{if(l.id!==id)return l;if(ok){const emp=emps.find(e=>e.name===l.empName);if(emp){const days=Math.max(1,Math.ceil((new Date(l.end)-new Date(l.start))/86400000));setEmps(prev=>prev.map(e=>e.id===emp.id?{...e,conges:Math.max(0,e.conges-days)}:e));setCalEv(prev=>[...prev,{id:uid(),day:new Date(l.start).getDate()||15,title:`Congé ${l.empName.split(' ')[0]}`,type:'conge',emp:l.empName}])}}return{...l,status:ok?'approved':'refused'}}))};
+  const saveToVault=doc=>{setVault(p=>[{...doc,id:uid(),savedAt:now()},...p])};
+  const addVaultDoc=async doc=>{const row={id:uid(),title:doc.title,url:doc.url||'',category:doc.category||'Général',note:doc.note||'',created_at:new Date().toISOString()};setVault(p=>p.some(x=>x.id===row.id)?p:[row,...p]);if(sb){try{await sb.from("vault_docs").insert(row)}catch(e){}}};
+  const delVaultDoc=async id=>{setVault(p=>p.filter(x=>x.id!==id));if(sb){try{await sb.from("vault_docs").delete().eq("id",id)}catch(e){}}};
+  const addExpense=async ex=>{const row={id:uid(),label:ex.label,amount:Number(ex.amount)||0,category:ex.category||'Divers',date:ex.date||todayISO(),recurrence:ex.recurrence||'none',created_at:new Date().toISOString()};setExpenses(p=>p.some(x=>x.id===row.id)?p:[row,...p]);if(sb){try{await sb.from("finance_expenses").insert(row)}catch(e){}}};
+  const delExpense=async id=>{setExpenses(p=>p.filter(x=>x.id!==id));if(sb){try{await sb.from("finance_expenses").delete().eq("id",id)}catch(e){}}};
+  const togglePaid=async(leadId)=>{const isPaid=paidIds.includes(leadId);if(isPaid){setPaidIds(p=>p.filter(id=>id!==leadId));if(sb){try{await sb.from("finance_paid").delete().eq("lead_id",leadId)}catch(e){}}}else{setPaidIds(p=>p.includes(leadId)?p:[...p,leadId]);if(sb){try{await sb.from("finance_paid").upsert({lead_id:leadId,paid:true,updated_at:new Date().toISOString()})}catch(e){}}}};
+  const sendChat=async(channelId,txt)=>{if(!txt.trim())return;const msg={id:uid(),channel_id:channelId,sender_id:myId,text:txt,created_at:new Date().toISOString(),lead_id:"",attachment_url:"",attachment_name:"",attachment_type:""};setChatMessages(p=>[...p,msg]);const lm=new Date().toISOString();const ch=chatChannels.find(c=>c.id===channelId);const reads={...((ch&&ch.reads)||{}),[myId]:lm};setChatChannels(p=>p.map(c=>c.id===channelId?{...c,last_msg_at:lm,reads}:c));if(sb){try{await sb.from("chat_messages").insert(msg);await sb.from("chat_channels").update({last_msg_at:lm,reads}).eq("id",channelId)}catch(e){}}};
+  const openArt=key=>{if(ARTS_DB[key]){setArt(ARTS_DB[key]);saveToVault({title:ARTS_DB[key].title,content:ARTS_DB[key].content,type:key})}};
+  const addCandidate=async c=>{const row={id:uid(),name:c.name,role:c.role||'',match:c.match||Math.floor(70+Math.random()*25),col:'sourced',src:c.src||'Manuel',created_at:new Date().toISOString()};setCands(p=>p.some(x=>x.id===row.id)?p:[row,...p]);if(sb){try{await sb.from("ats_candidates").insert(row)}catch(e){}}};
+  const moveCandidate=async(id,col)=>{setCands(p=>p.map(c=>c.id===id?{...c,col}:c));if(sb){try{await sb.from("ats_candidates").update({col}).eq("id",id)}catch(e){}}};
+  const resolveAlert=id=>{setResolved(p=>[...p,id]);confetti({particleCount:40,spread:45})};
+  const addCalEvent=async ev=>{const date=ev.date||todayISO();const row={id:uid(),date,title:ev.title||'Sans titre',time:ev.time||'09:00',end_time:ev.end_time||'',all_day:!!ev.all_day,color:ev.color||'var(--purple)',assignee_ids:[],owner_id:'atlas',created_at:new Date().toISOString()};setCalEv(p=>p.some(x=>x.id===row.id)?p:[...p,row]);if(sb){try{await sb.from("agenda_events").insert(row)}catch(e){}}};
+  const switchRole=r=>{setRole(r);setView(r==='salarie'?'portal':'dashboard')};
+  const crit=SENTINEL.filter(x=>x.type==='critical'&&!resolved.includes(x.id)).length;
+
+  const navAdmin=[{id:'dashboard',ic:'📊',lb:'Dashboard'},{id:'messages',ic:'✉️',lb:'Messagerie'},{id:'warroom',ic:'💬',lb:'War Room'},...(isFondateur?[{id:'finance',ic:'💶',lb:'Finance'}]:[]),{id:'calendar',ic:'📅',lb:'Agenda'},{id:'ats',ic:'🎯',lb:'Recrutement'},{id:'coffre',ic:'🔒',lb:'Coffre-Fort'},{id:'crm',ic:'🔗',lb:'Hub CRM'},{id:'reports',ic:'📥',lb:'Rapports'}];
+  const navMgr=[{id:'dashboard',ic:'📋',lb:'Mon Équipe'},{id:'warroom',ic:'💬',lb:'War Room'},{id:'calendar',ic:'📅',lb:'Agenda'},{id:'ats',ic:'🎯',lb:'Recrutement'}];
+  const navEmp=[{id:'portal',ic:'👤',lb:'Mon Portail'},{id:'calendar',ic:'📅',lb:'Agenda'}];
+  const nav=role==='admin'?navAdmin:role==='manager'?navMgr:navEmp;
+  useEffect(()=>{if(!nav.some(n=>n.id===view))setView(role==='salarie'?'portal':'dashboard')},[role]);
+
+  const viewLabel=nav.find(n=>n.id===view)?.lb||'Dashboard';
+  const S={emps,setEmps,addEmp,calEv,setCalEv,addCalEvent,leaves,addLeave,approveLeave,cands,setCands,addCandidate,moveCandidate,vault,saveToVault,addVaultDoc,delVaultDoc,openArt,resolved,resolveAlert,setView,setArt,setModal,role,crmLeads,expenses,addExpense,delExpense,paidIds,togglePaid,isFondateur,myId,chatChannels,chatMessages,sendChat};
+
+  const doSignOut=async()=>{try{await sb.auth.signOut()}catch(e){}setAuthed(false);setCalEv([]);setCands([]);};
+
+  if(authChecking)return(<div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--t3)'}}>Chargement…</div>);
+  if(!authed)return(<AtlasLogin onDone={()=>setAuthed(true)}/>);
+
+  return(<React.Fragment>
+    {/* SIDEBAR */}
+    <div className="sidebar">
+      <div style={{padding:'20px',borderBottom:'1px solid var(--bd)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+          <div style={{width:32,height:32,borderRadius:8,background:'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,color:'#fff'}}>⚛</div>
+          <div><div style={{fontWeight:700,fontSize:15,color:'var(--t0)'}}>Atlas OS</div><div style={{fontSize:11,color:'var(--t4)'}}>Système RH Intelligent</div></div>
+        </div>
+        <div className="role-switch">
+          {[['admin','Admin DRH'],['manager','Manager'],['salarie','Salarié']].map(([r,lb])=>(
+            <button key={r} className={`role-opt ${role===r?'active':''}`} onClick={()=>switchRole(r)}>{lb}</button>
+          ))}
+        </div>
+      </div>
+      <div style={{flex:1,overflowY:'auto',display:'flex',flexDirection:'column',padding:'4px 0'}}>
+        <div className="nav-section">Navigation</div>
+        <div className="nav-list">
+        {nav.map(n=>(<div key={n.id} className={`nav-item ${view===n.id?'active':''}`} onClick={()=>setView(n.id)}>
+          <span className="nav-icon">{n.ic}</span><span>{n.lb}</span>
+          {n.id==='shield'&&crit>0&&<span style={{marginLeft:'auto',background:'var(--er)',color:'#fff',borderRadius:6,padding:'2px 7px',fontSize:10,fontWeight:700}}>{crit}</span>}
+        </div>))}
+        </div>
+      </div>
+      <div style={{padding:'16px 20px',borderTop:'1px solid var(--bd)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'var(--t3)'}}><span className="status-dot green"></span>Système opérationnel</div>
+        <div style={{fontSize:11,color:'var(--t4)',marginTop:4}}>{(crmLeads||[]).length} prospects · {vault.length} documents</div>
+      </div>
+    </div>
+
+    {/* TOPBAR */}
+    <div className="topbar">
+      <div className="breadcrumb">Atlas OS <span style={{color:'var(--t4)'}}>/</span> <span>{viewLabel}</span></div>
+      <SearchBox leads={crmLeads} cands={cands} vault={vault} events={calEv} go={setView}/>
+      <div className="topbar-right">
+        <div className="theme-btn" onClick={toggleTheme} title={theme==='dark'?'Mode clair':'Mode sombre'}>{theme==='dark'?'☀️':'🌙'}</div>
+        <div className="notif-btn" onClick={()=>setView('dashboard')}>🔔{crit>0&&<div className="notif-dot"></div>}</div>
+        <div className="avatar">KM</div>
+        <div className="theme-btn" onClick={doSignOut} title="Se déconnecter" style={{fontSize:15}}>⎋</div>
+      </div>
+    </div>
+
+    {/* MAIN */}
+    <div className="main"><div className="main-inner">
+      {role==='admin'&&view==='dashboard'&&<DashAdmin S={S}/>}
+      {role==='admin'&&view==='warroom'&&<WarRoom S={S}/>}
+      {role==='admin'&&view==='finance'&&isFondateur&&<Finance S={S}/>}
+      {role==='admin'&&view==='messages'&&<Messagerie S={S}/>}
+      {role==='admin'&&view==='crm'&&<CRMHub/>}
+      {role==='admin'&&view==='reports'&&<Reports/>}
+      {role==='admin'&&view==='coffre'&&<CoffreFort S={S}/>}
+      {role==='manager'&&view==='dashboard'&&<DashManager S={S}/>}
+      {role==='manager'&&view==='warroom'&&<WarRoom S={S}/>}
+      {role==='salarie'&&view==='portal'&&<SalariePortal S={S}/>}
+      {view==='calendar'&&<CalendarView S={S}/>}
+      {view==='ats'&&<ATSKanban S={S}/>}
+    </div></div>
+
+    {art&&<ArtPanel d={art} onClose={()=>setArt(null)} save={saveToVault}/>}
+    {modal&&<div className="overlay" onClick={()=>setModal(null)}><div className="modal" onClick={e=>e.stopPropagation()}>{modal}</div></div>}
+    {showAP&&<AutoPilot go={()=>{setShowAP(false);LS.s('ap3',true);setView('dashboard');confetti({particleCount:50,spread:50})}}/>}
+    <FloatingBot ctx={{leads:crmLeads,cands,calEv,expenses}}/>
+  </React.Fragment>);
+}
+
+/* ═══ AUTO-PILOT ═══ */
+function AutoPilot({go}){return(<div className="overlay"><div className="modal" style={{textAlign:'center'}}>
+  <div style={{fontSize:36,marginBottom:12}}>🌙</div>
+  <h2 style={{fontSize:20,fontWeight:700,marginBottom:4}}>Résumé Auto-Pilot</h2>
+  <p style={{color:'var(--t3)',marginBottom:20,fontSize:14}}>Pendant votre absence, vos agents ont travaillé.</p>
+  {[{i:'🎯',n:'Talentis',t:'3 CVs sourcés et qualifiés (91%, 84%, 78%).'},{i:'⚖️',n:'Lexia',t:'25 contrats audités. 4 clauses obsolètes.'},{i:'⚙️',n:'Syncro',t:'47 fiches synchronisées avec le CRM.'}].map((x,i)=>(
+    <div key={i} className="card" style={{textAlign:'left',display:'flex',gap:12,padding:16,marginBottom:10}}>
+      <span style={{fontSize:20}}>{x.i}</span>
+      <div><div style={{fontWeight:600,fontSize:13,marginBottom:2}}>{x.n}</div><div style={{fontSize:13,color:'var(--t2)'}}>{x.t}</div></div>
+    </div>
+  ))}
+  <button className="btn btn-p" style={{marginTop:12,width:'100%',justifyContent:'center'}} onClick={go}>Voir mon Dashboard</button>
+</div></div>);}
+
+/* ═══ ARTIFACT PANEL ═══ */
+function ArtPanel({d,onClose,save}){
+  const[c,setC]=useState(d.content);
+  return(<div className="artifact-panel">
+    <div style={{padding:'16px 20px',borderBottom:'1px solid var(--bd)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+      <div><div style={{fontSize:11,fontWeight:600,color:'var(--t4)',textTransform:'uppercase',letterSpacing:'.5px',marginBottom:2}}>Artifact</div><div style={{fontSize:15,fontWeight:600}}>{d.title}</div></div>
+      <button className="btn btn-ghost btn-sm" onClick={onClose}>✕</button>
+    </div>
+    <div style={{flex:1,overflow:'auto',padding:20}}>
+      <textarea style={{width:'100%',minHeight:380,background:'var(--bg)',border:'1px solid var(--bd)',borderRadius:8,color:'var(--t1)',fontSize:13,fontFamily:'var(--font)',padding:16,lineHeight:1.7,resize:'vertical',outline:'none'}} value={c} onChange={e=>setC(e.target.value)}/>
+    </div>
+    <div style={{padding:'12px 20px',borderTop:'1px solid var(--bd)',display:'flex',gap:8}}>
+      <button className="btn btn-p btn-sm" onClick={()=>{confetti({particleCount:30,spread:30,origin:{x:.92,y:.3}});alert('📄 PDF exporté')}}>Exporter PDF</button>
+      <button className="btn btn-ok btn-sm" onClick={()=>{confetti({particleCount:20,spread:20});alert('Envoyé au CRM')}}>Push CRM</button>
+      <button className="btn btn-ghost btn-sm" onClick={()=>{navigator.clipboard.writeText(c);alert('Copié')}}>Copier</button>
+      <button className="btn btn-ghost btn-sm" onClick={()=>{save({title:d.title,content:c,type:'manual'});alert('Sauvé au Coffre-Fort')}}>Archiver</button>
+    </div>
+  </div>);
+}
+
+/* ═══ DASHBOARD ADMIN ═══ */
+function DashAdmin({S}){
+  const{crmLeads,cands,calEv,setView}=S;
+  const leads=crmLeads||[];
+  // Statuts CRM
+  const SIGNED=['reussi'];
+  const LOST=['perdu','pas_potentiel'];
+  const CONTACTED=['contact_std','relance_std','contact_siege','relance_siege','potentiel','rdv_call','relance_rdv'];
+  const num=v=>{const n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,''));return isNaN(n)?0:n;};
+  const signed=leads.filter(l=>SIGNED.includes(l.status));
+  const active=leads.filter(l=>!SIGNED.includes(l.status)&&!LOST.includes(l.status));
+  const caSigned=signed.reduce((s,l)=>s+num(l.valeur),0);
+  const pipeline=active.reduce((s,l)=>s+num(l.valeur),0);
+  // Relances en retard (next_relance dans le passé, prospect encore actif)
+  const todayStr=todayISO();
+  const relDue=leads.filter(l=>{const d=l.next_relance||l.nextRelance;return d&&String(d)<=todayStr&&!SIGNED.includes(l.status)&&!LOST.includes(l.status);});
+  // Prospects ajoutés ce mois
+  const d=new Date();const ym=d.getFullYear()+'-'+pad2(d.getMonth()+1);
+  const newThisMonth=leads.filter(l=>{const c=l.date_created||l.dateCreated;return c&&String(c).slice(0,7)===ym;}).length;
+  // Répartition par statut (pour la petite barre)
+  const byStatus={};leads.forEach(l=>{byStatus[l.status]=(byStatus[l.status]||0)+1;});
+  const STATUS_LBL={site_web:'Formulaire site',identifier:'Identifié',contact_std:'1er Contact',relance_std:'Relance',contact_siege:'Contact Siège',relance_siege:'Relance Siège',potentiel:'Potentiel',pas_potentiel:'Pas de potentiel',rdv_call:'RDV / Call',relance_rdv:'Relance RDV',perdu:'Perdu',reussi:'Signé'};
+  const topStatuses=Object.entries(byStatus).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const conv=leads.length?Math.round(signed.length/leads.length*100):0;
+  const fmt=n=>n.toLocaleString('fr-FR');
+
+  return(<React.Fragment>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24,flexWrap:'wrap',gap:12}}>
+      <div><h1 className="page-title">Pilotage WEBO</h1><p className="page-sub">{leads.length} prospects · données CRM en temps réel</p></div>
+      <button className="btn btn-p" onClick={()=>setView('crm')}>Ouvrir le CRM ↗</button>
+    </div>
+
+    {relDue.length>0&&<div className="alert-box danger" style={{cursor:'pointer',marginBottom:20}} onClick={()=>setView('crm')}>
+      <span>⏰</span><div style={{flex:1}}><strong>{relDue.length} relance{relDue.length>1?'s':''} en retard</strong> — à traiter dans le CRM</div><span style={{color:'var(--t3)'}}>Voir →</span>
+    </div>}
+
+    <div className="kpi-grid">
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>🎯</div><div className="kpi-val">{fmt(leads.length)}</div><div className="kpi-label">Prospects</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>✅</div><div className="kpi-val" style={{color:'var(--ok)'}}>{fmt(signed.length)}</div><div className="kpi-label">Signés</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>💶</div><div className="kpi-val" style={{color:'var(--ok)'}}>{fmt(caSigned)} €</div><div className="kpi-label">CA signé</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>📊</div><div className="kpi-val" style={{color:'var(--mk)'}}>{fmt(pipeline)} €</div><div className="kpi-label">Pipeline actif</div></div>
+    </div>
+
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:24}}>
+      <div className="card">
+        <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Répartition du pipeline</h3>
+        {topStatuses.length===0&&<p style={{color:'var(--t3)',fontSize:13}}>Aucun prospect pour l'instant.</p>}
+        {topStatuses.map(([st,n])=>{const pct=leads.length?Math.round(n/leads.length*100):0;return(
+          <div key={st} style={{marginBottom:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:4}}><span>{STATUS_LBL[st]||st}</span><span style={{color:'var(--t3)'}}>{n}</span></div>
+            <div style={{height:6,background:'var(--sf2)',borderRadius:4,overflow:'hidden'}}><div style={{width:pct+'%',height:'100%',background:'var(--ac)'}}></div></div>
+          </div>);})}
+      </div>
+      <div className="card">
+        <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Ce mois-ci</h3>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span style={{color:'var(--t2)',fontSize:14}}>Nouveaux prospects</span><span style={{fontSize:24,fontWeight:800}}>{newThisMonth}</span></div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span style={{color:'var(--t2)',fontSize:14}}>Taux de conversion</span><span style={{fontSize:24,fontWeight:800,color:'var(--ok)'}}>{conv}%</span></div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span style={{color:'var(--t2)',fontSize:14}}>Candidats en recrutement</span><span style={{fontSize:24,fontWeight:800}}>{(cands||[]).length}</span></div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span style={{color:'var(--t2)',fontSize:14}}>Événements agenda</span><span style={{fontSize:24,fontWeight:800}}>{(calEv||[]).length}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div className="card" style={{padding:0,overflow:'auto'}}>
+      <div style={{padding:'18px 24px',borderBottom:'1px solid var(--bd)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <h3 style={{fontSize:15,fontWeight:600}}>Derniers prospects</h3>
+        <div style={{display:'flex',gap:8}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>setView('warroom')}>💬 War Room</button>
+          <button className="btn btn-ghost btn-sm" onClick={()=>setView('ats')}>🎯 Recrutement</button>
+        </div>
+      </div>
+      <table className="data"><thead><tr><th>Nom</th><th>Statut</th><th>Valeur</th><th>Score audit</th></tr></thead>
+      <tbody>{leads.slice().sort((a,b)=>String(b.date_created||'').localeCompare(String(a.date_created||''))).slice(0,10).map(l=>(
+        <tr key={l.id}><td style={{fontWeight:500}}>{l.nom}</td><td style={{color:'var(--t2)'}}>{STATUS_LBL[l.status]||l.status||'—'}</td><td>{num(l.valeur)?fmt(num(l.valeur))+' €':'—'}</td><td>{(l.audit_score||l.auditScore)?(l.audit_score||l.auditScore)+'/100':'—'}</td></tr>
+      ))}</tbody>
+      </table>
+      {leads.length===0&&<div style={{padding:24,textAlign:'center',color:'var(--t4)',fontSize:13}}>Aucun prospect chargé. Vérifie ta connexion au CRM.</div>}
+    </div>
+  </React.Fragment>);
+}
+
+/* ═══ MANAGER DASHBOARD ═══ */
+function DashManager({S}){
+  const{emps,leaves,approveLeave,setModal}=S;
+  const team=emps.filter(e=>e.mgr==='manager');
+  const pendingLeaves=leaves.filter(l=>l.status==='pending'&&team.some(e=>e.name===l.empName));
+  const avgScore=team.length?Math.round(team.reduce((s,e)=>s+e.score,0)/team.length):0;
+  const qqRisk=Math.round(team.filter(e=>e.score<60).length/Math.max(team.length,1)*100);
+
+  const showPlan=()=>{S.setModal(<div>
+    <h3 style={{fontSize:18,fontWeight:700,marginBottom:16}}>Plan de remotivation</h3>
+    {team.filter(e=>e.score<70).map(e=>(<div key={e.id} className="card" style={{padding:16,marginBottom:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}><span style={{fontWeight:600}}>{e.name}</span><span className={`badge ${e.score<30?'badge-er':'badge-wn'}`}>Score {e.score}</span></div>
+      <p style={{fontSize:13,color:'var(--t2)',lineHeight:1.6}}>
+        {e.score<30?`Action urgente : entretien de rétention immédiat. Proposer mobilité interne ou revalorisation. Coût de départ estimé : ${Math.round(e.salary*6)} €.`
+        :e.score<50?`Signaux de désengagement. Déléguer un projet stratégique avec prime d'objectif (+${Math.round(e.salary*.1)} €). Planifier des one-on-one hebdomadaires.`
+        :`Vigilance modérée. Formation CPF recommandée pour relancer la motivation.`}
+      </p>
+    </div>))}
+    <button className="btn btn-ghost" style={{marginTop:8}} onClick={()=>S.setModal(null)}>Fermer</button>
+  </div>)};
+
+  return(<React.Fragment>
+    <div style={{marginBottom:24}}><h1 className="page-title">Mon équipe</h1><p className="page-sub">{team.length} collaborateurs</p></div>
+    <div className="kpi-grid">
+      <div className="kpi"><div className="kpi-val">{team.length}</div><div className="kpi-label">Équipe</div></div>
+      <div className="kpi"><div className="kpi-val" style={{color:avgScore>70?'var(--ok)':'var(--wn)'}}>{avgScore}</div><div className="kpi-label">Score moyen</div></div>
+      <div className="kpi" style={{borderColor:qqRisk>30?'rgba(239,68,68,.15)':undefined}}>
+        <div className="kpi-val" style={{color:qqRisk>30?'var(--er)':'var(--wn)'}}>{qqRisk}%</div>
+        <div className="kpi-label">Risque Quiet Quitting</div>
+        <button className="btn btn-p btn-sm" style={{marginTop:8}} onClick={showPlan}>Agir</button>
+      </div>
+      <div className="kpi"><div className="kpi-val" style={{color:pendingLeaves.length?'var(--wn)':'var(--ok)'}}>{pendingLeaves.length}</div><div className="kpi-label">Congés en attente</div></div>
+    </div>
+    {pendingLeaves.length>0&&<div className="card section-gap" style={{padding:24}}>
+      <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Demandes de congés</h3>
+      {pendingLeaves.map(l=>(<div key={l.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 0',borderBottom:'1px solid var(--bd)',flexWrap:'wrap',gap:8}}>
+        <div><div style={{fontWeight:500}}>{l.empName}</div><div style={{fontSize:13,color:'var(--t3)',marginTop:2}}>{l.start} → {l.end} · {l.motif}</div></div>
+        <div style={{display:'flex',gap:6}}><button className="btn btn-ok btn-sm" onClick={()=>approveLeave(l.id,true)}>Valider</button><button className="btn btn-ghost btn-sm" onClick={()=>approveLeave(l.id,false)}>Refuser</button></div>
+      </div>))}
+    </div>}
+    <div className="card" style={{padding:0,overflow:'auto'}}>
+      <table className="data"><thead><tr><th>Nom</th><th>Poste</th><th>Score</th><th>Risque</th><th>Congés</th></tr></thead>
+      <tbody>{team.map(e=>(<tr key={e.id}><td style={{fontWeight:500}}>{e.name}</td><td style={{color:'var(--t2)'}}>{e.role}</td><td style={{fontWeight:600,color:e.score>70?'var(--ok)':e.score>40?'var(--wn)':'var(--er)'}}>{e.score}</td><td><span className={`badge ${e.risk==='critical'||e.risk==='high'?'badge-er':e.risk==='medium'?'badge-wn':'badge-ok'}`}>{e.risk}</span></td><td>{e.conges}j</td></tr>))}</tbody>
+      </table>
+    </div>
+  </React.Fragment>);
+}
+
+/* ═══ SALARIÉ ═══ */
+function SalariePortal({S}){
+  const{emps,leaves,addLeave}=S;
+  const emp=emps[0];const myLeaves=leaves.filter(l=>l.empName===emp.name);
+  const[showLeave,setShowLeave]=useState(false);
+  const[lf,setLf]=useState({start:'',end:'',motif:''});
+  const[rdv,setRdv]=useState(false);
+  const submitLeave=()=>{if(!lf.start||!lf.end)return;addLeave({empName:emp.name,...lf});setLf({start:'',end:'',motif:''});setShowLeave(false);confetti({particleCount:20,spread:25})};
+
+  return(<React.Fragment>
+    <div style={{marginBottom:24}}><h1 className="page-title">Mon portail</h1><p className="page-sub">Bienvenue {emp.name}</p></div>
+    <div className="kpi-grid">
+      <div className="kpi" style={{padding:28}}><div style={{fontSize:14,fontWeight:600,marginBottom:8}}>Solde CPF</div><div style={{fontSize:32,fontWeight:800,color:'var(--ac2)'}}>{emp.cpf} €</div><div className="progress" style={{marginTop:10}}><div className="progress-fill" style={{width:`${Math.round(emp.cpf/5000*100)}%`,background:'var(--ac)'}}></div></div></div>
+      <div className="kpi" style={{padding:28}}><div style={{fontSize:14,fontWeight:600,marginBottom:8}}>Congés restants</div><div style={{fontSize:32,fontWeight:800,color:'var(--ok)'}}>{emp.conges} j</div></div>
+      <div className="kpi" style={{padding:28}}><div style={{fontSize:14,fontWeight:600,marginBottom:8}}>Score engagement</div><div style={{fontSize:32,fontWeight:800,color:'var(--ok)'}}>{emp.score}</div></div>
+    </div>
+    <div className="card section-gap" style={{padding:24}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+        <h3 style={{fontSize:15,fontWeight:600}}>Mes congés</h3>
+        <button className="btn btn-p" onClick={()=>setShowLeave(true)}>Poser un congé</button>
+      </div>
+      {myLeaves.length===0&&<p style={{color:'var(--t4)',fontSize:13}}>Aucune demande.</p>}
+      {myLeaves.map(l=>(<div key={l.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:'1px solid var(--bd)'}}>
+        <div><div style={{fontWeight:500,fontSize:13}}>{l.start} → {l.end}</div><div style={{fontSize:12,color:'var(--t3)'}}>{l.motif}</div></div>
+        <span className={`badge ${l.status==='approved'?'badge-ok':l.status==='refused'?'badge-er':'badge-wn'}`}>{l.status==='approved'?'Validé':l.status==='refused'?'Refusé':'En attente'}</span>
+      </div>))}
+    </div>
+    {showLeave&&<div className="overlay" onClick={()=>setShowLeave(false)}><div className="modal" onClick={e=>e.stopPropagation()}>
+      <h3 style={{fontSize:18,fontWeight:700,marginBottom:20}}>Demande de congé</h3>
+      <div className="field"><label className="label">Début</label><input className="input" type="date" value={lf.start} onChange={e=>setLf(p=>({...p,start:e.target.value}))}/></div>
+      <div className="field"><label className="label">Fin</label><input className="input" type="date" value={lf.end} onChange={e=>setLf(p=>({...p,end:e.target.value}))}/></div>
+      <div className="field"><label className="label">Motif</label><input className="input" value={lf.motif} onChange={e=>setLf(p=>({...p,motif:e.target.value}))} placeholder="Congés payés"/></div>
+      <div style={{display:'flex',gap:8}}><button className="btn btn-p" onClick={submitLeave}>Envoyer</button><button className="btn btn-ghost" onClick={()=>setShowLeave(false)}>Annuler</button></div>
+    </div></div>}
+    <div className="card" style={{padding:24}}>
+      {!rdv?<button className="btn btn-ghost" onClick={()=>{setRdv(true);confetti({particleCount:15,spread:20})}}>📞 Demander un rendez-vous RH</button>
+      :<div className="alert-box success"><span>✓</span>Demande envoyée. Claire Dupont vous recontactera sous 24h.</div>}
+    </div>
+  </React.Fragment>);
+}
+
+/* ═══ CALENDAR ═══ */
+function CalendarView({S}){
+  const{calEv,role,addCalEvent}=S;
+  const[cur,setCur]=useState(()=>{const t=new Date();return{y:t.getFullYear(),m:t.getMonth()};}); // m = 0..11
+  const[showAdd,setShowAdd]=useState(false);
+  const[nf,setNf]=useState({title:'',time:'09:00'});
+  const[selDay,setSelDay]=useState(null); // jour cliqué (numéro) pour le détail
+  const today=new Date();
+  const y=cur.y,m=cur.m;
+  const first=new Date(y,m,1);
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const startOffset=(first.getDay()+6)%7; // Lundi=0
+  const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const evByDay={};
+  (calEv||[]).forEach(ev=>{if(!ev.date)return;const[ey,em,ed]=String(ev.date).split('-').map(Number);if(ey===y&&em===m+1)(evByDay[ed]=evByDay[ed]||[]).push(ev);});
+  const prevM=()=>{setSelDay(null);setCur(c=>c.m===0?{y:c.y-1,m:11}:{y:c.y,m:c.m-1});};
+  const nextM=()=>{setSelDay(null);setCur(c=>c.m===11?{y:c.y+1,m:0}:{y:c.y,m:c.m+1});};
+  const isToday=d=>today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d;
+  const typeClass=ev=>{const c=(ev.color||'').toLowerCase();if(c.includes('red')||c.includes('gold'))return'legal';if(c.includes('green'))return'formation';return'meeting';};
+  const submitAdd=()=>{if(!nf.title.trim())return;const day=nf._day||(selDay||today.getDate());addCalEvent({date:isoDate(y,m+1,day),title:nf.title,time:nf.time});setShowAdd(false);setNf({title:'',time:'09:00'});};
+  const selEvents=selDay?(evByDay[selDay]||[]).slice().sort((a,b)=>String(a.time||'').localeCompare(String(b.time||''))):[];
+  return(<React.Fragment>
+    <div style={{marginBottom:24,display:'flex',justifyContent:'space-between',alignItems:'flex-end',flexWrap:'wrap',gap:12}}>
+      <div><h1 className="page-title">{role==='salarie'?'Mon agenda':'Agenda'}</h1><p className="page-sub">Synchronisé avec le CRM · clique un jour pour le détail</p></div>
+      <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        <button className="btn btn-ghost btn-sm" onClick={prevM}>←</button>
+        <span style={{fontWeight:600,minWidth:140,textAlign:'center'}}>{MONTHS[m]} {y}</span>
+        <button className="btn btn-ghost btn-sm" onClick={nextM}>→</button>
+        {role!=='salarie'&&<button className="btn btn-p btn-sm" onClick={()=>{setNf({title:'',time:'09:00',_day:selDay||today.getDate()});setShowAdd(true)}}>+ Événement</button>}
+      </div>
+    </div>
+    {showAdd&&<div className="card" style={{padding:16,marginBottom:16,display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+      <input className="input" placeholder="Titre" value={nf.title} onChange={e=>setNf({...nf,title:e.target.value})} style={{flex:'1 1 200px'}}/>
+      <input className="input" type="number" min="1" max={daysInMonth} value={nf._day||today.getDate()} onChange={e=>setNf({...nf,_day:parseInt(e.target.value)||1})} style={{width:70}} title="Jour"/>
+      <input className="input" type="time" value={nf.time} onChange={e=>setNf({...nf,time:e.target.value})} style={{width:110}}/>
+      <button className="btn btn-p btn-sm" onClick={submitAdd}>Ajouter</button>
+      <button className="btn btn-ghost btn-sm" onClick={()=>setShowAdd(false)}>Annuler</button>
+    </div>}
+    <div className="card" style={{padding:20}}>
+      <div className="cal-grid">
+        {['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(d=><div key={d} className="cal-head">{d}</div>)}
+        {Array.from({length:startOffset},(_,i)=><div key={`e${i}`} className="cal-day empty"></div>)}
+        {Array.from({length:daysInMonth},(_,i)=>{const day=i+1;const evts=evByDay[day]||[];const sel=selDay===day;
+          return(<div key={day} className={`cal-day ${isToday(day)?'today':''}`} onClick={()=>setSelDay(sel?null:day)} style={{cursor:'pointer',outline:sel?'2px solid var(--ac)':'none'}}>
+            <div style={{fontWeight:isToday(day)?600:400,color:isToday(day)?'var(--ac2)':'var(--t3)',marginBottom:2}}>{day}</div>
+            {evts.slice(0,3).map((ev,j)=><span key={j} className={`cal-ev ${typeClass(ev)}`} title={ev.time?ev.time+' — '+ev.title:ev.title}>{ev.title}</span>)}
+            {evts.length>3&&<span style={{fontSize:10,color:'var(--t4)',display:'block',marginTop:2}}>+{evts.length-3} autre{evts.length-3>1?'s':''}</span>}
+          </div>);
+        })}
+      </div>
+    </div>
+    {selDay&&<div className="card" style={{padding:20,marginTop:16}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+        <h3 style={{fontSize:15,fontWeight:600}}>{selDay} {MONTHS[m]} {y}</h3>
+        <div style={{display:'flex',gap:8}}>
+          {role!=='salarie'&&<button className="btn btn-p btn-sm" onClick={()=>{setNf({title:'',time:'09:00',_day:selDay});setShowAdd(true)}}>+ Ajouter ce jour</button>}
+          <button className="btn btn-ghost btn-sm" onClick={()=>setSelDay(null)}>Fermer</button>
+        </div>
+      </div>
+      {selEvents.length===0&&<p style={{color:'var(--t3)',fontSize:13}}>Aucun événement ce jour.</p>}
+      {selEvents.map((ev,j)=>(<div key={j} style={{display:'flex',gap:12,alignItems:'flex-start',padding:'10px 0',borderTop:j>0?'1px solid var(--bd)':'none'}}>
+        <span style={{fontSize:12,fontWeight:600,color:'var(--t3)',minWidth:44}}>{ev.all_day?'Journée':(ev.time||'—')}</span>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:500,fontSize:14}}>{ev.title}</div>
+          {ev.end_time&&<div style={{fontSize:12,color:'var(--t4)'}}>jusqu'à {ev.end_time}</div>}
+        </div>
+      </div>))}
+    </div>}
+  </React.Fragment>);
+}
+
+/* ═══ ATS KANBAN ═══ */
+/* ═══ FICHE DE POSTE (champ isolé, IA ou saisie manuelle) ═══ */
+function JobPostForm({onSave,onClose}){
+  const[title,setTitle]=useState('');
+  const[content,setContent]=useState('');
+  const[busy,setBusy]=useState(false);
+  const[err,setErr]=useState('');
+  const genAI=async()=>{
+    if(!title.trim()){setErr('Renseigne d\'abord l\'intitulé du poste');return;}
+    if(!getProxySecret()){setErr('Clé IA manquante : configure-la dans le CRM (elle est partagée).');return;}
+    setBusy(true);setErr('');
+    try{
+      const sys="Tu es un expert RH. Rédige une fiche de poste claire et professionnelle en français pour WEBO, agence spécialisée dans l'accessibilité numérique (mise en conformité EAA et RGAA). Structure : intitulé, contexte de l'entreprise, missions principales, profil recherché, compétences, conditions. N'utilise jamais de tiret cadratin. Format texte simple, pas de markdown lourd.";
+      const draft=await aiCall([{role:'user',content:'Rédige une fiche de poste pour : '+title.trim()}],sys);
+      setContent(draft);
+    }catch(e){setErr('Erreur IA : '+(e.message||'').slice(0,120));}
+    setBusy(false);
+  };
+  const save=()=>{
+    if(!title.trim()||!content.trim()){setErr('Intitulé et contenu requis');return;}
+    onSave({title:'Fiche de poste — '+title.trim(),content:content.trim()});
+  };
+  return(<div className="card" style={{padding:16,marginBottom:16}}>
+    <div style={{display:'flex',gap:8,marginBottom:8,alignItems:'center',flexWrap:'wrap'}}>
+      <input className="input" placeholder="Intitulé du poste (ex : Développeur accessibilité)" value={title} onChange={e=>setTitle(e.target.value)} style={{flex:'1 1 240px'}}/>
+      <button className="btn btn-ghost btn-sm" onClick={genAI} disabled={busy}>{busy?'Génération…':'✨ Brouillon IA'}</button>
+    </div>
+    <textarea placeholder="Contenu de la fiche de poste (généré par l'IA, ou colle la tienne ici)" value={content} onChange={e=>setContent(e.target.value)} style={{width:'100%',minHeight:220,background:'var(--sf1)',border:'1px solid var(--bd)',borderRadius:8,color:'var(--t1)',fontSize:13,fontFamily:'var(--font)',padding:12,lineHeight:1.5,resize:'vertical'}}/>
+    {err&&<div style={{fontSize:12,color:'var(--er)',marginTop:8}}>{err}</div>}
+    <div style={{display:'flex',gap:8,marginTop:10}}>
+      <button className="btn btn-p btn-sm" onClick={save}>Enregistrer au Coffre-Fort</button>
+      <button className="btn btn-ghost btn-sm" onClick={onClose}>Fermer</button>
+    </div>
+  </div>);
+}
+
+function ATSKanban({S}){
+  const{cands,moveCandidate,addCandidate,addVaultDoc,vault,setView,setArt}=S;
+  const[showForm,setShowForm]=useState(false);
+  const[showJob,setShowJob]=useState(false);
+  const[f,setF]=useState({name:'',role:'',match:''});
+  const submit=()=>{if(!f.name.trim())return;addCandidate({name:f.name,role:f.role,match:f.match?parseInt(f.match):undefined,src:'Manuel'});setF({name:'',role:'',match:''});setShowForm(false);};
+  const saveJob=({title,content})=>{addVaultDoc({title,category:'Fiche de poste',note:content});setShowJob(false);};
+  const jobPosts=(vault||[]).filter(d=>d.category==='Fiche de poste');
+  return(<React.Fragment>
+    <div style={{marginBottom:24,display:'flex',justifyContent:'space-between',alignItems:'flex-end',flexWrap:'wrap',gap:12}}>
+      <div><h1 className="page-title">Recrutement</h1><p className="page-sub">Pipeline de candidats · synchronisé CRM</p></div>
+      <div style={{display:'flex',gap:8}}>
+        <button className="btn btn-ghost btn-sm" onClick={()=>setShowJob(s=>!s)}>📄 Fiche de poste</button>
+        <button className="btn btn-p btn-sm" onClick={()=>setShowForm(s=>!s)}>+ Candidat</button>
+      </div>
+    </div>
+    {showJob&&<JobPostForm onSave={saveJob} onClose={()=>setShowJob(false)}/>}
+    {jobPosts.length>0&&<div className="card" style={{padding:16,marginBottom:16}}>
+      <h3 style={{fontSize:14,fontWeight:600,marginBottom:10}}>Fiches de poste ({jobPosts.length})</h3>
+      {jobPosts.map((d,i)=>(<div key={d.id||i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderTop:i>0?'1px solid var(--bd)':'none'}}>
+        <span style={{fontSize:13,fontWeight:500}}>{d.title}</span>
+        <div style={{display:'flex',gap:6}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>setArt({title:d.title,content:d.note||''})}>Ouvrir</button>
+        </div>
+      </div>))}
+    </div>}
+    {showForm&&<div className="card" style={{padding:16,marginBottom:16,display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+      <input className="input" placeholder="Nom" value={f.name} onChange={e=>setF({...f,name:e.target.value})} style={{flex:'1 1 180px'}}/>
+      <input className="input" placeholder="Poste" value={f.role} onChange={e=>setF({...f,role:e.target.value})} style={{flex:'1 1 180px'}}/>
+      <input className="input" type="number" min="0" max="100" placeholder="Match %" value={f.match} onChange={e=>setF({...f,match:e.target.value})} style={{width:100}}/>
+      <button className="btn btn-p btn-sm" onClick={submit}>Ajouter</button>
+      <button className="btn btn-ghost btn-sm" onClick={()=>setShowForm(false)}>Annuler</button>
+    </div>}
+    <div className="kan-cols">
+      {KAN_COLS.map(col=>{const cards=cands.filter(c=>c.col===col);return(
+        <div key={col} className="kan-col">
+          <div className="kan-col-head"><span style={{fontSize:13,fontWeight:600}}>{KAN_LBL[col]}</span><span className="badge badge-in">{cards.length}</span></div>
+          {cards.map(c=>(<div key={c.id} className="kan-card">
+            <div style={{fontWeight:600,fontSize:13,marginBottom:4}}>{c.name}</div>
+            <div style={{fontSize:12,color:'var(--t3)',marginBottom:8}}>{c.role}</div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <span className="badge badge-ok">Match {c.match}%</span>
+              {c.src&&<span className="badge badge-mk">{c.src}</span>}
+            </div>
+            <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+              {KAN_COLS.filter(x=>x!==col).map(target=>(
+                <button key={target} className="btn btn-ghost btn-sm" style={{fontSize:11,padding:'3px 8px'}} onClick={()=>{moveCandidate(c.id,target);if(target==='embauche')confetti({particleCount:30,spread:35})}}>
+                  → {KAN_LBL[target].split(' ')[0]}
+                </button>
+              ))}
+            </div>
+          </div>))}
+          {cards.length===0&&<div style={{textAlign:'center',padding:24,color:'var(--t4)',fontSize:13}}>Vide</div>}
+        </div>
+      )})}
+    </div>
+  </React.Fragment>);
+}
+
+/* ═══ COFFRE-FORT ═══ */
+function CoffreFort({S}){
+  const{vault,addVaultDoc,delVaultDoc}=S;
+  const[showForm,setShowForm]=useState(false);
+  const[f,setF]=useState({title:'',url:'',category:'Guide EAA',note:''});
+  const CATS=['Guide EAA','Modèle de contrat','Fiche de poste','Procédure','Ressource','Général'];
+  const submit=()=>{
+    if(!f.title.trim()){return;}
+    let url=f.url.trim();
+    if(url&&!/^https?:\/\//i.test(url))url='https://'+url;
+    addVaultDoc({title:f.title.trim(),url,category:f.category,note:f.note.trim()});
+    setF({title:'',url:'',category:'Guide EAA',note:''});setShowForm(false);
+  };
+  const open=d=>{if(d.url)window.open(d.url,'_blank','noopener,noreferrer');};
+  return(<React.Fragment>
+    <div style={{marginBottom:24,display:'flex',justifyContent:'space-between',alignItems:'flex-end',flexWrap:'wrap',gap:12}}>
+      <div><h1 className="page-title">Coffre-Fort</h1><p className="page-sub">{vault.length} document{vault.length>1?'s':''} · à disposition, synchronisés</p></div>
+      <button className="btn btn-p btn-sm" onClick={()=>setShowForm(s=>!s)}>+ Document</button>
+    </div>
+    {showForm&&<div className="card" style={{padding:16,marginBottom:16}}>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:8}}>
+        <input className="input" placeholder="Titre du document" value={f.title} onChange={e=>setF({...f,title:e.target.value})} style={{flex:'1 1 220px'}}/>
+        <select className="input" value={f.category} onChange={e=>setF({...f,category:e.target.value})} style={{width:180}}>
+          {CATS.map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+      <input className="input" placeholder="Lien (Google Drive, Notion, PDF…)" value={f.url} onChange={e=>setF({...f,url:e.target.value})} style={{width:'100%',marginBottom:8}}/>
+      <input className="input" placeholder="Note (optionnel)" value={f.note} onChange={e=>setF({...f,note:e.target.value})} style={{width:'100%',marginBottom:10}}/>
+      <div style={{display:'flex',gap:8}}>
+        <button className="btn btn-p btn-sm" onClick={submit}>Ajouter</button>
+        <button className="btn btn-ghost btn-sm" onClick={()=>setShowForm(false)}>Annuler</button>
+      </div>
+    </div>}
+    {vault.length===0&&!showForm&&<div className="card" style={{textAlign:'center',padding:40}}><div style={{fontSize:32,marginBottom:8}}>📁</div><p style={{color:'var(--t3)',marginBottom:4}}>Aucun document pour l'instant.</p><p style={{color:'var(--t4)',fontSize:13}}>Ajoute tes guides EAA, modèles de contrat ou fiches de poste via un lien.</p></div>}
+    {vault.map((d,i)=>(<div key={d.id||i} className="card" style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}>
+          <span style={{fontWeight:500}}>{d.title}</span>
+          {d.category&&<span className="badge badge-in" style={{fontSize:10}}>{d.category}</span>}
+        </div>
+        {d.note&&<div style={{fontSize:12,color:'var(--t3)',marginBottom:2}}>{d.note}</div>}
+        <div style={{fontSize:11,color:'var(--t4)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{d.url||(d.savedAt||'')}</div>
+      </div>
+      <div style={{display:'flex',gap:6,flexShrink:0,marginLeft:12}}>
+        {d.url&&<button className="btn btn-p btn-sm" onClick={()=>open(d)}>Ouvrir ↗</button>}
+        <button className="btn btn-ghost btn-sm" onClick={()=>{if(window.confirm('Supprimer ce document ?'))delVaultDoc(d.id)}}>Suppr.</button>
+      </div>
+    </div>))}
+  </React.Fragment>);
+}
+
+/* ═══ WAR ROOM ═══ */
+function WarRoom({S}){
+  const{openArt,addCandidate,addCalEvent,calEv,cands,emps}=S;
+  const init=[{ag:'system',tx:'Comité de direction IA connecté.'},{ag:'lexia',tx:"Lexia en ligne. 3 alertes en attente."},{ag:'talentis',tx:"Talentis prêt. 1 départ critique détecté."},{ag:'syncro',tx:"Syncro opérationnel. CRM synchronisé."}];
+  const[msgs,setMsgs]=useState(LS.g('wr7',init));
+  const[inp,setInp]=useState('');const[busy,setBusy]=useState(false);
+  const[tl,setTl]=useState([]);const[mic,setMic]=useState(false);
+  const eR=useRef(null);
+  useEffect(()=>{LS.s('wr7',msgs)},[msgs]);
+  useEffect(()=>{eR.current?.scrollIntoView({behavior:'smooth'})},[msgs,busy]);
+
+  const send=async(text)=>{
+    if(!text.trim()||busy)return;setInp('');setMsgs(p=>[...p,{ag:'user',tx:text}]);setBusy(true);setTl([]);
+    const sc=matchSC(text);
+    if(sc&&SC[sc.k]){
+      for(const step of SC[sc.k]){await new Promise(r=>setTimeout(r,step.d));setMsgs(p=>[...p,{ag:step.ag,tx:step.tx}]);if(step.tm)for(const t of step.tm){await new Promise(r=>setTimeout(r,150));setTl(p=>[...p,t])}}
+      if(sc.a)openArt(sc.a);
+      if(sc.k==='embauche')addCandidate({name:'Nouveau Candidat IA',role:'Dev Web Senior',match:Math.floor(75+Math.random()*20)});
+      if(sc.k==='conflit'){const d=new Date();d.setDate(d.getDate()+2);addCalEvent({date:isoDate(d.getFullYear(),d.getMonth()+1,d.getDate()),title:'Médiation',time:'14:00',color:'var(--red)'});}
+      confetti({particleCount:30,spread:35,origin:{x:.4,y:.7}});
+    } else {
+      // Pas de scénario pré-écrit : on appelle le vrai agent IA (même proxy que le CRM)
+      if(!getProxySecret()){
+        setMsgs(p=>[...p,{ag:'talentis',tx:"Pour l'IA en direct, configure d'abord la clé d'accès IA dans le CRM (icône clé). Elle est partagée avec Atlas.\n\nEn attendant, commandes disponibles :\n\n• **Embauche Dev Web**\n• **Offboarding Marc Rousseau**\n• **Résumé réunion CSE**\n• **Vérifier contrat**\n• **Audit 360°**"}]);
+      } else {
+        try{
+          const ctx="Contexte WEBO (agence accessibilité EAA/RGAA). "+
+            "Agenda: "+((calEv||[]).length)+" événements. "+
+            "Recrutement: "+((cands||[]).length)+" candidats dans le pipeline. "+
+            "Équipe: "+((emps||[]).map(e=>e.name+" ("+e.role+")").slice(0,8).join(", "))+".";
+          const sys="Tu es l'assistant de direction d'Atlas, l'OS de gestion de WEBO. Réponds en français, concret, expert, orienté action. N'utilise jamais de tiret cadratin. "+ctx;
+          const hist=msgs.filter(m=>m.ag==='user'||m.ag==='talentis').slice(-6).map(m=>({role:m.ag==='user'?'user':'assistant',content:m.tx}));
+          const reply=await aiCall([...hist,{role:'user',content:text}],sys);
+          setMsgs(p=>[...p,{ag:'talentis',tx:reply}]);
+        }catch(e){
+          setMsgs(p=>[...p,{ag:'talentis',tx:"Erreur IA : "+(e.message||'connexion échouée').slice(0,180)}]);
+        }
+      }
+    }
+    setBusy(false);
+  };
+
+  const handleVoice=()=>{setMic(true);setTimeout(()=>{setMic(false);const t="Gérez le départ de Marc Rousseau de A à Z";setInp(t);setTimeout(()=>send(t),200)},1800)};
+
+  const renderMsg=(m,i)=>{
+    if(m.ag==='user')return <div key={i} className="msg-row user"><div className="msg-content"><div className="msg-bubble">{m.tx}</div></div></div>;
+    const ag=AG[m.ag];const sys=m.ag==='system';
+    return(<div key={i} className="msg-row">
+      <div className="msg-avatar" style={{background:sys?'var(--sf3)':ag?ag.bg:'var(--sf3)',color:'#fff',fontSize:sys?12:14}}>{sys?'⚡':ag?ag.i:'?'}</div>
+      <div className="msg-content">
+        <div className="msg-name" style={{color:sys?'var(--t3)':ag?ag.c:'var(--t3)'}}>{sys?'Orchestrateur':ag?ag.n:'Agent'}</div>
+        <div className="msg-bubble" style={{whiteSpace:'pre-wrap'}}>{m.tx.split('**').map((p,j)=>j%2?<strong key={j}>{p}</strong>:p)}</div>
+      </div>
+    </div>);
+  };
+
+  return(<React.Fragment>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24,flexWrap:'wrap',gap:12}}>
+      <div><h1 className="page-title">War Room</h1><p className="page-sub">Comité de direction IA · Make.com</p></div>
+      <button className="btn btn-er" onClick={()=>send('SOS Conflit')} disabled={busy}>🚨 SOS Conflit</button>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'1fr 300px',gap:20}}>
+      <div>
+        <div className="chat-frame">
+          <div className="chat-header">
+            <div style={{width:28,height:28,borderRadius:8,background:'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,color:'#fff'}}>⚛</div>
+            <div><div style={{fontWeight:600,fontSize:13}}>Comité IA</div><div style={{fontSize:12,color:'var(--t3)'}}>{mic?'Écoute en cours…':busy?'Exécution…':'3 agents en ligne'}</div></div>
+          </div>
+          <div className="chat-body">{msgs.map(renderMsg)}{busy&&<div className="msg-row"><div className="msg-avatar" style={{background:'var(--sf3)',color:'#fff',fontSize:12}}>⚡</div><div className="msg-content"><div className="msg-bubble" style={{display:'flex',gap:6,alignItems:'center'}}><span style={{animation:'breathe 1s infinite'}}>⚡</span>Traitement en cours…</div></div></div>}<div ref={eR}></div></div>
+          <div className="chat-input-bar">
+            <input className="input" value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')send(inp)}} placeholder={mic?"Écoute en cours…":"Envoyer une commande…"} disabled={busy||mic} style={{flex:1}}/>
+            <button className={`mic-btn ${mic?'on':''}`} onClick={handleVoice} disabled={busy||mic}>🎙️</button>
+            <button className="btn btn-p" onClick={()=>send(inp)} disabled={busy||!inp.trim()} style={{padding:'9px 14px'}}>↑</button>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:12}}>
+          {['Embauche Dev Web','Offboarding Marc','Résumé CSE','Vérifier contrat','Audit 360°'].map((q,i)=><button key={i} className="btn btn-ghost btn-sm" onClick={()=>send(q)} disabled={busy}>{q}</button>)}
+        </div>
+        <div className="drop-zone" style={{marginTop:16}}>
+          <div style={{fontSize:24,marginBottom:6}}>📂</div>
+          <div style={{fontWeight:600,marginBottom:4}}>Smart Drop</div>
+          <div style={{fontSize:13,color:'var(--t3)',marginBottom:12}}>Déposez réunions, contrats ou CVs pour analyse IA</div>
+          <div style={{display:'flex',gap:8,justifyContent:'center'}}><button className="btn btn-ghost btn-sm" onClick={()=>send('Résumé réunion CSE')} disabled={busy}>Réunion</button><button className="btn btn-ghost btn-sm" onClick={()=>send('Vérifier contrat directeur')} disabled={busy}>Contrat</button></div>
+        </div>
+      </div>
+      <div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}><span style={{fontSize:13,fontWeight:600,color:'var(--t3)'}}>Terminal</span><span className={`badge ${busy?'badge-wn':'badge-ok'}`}>{busy?'Actif':'Prêt'}</span></div>
+        <div className="terminal" style={{minHeight:380}}>
+          {tl.length===0&&!busy&&<div style={{color:'var(--t4)'}}>$ atlas-os --ready</div>}
+          {tl.map((l,i)=><div key={i} style={{color:l.c||'var(--t3)',marginBottom:2}}>{l.t}</div>)}
+          {busy&&<div style={{color:'var(--t4)',animation:'breathe 1s infinite'}}>▌</div>}
+        </div>
+      </div>
+    </div>
+  </React.Fragment>);
+}
+
+/* ═══ FINANCE ═══ */
+/* ═══ MESSAGERIE (partagée avec le CRM) ═══ */
+/* Champ isolé : pas de perte de focus */
+function MessageInput({onSend}){
+  const[txt,setTxt]=useState('');
+  const go=()=>{if(!txt.trim())return;onSend(txt.trim());setTxt('');};
+  return(<div style={{display:'flex',gap:8,padding:'12px 16px',borderTop:'1px solid var(--bd)'}}>
+    <input className="input" placeholder="Écrire un message…" value={txt} onChange={e=>setTxt(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')go()}} style={{flex:1}}/>
+    <button className="btn btn-p btn-sm" onClick={go} disabled={!txt.trim()}>Envoyer</button>
+  </div>);
+}
+
+function Messagerie({S}){
+  const{chatChannels,chatMessages,sendChat,myId}=S;
+  const chans=(chatChannels||[]).filter(c=>(c.member_ids||[]).includes(myId)).sort((a,b)=>String((b.last_msg_at||b.created_at||'')).localeCompare(String(a.last_msg_at||a.created_at||'')));
+  const[active,setActive]=useState(null);
+  const bodyRef=useRef(null);
+  const activeId=active||(chans[0]&&chans[0].id)||null;
+  const chan=chans.find(c=>c.id===activeId);
+  const msgs=(chatMessages||[]).filter(m=>m.channel_id===activeId).sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||'')));
+  useEffect(()=>{if(bodyRef.current)bodyRef.current.scrollTop=bodyRef.current.scrollHeight;},[msgs.length,activeId]);
+  const chanName=c=>{if(!c)return'';if(c.type==='dm'){const other=(c.member_ids||[]).find(m=>m!==myId);return mName(other);}return c.name||'Groupe';};
+  return(<React.Fragment>
+    <div style={{marginBottom:24}}><h1 className="page-title">Messagerie</h1><p className="page-sub">Canaux partagés avec le CRM · temps réel</p></div>
+    <div style={{display:'grid',gridTemplateColumns:'260px 1fr',gap:16,height:'calc(100vh - 200px)',minHeight:420}}>
+      <div className="card" style={{padding:0,overflow:'auto'}}>
+        <div style={{padding:'14px 16px',borderBottom:'1px solid var(--bd)',fontSize:13,fontWeight:600}}>Conversations ({chans.length})</div>
+        {chans.length===0&&<div style={{padding:20,textAlign:'center',color:'var(--t4)',fontSize:13}}>Aucune conversation. Crée-les depuis le CRM.</div>}
+        {chans.map(c=>(<div key={c.id} onClick={()=>setActive(c.id)} style={{padding:'12px 16px',borderBottom:'1px solid var(--bd)',cursor:'pointer',background:c.id===activeId?'var(--sf2)':'transparent',display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:32,height:32,borderRadius:8,background:c.type==='dm'?mColor((c.member_ids||[]).find(m=>m!==myId)):'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontSize:13,flexShrink:0}}>{c.type==='dm'?chanName(c).charAt(0):'#'}</div>
+          <div style={{minWidth:0}}><div style={{fontSize:13,fontWeight:500,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{chanName(c)}</div></div>
+        </div>))}
+      </div>
+      <div className="card" style={{padding:0,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+        {!chan&&<div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--t4)'}}>Sélectionne une conversation</div>}
+        {chan&&<React.Fragment>
+          <div style={{padding:'14px 16px',borderBottom:'1px solid var(--bd)',fontWeight:600,fontSize:14}}>{chanName(chan)}</div>
+          <div ref={bodyRef} style={{flex:1,overflow:'auto',padding:16,display:'flex',flexDirection:'column',gap:10}}>
+            {msgs.length===0&&<div style={{textAlign:'center',color:'var(--t4)',fontSize:13,marginTop:20}}>Aucun message.</div>}
+            {msgs.map(m=>{const mine=m.sender_id===myId;return(<div key={m.id} style={{display:'flex',flexDirection:'column',alignItems:mine?'flex-end':'flex-start'}}>
+              {!mine&&<div style={{fontSize:11,color:mColor(m.sender_id),fontWeight:600,marginBottom:2}}>{mName(m.sender_id)}</div>}
+              <div style={{maxWidth:'75%',padding:'8px 12px',borderRadius:12,background:mine?'var(--ac)':'var(--sf2)',color:mine?'#fff':'var(--t1)',fontSize:13,wordBreak:'break-word'}}>{m.text}</div>
+            </div>);})}
+          </div>
+          <MessageInput onSend={t=>sendChat(activeId,t)}/>
+        </React.Fragment>}
+      </div>
+    </div>
+  </React.Fragment>);
+}
+
+/* Champ isolé : évite la perte de focus (le sous-composant ne re-render pas le parent à chaque frappe) */
+function ExpenseForm({onAdd}){
+  const[label,setLabel]=useState('');
+  const[amount,setAmount]=useState('');
+  const[category,setCategory]=useState('Abonnement');
+  const[date,setDate]=useState(todayISO());
+  const[recurrence,setRecurrence]=useState('none');
+  const CATS=['Abonnement','Sous-traitance','Frais','Logiciel','Marketing','Divers'];
+  const submit=()=>{
+    if(!label.trim()||!amount)return;
+    onAdd({label:label.trim(),amount:parseFloat(amount)||0,category,date,recurrence});
+    setLabel('');setAmount('');setCategory('Abonnement');setDate(todayISO());setRecurrence('none');
+  };
+  return(<div className="card" style={{padding:16,marginBottom:20}}>
+    <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+      <input className="input" placeholder="Libellé de la dépense" value={label} onChange={e=>setLabel(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submit()}} style={{flex:'1 1 200px'}}/>
+      <input className="input" type="number" step="0.01" placeholder="Montant €" value={amount} onChange={e=>setAmount(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')submit()}} style={{width:120}}/>
+      <select className="input" value={category} onChange={e=>setCategory(e.target.value)} style={{width:150}}>
+        {CATS.map(c=><option key={c} value={c}>{c}</option>)}
+      </select>
+      <select className="input" value={recurrence} onChange={e=>setRecurrence(e.target.value)} style={{width:150}} title="Récurrence">
+        <option value="none">Ponctuel</option>
+        <option value="mensuel">Mensuel</option>
+        <option value="trimestriel">Trimestriel</option>
+        <option value="annuel">Annuel</option>
+      </select>
+      <input className="input" type="date" value={date} onChange={e=>setDate(e.target.value)} style={{width:150}}/>
+      <button className="btn btn-p btn-sm" onClick={submit}>Ajouter</button>
+    </div>
+  </div>);
+}
+
+function Finance({S}){
+  const{crmLeads,expenses,addExpense,delExpense,setView,paidIds,togglePaid}=S;
+  const leads=crmLeads||[];
+  const num=v=>{const n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,''));return isNaN(n)?0:n;};
+  const fmt=n=>n.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2});
+  const exp=expenses||[];
+  const paid=paidIds||[];
+  // ── Entrées : deals signés du CRM ──
+  const signed=leads.filter(l=>l.status==='reussi');
+  const caTotal=signed.reduce((s,l)=>s+num(l.valeur),0);
+  // Marge nette WEBO : 20% de la valeur, moins la part chasseur si apporté par un prospecteur (pas le fondateur)
+  const margeNette=signed.reduce((s,l)=>{const v=num(l.valeur);const com=v*0.2;const parFondateur=(l.member_id||l.memberId)==='kylian'||!(l.member_id||l.memberId);return s+(parFondateur?com:com*0.5);},0);
+  // Pipeline pondéré : somme (valeur × proba de l'étape) sur les deals actifs
+  const PROBA={site_web:.35,identifier:.05,contact_std:.15,relance_std:.20,contact_siege:.25,relance_siege:.30,potentiel:.50,pas_potentiel:.05,rdv_call:.65,relance_rdv:.55,perdu:0,reussi:1};
+  const pipelinePondere=leads.filter(l=>!['reussi','perdu','pas_potentiel'].includes(l.status)).reduce((s,l)=>s+num(l.valeur)*(PROBA[l.status]||0),0);
+  // Objectif mensuel
+  const OBJECTIF=15000;
+  const nowD=new Date();const curKey=nowD.getFullYear()+'-'+String(nowD.getMonth()+1).padStart(2,'0');
+  const caMois=signed.filter(l=>((l.date_created||l.dateCreated||'').slice(0,7))===curKey).reduce((s,l)=>s+num(l.valeur),0);
+  const objPct=Math.min(100,Math.round(caMois/OBJECTIF*100));
+  // encaissé = marqué payé dans Atlas OU payment_status='encaisse' côté CRM
+  const isPaid=l=>paid.includes(l.id)||(l.payment_status||l.paymentStatus)==='encaisse';
+  const encaisse=signed.filter(isPaid).reduce((s,l)=>s+num(l.valeur),0);
+  const enAttente=caTotal-encaisse;
+  // ── Sorties ──
+  const depTotal=exp.reduce((s,e)=>s+num(e.amount),0);
+  const solde=caTotal-depTotal;
+  // ── Charges fixes mensuelles (récurrences ramenées au mois) ──
+  const monthlyOf=e=>{const a=num(e.amount);const r=e.recurrence||'none';if(r==='mensuel')return a;if(r==='trimestriel')return a/3;if(r==='annuel')return a/12;return 0;};
+  const chargesFixes=exp.reduce((s,e)=>s+monthlyOf(e),0);
+  const recurrents=exp.filter(e=>(e.recurrence||'none')!=='none');
+  // ── Dépenses par catégorie ──
+  const byCat={};exp.forEach(e=>{byCat[e.category]=(byCat[e.category]||0)+num(e.amount);});
+  const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  // ── Vue par mois (tendance solde) : 6 derniers mois ──
+  const MONTHS=['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
+  const now=new Date();
+  const months=[];
+  for(let k=5;k>=0;k--){const d=new Date(now.getFullYear(),now.getMonth()-k,1);months.push({y:d.getFullYear(),m:d.getMonth()});}
+  const monthKey=(y,m)=>y+'-'+String(m+1).padStart(2,'0');
+  const trend=months.map(({y,m})=>{
+    const key=monthKey(y,m);
+    const inM=signed.filter(l=>{const c=(l.date_created||l.dateCreated||'').slice(0,7);return c===key;}).reduce((s,l)=>s+num(l.valeur),0);
+    const outM=exp.filter(e=>(e.date||'').slice(0,7)===key).reduce((s,e)=>s+num(e.amount),0);
+    return{label:MONTHS[m],in:inM,out:outM,net:inM-outM};
+  });
+  const maxAbs=Math.max(1,...trend.map(t=>Math.max(t.in,t.out)));
+
+  return(<React.Fragment>
+    <div style={{marginBottom:24,display:'flex',justifyContent:'space-between',alignItems:'flex-end',flexWrap:'wrap',gap:12}}>
+      <div><h1 className="page-title">Finance</h1><p className="page-sub">Entrées · sorties · solde · charges fixes</p></div>
+      <button className="btn btn-ghost btn-sm" onClick={()=>setView('crm')}>Ouvrir le CRM ↗</button>
+    </div>
+
+    <div className="kpi-grid" style={{marginBottom:16}}>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>💶</div><div className="kpi-val" style={{color:'var(--ok)'}}>{fmt(caTotal)} €</div><div className="kpi-label">CA signé</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>⏳</div><div className="kpi-val" style={{color:'var(--wn)'}}>{fmt(enAttente)} €</div><div className="kpi-label">À encaisser</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>📤</div><div className="kpi-val" style={{color:'var(--er)'}}>{fmt(depTotal)} €</div><div className="kpi-label">Dépenses</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>⚖️</div><div className="kpi-val" style={{color:solde>=0?'var(--ok)':'var(--er)'}}>{fmt(solde)} €</div><div className="kpi-label">Solde</div></div>
+    </div>
+
+    <div className="kpi-grid" style={{marginBottom:16}}>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>🏆</div><div className="kpi-val" style={{color:'var(--ac)'}}>{fmt(margeNette)} €</div><div className="kpi-label">Marge nette WEBO</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>📈</div><div className="kpi-val" style={{color:'var(--mk)'}}>{fmt(pipelinePondere)} €</div><div className="kpi-label">Pipeline pondéré</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>🎯</div><div className="kpi-val">{fmt(caMois)} €</div><div className="kpi-label">CA ce mois</div></div>
+      <div className="kpi"><div style={{fontSize:22,marginBottom:4}}>{objPct>=100?'✅':'⏳'}</div><div className="kpi-val" style={{color:objPct>=100?'var(--ok)':'var(--wn)'}}>{objPct}%</div><div className="kpi-label">Objectif ({fmt(OBJECTIF)} €)</div></div>
+    </div>
+
+    <div className="card" style={{padding:16,marginBottom:24}}>
+      <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:8}}><span style={{fontWeight:600}}>Objectif mensuel — {fmt(OBJECTIF)} €</span><span style={{color:'var(--t3)'}}>{fmt(caMois)} € / {objPct}%</span></div>
+      <div style={{height:10,background:'var(--sf2)',borderRadius:6,overflow:'hidden'}}><div style={{width:objPct+'%',height:'100%',background:objPct>=100?'var(--ok)':'var(--ac)',transition:'width .3s'}}></div></div>
+    </div>
+
+    <div className="card" style={{padding:16,marginBottom:24,display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12}}>
+      <div><div style={{fontSize:13,color:'var(--t3)'}}>Charges fixes mensuelles (récurrences)</div><div style={{fontSize:26,fontWeight:800,color:'var(--er)'}}>{fmt(chargesFixes)} € <span style={{fontSize:14,fontWeight:400,color:'var(--t4)'}}>/ mois</span></div></div>
+      <div style={{fontSize:12,color:'var(--t4)',textAlign:'right'}}>{recurrents.length} paiement{recurrents.length>1?'s':''} récurrent{recurrents.length>1?'s':''}<br/>soit {fmt(chargesFixes*12)} € / an</div>
+    </div>
+
+    <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Ajouter une dépense</h3>
+    <ExpenseForm onAdd={addExpense}/>
+
+    <div className="card" style={{marginBottom:24}}>
+      <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Tendance sur 6 mois (entrées vs sorties)</h3>
+      <div style={{display:'flex',alignItems:'flex-end',gap:16,height:160}}>
+        {trend.map((t,i)=>(<div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:6}}>
+          <div style={{flex:1,display:'flex',alignItems:'flex-end',gap:3,width:'100%',justifyContent:'center'}}>
+            <div title={'Entrées : '+fmt(t.in)+' €'} style={{width:'42%',height:(t.in/maxAbs*120)+'px',background:'var(--ok)',borderRadius:'3px 3px 0 0',minHeight:t.in>0?4:0}}></div>
+            <div title={'Sorties : '+fmt(t.out)+' €'} style={{width:'42%',height:(t.out/maxAbs*120)+'px',background:'var(--er)',borderRadius:'3px 3px 0 0',minHeight:t.out>0?4:0}}></div>
+          </div>
+          <div style={{fontSize:11,color:'var(--t4)'}}>{t.label}</div>
+          <div style={{fontSize:11,fontWeight:600,color:t.net>=0?'var(--ok)':'var(--er)'}}>{t.net>=0?'+':''}{fmt(t.net)}</div>
+        </div>))}
+      </div>
+      <div style={{display:'flex',gap:16,marginTop:12,fontSize:12,color:'var(--t3)'}}>
+        <span style={{display:'flex',alignItems:'center',gap:6}}><span style={{width:10,height:10,background:'var(--ok)',borderRadius:2,display:'inline-block'}}></span>Entrées</span>
+        <span style={{display:'flex',alignItems:'center',gap:6}}><span style={{width:10,height:10,background:'var(--er)',borderRadius:2,display:'inline-block'}}></span>Sorties</span>
+      </div>
+    </div>
+
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:24}}>
+      <div className="card" style={{padding:0,overflow:'hidden'}}>
+        <div style={{padding:'16px 20px',borderBottom:'1px solid var(--bd)'}}><h3 style={{fontSize:15,fontWeight:600}}>Dépenses récentes</h3></div>
+        {exp.length===0&&<div style={{padding:24,textAlign:'center',color:'var(--t4)',fontSize:13}}>Aucune dépense enregistrée.</div>}
+        {exp.slice(0,12).map(e=>(<div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',borderTop:'1px solid var(--bd)'}}>
+          <div style={{minWidth:0}}><div style={{fontWeight:500,fontSize:14,display:'flex',alignItems:'center',gap:6}}>{e.label}{(e.recurrence&&e.recurrence!=='none')&&<span className="badge badge-mk" style={{fontSize:10}}>🔁 {e.recurrence}</span>}</div><div style={{fontSize:12,color:'var(--t4)'}}>{e.category} · {e.date}</div></div>
+          <div style={{display:'flex',alignItems:'center',gap:10,flexShrink:0}}>
+            <span style={{fontWeight:600,color:'var(--er)'}}>-{fmt(num(e.amount))} €</span>
+            <button className="btn btn-ghost btn-sm" onClick={()=>{if(window.confirm('Supprimer cette dépense ?'))delExpense(e.id)}}>✕</button>
+          </div>
+        </div>))}
+      </div>
+      <div className="card">
+        <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Dépenses par catégorie</h3>
+        {cats.length===0&&<p style={{color:'var(--t3)',fontSize:13}}>Rien à afficher.</p>}
+        {cats.map(([c,v])=>{const pct=depTotal?Math.round(v/depTotal*100):0;return(
+          <div key={c} style={{marginBottom:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:4}}><span>{c}</span><span style={{color:'var(--t3)'}}>{fmt(v)} €</span></div>
+            <div style={{height:6,background:'var(--sf2)',borderRadius:4,overflow:'hidden'}}><div style={{width:pct+'%',height:'100%',background:'var(--er)'}}></div></div>
+          </div>);})}
+      </div>
+    </div>
+
+    <div className="card" style={{padding:0,overflow:'hidden'}}>
+      <div style={{padding:'16px 20px',borderBottom:'1px solid var(--bd)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <h3 style={{fontSize:15,fontWeight:600}}>Deals signés — encaissement</h3>
+        <span style={{fontSize:12,color:'var(--t3)'}}>{fmt(encaisse)} € encaissé · {fmt(enAttente)} € à encaisser</span>
+      </div>
+      {signed.length===0&&<div style={{padding:24,textAlign:'center',color:'var(--t4)',fontSize:13}}>Aucun deal signé pour l'instant.</div>}
+      {signed.map(l=>{const done=isPaid(l);return(<div key={l.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 20px',borderTop:'1px solid var(--bd)'}}>
+        <div><div style={{fontWeight:500,fontSize:14}}>{l.nom}</div><div style={{fontSize:12,color:'var(--t4)'}}>{num(l.valeur)?fmt(num(l.valeur))+' €':'montant non renseigné'}</div></div>
+        <button className={done?'btn btn-ghost btn-sm':'btn btn-p btn-sm'} onClick={()=>togglePaid(l.id)}>{done?'✓ Encaissé':'Marquer encaissé'}</button>
+      </div>);})}
+    </div>
+  </React.Fragment>);
+}
+
+/* ═══ SHIELD ═══ */
+function Shield({S}){
+  const{resolved,resolveAlert}=S;
+  const totR=SENTINEL.filter(a=>!resolved.includes(a.id)).reduce((s,a)=>{const v=parseFloat((a.risk||'0').replace(/[^0-9]/g,''));return s+(isNaN(v)?0:v)},0);
+  return(<React.Fragment>
+    <div style={{marginBottom:24}}><h1 className="page-title">Bouclier Légal</h1><p className="page-sub">Exposition restante : {totR.toLocaleString('fr-FR')} €</p></div>
+    {SENTINEL.length===0&&<div className="card" style={{textAlign:'center',padding:40}}><div style={{fontSize:32,marginBottom:8}}>🛡️</div><p style={{color:'var(--t3)',marginBottom:4}}>Aucune alerte de conformité pour l'instant.</p><p style={{color:'var(--t4)',fontSize:13}}>Ce module se remplira quand tu auras des salariés et des obligations à suivre (DSN, OETH, RGAA…).</p></div>}
+    {SENTINEL.map(a=>{const done=resolved.includes(a.id);return(
+      <div key={a.id} className="card" style={{marginBottom:14,opacity:done?.35:1,borderColor:a.type==='critical'&&!done?'rgba(239,68,68,.12)':undefined,padding:20}}>
+        <div style={{display:'flex',alignItems:'flex-start',gap:14}}>
+          <span style={{fontSize:20,marginTop:2}}>{done?'✓':a.ic}</span>
+          <div style={{flex:1}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}><span style={{fontSize:15,fontWeight:600}}>{a.title}</span><span className={`badge ${a.type==='critical'?'badge-er':a.type==='warning'?'badge-wn':'badge-in'}`}>{done?'Résolu':a.type}</span></div>
+            <p style={{fontSize:13,color:'var(--t2)',lineHeight:1.55,marginBottom:8}}>{a.desc}</p>
+            <div style={{display:'flex',gap:16,fontSize:12,color:'var(--t4)'}}><span>Risque : <strong style={{color:'var(--er)'}}>{a.risk}</strong></span><span>Échéance : <strong>{a.dl}</strong></span></div>
+          </div>
+          {!done&&<button className="btn btn-p btn-sm" onClick={()=>resolveAlert(a.id)}>Traiter</button>}
+        </div>
+      </div>
+    )})}
+  </React.Fragment>);
+}
+
+/* ═══ CRM ═══ */
+function CRMHub(){
+  const CRM_URL='https://kylianmnr.github.io/WEBO/';
+  const open=()=>window.open(CRM_URL,'_blank','noopener,noreferrer');
+  return(<React.Fragment>
+    <div style={{marginBottom:24}}><h1 className="page-title">Hub CRM</h1><p className="page-sub">Accès au CRM commercial WEBO SMART</p></div>
+    <div className="card" style={{textAlign:'center',padding:'48px 32px',maxWidth:560}}>
+      <div style={{fontSize:48,marginBottom:16}}>🔗</div>
+      <h2 style={{fontSize:22,fontWeight:700,marginBottom:8}}>WEBO Tracker</h2>
+      <p style={{color:'var(--t4)',marginBottom:8,lineHeight:1.5}}>Votre CRM commercial : prospects, pipeline, deals et relances.</p>
+      <p style={{color:'var(--t4)',fontSize:13,marginBottom:24}}>L'outil s'ouvre dans un nouvel onglet. Atlas reste ouvert ici.</p>
+      <button className="btn btn-p" onClick={open} style={{fontSize:15,padding:'12px 28px'}}>Ouvrir le CRM commercial ↗</button>
+      <div style={{marginTop:20,fontSize:12,color:'var(--t4)',fontFamily:'var(--mono)'}}>{CRM_URL}</div>
+    </div>
+    <div className="card" style={{marginTop:20,maxWidth:560}}>
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}><div className="status-dot green" style={{width:10,height:10}}></div><span style={{fontWeight:600,color:'var(--ok)'}}>En ligne</span></div>
+      <p style={{color:'var(--t4)',fontSize:13,lineHeight:1.5,margin:0}}>Le CRM est hébergé en ligne et sauvegardé sur sa propre base. Atlas (gestion interne) et le CRM (commercial) restent deux outils séparés et robustes, reliés par cet accès.</p>
+    </div>
+  </React.Fragment>);
+}
+
+/* ═══ REPORTS ═══ */
+function Reports(){
+  const[gen,setGen]=useState(null);
+  const reps=[{id:'c',ic:'🛡️',t:'Conformité 360°'},{id:'r',ic:'♿',t:'RGAA / EAA'},{id:'o',ic:'📦',t:'Offboarding'},{id:'t',ic:'📉',t:'Turnover'},{id:'k',ic:'🔗',t:'Logs CRM'}];
+  const dl=r=>{setGen(r.id);setTimeout(()=>{setGen(null);confetti({particleCount:40,spread:40});alert('Téléchargé : '+r.t)},1200)};
+  return(<React.Fragment>
+    <div style={{marginBottom:24}}><h1 className="page-title">Rapports</h1><p className="page-sub">Exports automatisés</p></div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:16}}>
+      {reps.map(r=>(<div key={r.id} className="card" style={{textAlign:'center',padding:28}}>
+        <div style={{fontSize:28,marginBottom:10}}>{r.ic}</div>
+        <div style={{fontWeight:600,marginBottom:14}}>{r.t}</div>
+        <button className={`btn ${gen===r.id?'btn-ghost':'btn-p'}`} style={{width:'100%',justifyContent:'center'}} onClick={()=>dl(r)} disabled={gen!==null}>{gen===r.id?'Génération…':'Télécharger'}</button>
+      </div>))}
+    </div>
+  </React.Fragment>);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
