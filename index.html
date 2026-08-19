@@ -1066,7 +1066,7 @@ const effRole=povRole||roleOf(effSess);
 const isA=povRole?false:(TEAM.find(t=>t.id===effSess)?.isAdmin||false);
 const sU=povRole?{name:povRole==="commercial"?"Commercial":"Technicien",role:povRole==="commercial"?"Vue Commercial":"Vue Technicien"}:TEAM.find(t=>t.id===effSess);
 const isTech=effRole==="technicien";const isCom=effRole==="commercial";
-const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);const[aiMini,setAiMini]=useState(false);const[gcalToken,setGcalToken]=useState(null);const[gcalConnected,setGcalConnected]=useState(false);
+const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);const[aiMini,setAiMini]=useState(false);const[gcalToken,setGcalToken]=useState(()=>{try{const t=localStorage.getItem("gcal_token");const e=parseInt(localStorage.getItem("gcal_token_exp")||"0",10);return(t&&e>Date.now())?t:null;}catch(e){return null;}});const[gcalConnected,setGcalConnected]=useState(()=>{try{return localStorage.getItem("gcal_connected")==="1";}catch(e){return false;}});
 const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("webo_theme")||"dark"}catch(e){return"dark"}});const[proxySecret,setProxySecret]=useState(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const AI_PROXY=SB_URL+"/functions/v1/ai-proxy";
 const aiCall=async(messages,system,search)=>{if(!proxySecret)throw new Error("Cle d acces IA manquante. Cliquez sur la cle dans la nav.");const r=await fetch(AI_PROXY,{method:"POST",headers:{"Content-Type":"application/json","x-webo-secret":proxySecret,"x-webo-user":(sess||"")},body:JSON.stringify({messages:messages,system:system||"",search:!!search})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||("Erreur IA "+r.status));return d.text||"";};
@@ -1159,7 +1159,7 @@ const gcalConnect=()=>{
     const tc=window.google.accounts.oauth2.initTokenClient({
       client_id:GCAL_CLIENT_ID,scope:GCAL_SCOPE,
       callback:(resp)=>{
-        if(resp&&resp.access_token){setGcalToken(resp.access_token);setGcalConnected(true);try{localStorage.setItem("gcal_connected","1")}catch(e){}flash("Google Agenda connecté ✓");}
+        if(resp&&resp.access_token){setGcalToken(resp.access_token);setGcalConnected(true);try{const ttl=(parseInt(resp.expires_in,10)||3600)*1000;localStorage.setItem("gcal_token",resp.access_token);localStorage.setItem("gcal_token_exp",String(Date.now()+ttl-60000));localStorage.setItem("gcal_connected","1")}catch(e){}flash("Google Agenda connecté ✓");}
         else{flash("Connexion Google échouée");}
       }
     });
@@ -1167,6 +1167,35 @@ const gcalConnect=()=>{
     tc.requestAccessToken({prompt:gcalConnected?"":"consent"});
   }catch(e){flash("Erreur Google: "+(e.message||"").slice(0,50));}
 };
+// Reconnexion silencieuse : renouvelle le token sans réafficher l'écran de consentement
+const gcalSilentRenew=()=>{
+  if(!window.google||!window.google.accounts||!window.google.accounts.oauth2)return;
+  try{
+    const tc=window.google.accounts.oauth2.initTokenClient({
+      client_id:GCAL_CLIENT_ID,scope:GCAL_SCOPE,
+      callback:(resp)=>{
+        if(resp&&resp.access_token){setGcalToken(resp.access_token);setGcalConnected(true);try{const ttl=(parseInt(resp.expires_in,10)||3600)*1000;localStorage.setItem("gcal_token",resp.access_token);localStorage.setItem("gcal_token_exp",String(Date.now()+ttl-60000));localStorage.setItem("gcal_connected","1")}catch(e){}}
+      }
+    });
+    gcalTokenClientRef.current=tc;
+    tc.requestAccessToken({prompt:""}); // pas de consentement : silencieux si session Google active
+  }catch(e){}
+};
+// Au démarrage : restaurer le token stocké, ou le renouveler en silence s'il a expiré
+useEffect(()=>{
+  let tries=0;
+  const boot=()=>{
+    tries++;
+    if(!window.google||!window.google.accounts||!window.google.accounts.oauth2){
+      if(tries<20){setTimeout(boot,500);return;}else return;
+    }
+    let tok=null,exp=0,wasConnected=false;
+    try{tok=localStorage.getItem("gcal_token");exp=parseInt(localStorage.getItem("gcal_token_exp")||"0",10);wasConnected=localStorage.getItem("gcal_connected")==="1";}catch(e){}
+    if(tok&&exp>Date.now()){setGcalToken(tok);setGcalConnected(true);}
+    else if(wasConnected){gcalSilentRenew();}
+  };
+  boot();
+},[]);
 // Envoyer un événement vers Google Agenda
 const gcalPush=async(date,title,time,endTime,allDay)=>{
   if(!gcalToken)return; // pas connecté, on ne fait rien
@@ -1182,7 +1211,7 @@ const gcalPush=async(date,title,time,endTime,allDay)=>{
     const r=await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events",{
       method:"POST",headers:{"Authorization":"Bearer "+gcalToken,"Content-Type":"application/json"},body:JSON.stringify(body)
     });
-    if(r.status===401){setGcalToken(null);setGcalConnected(false);flash("Session Google expirée, reconnecte-toi");}
+    if(r.status===401){setGcalToken(null);try{localStorage.removeItem("gcal_token");localStorage.removeItem("gcal_token_exp");}catch(e){}gcalSilentRenew();}
   }catch(e){/* silencieux : ne bloque pas la création CRM */}
 };
 // Envoyer TOUS mes événements existants vers Google (rattrapage)
