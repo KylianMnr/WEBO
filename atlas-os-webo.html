@@ -480,6 +480,7 @@ function App(){
   const[authed,setAuthed]=useState(null); // null = en cours de vérification
   const[authChecking,setAuthChecking]=useState(true);
   const[isFondateur,setIsFondateur]=useState(false);
+  const[weboRole,setWeboRole]=useState('fondateur');
   const[myId,setMyId]=useState('kylian');
   const[chatChannels,setChatChannels]=useState([]);
   const[chatMessages,setChatMessages]=useState([]);
@@ -489,6 +490,8 @@ function App(){
   const[resolved,setResolved]=useState(LS.g('res',[]));
   const[art,setArt]=useState(null);
   const[modal,setModal]=useState(null);
+  const[toast,setToast]=useState(null);
+  const notify=(msg,type='ok')=>{setToast({msg,type,k:Date.now()});setTimeout(()=>setToast(t=>t&&t.msg===msg?null:t),3200);};
   const[showAP,setShowAP]=useState(!LS.g('ap3',false));
   const[theme,setTheme]=useState(LS.g('theme','dark'));
 
@@ -511,11 +514,12 @@ function App(){
         const sess=data&&data.session;
         setAuthed(!!sess);
         setIsFondateur(!!(sess&&sess.user&&sess.user.app_metadata&&sess.user.app_metadata.role==='fondateur'));
+        setWeboRole((sess&&sess.user&&sess.user.app_metadata&&sess.user.app_metadata.role)||'fondateur');
         if(sess&&sess.user){const a=acctByEmail(sess.user.email);if(a)setMyId(a.id);}
       }catch(e){if(alive)setAuthed(false);}
       if(alive)setAuthChecking(false);
     })();
-    const{data:sub}=sb.auth.onAuthStateChange((_e,session)=>{setAuthed(!!session);setIsFondateur(!!(session&&session.user&&session.user.app_metadata&&session.user.app_metadata.role==='fondateur'));});
+    const{data:sub}=sb.auth.onAuthStateChange((_e,session)=>{setAuthed(!!session);setIsFondateur(!!(session&&session.user&&session.user.app_metadata&&session.user.app_metadata.role==='fondateur'));setWeboRole((session&&session.user&&session.user.app_metadata&&session.user.app_metadata.role)||'fondateur');});
     return()=>{alive=false;try{sub&&sub.subscription&&sub.subscription.unsubscribe()}catch(e){}};
   },[]);
 
@@ -617,14 +621,16 @@ function App(){
   const switchRole=r=>{setRole(r);setView(r==='salarie'?'portal':'dashboard')};
   const crit=SENTINEL.filter(x=>x.type==='critical'&&!resolved.includes(x.id)).length;
 
-  const navAdmin=[{id:'dashboard',ic:'📊',lb:'Dashboard'},{id:'messages',ic:'✉️',lb:'Messagerie'},{id:'warroom',ic:'💬',lb:'War Room'},...(isFondateur?[{id:'finance',ic:'💶',lb:'Finance'}]:[]),{id:'calendar',ic:'📅',lb:'Agenda'},{id:'ats',ic:'🎯',lb:'Recrutement'},{id:'coffre',ic:'🔒',lb:'Coffre-Fort'},{id:'crm',ic:'🔗',lb:'Hub CRM'},{id:'reports',ic:'📥',lb:'Rapports'}];
+  const navAdminFull=[{id:'dashboard',ic:'📊',lb:'Dashboard'},{id:'messages',ic:'✉️',lb:'Messagerie'},{id:'warroom',ic:'💬',lb:'War Room'},...(isFondateur?[{id:'finance',ic:'💶',lb:'Finance'}]:[]),{id:'calendar',ic:'📅',lb:'Agenda'},{id:'ats',ic:'🎯',lb:'Recrutement'},{id:'coffre',ic:'🔒',lb:'Coffre-Fort'},{id:'crm',ic:'🔗',lb:'Hub CRM'},{id:'reports',ic:'📥',lb:'Rapports'}];
+  const ACCES_ROLE={commercial:['dashboard','messages','warroom','calendar','crm'],technicien:['dashboard','messages','warroom','calendar','coffre']};
+  const navAdmin=(weboRole==='commercial'||weboRole==='technicien')?navAdminFull.filter(n=>ACCES_ROLE[weboRole].includes(n.id)):navAdminFull;
   const navMgr=[{id:'dashboard',ic:'📋',lb:'Mon Équipe'},{id:'warroom',ic:'💬',lb:'War Room'},{id:'calendar',ic:'📅',lb:'Agenda'},{id:'ats',ic:'🎯',lb:'Recrutement'}];
   const navEmp=[{id:'portal',ic:'👤',lb:'Mon Portail'},{id:'calendar',ic:'📅',lb:'Agenda'}];
   const nav=role==='admin'?navAdmin:role==='manager'?navMgr:navEmp;
   useEffect(()=>{if(!nav.some(n=>n.id===view))setView(role==='salarie'?'portal':'dashboard')},[role]);
 
   const viewLabel=nav.find(n=>n.id===view)?.lb||'Dashboard';
-  const S={emps,setEmps,addEmp,calEv,setCalEv,addCalEvent,leaves,addLeave,approveLeave,cands,setCands,addCandidate,moveCandidate,vault,saveToVault,addVaultDoc,delVaultDoc,openArt,resolved,resolveAlert,setView,setArt,setModal,role,crmLeads,expenses,addExpense,delExpense,paidIds,togglePaid,isFondateur,myId,chatChannels,chatMessages,sendChat};
+  const S={emps,setEmps,addEmp,calEv,setCalEv,addCalEvent,leaves,addLeave,approveLeave,cands,setCands,addCandidate,moveCandidate,vault,saveToVault,addVaultDoc,delVaultDoc,openArt,resolved,resolveAlert,setView,setArt,setModal,role,crmLeads,expenses,addExpense,delExpense,paidIds,togglePaid,isFondateur,myId,chatChannels,chatMessages,sendChat,weboRole,notify};
 
   const doSignOut=async()=>{try{await sb.auth.signOut()}catch(e){}setAuthed(false);setCalEv([]);setCands([]);};
 
@@ -662,7 +668,7 @@ function App(){
 
     {/* TOPBAR */}
     <div className="topbar">
-      <div className="breadcrumb">Atlas OS <span style={{color:'var(--t4)'}}>/</span> <span>{viewLabel}</span></div>
+      <div className="breadcrumb">WEBO SMART <span style={{color:'var(--t4)'}}>/</span> <span>{viewLabel}</span></div>
       <SearchBox leads={crmLeads} cands={cands} vault={vault} events={calEv} go={setView}/>
       <div className="topbar-right">
         <div className="theme-btn" onClick={toggleTheme} title={theme==='dark'?'Mode clair':'Mode sombre'}>{theme==='dark'?'☀️':'🌙'}</div>
@@ -678,20 +684,21 @@ function App(){
       {role==='admin'&&view==='warroom'&&<WarRoom S={S}/>}
       {role==='admin'&&view==='finance'&&isFondateur&&<Finance S={S}/>}
       {role==='admin'&&view==='messages'&&<Messagerie S={S}/>}
-      {role==='admin'&&view==='crm'&&<CRMHub/>}
-      {role==='admin'&&view==='reports'&&<Reports/>}
-      {role==='admin'&&view==='coffre'&&<CoffreFort S={S}/>}
+      {role==='admin'&&view==='crm'&&(weboRole==='fondateur'||weboRole==='commercial')&&<CRMHub/>}
+      {role==='admin'&&view==='reports'&&weboRole==='fondateur'&&<Reports S={S}/>}
+      {role==='admin'&&view==='coffre'&&(weboRole==='fondateur'||weboRole==='technicien')&&<CoffreFort S={S}/>}
+      {role==='admin'&&view==='ats'&&weboRole==='fondateur'&&<ATSKanban S={S}/>}
       {role==='manager'&&view==='dashboard'&&<DashManager S={S}/>}
       {role==='manager'&&view==='warroom'&&<WarRoom S={S}/>}
       {role==='salarie'&&view==='portal'&&<SalariePortal S={S}/>}
       {view==='calendar'&&<CalendarView S={S}/>}
-      {view==='ats'&&<ATSKanban S={S}/>}
     </div></div>
 
     {art&&<ArtPanel d={art} onClose={()=>setArt(null)} save={saveToVault}/>}
     {modal&&<div className="overlay" onClick={()=>setModal(null)}><div className="modal" onClick={e=>e.stopPropagation()}>{modal}</div></div>}
     {showAP&&<AutoPilot go={()=>{setShowAP(false);LS.s('ap3',true);setView('dashboard');confetti({particleCount:50,spread:50})}}/>}
     <FloatingBot ctx={{leads:crmLeads,cands,calEv,expenses}}/>
+    {toast&&<div key={toast.k} style={{position:'fixed',bottom:24,left:'50%',transform:'translateX(-50%)',zIndex:9999,background:toast.type==='err'?'var(--er)':toast.type==='warn'?'#B8860B':'var(--ok)',color:'#fff',padding:'12px 20px',borderRadius:10,fontSize:14,fontWeight:500,boxShadow:'0 8px 24px rgba(0,0,0,.25)',maxWidth:'80vw',textAlign:'center'}}>{toast.msg}</div>}
   </React.Fragment>);
 }
 
@@ -1139,7 +1146,7 @@ function WarRoom({S}){
     } else {
       // Pas de scénario pré-écrit : on appelle le vrai agent IA (même proxy que le CRM)
       if(!getProxySecret()){
-        setMsgs(p=>[...p,{ag:'talentis',tx:"Pour l'IA en direct, configure d'abord la clé d'accès IA dans le CRM (icône clé). Elle est partagée avec Atlas.\n\nEn attendant, commandes disponibles :\n\n• **Embauche Dev Web**\n• **Offboarding Marc Rousseau**\n• **Résumé réunion CSE**\n• **Vérifier contrat**\n• **Audit 360°**"}]);
+        setMsgs(p=>[...p,{ag:'talentis',tx:"Pour l'IA en direct, configure d'abord la clé d'accès IA dans le CRM (icône clé). Elle est partagée avec Atlas.\n\nEn attendant, tu peux me demander par exemple :\n\n• **Comment cadrer un audit RGAA**\n• **Rédige un message de prospection EAA**\n• **Explique la mise en conformité à un client**\n• **Aide-moi à construire un devis d'audit**"}]);
       } else {
         try{
           const ctx="Contexte WEBO (agence accessibilité EAA/RGAA). "+
@@ -1158,7 +1165,7 @@ function WarRoom({S}){
     setBusy(false);
   };
 
-  const handleVoice=()=>{setMic(true);setTimeout(()=>{setMic(false);const t="Gérez le départ de Marc Rousseau de A à Z";setInp(t);setTimeout(()=>send(t),200)},1800)};
+  const handleVoice=()=>{setMic(true);setTimeout(()=>{setMic(false);const t="Comment se déroule un audit RGAA de A à Z";setInp(t);setTimeout(()=>send(t),200)},1800)};
 
   const renderMsg=(m,i)=>{
     if(m.ag==='user')return <div key={i} className="msg-row user"><div className="msg-content"><div className="msg-bubble">{m.tx}</div></div></div>;
@@ -1174,7 +1181,7 @@ function WarRoom({S}){
 
   return(<React.Fragment>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24,flexWrap:'wrap',gap:12}}>
-      <div><h1 className="page-title">War Room</h1><p className="page-sub">Comité de direction IA · Make.com</p></div>
+      <div><h1 className="page-title">War Room</h1><p className="page-sub">Assistant IA WEBO · accessibilité, prospection, audits</p></div>
       <button className="btn btn-er" onClick={()=>send('SOS Conflit')} disabled={busy}>🚨 SOS Conflit</button>
     </div>
     <div style={{display:'grid',gridTemplateColumns:'1fr 300px',gap:20}}>
@@ -1192,13 +1199,13 @@ function WarRoom({S}){
           </div>
         </div>
         <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:12}}>
-          {['Embauche Dev Web','Offboarding Marc','Résumé CSE','Vérifier contrat','Audit 360°'].map((q,i)=><button key={i} className="btn btn-ghost btn-sm" onClick={()=>send(q)} disabled={busy}>{q}</button>)}
+          {['Comment cadrer un audit RGAA','Rédige un message de prospection EAA','Explique la mise en conformité à un client','Estime le nombre de pages à auditer','Quelles sanctions en cas de non-conformité'].map((q,i)=><button key={i} className="btn btn-ghost btn-sm" onClick={()=>send(q)} disabled={busy}>{q}</button>)}
         </div>
         <div className="drop-zone" style={{marginTop:16}}>
           <div style={{fontSize:24,marginBottom:6}}>📂</div>
           <div style={{fontWeight:600,marginBottom:4}}>Smart Drop</div>
-          <div style={{fontSize:13,color:'var(--t3)',marginBottom:12}}>Déposez réunions, contrats ou CVs pour analyse IA</div>
-          <div style={{display:'flex',gap:8,justifyContent:'center'}}><button className="btn btn-ghost btn-sm" onClick={()=>send('Résumé réunion CSE')} disabled={busy}>Réunion</button><button className="btn btn-ghost btn-sm" onClick={()=>send('Vérifier contrat directeur')} disabled={busy}>Contrat</button></div>
+          <div style={{fontSize:13,color:'var(--t3)',marginBottom:12}}>Pose ta question ou lance une analyse liée à un audit ou un prospect</div>
+          <div style={{display:'flex',gap:8,justifyContent:'center'}}><button className="btn btn-ghost btn-sm" onClick={()=>send('Rédige une déclaration d\'accessibilité type')} disabled={busy}>Déclaration</button><button className="btn btn-ghost btn-sm" onClick={()=>send('Aide-moi à construire un devis d\'audit')} disabled={busy}>Devis audit</button></div>
         </div>
       </div>
       <div>
@@ -1477,17 +1484,50 @@ function CRMHub(){
 }
 
 /* ═══ REPORTS ═══ */
-function Reports(){
+function Reports({S}){
+  const{crmLeads,cands,vault,calEv,expenses,isFondateur,notify}=S;
   const[gen,setGen]=useState(null);
-  const reps=[{id:'c',ic:'🛡️',t:'Conformité 360°'},{id:'r',ic:'♿',t:'RGAA / EAA'},{id:'o',ic:'📦',t:'Offboarding'},{id:'t',ic:'📉',t:'Turnover'},{id:'k',ic:'🔗',t:'Logs CRM'}];
-  const dl=r=>{setGen(r.id);setTimeout(()=>{setGen(null);confetti({particleCount:40,spread:40});alert('Téléchargé : '+r.t)},1200)};
+  const csvEscape=v=>{const s=(v==null?'':String(v)).replace(/"/g,'""');return /[",;\n]/.test(s)?'"'+s+'"':s;};
+  const toCSV=(headers,rows)=>{const bom='\uFEFF';const head=headers.map(csvEscape).join(';');const body=rows.map(r=>r.map(csvEscape).join(';')).join('\n');return bom+head+'\n'+body;};
+  const download=(name,content)=>{const blob=new Blob([content],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1500);};
+  const stamp=()=>{const d=new Date();return d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate());};
+
+  const builders={
+    pipeline:()=>{const rows=(crmLeads||[]).map(l=>[l.nom,STATUS_LBL[l.status]||l.status||'',num(l.valeur)||'',l.audit_score||l.auditScore||'',l.email||'',l.telephone||l.tel||'']);return{name:`WEBO_pipeline_${stamp()}.csv`,csv:toCSV(['Prospect','Statut','Valeur (€)','Score audit','Email','Téléphone'],rows),n:rows.length};},
+    rgaa:()=>{const rows=(crmLeads||[]).filter(l=>l.audit_score||l.auditScore).map(l=>[l.nom,(l.audit_score||l.auditScore)+'/100',STATUS_LBL[l.status]||l.status||'',l.site||l.url||'']);return{name:`WEBO_audits_RGAA_EAA_${stamp()}.csv`,csv:toCSV(['Prospect','Score audit','Statut','Site'],rows),n:rows.length};},
+    recrutement:()=>{const rows=(cands||[]).map(c=>[c.name||c.nom,c.role||c.poste||'',c.stage||c.etape||'',(c.match!=null?c.match+'%':'')]);return{name:`WEBO_recrutement_${stamp()}.csv`,csv:toCSV(['Candidat','Poste','Étape','Match'],rows),n:rows.length};},
+    finance:()=>{const rows=(expenses||[]).map(e=>[e.label||e.libelle||'',num(e.amount||e.montant)||'',e.category||e.categorie||'',e.date||'',e.recurrence||'ponctuel']);return{name:`WEBO_depenses_${stamp()}.csv`,csv:toCSV(['Libellé','Montant (€)','Catégorie','Date','Récurrence'],rows),n:rows.length};},
+    agenda:()=>{const rows=(calEv||[]).slice().sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).map(e=>[e.date||'',e.time||'',e.title||e.titre||'']);return{name:`WEBO_agenda_${stamp()}.csv`,csv:toCSV(['Date','Heure','Événement'],rows),n:rows.length};},
+  };
+
+  const reps=[
+    {id:'pipeline',ic:'📊',t:'Pipeline commercial',d:'Tous les prospects, statuts et valeurs'},
+    {id:'rgaa',ic:'♿',t:'Audits RGAA / EAA',d:'Prospects avec score d\'audit'},
+    {id:'recrutement',ic:'🎯',t:'Recrutement',d:'Candidats et avancement'},
+    {id:'agenda',ic:'📅',t:'Agenda',d:'Événements à venir et passés'},
+    ...(isFondateur?[{id:'finance',ic:'💶',t:'Dépenses',d:'Charges et dépenses enregistrées'}]:[]),
+  ];
+
+  const dl=r=>{
+    setGen(r.id);
+    try{
+      const out=builders[r.id]();
+      if(!out.n){notify&&notify('Aucune donnée à exporter pour «'+r.t+'»','warn');setGen(null);return;}
+      download(out.name,out.csv);
+      confetti({particleCount:40,spread:40});
+      notify&&notify(out.n+' ligne'+(out.n>1?'s':'')+' exportée'+(out.n>1?'s':'')+' — '+r.t,'ok');
+    }catch(e){notify&&notify('Erreur lors de l\'export','err');}
+    setTimeout(()=>setGen(null),400);
+  };
+
   return(<React.Fragment>
-    <div style={{marginBottom:24}}><h1 className="page-title">Rapports</h1><p className="page-sub">Exports automatisés</p></div>
+    <div style={{marginBottom:24}}><h1 className="page-title">Rapports</h1><p className="page-sub">Exports CSV de tes données · ouvrables dans Excel ou Google Sheets</p></div>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:16}}>
       {reps.map(r=>(<div key={r.id} className="card" style={{textAlign:'center',padding:28}}>
         <div style={{fontSize:28,marginBottom:10}}>{r.ic}</div>
-        <div style={{fontWeight:600,marginBottom:14}}>{r.t}</div>
-        <button className={`btn ${gen===r.id?'btn-ghost':'btn-p'}`} style={{width:'100%',justifyContent:'center'}} onClick={()=>dl(r)} disabled={gen!==null}>{gen===r.id?'Génération…':'Télécharger'}</button>
+        <div style={{fontWeight:600,marginBottom:4}}>{r.t}</div>
+        <div style={{fontSize:12,color:'var(--t3)',marginBottom:14,minHeight:32}}>{r.d}</div>
+        <button className={`btn ${gen===r.id?'btn-ghost':'btn-p'}`} style={{width:'100%',justifyContent:'center'}} onClick={()=>dl(r)} disabled={gen!==null}>{gen===r.id?'Export…':'Télécharger CSV'}</button>
       </div>))}
     </div>
   </React.Fragment>);
