@@ -637,10 +637,10 @@ function App(){
       <div style={{padding:'20px',borderBottom:'1px solid var(--bd)'}}>
         <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
           <div style={{width:32,height:32,borderRadius:8,background:'var(--ac)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,color:'#fff'}}>⚛</div>
-          <div><div style={{fontWeight:700,fontSize:15,color:'var(--t0)'}}>Atlas OS</div><div style={{fontSize:11,color:'var(--t4)'}}>Système RH Intelligent</div></div>
+          <div><div style={{fontWeight:700,fontSize:15,color:'var(--t0)'}}>WEBO SMART</div><div style={{fontSize:11,color:'var(--t4)'}}>Plateforme WEBO</div></div>
         </div>
         <div className="role-switch">
-          {[['admin','Admin DRH'],['manager','Manager'],['salarie','Salarié']].map(([r,lb])=>(
+          {[['admin','ADMIN'],['manager','Manager'],['salarie','Salarié']].map(([r,lb])=>(
             <button key={r} className={`role-opt ${role===r?'active':''}`} onClick={()=>switchRole(r)}>{lb}</button>
           ))}
         </div>
@@ -774,13 +774,27 @@ function DashAdmin({S}){
 
     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:24}}>
       <div className="card">
-        <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Répartition du pipeline</h3>
-        {topStatuses.length===0&&<p style={{color:'var(--t3)',fontSize:13}}>Aucun prospect pour l'instant.</p>}
-        {topStatuses.map(([st,n])=>{const pct=leads.length?Math.round(n/leads.length*100):0;return(
-          <div key={st} style={{marginBottom:12}}>
-            <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:4}}><span>{STATUS_LBL[st]||st}</span><span style={{color:'var(--t3)'}}>{n}</span></div>
-            <div style={{height:6,background:'var(--sf2)',borderRadius:4,overflow:'hidden'}}><div style={{width:pct+'%',height:'100%',background:'var(--ac)'}}></div></div>
-          </div>);})}
+        {(()=>{const t=new Date();const y=t.getFullYear(),m=t.getMonth();
+          const daysInMonth=new Date(y,m+1,0).getDate();const startOffset=(new Date(y,m,1).getDay()+6)%7;
+          const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+          const evByDay={};(calEv||[]).forEach(ev=>{if(!ev.date)return;const[ey,em,ed]=String(ev.date).split('-').map(Number);if(ey===y&&em===m+1)(evByDay[ed]=evByDay[ed]||[]).push(ev);});
+          const isToday=d=>t.getDate()===d;
+          return(<React.Fragment>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+              <h3 style={{fontSize:15,fontWeight:600}}>Agenda du mois</h3>
+              <button className="btn btn-ghost btn-sm" onClick={()=>setView('agenda')}>Voir tout →</button>
+            </div>
+            <div style={{textAlign:'center',fontSize:13,fontWeight:600,color:'var(--ac2)',marginBottom:10}}>{MONTHS[m]} {y}</div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:4}}>
+              {['L','M','M','J','V','S','D'].map((d,i)=><div key={i} style={{textAlign:'center',fontSize:10,color:'var(--t4)',fontWeight:600,paddingBottom:4}}>{d}</div>)}
+              {Array.from({length:startOffset},(_,i)=><div key={`e${i}`}></div>)}
+              {Array.from({length:daysInMonth},(_,i)=>{const day=i+1;const has=(evByDay[day]||[]).length>0;const td=isToday(day);
+                return(<div key={day} onClick={()=>setView('agenda')} title={has?(evByDay[day].length+' événement'+(evByDay[day].length>1?'s':'')):''} style={{cursor:'pointer',position:'relative',textAlign:'center',padding:'6px 0',borderRadius:6,fontSize:12,fontWeight:td?700:400,background:td?'var(--ac)':(has?'var(--acs)':'transparent'),color:td?'#fff':(has?'var(--ac2)':'var(--t3)')}}>
+                  {day}
+                  {has&&!td&&<span style={{position:'absolute',bottom:3,left:'50%',transform:'translateX(-50%)',width:4,height:4,borderRadius:'50%',background:'var(--ac)'}}></span>}
+                </div>);})}
+            </div>
+          </React.Fragment>);})()}
       </div>
       <div className="card">
         <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Ce mois-ci</h3>
@@ -793,21 +807,6 @@ function DashAdmin({S}){
       </div>
     </div>
 
-    <div className="card" style={{padding:0,overflow:'auto'}}>
-      <div style={{padding:'18px 24px',borderBottom:'1px solid var(--bd)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <h3 style={{fontSize:15,fontWeight:600}}>Derniers prospects</h3>
-        <div style={{display:'flex',gap:8}}>
-          <button className="btn btn-ghost btn-sm" onClick={()=>setView('warroom')}>💬 War Room</button>
-          <button className="btn btn-ghost btn-sm" onClick={()=>setView('ats')}>🎯 Recrutement</button>
-        </div>
-      </div>
-      <table className="data"><thead><tr><th>Nom</th><th>Statut</th><th>Valeur</th><th>Score audit</th></tr></thead>
-      <tbody>{leads.slice().sort((a,b)=>String(b.date_created||'').localeCompare(String(a.date_created||''))).slice(0,10).map(l=>(
-        <tr key={l.id}><td style={{fontWeight:500}}>{l.nom}</td><td style={{color:'var(--t2)'}}>{STATUS_LBL[l.status]||l.status||'—'}</td><td>{num(l.valeur)?fmt(num(l.valeur))+' €':'—'}</td><td>{(l.audit_score||l.auditScore)?(l.audit_score||l.auditScore)+'/100':'—'}</td></tr>
-      ))}</tbody>
-      </table>
-      {leads.length===0&&<div style={{padding:24,textAlign:'center',color:'var(--t4)',fontSize:13}}>Aucun prospect chargé. Vérifie ta connexion au CRM.</div>}
-    </div>
   </React.Fragment>);
 }
 
