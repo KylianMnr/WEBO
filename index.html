@@ -1174,7 +1174,9 @@ const gcalSilentRenew=()=>{
     const tc=window.google.accounts.oauth2.initTokenClient({
       client_id:GCAL_CLIENT_ID,scope:GCAL_SCOPE,
       callback:(resp)=>{
-        if(resp&&resp.access_token){setGcalToken(resp.access_token);setGcalConnected(true);try{const ttl=(parseInt(resp.expires_in,10)||3600)*1000;localStorage.setItem("gcal_token",resp.access_token);localStorage.setItem("gcal_token_exp",String(Date.now()+ttl-60000));localStorage.setItem("gcal_connected","1")}catch(e){}}
+        if(resp&&resp.access_token){setGcalToken(resp.access_token);setGcalConnected(true);try{const ttl=(parseInt(resp.expires_in,10)||3600)*1000;localStorage.setItem("gcal_token",resp.access_token);localStorage.setItem("gcal_token_exp",String(Date.now()+ttl-60000));localStorage.setItem("gcal_connected","1")}catch(e){}
+          if(window.__gcalPending){const p=window.__gcalPending;window.__gcalPending=null;gcalPush(p.date,p.title,p.time,p.end_time,p.all_day);flash("Google Agenda reconnecté, événement synchronisé ✓");}}
+        else{setGcalConnected(false);try{localStorage.removeItem("gcal_token");localStorage.removeItem("gcal_token_exp");localStorage.removeItem("gcal_connected");}catch(e){}}
       }
     });
     gcalTokenClientRef.current=tc;
@@ -1205,7 +1207,14 @@ const gcalPush=async(date,title,time,endTime,allDay)=>{
     if(stored&&exp&&Date.now()<exp){tok=stored;}
     else if(stored&&!exp){tok=stored;}
   }catch(e){}
-  if(!tok)return; // vraiment pas connecté, on ne fait rien
+  if(!tok){
+    // Token absent/expiré : on garde l'événement en attente et on tente une reconnexion silencieuse
+    let wasConnected=false;try{wasConnected=localStorage.getItem("gcal_connected")==="1";}catch(e){}
+    if(wasConnected){window.__gcalPending={date,title,time,end_time:endTime,all_day:allDay};gcalSilentRenew();
+      setTimeout(()=>{if(window.__gcalPending){window.__gcalPending=null;setGcalConnected(false);flash("Google Agenda déconnecté — reclique sur Connecter Google, l'événement est bien dans le CRM");}},4000);
+    }else{flash("Google Agenda non connecté — clique sur Connecter Google pour synchroniser");}
+    return;
+  }
   try{
     let body;
     if(allDay){
