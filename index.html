@@ -1198,7 +1198,14 @@ useEffect(()=>{
 },[]);
 // Envoyer un événement vers Google Agenda
 const gcalPush=async(date,title,time,endTime,allDay)=>{
-  if(!gcalToken)return; // pas connecté, on ne fait rien
+  let tok=gcalToken;
+  try{
+    const stored=localStorage.getItem("gcal_token");
+    const exp=parseInt(localStorage.getItem("gcal_token_exp")||"0",10);
+    if(stored&&exp&&Date.now()<exp){tok=stored;}
+    else if(stored&&!exp){tok=stored;}
+  }catch(e){}
+  if(!tok)return; // vraiment pas connecté, on ne fait rien
   try{
     let body;
     if(allDay){
@@ -1209,10 +1216,11 @@ const gcalPush=async(date,title,time,endTime,allDay)=>{
       body={summary:title,start:{dateTime:date+"T"+st+":00",timeZone:"Europe/Paris"},end:{dateTime:date+"T"+et+":00",timeZone:"Europe/Paris"}};
     }
     const r=await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events",{
-      method:"POST",headers:{"Authorization":"Bearer "+gcalToken,"Content-Type":"application/json"},body:JSON.stringify(body)
+      method:"POST",headers:{"Authorization":"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)
     });
-    if(r.status===401){setGcalToken(null);try{localStorage.removeItem("gcal_token");localStorage.removeItem("gcal_token_exp");}catch(e){}gcalSilentRenew();}
-  }catch(e){/* silencieux : ne bloque pas la création CRM */}
+    if(r.status===401){setGcalToken(null);try{localStorage.removeItem("gcal_token");localStorage.removeItem("gcal_token_exp");}catch(e){}gcalSilentRenew();flash("Reconnecte Google Agenda et réessaie");}
+    else if(!r.ok){flash("Google Agenda: envoi refusé ("+r.status+")");}
+  }catch(e){/* réseau : ne bloque pas la création CRM */}
 };
 // Envoyer TOUS mes événements existants vers Google (rattrapage)
 const[gcalSyncing,setGcalSyncing]=useState(false);
