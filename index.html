@@ -1238,9 +1238,45 @@ const gcalPush=async(date,title,time,endTime,allDay)=>{
     const r=await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events",{
       method:"POST",headers:{"Authorization":"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)
     });
-    if(r.status===401){setGcalToken(null);try{localStorage.removeItem("gcal_token");localStorage.removeItem("gcal_token_exp");}catch(e){}gcalSilentRenew();flash("Reconnecte Google Agenda et réessaie");}
-    else if(!r.ok){flash("Google Agenda: envoi refusé ("+r.status+")");}
-  }catch(e){/* réseau : ne bloque pas la création CRM */}
+    if(r.status===401){setGcalToken(null);try{localStorage.removeItem("gcal_token");localStorage.removeItem("gcal_token_exp");}catch(e){}gcalSilentRenew();flash("Reconnecte Google Agenda et réessaie");return null;}
+    else if(!r.ok){flash("Google Agenda: envoi refusé ("+r.status+")");return null;}
+    const created=await r.json();
+    return created&&created.id?created.id:null;
+  }catch(e){/* réseau : ne bloque pas la création CRM */return null;}
+};
+// Lit un token Google frais depuis localStorage (ou state), sinon null
+const gcalGetToken=()=>{
+  let tok=gcalToken;
+  try{const stored=localStorage.getItem("gcal_token");const exp=parseInt(localStorage.getItem("gcal_token_exp")||"0",10);
+    if(stored&&(!exp||Date.now()<exp))tok=stored;}catch(e){}
+  return tok||null;
+};
+// Supprimer un événement dans Google Agenda
+const gcalDelete=async(gcalId)=>{
+  if(!gcalId)return;const tok=gcalGetToken();if(!tok)return;
+  try{const r=await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events/"+encodeURIComponent(gcalId),{method:"DELETE",headers:{"Authorization":"Bearer "+tok}});
+    if(r.status===401){gcalSilentRenew();flash("Reconnecte Google Agenda");}
+    else if(!r.ok&&r.status!==404&&r.status!==410){flash("Google Agenda: suppression refusée ("+r.status+")");}
+  }catch(e){}
+};
+// Modifier un événement dans Google Agenda
+const gcalUpdate=async(gcalId,date,title,time,endTime,allDay)=>{
+  if(!gcalId)return;const tok=gcalGetToken();if(!tok)return;
+  try{
+    let body;
+    if(allDay){body={summary:title,start:{date},end:{date}};}
+    else{const st=(time||"09:00");const et=endTime||(String(Math.min(parseInt(st)+1,23)).padStart(2,"0")+":"+(st.split(":")[1]||"00"));
+      const parisOffset=(ds)=>{const d=new Date(ds+"T12:00:00Z");const m=d.getUTCMonth()+1,day=d.getUTCDate();
+        const lastSun=(y,mo)=>{const last=new Date(Date.UTC(y,mo,0));return last.getUTCDate()-last.getUTCDay();};
+        const y=d.getUTCFullYear();const marSun=lastSun(y,3),octSun=lastSun(y,10);
+        let dst;if(m>3&&m<10)dst=true;else if(m<3||m>10)dst=false;else if(m===3)dst=day>=marSun;else dst=day<octSun;
+        return dst?"+02:00":"+01:00";};
+      const off=parisOffset(date);
+      body={summary:title,start:{dateTime:date+"T"+st+":00"+off},end:{dateTime:date+"T"+et+":00"+off}};}
+    const r=await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events/"+encodeURIComponent(gcalId),{method:"PATCH",headers:{"Authorization":"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(r.status===401){gcalSilentRenew();flash("Reconnecte Google Agenda");}
+    else if(!r.ok&&r.status!==404){flash("Google Agenda: modification refusée ("+r.status+")");}
+  }catch(e){}
 };
 // Envoyer TOUS mes événements existants vers Google (rattrapage)
 const[gcalSyncing,setGcalSyncing]=useState(false);
@@ -1255,9 +1291,9 @@ const gcalPushAll=async()=>{
   }
   setGcalSyncing(false);flash(ok+" événements envoyés vers Google Agenda ✓");
 };
-const addAgEvent=async(date,title,time,color,assignee_ids,endTime,allDay)=>{const ev={id:uid(),date,title,time:allDay?"00:00":(time||"09:00"),end_time:allDay?"":(endTime||""),all_day:!!allDay,color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}gcalPush(ev.date,ev.title,ev.time,ev.end_time,ev.all_day);};
-const delAgEvent=async id=>{setAgEvents(p=>p.filter(e=>e.id!==id));try{await sb.from("agenda_events").delete().eq("id",id)}catch(e){}};
-const moveAgEvent=async(id,newDate,newTime,newEnd,newTitle)=>{const patch={date:newDate};if(newTime)patch.time=newTime;if(newEnd!==undefined)patch.end_time=newEnd;if(newTitle!==undefined&&newTitle!=="")patch.title=newTitle;setAgEvents(p=>p.map(e=>e.id===id?{...e,...patch}:e));const ev=agEvents.find(e=>e.id===id);flash("Event deplace au "+newDate);if(ev)addActivity(sess,"a deplace",ev.title,"var(--purple)");try{await sb.from("agenda_events").update(patch).eq("id",id)}catch(e){flash("Erreur sync agenda")}};
+const addAgEvent=async(date,title,time,color,assignee_ids,endTime,allDay)=>{const ev={id:uid(),date,title,time:allDay?"00:00":(time||"09:00"),end_time:allDay?"":(endTime||""),all_day:!!allDay,color:color||"var(--purple)",assignee_ids:assignee_ids&&assignee_ids.length?assignee_ids:[sess],owner_id:sess,created_at:new Date().toISOString()};setAgEvents(p=>[...p,ev]);flash("Event ajouté");addActivity(sess,"a planifié",title,color||"var(--purple)");(ev.assignee_ids||[]).filter(a=>a!==sess).forEach(a=>addNotif("fa-calendar","var(--purple)",mN(sess)+" t'a planifié: "+title));try{await sb.from("agenda_events").insert(ev)}catch(e){flash("Erreur sync agenda")}const gid=await gcalPush(ev.date,ev.title,ev.time,ev.end_time,ev.all_day);if(gid){setAgEvents(p=>p.map(e=>e.id===ev.id?{...e,gcal_id:gid}:e));try{await sb.from("agenda_events").update({gcal_id:gid}).eq("id",ev.id)}catch(e){}}};
+const delAgEvent=async id=>{const ev=agEvents.find(e=>e.id===id);setAgEvents(p=>p.filter(e=>e.id!==id));try{await sb.from("agenda_events").delete().eq("id",id)}catch(e){}if(ev&&ev.gcal_id)gcalDelete(ev.gcal_id);};
+const moveAgEvent=async(id,newDate,newTime,newEnd,newTitle)=>{const patch={date:newDate};if(newTime)patch.time=newTime;if(newEnd!==undefined)patch.end_time=newEnd;if(newTitle!==undefined&&newTitle!=="")patch.title=newTitle;setAgEvents(p=>p.map(e=>e.id===id?{...e,...patch}:e));const ev=agEvents.find(e=>e.id===id);flash("Event deplace au "+newDate);if(ev)addActivity(sess,"a deplace",ev.title,"var(--purple)");try{await sb.from("agenda_events").update(patch).eq("id",id)}catch(e){flash("Erreur sync agenda")}if(ev&&ev.gcal_id){const merged={...ev,...patch};gcalUpdate(ev.gcal_id,merged.date,merged.title,merged.time,merged.end_time,merged.all_day);}};
 
 const bulkApporteur=async mid=>{const ids=[...selIds];for(const id of ids){setLeads(p=>p.map(x=>x.id===id?{...x,memberId:mid}:x));markEcho(id);await sb.from("leads").update({member_id:mid}).eq("id",id)}setSelIds(new Set());flash(mid?ids.length+" prospect(s) → "+mN(mid):ids.length+" prospect(s) désattribués");if(mid&&mid!==sess)addNotif("fa-user-plus",mC(mid),mN(sess)+" a attribué "+ids.length+" prospect(s) à "+mN(mid));addActivity(sess,"a attribué "+ids.length+" prospect(s) à",mid?mN(mid):"personne",mid?mC(mid):"var(--text3)")};
 
