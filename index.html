@@ -1222,7 +1222,18 @@ const gcalPush=async(date,title,time,endTime,allDay)=>{
     }else{
       const st=(time||"09:00");
       const et=endTime||(String(Math.min(parseInt(st)+1,23)).padStart(2,"0")+":"+(st.split(":")[1]||"00"));
-      body={summary:title,start:{dateTime:date+"T"+st+":00",timeZone:"Europe/Paris"},end:{dateTime:date+"T"+et+":00",timeZone:"Europe/Paris"}};
+      // Décalage Paris explicite selon la date (heure d'été +02:00 / heure d'hiver +01:00),
+      // pour éviter toute réinterprétation UTC par Google.
+      const parisOffset=(ds)=>{const d=new Date(ds+"T12:00:00Z");const m=d.getUTCMonth()+1,day=d.getUTCDate();
+        // Heure d'été UE : dernier dimanche de mars -> dernier dimanche d'octobre
+        const lastSun=(y,mo)=>{const last=new Date(Date.UTC(y,mo,0));return last.getUTCDate()-last.getUTCDay();};
+        const y=d.getUTCFullYear();const marSun=lastSun(y,3),octSun=lastSun(y,10);
+        let dst;
+        if(m>3&&m<10)dst=true;else if(m<3||m>10)dst=false;
+        else if(m===3)dst=day>=marSun;else dst=day<octSun;
+        return dst?"+02:00":"+01:00";};
+      const off=parisOffset(date);
+      body={summary:title,start:{dateTime:date+"T"+st+":00"+off},end:{dateTime:date+"T"+et+":00"+off}};
     }
     const r=await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events",{
       method:"POST",headers:{"Authorization":"Bearer "+tok,"Content-Type":"application/json"},body:JSON.stringify(body)
