@@ -941,8 +941,9 @@ const sb=window.supabase.createClient(SB_URL,SB_KEY,{realtime:{params:{eventsPer
 const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kmeunier",email:"kmeunier@webo-smart.fr"},
 {id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr"},
-{id:"theo",name:"Théo",role:"Commercial",color:"#10b981",isAdmin:false,isFondateur:false,login:"ttheveniot",email:"ttheveniot@webo-smart.fr"}];
-const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur,roleType:isAdmin?"admin":(role||"").toLowerCase().includes("techni")?"technicien":"commercial"}));
+{id:"theo",name:"Théo",role:"Commercial",color:"#10b981",isAdmin:false,isFondateur:false,login:"ttheveniot",email:"ttheveniot@webo-smart.fr"},
+{id:"matthieu",name:"Matthieu Faucher",role:"Apporteur d'affaires",color:"#8B5CF6",isAdmin:false,isFondateur:false,login:"mfaucher",email:"mfaucher@webo-smart.fr"}];
+const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur,roleType:isAdmin?"admin":(role||"").toLowerCase().includes("techni")?"technicien":(role||"").toLowerCase().includes("apporteur")?"apporteur":"commercial"}));
 const roleOf=id=>(TEAM.find(t=>t.id===id)||{}).roleType||"commercial";
 
 /* ═══ DATA MAPPING ═══ */
@@ -1065,7 +1066,7 @@ const effSess=povRole?(povUser?.id||sess):(viewAs||sess);
 const effRole=povRole||roleOf(effSess);
 const isA=povRole?false:(TEAM.find(t=>t.id===effSess)?.isAdmin||false);
 const sU=povRole?{name:povRole==="commercial"?"Commercial":"Technicien",role:povRole==="commercial"?"Vue Commercial":"Vue Technicien"}:TEAM.find(t=>t.id===effSess);
-const isTech=effRole==="technicien";const isCom=effRole==="commercial";
+const isTech=effRole==="technicien";const isCom=effRole==="commercial";const isApp=effRole==="apporteur";
 const[leads,setLeads]=useState([]);const[prestas,setPrestas]=useState([]);const[ready,setReady]=useState(false);const[sync,setSync]=useState("loading");const[rtDbg,setRtDbg]=useState({status:"—",events:0,last:"",lastAt:""});const[showRtDbg,setShowRtDbg]=useState(false);const[aiMini,setAiMini]=useState(false);const[gcalToken,setGcalToken]=useState(()=>{try{const t=localStorage.getItem("gcal_token");const e=parseInt(localStorage.getItem("gcal_token_exp")||"0",10);return(t&&e>Date.now())?t:null;}catch(e){return null;}});const[gcalConnected,setGcalConnected]=useState(()=>{try{return localStorage.getItem("gcal_connected")==="1";}catch(e){return false;}});
 const[theme,setTheme]=useState(()=>{try{return localStorage.getItem("webo_theme")||"dark"}catch(e){return"dark"}});const[proxySecret,setProxySecret]=useState(()=>{try{return localStorage.getItem("webo_proxy_secret")||""}catch(e){return""}});const[apiTestRes,setApiTestRes]=useState(null);const[viewAs,setViewAs]=useState("");const[showApiCfg,setShowApiCfg]=useState(false);const[outreachLead,setOutreachLead]=useState(null);const[outreachPresta,setOutreachPresta]=useState(null);
 const AI_PROXY=SB_URL+"/functions/v1/ai-proxy";
@@ -1869,7 +1870,7 @@ useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{loc
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
 
 /* Computed */
-const myL=useMemo(()=>{if(isA)return leads;if(isTech)return leads.filter(l=>l.prestaId===effSess);return leads.filter(l=>l.memberId===effSess||!l.memberId)},[leads,effSess,isA,isTech]);
+const myL=useMemo(()=>{if(isA)return leads;if(isTech)return leads.filter(l=>l.prestaId===effSess);if(isApp)return leads.filter(l=>l.memberId===effSess);return leads.filter(l=>l.memberId===effSess||!l.memberId)},[leads,effSess,isA,isTech,isApp]);
 /* V34 — leads strictement personnels (agenda/tâches des apporteurs) */
 const myOwnL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,effSess,isA]);
 /* v54 — leads strictement personnels, y compris pour un admin (objectifs individuels) */
@@ -2086,11 +2087,11 @@ return(
 
   {/* ═══ MODULES ═══ */}
   <div className="hub-grid">
-    {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊",roles:["admin","commercial","technicien"]},
+    {[{icon:"fa-chart-line",title:"Pipeline",desc:"Kanban, leads, cycle de vente",pg:"pipeline",cnt:st.total+" deals",ac:"#2962FF",em:"📊",roles:["admin","commercial","technicien","apporteur"]},
     {icon:"fa-layer-group",title:"Espace",desc:"Tâches & notes partagées",pg:"espace",roles:["admin","commercial","technicien"],cnt:(visibleWsTasks.filter(t=>t.status!=="done").length)+" tâches",ac:"#8B5CF6",em:"🗂️"},
-    {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",roles:["admin","commercial","technicien"],cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
+    {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",roles:["admin","commercial","technicien","apporteur"],cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",roles:["admin","commercial"],cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
-    {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",roles:["admin","commercial","technicien"],cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
+    {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",roles:["admin","commercial","technicien","apporteur"],cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
     {icon:"fa-screwdriver-wrench",title:"Techniciens",desc:"Réseau de techniciens EAA",pg:"talents",cnt:(prestas.length||0)+" techniciens",ac:"#8B5CF6",em:"🔧",roles:["admin"]},{icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖",roles:["admin","commercial","technicien"]},
     {icon:"fa-satellite-dish",title:"Sourcing",desc:"Import massif & scoring de leads",pg:"sourcing",cnt:"Admin",ac:"#C5A059",em:"📡",fondateurOnly:true},
     ].filter(c=>(!c.roles||c.roles.includes(effRole))&&(!c.fondateurOnly||(TEAM.find(t=>t.id===sess)?.isFondateur))).map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
@@ -3126,12 +3127,12 @@ return (
       <button onClick={()=>setPage("hub")} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"8px 16px",borderRadius:"var(--radius)",border:"1px solid var(--border)",background:"var(--bg2)",color:"var(--text2)",fontSize:12,fontWeight:600,transition:"all .15s",cursor:"pointer"}} onMouseOver={e=>{e.currentTarget.style.borderColor="var(--gold)";e.currentTarget.style.color="var(--gold)"}} onMouseOut={e=>{e.currentTarget.style.borderColor="var(--border)";e.currentTarget.style.color="var(--text2)"}}><i className="fa-solid fa-arrow-left"/>Retour au Hub</button>
     </div>}
     {page==="hub"&&<HubPage/>}
-    {page==="espace"&&<Espace/>}{page==="talents"&&isA&&<Talents/>}
+    {page==="espace"&&!isApp&&<Espace/>}{page==="talents"&&isA&&<Talents/>}
     {page==="messages"&&<MessagesPage/>}
     {page==="pipeline"&&<Pipeline/>}
     {page==="agenda"&&<Agenda/>}
-    {page==="finance"&&!isTech&&<Finance/>}
-    {page==="ia"&&iaUI}
+    {page==="finance"&&!isTech&&!isApp&&<Finance/>}
+    {page==="ia"&&!isApp&&iaUI}
     {page==="sourcing"&&(TEAM.find(t=>t.id===sess)?.isFondateur)&&sourcingUI}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
