@@ -2035,7 +2035,7 @@ return(
         </div>)}
       </div>
       {/* Barres objectifs perso + équipe */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
+      <div style={{display:"grid",gridTemplateColumns:isApp?"1fr 1fr":"1fr 1fr 1fr",gap:14}}>
         <div>
           <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>MES CLIENTS / MOIS — {mySignMonth}/{myObj.month}</span><span style={{color:objMonthPct>=80?"var(--green)":"var(--gold)"}}>{objMonthPct}%</span></div>
           <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",width:Math.min(objMonthPct,100)+"%",transition:"width 1s ease-out"}}/></div>
@@ -2044,10 +2044,10 @@ return(
           <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>MON CA / MOIS — {E(myCaMonth)}/{E(myCaObj)}</span><span style={{color:caMonthPct>=80?"var(--green)":"var(--gold)"}}>{caMonthPct}%</span></div>
           <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:caMonthPct>=100?"var(--green)":caMonthPct>=50?"var(--gold)":"var(--red)",width:Math.min(caMonthPct,100)+"%",transition:"width 1s ease-out"}}/></div>
         </div>
-        <div>
+        {!isApp&&<div>
           <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>ÉQUIPE CA / MOIS — {E(teamCaMonth)}/{E(teamCaObj)}</span><span style={{color:(teamCaObj&&teamCaMonth/teamCaObj>=.8)?"var(--green)":"var(--gold)"}}>{teamCaObj?Math.round(teamCaMonth/teamCaObj*100):0}%</span></div>
           <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:"linear-gradient(90deg,var(--gold),var(--blue))",width:Math.min(teamCaObj?teamCaMonth/teamCaObj*100:0,100)+"%",transition:"width 1s ease-out"}}/></div>
-        </div>
+        </div>}
       </div>
     </div>
   </div>
