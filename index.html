@@ -1990,7 +1990,7 @@ const Nav=()=>(
         </div>}
         <div style={{padding:"5px 0"}}>
           <button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>
-      {isFondateur&&<button className="you-item" onClick={()=>{setShowColors(true);setShowYou(false)}}><i className="fa-solid fa-palette" style={{color:"var(--purple)"}}/>Couleurs équipe</button>}
+      {(TEAM.find(t=>t.id===sess)?.isFondateur)&&<button className="you-item" onClick={()=>{setShowColors(true);setShowYou(false)}}><i className="fa-solid fa-palette" style={{color:"var(--purple)"}}/>Couleurs équipe</button>}
           <button className="you-item" onClick={()=>{setTheme(t=>t==="dark"?"light":"dark")}}><i className={"fa-solid "+(theme==="dark"?"fa-sun":"fa-moon")} style={{color:theme==="dark"?"#FBBF24":"#6366f1"}}/>{theme==="dark"?"Mode clair":"Mode sombre"}</button>
           <button className="you-item" onClick={()=>setPrivacy(p=>!p)}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")} style={{color:privacy?"var(--red)":"var(--text3)"}}/>Confidentialité {privacy?"ON":"OFF"}</button>
           <button className="you-item" onClick={()=>setClientMode(p=>!p)}><i className={"fa-solid "+(clientMode?"fa-user-tie":"fa-user-secret")} style={{color:clientMode?"var(--purple)":"var(--text3)"}}/>{clientMode?"Mode Admin":"Mode Client"}</button>
@@ -2551,8 +2551,8 @@ return <div style={{padding:"14px 18px",flex:1,overflow:"auto"}}>
   {(()=>{
     const todayDs=td();
     const in7=(ds)=>{if(!ds)return false;const d=new Date(ds+"T00:00:00");const n=new Date();const dow=(n.getDay()+6)%7;const lundi=new Date(n.getFullYear(),n.getMonth(),n.getDate()-dow);const dimanche=new Date(lundi);dimanche.setDate(lundi.getDate()+6);dimanche.setHours(23,59,59,999);return d>=lundi&&d<=dimanche;};
-    const rdvToday=(agEvents||[]).filter(e=>e.date===todayDs).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
-    const rdvWeek=(agEvents||[]).filter(e=>e.date!==todayDs&&in7(e.date)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+    const rdvToday=(myAgEvents||[]).filter(e=>e.date===todayDs).sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+    const rdvWeek=(myAgEvents||[]).filter(e=>e.date!==todayDs&&in7(e.date)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
     const relances=agendaItems.filter(x=>x.type==="relance");
     const dormants=agendaItems.filter(x=>x.type==="dormant");
     const Item=({ic,col,txt,sub,onClick})=>(<div onClick={onClick} style={{display:"flex",alignItems:"center",gap:9,padding:"8px 10px",borderRadius:8,background:"var(--bg2)",border:"1px solid var(--border)",cursor:onClick?"pointer":"default",marginBottom:6}}><span style={{width:26,height:26,borderRadius:7,background:col+"18",color:col,display:"grid",placeItems:"center",fontSize:11,flexShrink:0}}><i className={"fa-solid "+ic}/></span><div style={{flex:1,minWidth:0}}><div style={{fontSize:12,fontWeight:600,color:"var(--text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{txt}</div>{sub&&<div style={{fontSize:10,color:"var(--text3)"}}>{sub}</div>}</div></div>);
