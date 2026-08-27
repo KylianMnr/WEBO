@@ -1994,7 +1994,7 @@ const Nav=()=>(
           <button className="you-item" onClick={()=>{setTheme(t=>t==="dark"?"light":"dark")}}><i className={"fa-solid "+(theme==="dark"?"fa-sun":"fa-moon")} style={{color:theme==="dark"?"#FBBF24":"#6366f1"}}/>{theme==="dark"?"Mode clair":"Mode sombre"}</button>
           {realAdmin&&<button className="you-item" onClick={()=>setPrivacy(p=>!p)}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")} style={{color:privacy?"var(--red)":"var(--text3)"}}/>Confidentialité {privacy?"ON":"OFF"}</button>}
           <button className="you-item" onClick={()=>setClientMode(p=>!p)}><i className={"fa-solid "+(clientMode?"fa-user-tie":"fa-user-secret")} style={{color:clientMode?"var(--purple)":"var(--text3)"}}/>{clientMode?"Mode Admin":"Mode Client"}</button>
-          {realAdmin&&<button className="you-item" onClick={()=>{setShowApiCfg(true);setShowYou(false)}}><i className="fa-solid fa-key" style={{color:proxySecret?"var(--green)":"var(--red)"}}/>Clé API IA</button>}
+          <button className="you-item" onClick={()=>{setShowApiCfg(true);setShowYou(false)}}><i className="fa-solid fa-key" style={{color:proxySecret?"var(--green)":"var(--red)"}}/>Clé API IA</button>
           {realAdmin&&<button className="you-item" onClick={()=>{setShowRtDbg(true);setShowYou(false)}}><i className="fa-solid fa-circle" style={{color:rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)",fontSize:9}}/>Temps réel {rtDbg.status==="SUBSCRIBED"?"· OK":"· HS"}</button>}
         </div>
         {realAdmin&&<div style={{borderTop:"1px solid var(--border)",padding:"5px 0"}}>
@@ -2116,7 +2116,7 @@ return(
     {icon:"fa-calendar-check",title:"Agenda",desc:"Relances, audits, deadlines",pg:"agenda",roles:["admin","commercial","technicien","apporteur"],cnt:st.agenda+" tâches",ac:"#E74C4C",em:"📅"},
     {icon:"fa-chart-pie",title:"Finance",desc:"CA, commissions, objectifs",pg:"finance",roles:["admin","commercial"],cnt:isA?E(st.margeNette):E(me.prosp||0),ac:"#089981",em:"💰"},
     {icon:"fa-comments",title:"Messages",desc:"Discussions privées & groupes",pg:"messages",roles:["admin","commercial","technicien","apporteur"],cnt:chatUnreadTotal>0?chatUnreadTotal+" non lus":"À jour",ac:"#0EA5E9",em:"💬"},
-    {icon:"fa-screwdriver-wrench",title:"Techniciens",desc:"Réseau de techniciens EAA",pg:"talents",cnt:(prestas.length||0)+" techniciens",ac:"#8B5CF6",em:"🔧",roles:["admin"]},{icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖",roles:["admin","commercial","technicien"]},
+    {icon:"fa-screwdriver-wrench",title:"Techniciens",desc:"Réseau de techniciens EAA",pg:"talents",cnt:(prestas.length||0)+" techniciens",ac:"#8B5CF6",em:"🔧",roles:["admin"]},{icon:"fa-robot",title:"Agent IA",desc:"Analyse et coaching IA",pg:"ia",cnt:"IA",ac:"#C5A059",em:"🤖",roles:["admin","commercial","technicien","apporteur"]},
     {icon:"fa-satellite-dish",title:"Sourcing",desc:"Import massif & scoring de leads",pg:"sourcing",cnt:"Admin",ac:"#C5A059",em:"📡",fondateurOnly:true},
     ].filter(c=>(!c.roles||c.roles.includes(effRole))&&(!c.fondateurOnly||(TEAM.find(t=>t.id===sess)?.isFondateur))).map((c,i)=><div key={i} className="hub-card fu" style={{animationDelay:(i+5)*50+"ms",borderTop:"3px solid "+c.ac,padding:"26px 24px"}} onClick={()=>setPage(c.pg)}>
       <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:14}}>
@@ -3164,7 +3164,7 @@ return (
     {page==="pipeline"&&<Pipeline/>}
     {page==="agenda"&&<Agenda/>}
     {page==="finance"&&!isTech&&!isApp&&<Finance/>}
-    {page==="ia"&&!isApp&&iaUI}
+    {page==="ia"&&iaUI}
     {page==="sourcing"&&(TEAM.find(t=>t.id===sess)?.isFondateur)&&sourcingUI}
   </div>
   {selLead&&<Detail l={selLead} onClose={()=>setSelLead(null)}/>}
