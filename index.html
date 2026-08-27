@@ -1052,7 +1052,7 @@ const IS={width:"100%",padding:"10px 12px",borderRadius:"var(--radius)",border:"
 /* ═══ ESPACE — colonnes & priorités ═══ */
 const WS_COLS=[{id:"todo",label:"À faire",accent:"#64748b",icon:"fa-inbox"},{id:"doing",label:"En cours",accent:"#2962FF",icon:"fa-spinner"},{id:"review",label:"À valider",accent:"#C5A059",icon:"fa-eye"},{id:"done",label:"Terminé",accent:"#089981",icon:"fa-check"}];
 const WS_PRIO=[{id:"low",label:"Basse",c:"#64748b"},{id:"normal",label:"Normale",c:"#2962FF"},{id:"high",label:"Haute",c:"#f59e0b"},{id:"urgent",label:"Urgente",c:"#E74C4C"}];
-const OBJ_DEFAULTS={kylian:{week:5,month:20,caMonth:15000},johanna:{week:3,month:12,caMonth:8000},theo:{week:3,month:12,caMonth:6000}};
+const OBJ_DEFAULTS={kylian:{week:0,month:0,caMonth:0},johanna:{week:0,month:0,caMonth:0},theo:{week:0,month:0,caMonth:0}};
 
 /* ═══ APP ═══ */
 function App(){
@@ -1989,18 +1989,18 @@ const Nav=()=>(
           <select value={viewAs||""} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;setViewAs(v);wantTopRef.current=true;const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===""?"Retour à votre vue":v==="pov_commercial"?"👁 POV Commercial":"👁 POV Technicien")}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}><option value="">Votre vue (Admin)</option><option value="pov_commercial">👁 POV Commercial</option><option value="pov_technicien">👁 POV Technicien</option></select>
         </div>}
         <div style={{padding:"5px 0"}}>
-          <button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>
+          {realAdmin&&<button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>}
       {(TEAM.find(t=>t.id===sess)?.isFondateur)&&<button className="you-item" onClick={()=>{setShowColors(true);setShowYou(false)}}><i className="fa-solid fa-palette" style={{color:"var(--purple)"}}/>Couleurs équipe</button>}
           <button className="you-item" onClick={()=>{setTheme(t=>t==="dark"?"light":"dark")}}><i className={"fa-solid "+(theme==="dark"?"fa-sun":"fa-moon")} style={{color:theme==="dark"?"#FBBF24":"#6366f1"}}/>{theme==="dark"?"Mode clair":"Mode sombre"}</button>
-          <button className="you-item" onClick={()=>setPrivacy(p=>!p)}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")} style={{color:privacy?"var(--red)":"var(--text3)"}}/>Confidentialité {privacy?"ON":"OFF"}</button>
+          {realAdmin&&<button className="you-item" onClick={()=>setPrivacy(p=>!p)}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")} style={{color:privacy?"var(--red)":"var(--text3)"}}/>Confidentialité {privacy?"ON":"OFF"}</button>}
           <button className="you-item" onClick={()=>setClientMode(p=>!p)}><i className={"fa-solid "+(clientMode?"fa-user-tie":"fa-user-secret")} style={{color:clientMode?"var(--purple)":"var(--text3)"}}/>{clientMode?"Mode Admin":"Mode Client"}</button>
-          <button className="you-item" onClick={()=>{setShowApiCfg(true);setShowYou(false)}}><i className="fa-solid fa-key" style={{color:proxySecret?"var(--green)":"var(--red)"}}/>Clé API IA</button>
-          <button className="you-item" onClick={()=>{setShowRtDbg(true);setShowYou(false)}}><i className="fa-solid fa-circle" style={{color:rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)",fontSize:9}}/>Temps réel {rtDbg.status==="SUBSCRIBED"?"· OK":"· HS"}</button>
+          {realAdmin&&<button className="you-item" onClick={()=>{setShowApiCfg(true);setShowYou(false)}}><i className="fa-solid fa-key" style={{color:proxySecret?"var(--green)":"var(--red)"}}/>Clé API IA</button>}
+          {realAdmin&&<button className="you-item" onClick={()=>{setShowRtDbg(true);setShowYou(false)}}><i className="fa-solid fa-circle" style={{color:rtDbg.status==="SUBSCRIBED"?"var(--green)":"var(--red)",fontSize:9}}/>Temps réel {rtDbg.status==="SUBSCRIBED"?"· OK":"· HS"}</button>}
         </div>
-        <div style={{borderTop:"1px solid var(--border)",padding:"5px 0"}}>
+        {realAdmin&&<div style={{borderTop:"1px solid var(--border)",padding:"5px 0"}}>
           <button className="you-item" onClick={()=>{exportLeads();setShowYou(false)}}><i className="fa-solid fa-file-csv"/>Export CSV</button>
           <button className="you-item" onClick={()=>{const d=JSON.stringify({v:"12",leads,prestas},null,2);const b=new Blob([d],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="webo-"+td()+".json";a.click();flash("Backup ✓");setShowYou(false)}}><i className="fa-solid fa-cloud-arrow-down"/>Backup JSON</button>
-        </div>
+        </div>}
         <div style={{borderTop:"1px solid var(--border)",padding:"5px 0"}}>
           <button className="you-item" onClick={async()=>{try{await sb.auth.signOut()}catch(e){}setSess("");try{localStorage.removeItem("webo_session");sessionStorage.removeItem("webo_session")}catch(e){}}} style={{color:"var(--red)"}}><i className="fa-solid fa-power-off"/>Déconnexion</button>
         </div>
@@ -2024,7 +2024,7 @@ const moneyEmoji=isA?"🏆":"💸";
 const nowD=new Date();const startMonth=new Date(nowD.getFullYear(),nowD.getMonth(),1).getTime();
 const signedThisWeek=l=>l.status==="reussi"&&(Date.now()-new Date(l.dateCreated).getTime())/8.64e7<=7;
 const signedThisMonth=l=>l.status==="reussi"&&new Date(l.dateCreated).getTime()>=startMonth;
-const myObj=objectives[effSess]||OBJ_DEFAULTS[effSess]||{week:5,month:20,caMonth:10000};
+const myObj=objectives[effSess]||OBJ_DEFAULTS[effSess]||{week:0,month:0,caMonth:0};
 const mySignWeek=mineL.filter(signedThisWeek).length;
 const mySignMonth=mineL.filter(signedThisMonth).length;
 const objWeekPct=myObj.week>0?Math.round(mySignWeek/myObj.week*100):0;
