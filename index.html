@@ -569,6 +569,17 @@ h2{font-size:16px!important}
 
 /* V19 — Pipeline Pro */
 .pill-bar{display:flex;gap:3px;padding:2px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+/* Rangée d'onglets colonnes du pipeline (gauche→droite, cliquables) */
+.pipe-tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 2px;margin-bottom:6px;flex-shrink:0;scrollbar-width:none;-ms-overflow-style:none}
+.pipe-tabs::-webkit-scrollbar{display:none}
+.pipe-tab{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all .15s}
+.pipe-tab:hover{border-color:var(--border2);color:var(--text);transform:translateY(-1px)}
+.pipe-tab-lb{font-family:var(--sans)}
+.pipe-tab-cnt{min-width:20px;text-align:center;padding:1px 7px;border-radius:10px;font-family:var(--mono);font-weight:800;font-size:10px;background:var(--bg);border:1px solid var(--border)}
+[data-theme="light"] .pipe-tab{background:#FFFDF8;box-shadow:var(--sh-sm)}
+.pipe-tab-on{background:var(--tabc)!important;border-color:var(--tabc)!important;color:#fff!important}
+.pipe-tab-on .status-dot{background:#fff!important}
+.pipe-tab-on .pipe-tab-cnt{background:rgba(255,255,255,.22)!important;border-color:rgba(255,255,255,.5)!important;color:#fff!important}
 .pill{padding:5px 12px;border-radius:6px;font-size:10px;font-weight:600;color:var(--text3);cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px;border:none;background:transparent;font-family:var(--sans)}
 .pill:hover{color:var(--text2);background:var(--bg3)}
 .pill.active{background:var(--bg3);color:var(--gold);box-shadow:0 1px 3px rgba(0,0,0,.2)}
@@ -942,7 +953,8 @@ const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kmeunier",email:"kmeunier@webo-smart.fr"},
 {id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr"},
 {id:"theo",name:"Théo",role:"Commercial",color:"#10b981",isAdmin:false,isFondateur:false,login:"ttheveniot",email:"ttheveniot@webo-smart.fr"},
-{id:"matthieu",name:"Matthieu Faucher",role:"Apporteur d'affaires",color:"#8B5CF6",isAdmin:false,isFondateur:false,login:"mfaucher",email:"mfaucher@webo-smart.fr"},{id:"awa",name:"Awa Andrault",role:"Apporteur d'affaires",color:"#0EA5E9",isAdmin:false,isFondateur:false,login:"a.andrault",email:"a.andrault@webo-smart.fr"}];
+{id:"matthieu",name:"Matthieu Faucher",role:"Apporteur d'affaires",color:"#8B5CF6",isAdmin:false,isFondateur:false,login:"mfaucher",email:"mfaucher@webo-smart.fr"},
+{id:"awa",name:"Awa Andrault",role:"Apporteur d'affaires",color:"#0EA5E9",isAdmin:false,isFondateur:false,login:"a.andrault",email:"a.andrault@webo-smart.fr"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur,roleType:isAdmin?"admin":(role||"").toLowerCase().includes("techni")?"technicien":(role||"").toLowerCase().includes("apporteur")?"apporteur":"commercial"}));
 const roleOf=id=>(TEAM.find(t=>t.id===id)||{}).roleType||"commercial";
 
@@ -2406,9 +2418,18 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
   </div>}
 
   {/* ═══ KANBAN ═══ */}
-  {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
+  {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0,display:"flex",flexDirection:"column"}}>
+  <div className="pipe-tabs">
+    {(pipelineMode==="production"?PROD_COLS:COLS).map(col=>{const n=psFilt.filter(l=>pipelineMode==="production"?(l.prodStatus||"a_auditer")===col.id:l.status===col.id).length;return(
+      <button key={col.id} className="pipe-tab" data-col={col.id} onClick={e=>{const el=document.getElementById("kcol-"+col.id);if(el)el.scrollIntoView({behavior:"smooth",inline:"start",block:"nearest"});const btns=e.currentTarget.parentNode.querySelectorAll(".pipe-tab");btns.forEach(b=>b.classList.remove("pipe-tab-on"));e.currentTarget.classList.add("pipe-tab-on");setTimeout(()=>e.currentTarget&&e.currentTarget.classList.remove("pipe-tab-on"),1200)}} title={col.label} style={{"--tabc":col.accent}}>
+        <span className="status-dot" style={{background:col.accent}}/>
+        <span className="pipe-tab-lb">{col.label}</span>
+        <span className="pipe-tab-cnt" style={{color:col.accent,borderColor:col.accent+"55"}}>{n}</span>
+      </button>);})}
+  </div>
+  <div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
   {(pipelineMode==="production"?PROD_COLS:COLS).map(col=>{const allCards=srt(psFilt.filter(l=>pipelineMode==="production"?(l.prodStatus||"a_auditer")===col.id:l.status===col.id));const cards=allCards.slice(0,kMax[col.id]||KPER);const hasMore=allCards.length>(kMax[col.id]||KPER);const cv=allCards.reduce((s,l)=>s+l.valeur,0);
-  return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
+  return <div key={col.id} id={"kcol-"+col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
     <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:3}}><span className="status-dot" style={{background:col.accent}}/><span style={{fontSize:10,fontWeight:600,color:col.accent,fontFamily:"var(--mono)"}}>{col.label}</span></div>
       <span style={{fontSize:10,fontWeight:700,color:col.accent,fontFamily:"var(--mono)"}}><P$ v={E(cv)} p={pm}/></span>
@@ -2426,7 +2447,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
       <Prog pct={Math.round((col.proba||0)*100)} color={col.accent}/>
     </div>})}{hasMore&&<button onClick={()=>setKMax(p=>({...p,[col.id]:(p[col.id]||KPER)+KPER}))} style={{width:"100%",padding:"6px",borderRadius:6,border:"1px solid var(--border)",color:"var(--gold)",fontSize:10,fontWeight:600,marginTop:2,background:"var(--bg2)"}}><i className="fa-solid fa-chevron-down" style={{marginRight:3}}/>{allCards.length-(kMax[col.id]||KPER)} de plus</button>}</div>
   </div>})}
-  </div></div>}
+  </div></div></div>}
 
   {/* ═══ FOCUS ═══ */}
   {pView==="focus"&&<div style={{flex:1,overflow:"auto"}}>
