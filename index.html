@@ -942,7 +942,7 @@ const ACCTS=[
 {id:"kylian",name:"Kylian Meunier",role:"Fondateur",color:"#C5A059",isAdmin:true,isFondateur:true,login:"kmeunier",email:"kmeunier@webo-smart.fr"},
 {id:"johanna",name:"Johanna",role:"Directrice Administrative",color:"#ec4899",isAdmin:true,isFondateur:false,login:"johanna",email:"johanna@webo.fr"},
 {id:"theo",name:"Théo",role:"Commercial",color:"#10b981",isAdmin:false,isFondateur:false,login:"ttheveniot",email:"ttheveniot@webo-smart.fr"},
-{id:"matthieu",name:"Matthieu Faucher",role:"Apporteur d'affaires",color:"#8B5CF6",isAdmin:false,isFondateur:false,login:"mfaucher",email:"mfaucher@webo-smart.fr"}];
+{id:"matthieu",name:"Matthieu Faucher",role:"Apporteur d'affaires",color:"#8B5CF6",isAdmin:false,isFondateur:false,login:"mfaucher",email:"mfaucher@webo-smart.fr"},{id:"awa",name:"Awa Andrault",role:"Apporteur d'affaires",color:"#0EA5E9",isAdmin:false,isFondateur:false,login:"a.andrault",email:"a.andrault@webo-smart.fr"}];
 const TEAM=ACCTS.map(({id,name,role,color,isAdmin,isFondateur})=>({id,name,role,color,isAdmin,isFondateur,roleType:isAdmin?"admin":(role||"").toLowerCase().includes("techni")?"technicien":(role||"").toLowerCase().includes("apporteur")?"apporteur":"commercial"}));
 const roleOf=id=>(TEAM.find(t=>t.id===id)||{}).roleType||"commercial";
 
