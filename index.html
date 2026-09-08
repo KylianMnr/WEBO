@@ -628,7 +628,7 @@ h2{font-size:16px!important}
 .persona-btn{padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;transition:all .2s;flex:1;text-align:center}
 .persona-btn.sel{background:rgba(197,160,89,.1);border-color:var(--gold);color:var(--gold)}
 
-.k-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:45;width:32px;height:60px;border-radius:8px;background:rgba(197,160,89,.06);border:1px solid rgba(197,160,89,.08);color:rgba(197,160,89,.25);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .3s;cursor:pointer;backdrop-filter:blur(4px);touch-action:manipulation}
+.k-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:40;width:32px;height:60px;border-radius:8px;background:rgba(197,160,89,.06);border:1px solid rgba(197,160,89,.08);color:rgba(197,160,89,.25);font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .3s;cursor:pointer;backdrop-filter:blur(4px)}
 .k-arrow:hover{background:rgba(197,160,89,.15);color:var(--gold);border-color:rgba(197,160,89,.25)}
 .k-arrow-l{left:6px}.k-arrow-r{right:6px}
 
@@ -1899,7 +1899,7 @@ useEffect(()=>{document.documentElement.setAttribute("data-theme",theme);try{loc
 useEffect(()=>{if(!ready||notifs.length>0)return;const ini=[];urgL.slice(0,5).forEach(l=>ini.push({id:uid(),icon:"fa-fire",color:"var(--red)",msg:l.nom+" inactif "+Math.floor(dA(l.lastInteraction))+"j",time:new Date().toISOString(),read:false,leadId:l.id}));leads.filter(l=>l.status==="reussi"&&!l.paymentProof).slice(0,3).forEach(l=>ini.push({id:uid(),icon:"fa-receipt",color:"var(--gold)",msg:"Preuve paiement: "+l.nom,time:new Date().toISOString(),read:false,leadId:l.id}));if(ini.length>0)setNotifs(ini)},[ready]);
 
 /* Computed */
-const myL=useMemo(()=>{if(isA)return leads;if(isTech)return leads.filter(l=>l.prestaId===effSess);if(isApp)return leads.filter(l=>l.memberId===effSess);return leads.filter(l=>l.memberId===effSess||!l.memberId)},[leads,effSess,isA,isTech,isApp]);
+const myL=useMemo(()=>{if(isA)return leads;if(isTech)return leads.filter(l=>l.prestaId===effSess);if(isApp)return leads.filter(l=>l.memberId===effSess||!l.memberId);return leads.filter(l=>l.memberId===effSess||!l.memberId)},[leads,effSess,isA,isTech,isApp]);
 /* V34 — leads strictement personnels (agenda/tâches des apporteurs) */
 const myOwnL=useMemo(()=>isA?leads:leads.filter(l=>l.memberId===effSess),[leads,effSess,isA]);
 /* v54 — leads strictement personnels, y compris pour un admin (objectifs individuels) */
@@ -1966,7 +1966,7 @@ if(!sess)return(
 <div style={{display:"flex",alignItems:"center",justifyContent:"center",minHeight:"100dvh",background:"var(--bg)"}}>
 <div className="fu" style={{background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:12,padding:48,maxWidth:400,width:"95%",textAlign:"center"}}>
   <div style={{marginBottom:4}}><span style={{fontFamily:"var(--serif)",fontWeight:700,fontSize:48,color:"var(--gold)",fontStyle:"italic"}}>W</span><span style={{fontFamily:"var(--serif)",fontWeight:600,fontSize:42,color:"var(--text)"}}>ebo</span></div>
-  <div style={{fontSize:9,color:"var(--text3)",letterSpacing:4,textTransform:"uppercase",fontFamily:"var(--mono)",marginBottom:24}}>EAA Compliance</div>
+  <div style={{fontSize:9,color:"var(--text3)",letterSpacing:4,textTransform:"uppercase",fontFamily:"var(--mono)",marginBottom:24}}>WEBO SMART</div>
   <div className="sep"/>
   <p style={{fontSize:13,color:"var(--text2)",margin:"12px 0 20px",fontFamily:"var(--serif)",fontStyle:"italic"}}>Votre croissance, notre expertise.</p>
   <div style={{textAlign:"left"}}><FF l="Identifiant"><input style={IS} value={logId} onChange={e=>{setLogId(e.target.value);setLogErr("")}} placeholder="kmeunier ou email pro" onKeyDown={e=>{if(e.key==="Enter")doLogin()}}/></FF>
@@ -1982,7 +1982,7 @@ if(!ready)return <div style={{display:"flex",alignItems:"center",justifyContent:
 const Nav=()=>(
 <nav className="topnav">
   <span className="logo" onClick={()=>setPage("hub")}><span className="w">W</span><span className="r">ebo</span></span>
-  <span className="logo-tag">EAA Compliance</span>
+  <span className="logo-tag">WEBO SMART</span>
   <div style={{flex:1}}/>
   <div style={{display:"flex",gap:2,alignItems:"center"}}>
     {page!=="hub"&&<button className="nb" onClick={()=>setPage("hub")} title="Retour"><i className="fa-solid fa-arrow-left"/></button>}
@@ -2015,7 +2015,7 @@ const Nav=()=>(
           <select value={viewAs||""} onClick={e=>e.stopPropagation()} onMouseDown={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();const v=e.target.value;setViewAs(v);wantTopRef.current=true;const el=document.querySelector(".main-scroll");if(el)el.scrollTop=0;flash(v===""?"Retour à votre vue":v==="pov_commercial"?"👁 POV Commercial":"👁 POV Technicien")}} style={{width:"100%",padding:"6px 8px",borderRadius:6,border:"1px solid "+(viewAs?"var(--purple)":"var(--border)"),background:"var(--bg)",color:viewAs?"var(--purple)":"var(--text)",fontSize:11,fontWeight:600,outline:"none",cursor:"pointer"}}><option value="">Votre vue (Admin)</option><option value="pov_commercial">👁 POV Commercial</option><option value="pov_technicien">👁 POV Technicien</option></select>
         </div>}
         <div style={{padding:"5px 0"}}>
-          {realAdmin&&<button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>}
+          {false&&<button className="you-item" onClick={()=>{setShowObjForm(true);setShowYou(false)}}><i className="fa-solid fa-bullseye" style={{color:"var(--gold)"}}/>Objectifs</button>}
       {(TEAM.find(t=>t.id===sess)?.isFondateur)&&<button className="you-item" onClick={()=>{setShowColors(true);setShowYou(false)}}><i className="fa-solid fa-palette" style={{color:"var(--purple)"}}/>Couleurs équipe</button>}
           <button className="you-item" onClick={()=>{setTheme(t=>t==="dark"?"light":"dark")}}><i className={"fa-solid "+(theme==="dark"?"fa-sun":"fa-moon")} style={{color:theme==="dark"?"#FBBF24":"#6366f1"}}/>{theme==="dark"?"Mode clair":"Mode sombre"}</button>
           {realAdmin&&<button className="you-item" onClick={()=>setPrivacy(p=>!p)}><i className={"fa-solid "+(privacy?"fa-eye-slash":"fa-eye")} style={{color:privacy?"var(--red)":"var(--text3)"}}/>Confidentialité {privacy?"ON":"OFF"}</button>}
@@ -2074,10 +2074,10 @@ return(
           <Av id={effSess} sz={42}/>
           <div><div style={{fontWeight:700,fontSize:16}}>{sU?.name}</div><div style={{fontSize:11,color:"var(--text2)"}}>{sU?.role}</div></div>
         </div>
-        <button onClick={()=>setShowObjForm(true)} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-bullseye" style={{marginRight:5,color:"var(--gold)"}}/>Objectifs</button>
+        {false&&<button onClick={()=>setShowObjForm(true)} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-bullseye" style={{marginRight:5,color:"var(--gold)"}}/>Objectifs</button>}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))",gap:10,marginBottom:14}}>
-        {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Obj. Semaine",v:mySignWeek+" / "+myObj.week,c:objWeekPct>=100?"var(--green)":objWeekPct>=50?"var(--gold)":"var(--red)",e:"🎯"},{l:"Obj. Mois",v:mySignMonth+" / "+myObj.month,c:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",e:"📆"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:moneyLabel,v:E(myMoney),c:isA?"var(--gold)":"var(--blue)",e:moneyEmoji},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].map((s,i)=>
+        {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Obj. Semaine",v:mySignWeek+" / "+myObj.week,c:objWeekPct>=100?"var(--green)":objWeekPct>=50?"var(--gold)":"var(--red)",e:"🎯"},{l:"Obj. Mois",v:mySignMonth+" / "+myObj.month,c:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",e:"📆"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:moneyLabel,v:E(myMoney),c:isA?"var(--gold)":"var(--blue)",e:moneyEmoji},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].filter(s=>!(isApp&&(s.l===moneyLabel||s.l==="CA Signé"))).map((s,i)=>
         <div key={i} className="fu" style={{animationDelay:i*40+"ms",textAlign:"center",padding:"10px 6px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
           <div style={{fontSize:18,marginBottom:2}}>{s.e}</div>
           <div style={{fontSize:16,fontWeight:800,fontFamily:"var(--mono)",color:s.c}}>{typeof s.v==="string"?<P$ v={s.v} p={pm}/>:s.v}</div>
@@ -2091,7 +2091,7 @@ return(
           <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",width:Math.min(objMonthPct,100)+"%",transition:"width 1s ease-out"}}/></div>
         </div>
         <div>
-          <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>MON CA / MOIS — {E(myCaMonth)}/{E(myCaObj)}</span><span style={{color:caMonthPct>=80?"var(--green)":"var(--gold)"}}>{caMonthPct}%</span></div>
+          <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>MON CA / MOIS{!isApp?" — "+E(myCaMonth)+"/"+E(myCaObj):""}</span><span style={{color:caMonthPct>=80?"var(--green)":"var(--gold)"}}>{caMonthPct}%</span></div>
           <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:caMonthPct>=100?"var(--green)":caMonthPct>=50?"var(--gold)":"var(--red)",width:Math.min(caMonthPct,100)+"%",transition:"width 1s ease-out"}}/></div>
         </div>
         {!isApp&&<div>
@@ -2432,7 +2432,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
   </div>}
 
   {/* ═══ KANBAN ═══ */}
-  {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onWheel={e=>{const el=document.querySelector(".main-scroll");if(el&&Math.abs(e.deltaY)>Math.abs(e.deltaX))el.scrollTop+=e.deltaY}} onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onWheel={e=>{const el=document.querySelector(".main-scroll");if(el&&Math.abs(e.deltaY)>Math.abs(e.deltaX))el.scrollTop+=e.deltaY}} onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
+  {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
   {(pipelineMode==="production"?PROD_COLS:COLS).map(col=>{const allCards=srt(psFilt.filter(l=>pipelineMode==="production"?(l.prodStatus||"a_auditer")===col.id:l.status===col.id));const cards=allCards.slice(0,kMax[col.id]||KPER);const hasMore=allCards.length>(kMax[col.id]||KPER);const cv=allCards.reduce((s,l)=>s+l.valeur,0);
   return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
     <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
@@ -3144,11 +3144,11 @@ return <div className="rpanel-ov" onMouseDown={e=>{if(e.target===e.currentTarget
       {l.auditErreurs&&<div style={{background:aBgFull+".06)",borderRadius:8,padding:10,border:"1px solid "+aColor+"15"}}><div style={{fontSize:8,fontWeight:700,color:aColor,fontFamily:"var(--mono)",letterSpacing:1,marginBottom:5}}>ERREURS DÉTECTÉES</div><div style={{fontSize:11,color:"var(--text2)",lineHeight:1.7,whiteSpace:"pre-wrap"}}>{l.auditErreurs}</div></div>}
     </div>}
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)"}}><P$ v={E(l.valeur)} p={pm}/></div></div>
+      <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>VALEUR</div><div style={{fontSize:20,fontWeight:700,fontFamily:"var(--mono)"}}>{isApp?"—":<P$ v={E(l.valeur)} p={pm}/>}</div></div>
       <div><div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)"}}>STATUT</div><SBadge status={l.status}/>{l.prodStatus&&l.prodStatus!=="a_auditer"&&<div style={{marginTop:3,fontSize:9,color:"var(--purple)",fontFamily:"var(--mono)"}}><i className="fa-solid fa-gears" style={{marginRight:3}}/>{PROD_COLS.find(p=>p.id===l.prodStatus)?.label}</div>}</div>
     </div>
     {/* Margin breakdown */}
-    <div style={{background:"rgba(197,160,89,.06)",border:"1px solid rgba(197,160,89,.12)",borderRadius:"var(--radius)",padding:10,marginBottom:12}}>
+    {!isApp&&<div style={{background:"rgba(197,160,89,.06)",border:"1px solid rgba(197,160,89,.12)",borderRadius:"var(--radius)",padding:10,marginBottom:12}}>
       <div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:6}}>VENTILATION FINANCIÈRE</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,fontSize:11,fontFamily:"var(--mono)"}}>
         <div><span style={{color:"var(--text3)"}}>Com. WEBO 20%</span><div style={{fontWeight:700,color:"var(--gold)"}}><P$ v={E(mg.comWebo)} p={pm}/></div></div>
@@ -3156,7 +3156,7 @@ return <div className="rpanel-ov" onMouseDown={e=>{if(e.target===e.currentTarget
         {isA&&<div style={{gridColumn:"1/3",borderTop:"1px solid var(--border)",paddingTop:6}}><span style={{color:"var(--text3)"}}>Marge Nette</span><div style={{fontSize:16,fontWeight:800,color:"var(--gold)"}}><P$ v={E(mg.margeNette)} p={pm}/></div></div>}
       </div>
       {cd!==null&&<div style={{fontSize:10,color:"var(--text3)",marginTop:4}}>Cycle: {cd}j</div>}
-    </div>
+    </div>}
     <div className="sep"/>
     {l.activityLog&&<div style={{marginTop:8}}><div style={{fontSize:9,color:"var(--gold)",fontFamily:"var(--mono)",marginBottom:4}}>HISTORIQUE</div><div className="tl" style={{maxHeight:120,overflowY:"auto"}}>{l.activityLog.split("\n").filter(Boolean).slice(0,8).map((e,i)=>{const p=e.split("—");return <div key={i} className="tl-item" style={{padding:"3px 0"}}><div className="tl-dot" style={{background:e.includes(">")||e.includes("Bulk")?"var(--blue)":e.includes("Cree")?"var(--green)":"var(--text3)"}}/><div className="tl-time">{p[0]}</div><div style={{fontSize:10,color:"var(--text2)"}}>{p.slice(1).join("—")}</div></div>})}</div></div>}
     <div className="sep"/>
