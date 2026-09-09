@@ -1869,6 +1869,7 @@ const onDS=(e,id)=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("
 const onDr=async(e,col)=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");if(id){const l=leads.find(x=>x.id===id);if(pipelineMode==="production"){const pLb=PROD_COLS.find(c=>c.id===col)?.label;const nl=addLog(l?.activityLog||"","Prod→"+pLb);setLeads(p=>p.map(x=>x.id===id?{...x,prodStatus:col,activityLog:nl}:x));flash((l?.nom||"")+" → "+pLb);addActivity(sess,"production",(l?.nom||"")+" → "+pLb,"var(--purple)");await sb.from("leads").update({prod_status:col,activity_log:nl}).eq("id",id)}else{const nd={status:col,lastInteraction:new Date().toISOString(),tentatives:(l?.tentatives||0)+1};const nl=addLog(l?.activityLog||"","→"+COLS.find(c=>c.id===col)?.label);const upd2={...nd,activityLog:nl};if(col==="reussi"&&!l?.prodStatus){upd2.prodStatus="a_auditer"}setLeads(p=>p.map(x=>x.id===id?{...x,...upd2}:x));const cLb=COLS.find(c=>c.id===col)?.label;flash(l?.nom+" → "+cLb);addActivity(sess,"a déplacé",(l?.nom||"")+" → "+cLb);if(col==="reussi"){addNotif("fa-trophy","var(--green)",(l?.nom||"")+" Réussi! Basculé en Production EAA "+E(l?.valeur||0),id)}const dbUp={status:col,last_interaction:nd.lastInteraction,tentatives:nd.tentatives,activity_log:nl};if(col==="reussi"&&!l?.prodStatus)dbUp.prod_status="a_auditer";await sb.from("leads").update(dbUp).eq("id",id)}}setDragOver(null)};
 
 const askAI=async pr=>{setAiMsgs(p=>[...p,{role:"user",content:pr}]);setAiIn("");setAiLoad(true);try{const sg=leads.filter(l=>l.status==="reussi");const t=await geminiChat([...aiMsgs.slice(-6).map(m=>({role:m.role,content:m.content})),{role:"user",content:pr}],"Assistant WEBO. Com 20%, Fondateur garde 100%, Chasseur split 50%. "+leads.length+" leads, "+sg.length+" signes. Francais, expert, concret.")||"Erreur";setAiMsgs(p=>[...p,{role:"assistant",content:t}])}catch(e){setAiMsgs(p=>[...p,{role:"assistant",content:"Erreur: "+(e.message||"Connexion echouee").slice(0,200)}])}setAiLoad(false)};
+useEffect(()=>{const dp=e=>{if(!e.target.closest||!e.target.closest("[data-dropzone]"))e.preventDefault()};window.addEventListener("drop",dp);return()=>{window.removeEventListener("drop",dp)}},[]);
 useEffect(()=>{if(aiRef.current)aiRef.current.scrollIntoView({behavior:"smooth"})},[aiMsgs,aiLoad]);
 
 /* Supabase */
@@ -2077,7 +2078,7 @@ return(
         {false&&<button onClick={()=>setShowObjForm(true)} style={{padding:"6px 12px",borderRadius:"var(--radius)",border:"1px solid var(--border)",color:"var(--text2)",fontSize:11,fontWeight:600}}><i className="fa-solid fa-bullseye" style={{marginRight:5,color:"var(--gold)"}}/>Objectifs</button>}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(100px,1fr))",gap:10,marginBottom:14}}>
-        {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Obj. Semaine",v:mySignWeek+" / "+myObj.week,c:objWeekPct>=100?"var(--green)":objWeekPct>=50?"var(--gold)":"var(--red)",e:"🎯"},{l:"Obj. Mois",v:mySignMonth+" / "+myObj.month,c:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",e:"📆"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:moneyLabel,v:E(myMoney),c:isA?"var(--gold)":"var(--blue)",e:moneyEmoji},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].filter(s=>!(isApp&&(s.l===moneyLabel||s.l==="CA Signé"))).map((s,i)=>
+        {[{l:"Cette semaine",v:myWeek,c:"var(--blue)",e:"📥"},{l:"Total leads",v:st.total,c:"var(--gold)",e:"📁"},{l:"Obj. Semaine",v:mySignWeek+" / "+myObj.week,c:objWeekPct>=100?"var(--green)":objWeekPct>=50?"var(--gold)":"var(--red)",e:"🎯"},{l:"Obj. Mois",v:mySignMonth+" / "+myObj.month,c:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",e:"📆"},{l:"Conversion",v:(me.conv||0)+"%",c:(me.conv||0)>=25?"var(--green)":"var(--red)",e:me.conv>=25?"🔥":"📊"},{l:moneyLabel,v:E(myMoney),c:isA?"var(--gold)":"var(--blue)",e:moneyEmoji},{l:"CA Signé",v:E(st.ca),c:"var(--green)",e:"💰"},{l:"Urgents",v:myUrg,c:myUrg>0?"var(--red)":"var(--green)",e:myUrg>0?"🔥":"✅"}].map((s,i)=>
         <div key={i} className="fu" style={{animationDelay:i*40+"ms",textAlign:"center",padding:"10px 6px",background:"var(--bg)",borderRadius:10,border:"1px solid var(--border)"}}>
           <div style={{fontSize:18,marginBottom:2}}>{s.e}</div>
           <div style={{fontSize:16,fontWeight:800,fontFamily:"var(--mono)",color:s.c}}>{typeof s.v==="string"?<P$ v={s.v} p={pm}/>:s.v}</div>
@@ -2091,7 +2092,7 @@ return(
           <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:objMonthPct>=100?"var(--green)":objMonthPct>=50?"var(--gold)":"var(--red)",width:Math.min(objMonthPct,100)+"%",transition:"width 1s ease-out"}}/></div>
         </div>
         <div>
-          <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>MON CA / MOIS{!isApp?" — "+E(myCaMonth)+"/"+E(myCaObj):""}</span><span style={{color:caMonthPct>=80?"var(--green)":"var(--gold)"}}>{caMonthPct}%</span></div>
+          <div style={{fontSize:9,color:"var(--text3)",fontFamily:"var(--mono)",marginBottom:3,display:"flex",justifyContent:"space-between"}}><span>MON CA / MOIS — {E(myCaMonth)}/{E(myCaObj)}</span><span style={{color:caMonthPct>=80?"var(--green)":"var(--gold)"}}>{caMonthPct}%</span></div>
           <div style={{height:8,borderRadius:4,background:"var(--bg4)",overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,background:caMonthPct>=100?"var(--green)":caMonthPct>=50?"var(--gold)":"var(--red)",width:Math.min(caMonthPct,100)+"%",transition:"width 1s ease-out"}}/></div>
         </div>
         {!isApp&&<div>
@@ -2109,7 +2110,7 @@ return(
       return <div key={col.id} className="funnel-step">
         <div style={{width:80,fontSize:9,fontWeight:600,color:col.accent,flexShrink:0}}><i className={"fa-solid "+col.icon} style={{marginRight:4,fontSize:8}}/>{col.label}</div>
         <div style={{flex:1}}><div className="funnel-bar" style={{width:Math.max(pct,8)+"%",background:"linear-gradient(90deg,"+col.accent+"CC,"+col.accent+"55)"}}>{cnt>0?cnt:""}</div></div>
-        <div style={{width:70,textAlign:"right",fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}><P$ v={E(val)} p={pm}/></div>
+        {!isApp&&<div style={{width:70,textAlign:"right",fontSize:10,fontFamily:"var(--mono)",color:"var(--text2)"}}><P$ v={E(val)} p={pm}/></div>}
       </div>})}</div>
     </div>
     {/* AGENDA DU JOUR */}
@@ -2197,7 +2198,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
     </div>
     <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,flex:1,minHeight:0,overflowX:"auto"}}>
       {WS_COLS.map(col=>{const colTasks=tasksFiltered.filter(t=>t.status===col.id);return(
-      <div key={col.id} className="kanban-col" onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onTaskDrop(e,col.id)} style={{borderRadius:10,padding:8,minWidth:180,display:"flex",flexDirection:"column",gap:6,outline:dragOver===col.id?"2px dashed "+col.accent:"none"}}>
+      <div key={col.id} data-dropzone className="kanban-col" onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onTaskDrop(e,col.id)} style={{borderRadius:10,padding:8,minWidth:180,display:"flex",flexDirection:"column",gap:6,outline:dragOver===col.id?"2px dashed "+col.accent:"none"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"4px 6px"}}>
           <span style={{fontSize:11,fontWeight:700,color:col.accent}}><i className={"fa-solid "+col.icon} style={{marginRight:5}}/>{col.label}</span>
           <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--text3)",background:"var(--bg)",borderRadius:8,padding:"1px 7px"}}>{colTasks.length}</span>
@@ -2432,9 +2433,9 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
   </div>}
 
   {/* ═══ KANBAN ═══ */}
-  {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" style={{flex:1,minWidth:0}}>
+  {pView==="kanban"&&<div style={{flex:1,position:"relative",minWidth:0}}><button className="k-arrow k-arrow-l" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:-270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-left"/></button><button className="k-arrow k-arrow-r" onClick={()=>{const el=document.querySelector(".kanban-scroll");if(el)el.scrollBy({left:270,behavior:"smooth"})}}><i className="fa-solid fa-chevron-right"/></button><div className="kanban-scroll" onWheel={e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){const ms=e.currentTarget.closest(".main-scroll");if(ms){ms.scrollTop+=e.deltaY;e.preventDefault()}}}} style={{flex:1,minWidth:0}}>
   {(pipelineMode==="production"?PROD_COLS:COLS).map(col=>{const allCards=srt(psFilt.filter(l=>pipelineMode==="production"?(l.prodStatus||"a_auditer")===col.id:l.status===col.id));const cards=allCards.slice(0,kMax[col.id]||KPER);const hasMore=allCards.length>(kMax[col.id]||KPER);const cv=allCards.reduce((s,l)=>s+l.valeur,0);
-  return <div key={col.id} className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
+  return <div key={col.id} data-dropzone className={"kanban-col "+(dragOver===col.id?"kcol over":"")} onDragOver={e=>{e.preventDefault();setDragOver(col.id)}} onDragLeave={()=>setDragOver(null)} onDrop={e=>onDr(e,col.id)}>
     <div style={{padding:"6px",borderBottom:"1px solid var(--border)",marginBottom:4,display:"flex",justifyContent:"space-between"}}>
       <div style={{display:"flex",alignItems:"center",gap:3}}><span className="status-dot" style={{background:col.accent}}/><span style={{fontSize:10,fontWeight:600,color:col.accent,fontFamily:"var(--mono)"}}>{col.label}</span></div>
       {!isApp&&<span style={{fontSize:10,fontWeight:700,color:col.accent,fontFamily:"var(--mono)"}}><P$ v={E(cv)} p={pm}/></span>}
@@ -2475,7 +2476,7 @@ return <div style={{padding:"12px 14px",flex:1,display:"flex",flexDirection:"col
         <span className="esc-open-cnt">{psFilt.filter(l=>pipelineMode==="production"?(l.prodStatus||"a_auditer")===oc.id:l.status===oc.id).length} leads{oc.proba!==undefined?" · "+Math.round(oc.proba*100)+"%":""}</span>
         <button className="esc-close" onClick={()=>setEscOpen(null)}><i className="fa-solid fa-xmark"/></button>
       </div>
-      <div className="esc-open-body" onDragOver={e=>{e.preventDefault();setDragOver(oc.id)}} onDrop={e=>onDr(e,oc.id)}>{renderCards(oc)}</div>
+      <div className="esc-open-body" data-dropzone onDragOver={e=>{e.preventDefault();setDragOver(oc.id)}} onDrop={e=>onDr(e,oc.id)}>{renderCards(oc)}</div>
     </div>
     :
     <div className="esc-stack" style={{height:Math.max(400,cols.length*52+230)}}>
